@@ -1,6 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'app_router.dart';
+import 'core/constants/hivebox_names.dart';
+import 'core/theme/app_theme.dart';
+import 'data/models/blocked_app.dart';
+import 'data/models/streak.dart';
+import 'data/models/timer_config.dart';
+import 'data/models/usage_log.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+
+  // register adapters
+  Hive.registerAdapter(TimerConfigAdapter());
+  Hive.registerAdapter(BlockedAppAdapter());
+  Hive.registerAdapter(UsageLogAdapter());
+  Hive.registerAdapter(StreakAdapter());
+
+  // open boxes
+  await Hive.openBox<TimerConfig>(HiveBoxNames.timerConfigs);
+  await Hive.openBox<BlockedApp>(HiveBoxNames.blockedApps);
+  await Hive.openBox<UsageLog>(HiveBoxNames.usageLogs);
+  await Hive.openBox<Streak>(HiveBoxNames.streaks);
+  await Hive.openBox(HiveBoxNames.settings);
+
+
+
   runApp(const MyApp());
 }
 
@@ -9,65 +36,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return MaterialApp.router(
+      title: 'ScreenBlocker',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark,
+      routerConfig: AppRouter.router,
     );
-  }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
-      ),
-      body: Center(
-
-        child: Column(
-
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
   }
 }
