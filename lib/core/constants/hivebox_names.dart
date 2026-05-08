@@ -6,4 +6,6 @@ class HiveBoxNames {
   static const String usageLogs    = 'usage_logs';
   static const String streaks      = 'streaks';
   static const String settings     = 'settings';
+  static const String schedules = 'schedules';
+
 }

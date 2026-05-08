@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'app_router.dart';
 import 'core/constants/hivebox_names.dart';
 import 'core/theme/app_theme.dart';
 import 'data/models/blocked_app.dart';
+import 'data/models/schedule.dart';
 import 'data/models/streak.dart';
 import 'data/models/timer_config.dart';
 import 'data/models/usage_log.dart';
@@ -18,6 +20,8 @@ void main() async {
   Hive.registerAdapter(BlockedAppAdapter());
   Hive.registerAdapter(UsageLogAdapter());
   Hive.registerAdapter(StreakAdapter());
+  Hive.registerAdapter(ScheduleAdapter());
+
 
   // open boxes
   await Hive.openBox<TimerConfig>(HiveBoxNames.timerConfigs);
@@ -25,10 +29,16 @@ void main() async {
   await Hive.openBox<UsageLog>(HiveBoxNames.usageLogs);
   await Hive.openBox<Streak>(HiveBoxNames.streaks);
   await Hive.openBox(HiveBoxNames.settings);
+  await Hive.openBox<Schedule>(HiveBoxNames.schedules);
 
 
 
-  runApp(const MyApp());
+
+  runApp(
+      const ProviderScope(
+        child: MyApp(),
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {

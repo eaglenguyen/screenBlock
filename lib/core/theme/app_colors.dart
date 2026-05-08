@@ -28,8 +28,6 @@ class AppColors {
   static const Color error            = Color(0xFFE74C3C);
   static const Color warning          = Color(0xFFEDB82A);
 
-  // ── Block intensity ────────────────────────────
-  static const Color softBlock        = Color(0xFF2ECC71);
-  static const Color mediumBlock      = Color(0xFFEDB82A);
-  static const Color hardBlock        = Color(0xFFE74C3C);
+  static const Color faint = Color(0xFF2A2A48);
+
 }

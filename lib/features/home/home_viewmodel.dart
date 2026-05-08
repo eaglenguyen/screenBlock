@@ -16,8 +16,27 @@ class HomeViewModel extends _$HomeViewModel {
 
   @override
   HomeState build() {
-    // load data the moment this viewmodel is created
-    _init();
+    // stream listener lives here — correct Riverpod pattern
+    final subscription = _blockingService.usageEvents.listen((event) {
+      switch (event.type) {
+        case AppEventType.timerExpired:
+          state = state.copyWith(
+            error: 'timer_expired:${event.packageName}',
+          );
+          break;
+        case AppEventType.timerWarning:
+          state = state.copyWith(
+            error: 'timer_warning:${event.packageName}',
+          );
+          break;
+        default:
+          break;
+      }
+    });
+
+    // cancel when provider is disposed — no memory leak
+    ref.onDispose(() => subscription.cancel());
+
     return const HomeState(isLoading: true);
   }
 
@@ -31,10 +50,7 @@ class HomeViewModel extends _$HomeViewModel {
       ref.read(blockingServiceProvider);
 
   // ── Init ────────────────────────────────────────
-  void _init() {
-    loadTrackedApps();
-    _listenToUsageEvents();
-  }
+
 
   // ── Load ────────────────────────────────────────
   void loadTrackedApps() {
@@ -107,33 +123,6 @@ class HomeViewModel extends _$HomeViewModel {
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
-  }
-
-  // ── Usage event listener ────────────────────────
-  // listens to the blocking service stream
-  // triggers interrupt overlay when timer expires
-  void _listenToUsageEvents() {
-    ref.listen(
-      blockingServiceProvider,
-          (previous, next) {},
-    );
-
-    _blockingService.usageEvents.listen((event) {
-      switch (event.type) {
-        case AppEventType.timerExpired:
-          state = state.copyWith(
-            error: 'timer_expired:${event.packageName}',
-          );
-          break;
-        case AppEventType.timerWarning:
-          state = state.copyWith(
-            error: 'timer_warning:${event.packageName}',
-          );
-          break;
-        default:
-          break;
-      }
-    });
   }
 
   void clearError() {
