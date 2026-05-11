@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'UI/overlay_screen.dart';
 import 'app_router.dart';
 import 'core/constants/hivebox_names.dart';
 import 'core/theme/app_theme.dart';
@@ -10,9 +12,26 @@ import 'data/models/streak.dart';
 import 'data/models/timer_config.dart';
 import 'data/models/usage_log.dart';
 
+
+@pragma('vm:entry-point')
+void overlayMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: OverlayScreen(),
+    ),
+  );
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  FlutterForegroundTask.initCommunicationPort();
+
+  // request battery optimization exemption
+  if (await FlutterForegroundTask.isIgnoringBatteryOptimizations == false) {
+    await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+  }
   await Hive.initFlutter();
 
   // register adapters

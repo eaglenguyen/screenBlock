@@ -5,6 +5,7 @@ import 'package:screenblock/features/home/widgets/home_header.dart';
 import 'package:screenblock/features/home/widgets/timer_card.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/blocking_service_provider.dart';
 import 'home_viewmodel.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -21,7 +22,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     // trigger load after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(homeViewModelProvider.notifier).loadTrackedApps();
+      ref.read(homeViewModelProvider.notifier).init();
     });
   }
 
@@ -56,9 +57,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
           ),
+          // temporary test button — remove after testing
+          ElevatedButton(
+            onPressed: () async {
+              debugPrint('🔵 test button tapped');
+
+              // init streams first
+              ref.read(homeViewModelProvider.notifier).init();
+
+              const testPackage = 'com.instagram.android';
+              final service = ref.read(blockingServiceProvider);
+
+              final hasUsage = await service.hasUsageStatsPermission();
+              final hasOverlay = await service.hasOverlayPermission();
+
+              debugPrint('🔵 hasUsage: $hasUsage hasOverlay: $hasOverlay');
+
+              if (!hasUsage) {
+                await service.requestUsageStatsPermission();
+                return;
+              }
+
+              if (!hasOverlay) {
+                await service.requestOverlayPermission();
+                return;
+              }
+
+              await service.startMonitoring(testPackage, 1);
+              debugPrint('🔵 monitoring started for $testPackage');
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Monitoring started — open Instagram'),
+                ),
+              );
+            },
+            child: const Text('Test Block'),
+          ),
         ],
+
       ),
+
     );
+
   }
 
   // Empty Callbacks

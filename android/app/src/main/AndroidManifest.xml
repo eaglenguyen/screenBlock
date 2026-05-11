@@ -12,7 +12,8 @@
     <!-- Foreground service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!-- Reboot persistence -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -51,6 +52,13 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- foreground service -->
+        <service
+            android:name="com.pravera.flutter_foreground_task.service.ForegroundTaskService"
+
+            android:exported="false"
+            >
+        </service>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screenblock/data/repositoryImpl/UsageStreakRepo.dart';
 
@@ -14,10 +18,39 @@ part 'home_viewmodel.g.dart';
 @riverpod
 class HomeViewModel extends _$HomeViewModel {
 
+  StreamSubscription? _usageSubscription;
+  StreamSubscription? _overlaySubscription;
+  bool _streamsInitialized = false;
+
   @override
   HomeState build() {
-    // stream listener lives here — correct Riverpod pattern
-    final subscription = _blockingService.usageEvents.listen((event) {
+    // only cleanup logic lives here
+    ref.onDispose(() {
+      _usageSubscription?.cancel();
+      _overlaySubscription?.cancel();
+      _streamsInitialized = false;
+
+    });
+
+    return const HomeState(isLoading: true);
+  }
+
+  // ── Called once from HomeScreen.initState ────────
+  void init() {
+    _setupStreams();
+    loadTrackedApps();
+  }
+
+  // ── Stream setup ─────────────────────────────────
+  void _setupStreams() {
+    if (_streamsInitialized) return;
+    _streamsInitialized = true;
+
+    // cancel any existing before creating new
+    _usageSubscription?.cancel();
+    _overlaySubscription?.cancel();
+
+    _usageSubscription = _blockingService.usageEvents.listen((event) {
       switch (event.type) {
         case AppEventType.timerExpired:
           state = state.copyWith(
@@ -33,13 +66,23 @@ class HomeViewModel extends _$HomeViewModel {
           break;
       }
     });
-
-    // cancel when provider is disposed — no memory leak
-    ref.onDispose(() => subscription.cancel());
-
-    return const HomeState(isLoading: true);
+    // overlay listener is a single-subscription stream
+    // only subscribe if not already subscribed
+    if (_overlaySubscription == null) {
+      try {
+        _overlaySubscription =
+            FlutterOverlayWindow.overlayListener.listen((data) {
+              if (data == 'block_for_day') {
+                // TODO: block the app
+              }
+            });
+      } catch (e) {
+        debugPrint('❌ overlay listener already subscribed: $e');
+      }
+    }
   }
 
+  // ── Getters ──────────────────────────────────────
   BlockingRepository get _blockingRepo =>
       ref.read(blockingRepositoryProvider);
 
@@ -49,10 +92,7 @@ class HomeViewModel extends _$HomeViewModel {
   BlockingService get _blockingService =>
       ref.read(blockingServiceProvider);
 
-  // ── Init ────────────────────────────────────────
-
-
-  // ── Load ────────────────────────────────────────
+  // ── Load ─────────────────────────────────────────
   void loadTrackedApps() {
     try {
       final timers = _blockingRepo.getAllTimers();
@@ -71,24 +111,19 @@ class HomeViewModel extends _$HomeViewModel {
     }
   }
 
-  // ── Add / remove ────────────────────────────────
+  // ── Add / remove ─────────────────────────────────
   Future<void> addTrackedApp(TimerConfig config) async {
     try {
-      // check free tier limit
       if (_blockingRepo.hasReachedFreeLimit()) {
-        state = state.copyWith(
-          error: 'free_limit_reached', // UI checks this string
-        );
+        state = state.copyWith(error: 'free_limit_reached');
         return;
       }
-
       await _blockingRepo.saveTimer(config);
       await _blockingService.startMonitoring(
         config.packageName,
         config.limitMinutes,
       );
-
-      loadTrackedApps(); // refresh list
+      loadTrackedApps();
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
@@ -104,7 +139,7 @@ class HomeViewModel extends _$HomeViewModel {
     }
   }
 
-  // ── Block / unblock ─────────────────────────────
+  // ── Block / unblock ──────────────────────────────
   Future<void> blockAppForDay(String packageName) async {
     try {
       await _blockingRepo.blockApp(packageName);

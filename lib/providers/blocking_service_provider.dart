@@ -5,12 +5,14 @@ import '../domain/platform/stub_blocking_service.dart';
 import '../domain/platform/android_blocking_service.dart';
 
 final blockingServiceProvider = Provider<BlockingService>((ref) {
-  // swap this flag to false when Android
-  // implementation is ready
-  const useStub = true;
+  const useStub = false;
 
-  if (useStub) return StubBlockingService();
-  if (Platform.isAndroid) return AndroidBlockingService();
+  final service = useStub
+      ? StubBlockingService()
+      : Platform.isAndroid
+      ? AndroidBlockingService()
+      : throw UnsupportedError('Platform not supported');
 
-  throw UnsupportedError('Platform not supported');
+  ref.keepAlive();
+  return service;
 });
