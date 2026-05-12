@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 
+// Block
 class BlockActivity : FlutterActivity() {
 
     companion object {
