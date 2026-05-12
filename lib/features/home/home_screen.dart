@@ -61,23 +61,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ElevatedButton(
             onPressed: () async {
               debugPrint('🔵 test button tapped');
-
-              // init streams first
-              ref.read(homeViewModelProvider.notifier).init();
-
               const testPackage = 'com.instagram.android';
               final service = ref.read(blockingServiceProvider);
 
-              final hasUsage = await service.hasUsageStatsPermission();
-              final hasOverlay = await service.hasOverlayPermission();
+              final hasAccessibility =
+              await service.hasAccessibilityPermission();
+              debugPrint('🔵 hasAccessibility: $hasAccessibility');
 
-              debugPrint('🔵 hasUsage: $hasUsage hasOverlay: $hasOverlay');
-
-              if (!hasUsage) {
-                await service.requestUsageStatsPermission();
+              if (!hasAccessibility) {
+                await service.requestAccessibilityPermission();
                 return;
               }
 
+              final hasOverlay = await service.hasOverlayPermission();
               if (!hasOverlay) {
                 await service.requestOverlayPermission();
                 return;

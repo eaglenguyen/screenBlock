@@ -1,48 +1,35 @@
 import 'dart:async';
-import 'package:app_usage/app_usage.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart' hide NotificationVisibility;
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'blocking_service.dart';
-import 'foreground_task_handler.dart';
 
+import 'package:app_usage/app_usage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+
+import 'blocking_service.dart';
 
 class AndroidBlockingService implements BlockingService {
+  bool _overlayShowing = false;
+  // add method channel call to launch BlockActivity
+  static const _blockChannel = MethodChannel(
+    'com.example.screenblock/block',
+  );
 
   final _eventController =
   StreamController<AppUsageEvent>.broadcast();
 
-  // in-memory monitored apps
-  // packageName → limitMinutes
   final Map<String, int> _monitoredApps = {};
 
-  // ── Foreground task setup ────────────────────────
-  static void _initForegroundTask() {
-    debugPrint('🟡 initializing foreground task...');
+  // method channel for permission checks
+  static const _methodChannel = MethodChannel(
+    'com.example.screenblock/accessibility',
+  );
 
-    FlutterForegroundTask.init(
-      androidNotificationOptions: AndroidNotificationOptions(
-        channelId: 'focus_blocker_channel',
-        channelName: 'Focus Blocker',
-        channelDescription:
-        'Monitoring app usage in the background',
-        channelImportance: NotificationChannelImportance.LOW,
-        priority: NotificationPriority.LOW,
-      ),
-      iosNotificationOptions: const IOSNotificationOptions(
-        showNotification: false,
-        playSound: false,
-      ),
-      foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(1000),
-        autoRunOnBoot: true,
-        allowWakeLock: true,
-        allowWifiLock: true,
-      ),
-    );
-    debugPrint('🟡 foreground task initialized');
+  // event channel for foreground app changes
+  static const _eventChannel = EventChannel(
+    'com.example.screenblock/foreground_app',
+  );
 
-  }
+  StreamSubscription? _foregroundAppSubscription;
 
   // ── Monitoring ───────────────────────────────────
   @override
@@ -52,87 +39,46 @@ class AndroidBlockingService implements BlockingService {
       ) async {
     debugPrint('🟡 startMonitoring: $packageName');
     _monitoredApps[packageName] = limitMinutes;
-    FlutterForegroundTask.addTaskDataCallback(_onTaskData);
-
-
-    _initForegroundTask();
-    await _startForegroundService();
+    _startListening();
   }
 
-  void _onTaskData(Object data) {
-    debugPrint('🟢 task data received: $data');
-    if (data is String) {
-      _onForegroundAppDetected(data);
-    }
-  }
+  void _startListening() {
+    // cancel existing subscription first
+    _foregroundAppSubscription?.cancel();
 
-  @override
-  Future<void> stopMonitoring(String packageName) async {
-    _monitoredApps.remove(packageName);
-    if (_monitoredApps.isEmpty) {
-      await FlutterForegroundTask.stopService();
-    }
-  }
-
-  @override
-  Future<void> stopAllMonitoring() async {
-    _monitoredApps.clear();
-    await FlutterForegroundTask.stopService();
-  }
-
-  Future<void> _startForegroundService() async {
-    debugPrint('🟡 checking if service is running...');
-    final isRunning = await FlutterForegroundTask.isRunningService;
-    debugPrint('🟡 isRunning: $isRunning');
-    // add this listener for data coming from the task handler
-    FlutterForegroundTask.addTaskDataCallback(_onTaskData);
-
-    if (isRunning) {
-      debugPrint('🟡 restarting service...');
-      await FlutterForegroundTask.restartService();
-    } else {
-      debugPrint('🟡 starting service...');
-      try {
-        await FlutterForegroundTask.startService(
-          notificationTitle: 'Focus is active',
-          notificationText: 'Monitoring your app usage',
-          callback: startForegroundCallback,
-        );
-        debugPrint('🟡 service start called');
-      } catch (e) {
-        debugPrint('❌ service start failed: $e');
+    _foregroundAppSubscription = _eventChannel
+        .receiveBroadcastStream()
+        .listen((dynamic packageName) {
+      if (packageName is String) {
+        debugPrint('🟢 foreground app changed: $packageName');
+        _onForegroundAppChanged(packageName);
       }
-    }
-
-    // send monitored apps to the task isolate
-    // so it knows which apps to watch for
-    await Future.delayed(const Duration(milliseconds: 500));
-    debugPrint('🟡 sending monitored apps to task: $_monitoredApps');
-    FlutterForegroundTask.sendDataToTask(_monitoredApps);
+    }, onError: (error) {
+      debugPrint('❌ event channel error: $error');
+    });
   }
 
-  void _onForegroundAppDetected(String packageName) {
-    debugPrint('🟢 foreground app detected in main: $packageName');
 
+  void _onForegroundAppChanged(String packageName) {
     if (!_monitoredApps.containsKey(packageName)) return;
+    if (_overlayShowing) return;
 
     final limitMinutes = _monitoredApps[packageName]!;
 
-    // get today's usage then decide whether to block
     getUsedMinutesToday(packageName).then((usedMinutes) {
       debugPrint('🟡 $packageName used: ${usedMinutes}m limit: ${limitMinutes}m');
 
       if (usedMinutes >= limitMinutes) {
-        // limit reached — block
+        _overlayShowing = true;
         _eventController.add(AppUsageEvent(
           packageName: packageName,
           type: AppEventType.timerExpired,
           usedMinutes: usedMinutes,
           limitMinutes: limitMinutes,
         ));
-        _showOverlay(packageName);
+        // don't call _showOverlay here
+        // let HomeViewModel handle it from main isolate
       } else if (usedMinutes >= (limitMinutes * 0.8).floor()) {
-        // 80% of limit — warning
         _eventController.add(AppUsageEvent(
           packageName: packageName,
           type: AppEventType.timerWarning,
@@ -143,78 +89,39 @@ class AndroidBlockingService implements BlockingService {
     });
   }
 
-
-  // ── Blocking ─────────────────────────────────────
   @override
-  Future<void> blockApp(String packageName) async {
-    _eventController.add(AppUsageEvent(
-      packageName: packageName,
-      type: AppEventType.appBlocked,
-      usedMinutes: _monitoredApps[packageName] ?? 0,
-      limitMinutes: _monitoredApps[packageName] ?? 0,
-    ));
-    await _showOverlay(packageName);
-  }
-
-  @override
-  Future<void> unblockApp(String packageName) async {
-    await FlutterOverlayWindow.closeOverlay();
-  }
-
-  // ── Overlay ──────────────────────────────────────
-  Future<void> _showOverlay(String packageName) async {
-    if (!await FlutterOverlayWindow.isPermissionGranted()) {
-      await FlutterOverlayWindow.requestPermission();
-      return;
+  Future<void> stopMonitoring(String packageName) async {
+    _monitoredApps.remove(packageName);
+    if (_monitoredApps.isEmpty) {
+      _foregroundAppSubscription?.cancel();
+      _foregroundAppSubscription = null;
     }
-
-    await FlutterOverlayWindow.showOverlay(
-      enableDrag: false,
-      overlayTitle: 'App Blocked',
-      overlayContent: packageName,
-      flag: OverlayFlag.defaultFlag,
-      visibility: NotificationVisibility.visibilityPublic,
-      positionGravity: PositionGravity.auto,
-      width: WindowSize.fullCover,
-      height: WindowSize.fullCover,
-    );
-  }
-
-  // ── State ────────────────────────────────────────
-  @override
-  Future<bool> isMonitoring(String packageName) async {
-    return _monitoredApps.containsKey(packageName);
   }
 
   @override
-  Future<int> getUsedMinutesToday(
-      String packageName,
-      ) async {
-    try {
-      final now = DateTime.now();
-      final startOfDay = DateTime(
-        now.year, now.month, now.day,
-      );
-
-      final usage = await AppUsage().getAppUsage(
-        startOfDay,
-        now,
-      );
-
-      final matches = usage.where(
-            (u) => u.packageName == packageName,
-      );
-
-      if (matches.isEmpty) return 0;
-
-      return matches.first.usage.inMinutes;
-      // 👆 usage is already a Duration so just use .inMinutes
-    } catch (e) {
-      return 0;
-    }
+  Future<void> stopAllMonitoring() async {
+    _monitoredApps.clear();
+    _foregroundAppSubscription?.cancel();
+    _foregroundAppSubscription = null;
   }
 
   // ── Permissions ──────────────────────────────────
+  @override
+  Future<bool> hasAccessibilityPermission() async {
+    try {
+      final result = await _methodChannel
+          .invokeMethod<bool>('isAccessibilityEnabled');
+      return result ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<void> requestAccessibilityPermission() async {
+    await _methodChannel.invokeMethod('openAccessibilitySettings');
+  }
+
   @override
   Future<bool> hasUsageStatsPermission() async {
     try {
@@ -236,7 +143,7 @@ class AndroidBlockingService implements BlockingService {
 
   @override
   Future<void> requestUsageStatsPermission() async {
-    await FlutterForegroundTask.openSystemAlertWindowSettings();
+    await _methodChannel.invokeMethod('openAccessibilitySettings');
   }
 
   @override
@@ -244,9 +151,49 @@ class AndroidBlockingService implements BlockingService {
     await FlutterOverlayWindow.requestPermission();
   }
 
-  // ── Stream ───────────────────────────────────────
+  // ── Blocking ─────────────────────────────────────
   @override
-  Stream<AppUsageEvent> get usageEvents =>
-      _eventController.stream;
-}
+  Future<void> blockApp(String packageName) async {
+    await _showBlockScreen(packageName);
+  }
 
+
+  @override
+  Future<void> unblockApp(String packageName) async {
+    _overlayShowing = false; // 👈 reset when unblocked
+    await FlutterOverlayWindow.closeOverlay();
+  }
+
+  Future<void> _showBlockScreen(String packageName) async {
+    try {
+      await _blockChannel.invokeMethod('showBlockScreen', {
+        'packageName': packageName,
+      });
+      debugPrint('🟢 block screen launched for: $packageName');
+    } catch (e) {
+      debugPrint('❌ block screen failed: $e');
+    }
+  }
+
+  @override
+  Future<bool> isMonitoring(String packageName) async {
+    return _monitoredApps.containsKey(packageName);
+  }
+
+  @override
+  Future<int> getUsedMinutesToday(String packageName) async {
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final usage = await AppUsage().getAppUsage(startOfDay, now);
+      final matches = usage.where((u) => u.packageName == packageName);
+      if (matches.isEmpty) return 0;
+      return matches.first.usage.inMinutes;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  @override
+  Stream<AppUsageEvent> get usageEvents => _eventController.stream;
+}

@@ -19,14 +19,13 @@ class AppMonitorTaskHandler extends TaskHandler {
       ) async {
     debugPrint('🟢 task handler onStart called');
   }
-
   @override
   void onRepeatEvent(DateTime timestamp) async {
     debugPrint('🟢 onRepeatEvent tick');
     try {
       final now = DateTime.now();
       final usage = await AppUsage().getAppUsage(
-        now.subtract(const Duration(seconds: 10)),
+        now.subtract(const Duration(minutes: 1)), // wider window
         now,
       );
 
@@ -35,10 +34,15 @@ class AppMonitorTaskHandler extends TaskHandler {
         return;
       }
 
-      usage.sort((a, b) => b.usage.compareTo(a.usage));
+      // sort by lastForeground timestamp — most recent first
+      // this is more reliable than sorting by usage duration
+      usage.sort((a, b) =>
+          b.lastForeground.compareTo(a.lastForeground));
+
       final foregroundApp = usage.first.packageName;
 
       debugPrint('🟡 foreground: $foregroundApp');
+      debugPrint('🟡 lastForeground: ${usage.first.lastForeground}');
       debugPrint('🟡 monitoring: $_monitoredApps');
 
       if (foregroundApp == _lastForegroundApp) return;
@@ -48,6 +52,7 @@ class AppMonitorTaskHandler extends TaskHandler {
         debugPrint('🟢 monitored app detected: $foregroundApp — sending to main');
         FlutterForegroundTask.sendDataToMain(foregroundApp);
       }
+
     } catch (e) {
       debugPrint('❌ onRepeatEvent error: $e');
     }

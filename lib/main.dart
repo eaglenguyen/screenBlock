@@ -13,16 +13,7 @@ import 'data/models/timer_config.dart';
 import 'data/models/usage_log.dart';
 
 
-@pragma('vm:entry-point')
-void overlayMain() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: OverlayScreen(),
-    ),
-  );
-}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -57,6 +48,17 @@ void main() async {
       const ProviderScope(
         child: MyApp(),
       )
+  );
+}
+
+@pragma('vm:entry-point')
+void overlayMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: OverlayScreen(),
+    ),
   );
 }
 

@@ -56,6 +56,8 @@ class HomeViewModel extends _$HomeViewModel {
           state = state.copyWith(
             error: 'timer_expired:${event.packageName}',
           );
+          // show overlay from main isolate
+          _blockingService.blockApp(event.packageName);
           break;
         case AppEventType.timerWarning:
           state = state.copyWith(

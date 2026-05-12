@@ -44,6 +44,9 @@ abstract class BlockingService {
   Future<void> requestUsageStatsPermission();
   Future<void> requestOverlayPermission();
 
+  Future<bool> hasAccessibilityPermission();
+  Future<void> requestAccessibilityPermission();
+
   // ── Event stream ────────────────────────────────
   // viewmodels subscribe to this to know when
   // to show the interrupt overlay

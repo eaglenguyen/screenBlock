@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ScreenBlock</string>
+    <string name="accessibility_service_description">
+        ScreenBlock uses accessibility to detect which app is in the foreground
+        so it can block distracting apps when your time limit is reached.
+    </string>
+</resources>
