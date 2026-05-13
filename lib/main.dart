@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'UI/overlay_screen.dart';
@@ -17,12 +16,7 @@ import 'data/models/usage_log.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  FlutterForegroundTask.initCommunicationPort();
 
-  // request battery optimization exemption
-  if (await FlutterForegroundTask.isIgnoringBatteryOptimizations == false) {
-    await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-  }
   await Hive.initFlutter();
 
   // register adapters

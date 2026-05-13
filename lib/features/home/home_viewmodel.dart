@@ -59,6 +59,14 @@ class HomeViewModel extends _$HomeViewModel {
           // show overlay from main isolate
           _blockingService.blockApp(event.packageName);
           break;
+        case AppEventType.appBlocked:
+        // write to Hive so app stays blocked all day
+          ref.read(blockingRepositoryProvider)
+              .blockApp(event.packageName);
+          state = state.copyWith(
+            error: 'app_blocked:${event.packageName}',
+          );
+          break;
         case AppEventType.timerWarning:
           state = state.copyWith(
             error: 'timer_warning:${event.packageName}',

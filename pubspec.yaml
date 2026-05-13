@@ -46,7 +46,6 @@ dependencies:
   purchases_flutter: ^9.15.1
 
   # Core blocking (Android)
-  flutter_foreground_task: ^9.2.2
   flutter_overlay_window: ^0.5.0
   app_usage: ^4.1.0
   installed_apps: ^2.1.1

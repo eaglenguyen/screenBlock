@@ -1,10 +1,8 @@
 import 'dart:async';
-
 import 'package:app_usage/app_usage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-
 import 'blocking_service.dart';
 
 class AndroidBlockingService implements BlockingService {
@@ -39,6 +37,8 @@ class AndroidBlockingService implements BlockingService {
       ) async {
     debugPrint('🟡 startMonitoring: $packageName');
     _monitoredApps[packageName] = limitMinutes;
+    _overlayShowing = false; // 👈 reset on every new monitoring session
+
     _startListening();
   }
 
@@ -56,19 +56,52 @@ class AndroidBlockingService implements BlockingService {
     }, onError: (error) {
       debugPrint('❌ event channel error: $error');
     });
+    // listen for block screen dismissed & blockForDay
+    // in _startListening()
+    _methodChannel.setMethodCallHandler((call) async {
+      debugPrint('🟡 methodChannel received: ${call.method}');
+      switch (call.method) {
+        case 'onBlockDismissed':
+          debugPrint('🟢 resetting _overlayShowing');
+          _overlayShowing = false;
+          break;
+        case 'blockForDay':
+          final packageName = call.arguments as String;
+          debugPrint('🟡 blocking for day: $packageName');
+          _eventController.add(AppUsageEvent(
+            packageName: packageName,
+            type: AppEventType.appBlocked,
+            usedMinutes: _monitoredApps[packageName] ?? 0,
+            limitMinutes: _monitoredApps[packageName] ?? 0,
+          ));
+          break;
+      }
+    });
+
   }
 
 
   void _onForegroundAppChanged(String packageName) {
-    if (!_monitoredApps.containsKey(packageName)) return;
-    if (_overlayShowing) return;
+    debugPrint('🔵 _onForegroundAppChanged: $packageName');
+    debugPrint('🔵 _overlayShowing: $_overlayShowing');
+    debugPrint('🔵 _monitoredApps: $_monitoredApps');
+
+    if (!_monitoredApps.containsKey(packageName)) {
+      debugPrint('❌ not monitored — skipping');
+      return;
+    }
+    if (_overlayShowing) {
+      debugPrint('❌ overlay already showing — skipping');
+      return;
+    }
 
     final limitMinutes = _monitoredApps[packageName]!;
 
     getUsedMinutesToday(packageName).then((usedMinutes) {
       debugPrint('🟡 $packageName used: ${usedMinutes}m limit: ${limitMinutes}m');
 
-      if (usedMinutes >= limitMinutes) {
+      if (usedMinutes >= 0) {
+        debugPrint('🟢 triggering block screen');
         _overlayShowing = true;
         _eventController.add(AppUsageEvent(
           packageName: packageName,
@@ -76,19 +109,10 @@ class AndroidBlockingService implements BlockingService {
           usedMinutes: usedMinutes,
           limitMinutes: limitMinutes,
         ));
-        // don't call _showOverlay here
-        // let HomeViewModel handle it from main isolate
-      } else if (usedMinutes >= (limitMinutes * 0.8).floor()) {
-        _eventController.add(AppUsageEvent(
-          packageName: packageName,
-          type: AppEventType.timerWarning,
-          usedMinutes: usedMinutes,
-          limitMinutes: limitMinutes,
-        ));
+        _showBlockScreen(packageName);
       }
     });
   }
-
   @override
   Future<void> stopMonitoring(String packageName) async {
     _monitoredApps.remove(packageName);
@@ -170,10 +194,18 @@ class AndroidBlockingService implements BlockingService {
         'packageName': packageName,
       });
       debugPrint('🟢 block screen launched for: $packageName');
+      // reset after a delay so if user dismisses and
+      // reopens Instagram the block shows again
+      Future.delayed(const Duration(seconds: 1), () {
+        debugPrint('🟡 resetting _overlayShowing after delay');
+        _overlayShowing = false;
+      });
     } catch (e) {
       debugPrint('❌ block screen failed: $e');
     }
   }
+
+
 
   @override
   Future<bool> isMonitoring(String packageName) async {

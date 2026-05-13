@@ -7,13 +7,16 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+import android.util.Log
 
-// Block
 class BlockActivity : FlutterActivity() {
 
     companion object {
         private const val EXTRA_PACKAGE_NAME = "blocked_package"
         private const val ACTION_DISMISS = "com.example.screenblock.DISMISS_BLOCK"
+        private const val BLOCK_CHANNEL = "com.example.screenblock/block"
 
         fun start(context: Context, packageName: String) {
             val intent = Intent(context, BlockActivity::class.java).apply {
@@ -30,6 +33,40 @@ class BlockActivity : FlutterActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             finish()
             overridePendingTransition(0, 0)
+        }
+    }
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+
+        // register the block channel IN THIS engine
+        // not in MainActivity — this is a separate engine
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            BLOCK_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "dismissBlockScreen" -> {
+                    finish()
+                    overridePendingTransition(0, 0)
+                    result.success(null)
+                }
+                "goHome" -> {
+                    Log.d("BlockActivity", "goHome called — sending BLOCK_DISMISSED broadcast")
+
+                    // reset block flag in main isolate
+                    sendBroadcast(Intent("com.example.screenblock.BLOCK_DISMISSED"))
+                    // don't open — send to Android home screen
+                    val homeIntent = Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_HOME)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    startActivity(homeIntent)
+                    finish()
+                    overridePendingTransition(0, 0)
+                    result.success(null)
+                }
+            }
         }
     }
 
@@ -56,5 +93,7 @@ class BlockActivity : FlutterActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(dismissReceiver)
+        // notify main engine that block screen was dismissed
+        sendBroadcast(Intent("com.example.screenblock.BLOCK_DISMISSED"))
     }
 }
