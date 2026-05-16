@@ -1,21 +1,35 @@
 // ── Timer card ───────────────────────────────────
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 
 class TimerCard extends StatelessWidget {
+  final VoidCallback onBlockNow;
+  final ValueChanged<String> onSelectorTapped;
+  final VoidCallback onBlockModeTapped;
+  final String blockingType;
+  final VoidCallback onTimerTapped;   // 👈 add
+  final int selectedMinutes;          // 👈 add
+
+
   const TimerCard({
     super.key,
     required this.onBlockNow,
     required this.onSelectorTapped,
+    required this.onBlockModeTapped,
+    required this.blockingType,
+    required this.onTimerTapped,    // 👈 add
+    required this.selectedMinutes,  // 👈 add
+
   });
 
-  final VoidCallback onBlockNow;
-  final ValueChanged<String> onSelectorTapped;
 
-@override
+
+
+  @override
 Widget build (BuildContext context){
   return Container(
     padding: const EdgeInsets.all(20),
@@ -123,22 +137,26 @@ Widget _timerColon() {
 }
 
 Widget _buildSelectorRow() {
+  final isAllApps = blockingType == AppConstants.blockingTypeAllApps;
+
   return Row(
     children: [
       Expanded(
         child: _selectorPill(
           icon: '🛡️',
-          label: 'All apps',
-          onTap: () => onSelectorTapped('apps'),
+          label: isAllApps ? 'All Apps' : 'Specific Apps',
+          onTap: onBlockModeTapped,
         ),
       ),
       const SizedBox(width: 8),
       Expanded(
         child: _selectorPill(
           icon: '⏱',
-          label: '30m',
+          label: selectedMinutes < 60
+              ? '${selectedMinutes}m'
+              : '${selectedMinutes ~/ 60}h', // 👈 dynamic label
           iconColor: AppColors.gold,
-          onTap: () => onSelectorTapped('time'),
+          onTap: onTimerTapped, // 👈 was onSelectorTapped('time')
         ),
       ),
     ],
@@ -150,9 +168,10 @@ Widget _selectorPill(
       required String icon,
       required String label,
       required VoidCallback onTap,
-      Color? iconColor,    }) {
+      Color? iconColor,    }
+    ) {
   return GestureDetector(
-    onTap: () => onTap,
+    onTap: onTap,
     child: Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 14, vertical: 10,

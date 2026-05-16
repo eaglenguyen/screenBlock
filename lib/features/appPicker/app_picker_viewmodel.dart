@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'app_picker_state.dart';
 
 part 'app_picker_viewmodel.g.dart';
@@ -41,7 +43,7 @@ class AppPickerViewModel extends _$AppPickerViewModel {
 
   @override
   AppPickerState build() {
-    Future.microtask(() => loadApps());
+    ref.keepAlive(); // 👈 prevents disposal between sheet opens
     return const AppPickerState(isLoading: true);
   }
 
@@ -58,20 +60,24 @@ class AppPickerViewModel extends _$AppPickerViewModel {
 
   // ── Load and categorize apps ────────────────────
   Future<void> loadApps() async {
+    // skip if already loaded
+    if (state.allApps.isNotEmpty) {
+      debugPrint('🟡 apps already cached — skipping load');
+      return;
+    }
+
     try {
+      state = state.copyWith(isLoading: true);
       final apps = await InstalledApps.getInstalledApps(
         excludeSystemApps: true,
         withIcon: true,
       );
-
-      apps.sort((a, b) =>
-          (a.name).compareTo(b.name));
-
+      apps.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
       final categorized = _categorizeApps(apps);
-
       state = state.copyWith(
         categorizedApps: categorized,
         isLoading: false,
+        allApps: apps
       );
     } catch (e) {
       state = state.copyWith(

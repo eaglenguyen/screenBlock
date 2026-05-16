@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screenblock/data/repositoryImpl/UsageStreakRepo.dart';
-
 import '../../../domain/platform/blocking_service.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/blocking_service_provider.dart';
+import '../../core/constants/app_constants.dart';
 import '../../data/models/timer_config.dart';
 import '../../data/repositories/BlockingRepo.dart';
 import 'home_state.dart';
@@ -21,6 +22,9 @@ class HomeViewModel extends _$HomeViewModel {
   StreamSubscription? _usageSubscription;
   StreamSubscription? _overlaySubscription;
   bool _streamsInitialized = false;
+  Timer? _countdownTimer;
+  Timer? _sessionTimer;
+  Timer? _breakTimer;
 
   @override
   HomeState build() {
@@ -28,10 +32,12 @@ class HomeViewModel extends _$HomeViewModel {
     ref.onDispose(() {
       _usageSubscription?.cancel();
       _overlaySubscription?.cancel();
+      _countdownTimer?.cancel();
+      _sessionTimer?.cancel();
+      _breakTimer?.cancel();
       _streamsInitialized = false;
 
     });
-
     return const HomeState(isLoading: true);
   }
 
@@ -50,7 +56,8 @@ class HomeViewModel extends _$HomeViewModel {
     _usageSubscription?.cancel();
     _overlaySubscription?.cancel();
 
-    _usageSubscription = _blockingService.usageEvents.listen((event) {
+    _usageSubscription = _blockingService.usageEvents.listen(
+            (event) {
       switch (event.type) {
         case AppEventType.timerExpired:
           state = state.copyWith(
@@ -90,17 +97,14 @@ class HomeViewModel extends _$HomeViewModel {
         debugPrint('❌ overlay listener already subscribed: $e');
       }
     }
+    _methodChannel.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case 'onBlockDismissed':
+          _blockingService.resetOverlayState();
+          break;
+      }
+    });
   }
-
-  // ── Getters ──────────────────────────────────────
-  BlockingRepository get _blockingRepo =>
-      ref.read(blockingRepositoryProvider);
-
-  UsageStreakRepo get _usageRepo =>
-      ref.read(usageRepositoryProvider);
-
-  BlockingService get _blockingService =>
-      ref.read(blockingServiceProvider);
 
   // ── Load ─────────────────────────────────────────
   void loadTrackedApps() {
@@ -170,7 +174,188 @@ class HomeViewModel extends _$HomeViewModel {
     }
   }
 
+  // ── Start blocking ───────────────────────────────
+  Future<void> startBlocking() async {
+    final hasAccessibility =
+    await _blockingService.hasAccessibilityPermission();
+    if (!hasAccessibility) {
+      await _blockingService.requestAccessibilityPermission();
+      return;
+    }
+
+    final hasOverlay =
+    await _blockingService.hasOverlayPermission();
+    if (!hasOverlay) {
+      await _blockingService.requestOverlayPermission();
+      return;
+    }
+
+    // start 3 second countdown
+    state = state.copyWith(
+      phase: BlockingPhase.countdown,
+      remainingSeconds: 3,
+    );
+
+    _countdownTimer?.cancel();
+    int count = 3;
+
+    _countdownTimer = Timer.periodic(
+      const Duration(seconds: 1),
+          (timer) async {
+        count--;
+        if (count <= 0) {
+          timer.cancel();
+          await _beginActiveBlocking();
+        } else {
+          state = state.copyWith(remainingSeconds: count);
+        }
+      },
+    );
+  }
+
+  Future<void> _beginActiveBlocking() async {
+    // set blocking mode first
+    _blockingService.setBlockingMode(state.blockingType);
+
+    final apps = state.blockingType ==
+        AppConstants.blockingTypeSpecificApps
+        ? state.blockedApps
+        : state.allowedApps;
+
+    // start monitoring all selected apps
+    for (final pkg in apps) {
+      await _blockingService.startMonitoring(
+        pkg,
+        state.selectedMinutes,
+      );
+    }
+
+    final totalSeconds = state.selectedMinutes * 60;
+
+    state = state.copyWith(
+      phase: BlockingPhase.active,
+      remainingSeconds: totalSeconds,
+    );
+
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer.periodic(
+      const Duration(seconds: 1),
+          (timer) {
+        final remaining = state.remainingSeconds - 1;
+        if (remaining <= 0) {
+          timer.cancel();
+          _onSessionComplete();
+        } else {
+          state = state.copyWith(remainingSeconds: remaining);
+        }
+      },
+    );
+  }
+  void _onSessionComplete() {
+    _blockingService.stopAllMonitoring();
+    state = state.copyWith(
+      phase: BlockingPhase.idle,
+      remainingSeconds: 0,
+    );
+  }
+
+
+
+  // Block Modes
+
+  void setBlockingType(String type) {
+    state = state.copyWith(blockingType: type);
+  }
+
+  void setBlockedApps(List<String> apps) {
+    state = state.copyWith(blockedApps: apps);
+  }
+
+  void setAllowedApps(List<String> apps) {
+    state = state.copyWith(allowedApps: apps);
+  }
+
+  void setSelectedMinutes(int minutes) {
+    state = state.copyWith(selectedMinutes: minutes);
+  }
+
+
+  // ── Cancel countdown ─────────────────────────────
+  void cancelCountdown() {
+    _countdownTimer?.cancel();
+    state = state.copyWith(
+      phase: BlockingPhase.idle,
+      remainingSeconds: 0,
+    );
+  }
+
+  // ── Give up ──────────────────────────────────────
+  Future<void> giveUp() async {
+    _sessionTimer?.cancel();
+    _breakTimer?.cancel();
+    await _blockingService.stopAllMonitoring();
+    state = state.copyWith(
+      phase: BlockingPhase.idle,
+      remainingSeconds: 0,
+      breakRemainingSeconds: 0,
+    );
+  }
+
+  // ── Take a break ─────────────────────────────────
+  Future<void> startBreak(int minutes) async {
+    _sessionTimer?.cancel();
+    await _blockingService.stopAllMonitoring();
+
+    final breakSeconds = minutes * 60;
+    state = state.copyWith(
+      phase: BlockingPhase.onBreak,
+      breakRemainingSeconds: breakSeconds,
+    );
+
+    _breakTimer?.cancel();
+    _breakTimer = Timer.periodic(
+      const Duration(seconds: 1),
+          (timer) {
+        final remaining = state.breakRemainingSeconds - 1;
+        if (remaining <= 0) {
+          timer.cancel();
+          _resumeAfterBreak();
+        } else {
+          state = state.copyWith(
+            breakRemainingSeconds: remaining,
+          );
+        }
+      },
+    );
+  }
+
+  Future<void> endBreak() async {
+    _breakTimer?.cancel();
+    await _beginActiveBlocking();
+  }
+
+  Future<void> _resumeAfterBreak() async {
+    await _beginActiveBlocking();
+  }
+
+
+
+  // ── Getters ──────────────────────────────────────
+  BlockingRepository get _blockingRepo =>
+      ref.read(blockingRepositoryProvider);
+
+  UsageStreakRepo get _usageRepo =>
+      ref.read(usageRepositoryProvider);
+
+  BlockingService get _blockingService =>
+      ref.read(blockingServiceProvider);
+
+  static const _methodChannel = MethodChannel(
+    'com.example.screenblock/block',
+  );
+
   void clearError() {
     state = state.copyWith(error: null);
   }
 }
+

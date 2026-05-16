@@ -241,6 +241,7 @@ class AppListScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useRootNavigator: true,
       builder: (_) => AppPickerScreen(
         mode: isBlock
             ? AppPickerMode.blockList

@@ -8,6 +8,7 @@ class CategorizedApp {
   final AppInfo app;
   final String category;
 
+
   const CategorizedApp({
     required this.app,
     required this.category,
@@ -24,8 +25,10 @@ class AppPickerState {
   final String searchQuery;
   final AppPickerMode mode;
   final String? error;
+  final List<AppInfo> allApps;
 
   const AppPickerState({
+    this.allApps = const [],
     this.categorizedApps = const {},
     this.searchResults = const [],
     this.selectedPackageNames = const [],
@@ -39,6 +42,7 @@ class AppPickerState {
   int get selectedCount => selectedPackageNames.length;
 
   AppPickerState copyWith({
+    List<AppInfo>? allApps,           // 👈 add this
     Map<String, List<AppInfo>>? categorizedApps,
     List<AppInfo>? searchResults,
     List<String>? selectedPackageNames,
@@ -49,6 +53,7 @@ class AppPickerState {
     String? error,
   }) {
     return AppPickerState(
+      allApps: allApps ?? this.allApps, // 👈 add this
       categorizedApps: categorizedApps ?? this.categorizedApps,
       searchResults: searchResults ?? this.searchResults,
       selectedPackageNames:

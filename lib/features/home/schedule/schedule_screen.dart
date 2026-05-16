@@ -107,6 +107,7 @@ class ScheduleScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useRootNavigator: true,
       builder: (_) => const SessionBottomSheet(),
     );
   }
@@ -120,6 +121,7 @@ class ScheduleScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useRootNavigator: true,
       builder: (_) => SessionBottomSheet(
         existingSchedule: schedule,
       ),

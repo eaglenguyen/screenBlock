@@ -1,35 +1,40 @@
 import 'dart:async';
 import 'package:app_usage/app_usage.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'blocking_service.dart';
 
 class AndroidBlockingService implements BlockingService {
-  bool _overlayShowing = false;
-  // add method channel call to launch BlockActivity
+
+  // ── Channels ─────────────────────────────────────
+  static const _methodChannel = MethodChannel(
+    'com.example.screenblock/accessibility',
+  );
+  static const _eventChannel = EventChannel(
+    'com.example.screenblock/foreground_app',
+  );
   static const _blockChannel = MethodChannel(
     'com.example.screenblock/block',
   );
 
-  final _eventController =
-  StreamController<AppUsageEvent>.broadcast();
-
+  // ── State ─────────────────────────────────────────
+  final _eventController = StreamController<AppUsageEvent>.broadcast();
   final Map<String, int> _monitoredApps = {};
-
-  // method channel for permission checks
-  static const _methodChannel = MethodChannel(
-    'com.example.screenblock/accessibility',
-  );
-
-  // event channel for foreground app changes
-  static const _eventChannel = EventChannel(
-    'com.example.screenblock/foreground_app',
-  );
-
   StreamSubscription? _foregroundAppSubscription;
+  bool _overlayShowing = false;
+  String _blockingMode = 'specific_apps';
+  final Set<String> _temporarilyExempted = {};
+  bool _methodHandlerRegistered = false;
 
-  // ── Monitoring ───────────────────────────────────
+
+  // ── BlockingService interface ─────────────────────
+
+  @override
+  Stream<AppUsageEvent> get usageEvents => _eventController.stream;
+
+  // ── Monitoring ────────────────────────────────────
+
   @override
   Future<void> startMonitoring(
       String packageName,
@@ -37,82 +42,10 @@ class AndroidBlockingService implements BlockingService {
       ) async {
     debugPrint('🟡 startMonitoring: $packageName');
     _monitoredApps[packageName] = limitMinutes;
-    _overlayShowing = false; // 👈 reset on every new monitoring session
-
+    _overlayShowing = false;
     _startListening();
   }
 
-  void _startListening() {
-    // cancel existing subscription first
-    _foregroundAppSubscription?.cancel();
-
-    _foregroundAppSubscription = _eventChannel
-        .receiveBroadcastStream()
-        .listen((dynamic packageName) {
-      if (packageName is String) {
-        debugPrint('🟢 foreground app changed: $packageName');
-        _onForegroundAppChanged(packageName);
-      }
-    }, onError: (error) {
-      debugPrint('❌ event channel error: $error');
-    });
-    // listen for block screen dismissed & blockForDay
-    // in _startListening()
-    _methodChannel.setMethodCallHandler((call) async {
-      debugPrint('🟡 methodChannel received: ${call.method}');
-      switch (call.method) {
-        case 'onBlockDismissed':
-          debugPrint('🟢 resetting _overlayShowing');
-          _overlayShowing = false;
-          break;
-        case 'blockForDay':
-          final packageName = call.arguments as String;
-          debugPrint('🟡 blocking for day: $packageName');
-          _eventController.add(AppUsageEvent(
-            packageName: packageName,
-            type: AppEventType.appBlocked,
-            usedMinutes: _monitoredApps[packageName] ?? 0,
-            limitMinutes: _monitoredApps[packageName] ?? 0,
-          ));
-          break;
-      }
-    });
-
-  }
-
-
-  void _onForegroundAppChanged(String packageName) {
-    debugPrint('🔵 _onForegroundAppChanged: $packageName');
-    debugPrint('🔵 _overlayShowing: $_overlayShowing');
-    debugPrint('🔵 _monitoredApps: $_monitoredApps');
-
-    if (!_monitoredApps.containsKey(packageName)) {
-      debugPrint('❌ not monitored — skipping');
-      return;
-    }
-    if (_overlayShowing) {
-      debugPrint('❌ overlay already showing — skipping');
-      return;
-    }
-
-    final limitMinutes = _monitoredApps[packageName]!;
-
-    getUsedMinutesToday(packageName).then((usedMinutes) {
-      debugPrint('🟡 $packageName used: ${usedMinutes}m limit: ${limitMinutes}m');
-
-      if (usedMinutes >= 0) {
-        debugPrint('🟢 triggering block screen');
-        _overlayShowing = true;
-        _eventController.add(AppUsageEvent(
-          packageName: packageName,
-          type: AppEventType.timerExpired,
-          usedMinutes: usedMinutes,
-          limitMinutes: limitMinutes,
-        ));
-        _showBlockScreen(packageName);
-      }
-    });
-  }
   @override
   Future<void> stopMonitoring(String packageName) async {
     _monitoredApps.remove(packageName);
@@ -125,11 +58,45 @@ class AndroidBlockingService implements BlockingService {
   @override
   Future<void> stopAllMonitoring() async {
     _monitoredApps.clear();
+    _overlayShowing = false;
+    _blockingMode = 'specific_apps';
     _foregroundAppSubscription?.cancel();
     _foregroundAppSubscription = null;
   }
 
-  // ── Permissions ──────────────────────────────────
+  @override
+  Future<bool> isMonitoring(String packageName) async {
+    return _monitoredApps.containsKey(packageName);
+  }
+
+  // ── Blocking ──────────────────────────────────────
+
+  @override
+  Future<void> blockApp(String packageName) async {
+    await _showBlockScreen(packageName);
+  }
+
+  @override
+  Future<void> unblockApp(String packageName) async {
+    _overlayShowing = false;
+    await FlutterOverlayWindow.closeOverlay();
+  }
+
+  @override
+  void resetOverlayState() {
+    debugPrint('🟡 resetOverlayState called');
+    _overlayShowing = false;
+  }
+
+  @override
+  void setBlockingMode(String mode) {
+    debugPrint('🟡 blockingMode set to: $mode');
+    _blockingMode = mode;
+  }
+
+
+  // ── Permissions ───────────────────────────────────
+
   @override
   Future<bool> hasAccessibilityPermission() async {
     try {
@@ -162,7 +129,7 @@ class AndroidBlockingService implements BlockingService {
 
   @override
   Future<bool> hasOverlayPermission() async {
-    return await FlutterOverlayWindow.isPermissionGranted();
+    return FlutterOverlayWindow.isPermissionGranted();
   }
 
   @override
@@ -175,17 +142,109 @@ class AndroidBlockingService implements BlockingService {
     await FlutterOverlayWindow.requestPermission();
   }
 
-  // ── Blocking ─────────────────────────────────────
   @override
-  Future<void> blockApp(String packageName) async {
-    await _showBlockScreen(packageName);
+  Future<int> getUsedMinutesToday(String packageName) async {
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final usage = await AppUsage().getAppUsage(startOfDay, now);
+      final matches = usage.where(
+            (u) => u.packageName == packageName,
+      );
+      if (matches.isEmpty) return 0;
+      return matches.first.usage.inMinutes;
+    } catch (e) {
+      return 0;
+    }
   }
 
+  // ── Private ───────────────────────────────────────
 
-  @override
-  Future<void> unblockApp(String packageName) async {
-    _overlayShowing = false; // 👈 reset when unblocked
-    await FlutterOverlayWindow.closeOverlay();
+  void _startListening() {
+    _foregroundAppSubscription?.cancel();
+
+    _foregroundAppSubscription = _eventChannel
+        .receiveBroadcastStream()
+        .listen(
+          (dynamic data) {
+        if (data is String) {
+          _onForegroundAppChanged(data);
+        }
+      },
+      onError: (error) {
+        debugPrint('❌ event channel error: $error');
+      },
+    );
+
+    // only register handler once
+    if (_methodHandlerRegistered) return;
+    _methodHandlerRegistered = true;
+
+    _methodChannel.setMethodCallHandler((call) async {
+      debugPrint('🟡 methodChannel received: ${call.method}');
+      switch (call.method) {
+        case 'onBlockDismissed':
+          debugPrint('🟢 resetting _overlayShowing');
+          _overlayShowing = false;
+          break;
+        case 'blockForDay':
+          final packageName = call.arguments as String;
+          debugPrint('🟡 blocking for day: $packageName');
+          _eventController.add(AppUsageEvent(
+            packageName: packageName,
+            type: AppEventType.appBlocked,
+            usedMinutes: _monitoredApps[packageName] ?? 0,
+            limitMinutes: _monitoredApps[packageName] ?? 0,
+          ));
+          break;
+      }
+    });
+  }
+
+  void _onForegroundAppChanged(String packageName) {
+    debugPrint('🔵 _onForegroundAppChanged: $packageName — overlayShowing: $_overlayShowing');
+    if (_overlayShowing) return;
+
+    debugPrint('🔵 _onForegroundAppChanged: $packageName');
+    debugPrint('🔵 _blockingMode: $_blockingMode');
+    debugPrint('🔵 _monitoredApps: $_monitoredApps');
+
+    if (_blockingMode == 'specific_apps') {
+      _handleSpecificAppsMode(packageName);
+    } else {
+      _handleAllAppsMode(packageName);
+    }
+  }
+
+  void _handleSpecificAppsMode(String packageName) {
+    if (_temporarilyExempted.contains(packageName)) return;
+    if (!_monitoredApps.containsKey(packageName)) return;
+
+    debugPrint('🟢 blocking specific app: $packageName');
+    _overlayShowing = true;
+    _eventController.add(AppUsageEvent(
+      packageName: packageName,
+      type: AppEventType.timerExpired,
+      usedMinutes: 0,
+      limitMinutes: _monitoredApps[packageName]!,
+    ));
+    _showBlockScreen(packageName);
+  }
+
+  void _handleAllAppsMode(String packageName) {
+    // allow apps in monitored list, block everything else
+    if (_temporarilyExempted.contains(packageName)) return;
+    if (_monitoredApps.containsKey(packageName)) return;
+
+    debugPrint('🟢 blocking non-allowed app: $packageName');
+    _overlayShowing = true;
+    _eventController.add(AppUsageEvent(
+      packageName: packageName,
+      type: AppEventType.timerExpired,
+      usedMinutes: 0,
+      limitMinutes: 0,
+    ));
+    _showBlockScreen(packageName);
   }
 
   Future<void> _showBlockScreen(String packageName) async {
@@ -194,38 +253,8 @@ class AndroidBlockingService implements BlockingService {
         'packageName': packageName,
       });
       debugPrint('🟢 block screen launched for: $packageName');
-      // reset after a delay so if user dismisses and
-      // reopens Instagram the block shows again
-      Future.delayed(const Duration(seconds: 1), () {
-        debugPrint('🟡 resetting _overlayShowing after delay');
-        _overlayShowing = false;
-      });
     } catch (e) {
       debugPrint('❌ block screen failed: $e');
     }
   }
-
-
-
-  @override
-  Future<bool> isMonitoring(String packageName) async {
-    return _monitoredApps.containsKey(packageName);
-  }
-
-  @override
-  Future<int> getUsedMinutesToday(String packageName) async {
-    try {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final usage = await AppUsage().getAppUsage(startOfDay, now);
-      final matches = usage.where((u) => u.packageName == packageName);
-      if (matches.isEmpty) return 0;
-      return matches.first.usage.inMinutes;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  @override
-  Stream<AppUsageEvent> get usageEvents => _eventController.stream;
 }

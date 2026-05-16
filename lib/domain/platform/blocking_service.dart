@@ -37,6 +37,9 @@ abstract class BlockingService {
   // ── State ───────────────────────────────────────
   Future<bool> isMonitoring(String packageName);
   Future<int> getUsedMinutesToday(String packageName);
+  void resetOverlayState(); // 👈 add this
+  void setBlockingMode(String mode);
+
 
   // ── Permissions ─────────────────────────────────
   Future<bool> hasUsageStatsPermission();

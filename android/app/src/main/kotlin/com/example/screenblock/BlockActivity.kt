@@ -47,9 +47,20 @@ class BlockActivity : FlutterActivity() {
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "dismissBlockScreen" -> {
-                    finish()
-                    overridePendingTransition(0, 0)
+                    val blockedPackage = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
+
+                    // set exemption directly on AccessibilityService BEFORE finishing
+                    // this is synchronous — no broadcast delay
+                    AppBlockAccessibilityService.addExemption(blockedPackage)
+
+                    sendBroadcast(Intent("com.example.screenblock.BLOCK_DISMISSED"))
                     result.success(null)
+
+                    android.os.Handler(android.os.Looper.getMainLooper())
+                        .postDelayed({
+                            finish()
+                            overridePendingTransition(0, 0)
+                        }, 150)
                 }
                 "goHome" -> {
                     Log.d("BlockActivity", "goHome called — sending BLOCK_DISMISSED broadcast")

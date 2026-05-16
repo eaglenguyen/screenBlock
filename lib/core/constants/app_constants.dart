@@ -4,13 +4,9 @@ class AppConstants {
   // ── Timer presets (minutes) ────────────────────
   static const List<int> timerPresets = [5, 10, 15, 30, 60];
 
-  // ── Block intensity ────────────────────────────
-  static const String softBlock   = 'soft';
-  static const String mediumBlock = 'medium';
-  static const String hardBlock   = 'hard';
 
   // ── Free tier limits ──────────────────────────
-  static const int freeTrackedAppsLimit = 2;
+  static const int freeTrackedAppsLimit = 1;
 
   // ── Foreground poll interval ──────────────────
   static const int pollIntervalMs = 1000;

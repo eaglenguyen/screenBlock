@@ -41,6 +41,8 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -75,11 +77,19 @@ class MainActivity : FlutterActivity() {
                         eventSink?.success(packageName)
                     }
                 }
+                // 👈 add this — resets _overlayShowing in Flutter
+                AppBlockAccessibilityService.overlayResetCallback = {
+                    runOnUiThread {
+                        blockMethodChannel?.invokeMethod("onBlockDismissed", null)
+                    }
+                }
             }
 
             override fun onCancel(arguments: Any?) {
                 eventSink = null
                 AppBlockAccessibilityService.eventCallback = null
+                AppBlockAccessibilityService.overlayResetCallback = null
+
             }
         }
         )
