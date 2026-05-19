@@ -60,6 +60,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             result(await service.requestAuthorization())
         case "isAuthorized":
             result(service.isAuthorized())
+        case "saveBlockingMode":
+            if let args = call.arguments as? [String: Any],
+               let mode = args["mode"] as? String {
+                let sharedDefaults = UserDefaults(
+                    suiteName: "group.com.eagle.screenblock"
+                )
+                sharedDefaults?.set(mode, forKey: "blockingMode")
+                print("✅ saved blockingMode: \(mode)")
+            }
+            result(nil)
         case "startBlocking":
             guard let args = call.arguments as? [String: Any],
                   let packageNames = args["packageNames"] as? [String],
@@ -92,7 +102,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     @available(iOS 16.0, *)
     @MainActor
     private func showAppPicker(result: @escaping FlutterResult) async {
-        guard let rootVC = window?.rootViewController else {
+        guard let windowScene = UIApplication.shared
+            .connectedScenes
+            .first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?
+            .rootViewController
+        else {
             result(FlutterError(
                 code: "NO_VIEW",
                 message: "No view controller",
@@ -100,9 +115,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             ))
             return
         }
+
+        // read blocking mode from shared defaults
+        let sharedDefaults = UserDefaults(
+            suiteName: "group.com.eagle.screenblock"
+        )
+        let blockingMode = sharedDefaults?.string(
+            forKey: "blockingMode"
+        ) ?? "specific_apps"
+
+        // save key depends on blocking mode
+        let saveKey = blockingMode == "specific_apps"
+            ? "blockedApps"
+            : "allowedApps"
+
         let picker = FamilyActivityPickerViewController(
             service: IOSBlockingService.shared,
-            onDismiss: { result(nil) }
+            onDismiss: {
+                       // return count of saved apps to Flutter
+                       if let data = sharedDefaults?.data(forKey: saveKey),
+                          let selection = try? JSONDecoder().decode(
+                              FamilyActivitySelection.self,
+                              from: data
+                          ) {
+                           let count = selection.applicationTokens.count
+                           print("✅ picker dismissed with \(count) apps saved")
+                           result(count)
+                       } else {
+                           print("❌ no selection saved after picker dismissed")
+                           result(0)
+                       }
+                   },
+            saveKey: saveKey // 👈 pass correct key
         )
         rootVC.present(picker, animated: true)
     }

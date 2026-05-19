@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +26,10 @@ class HomeViewModel extends _$HomeViewModel {
   Timer? _countdownTimer;
   Timer? _sessionTimer;
   Timer? _breakTimer;
+  static String _defaultBlockingType() =>
+      Platform.isIOS
+          ? AppConstants.blockingTypeSpecificApps
+          : AppConstants.blockingTypeAllApps;
 
   @override
   HomeState build() {
@@ -38,7 +43,12 @@ class HomeViewModel extends _$HomeViewModel {
       _streamsInitialized = false;
 
     });
-    return const HomeState(isLoading: true);
+    return HomeState(
+      isLoading: true,
+      blockingType: Platform.isIOS
+          ? AppConstants.blockingTypeSpecificApps
+          : AppConstants.blockingTypeAllApps,
+    );
   }
 
   // ── Called once from HomeScreen.initState ────────
@@ -214,24 +224,40 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   Future<void> _beginActiveBlocking() async {
-    // set blocking mode first
     _blockingService.setBlockingMode(state.blockingType);
 
-    final apps = state.blockingType ==
-        AppConstants.blockingTypeSpecificApps
-        ? state.blockedApps
-        : state.allowedApps;
-
-    // start monitoring all selected apps
-    for (final pkg in apps) {
+    if (Platform.isIOS) {
+      // iOS — tokens already saved in UserDefaults by FamilyActivityPicker
+      // just start monitoring with the limit minutes
       await _blockingService.startMonitoring(
-        pkg,
+        'ios_apps', // placeholder — iOS uses saved tokens not package names
         state.selectedMinutes,
       );
+    } else {
+      // Android — pass actual package names
+      final apps = state.blockingType ==
+          AppConstants.blockingTypeSpecificApps
+          ? state.blockedApps
+          : state.allowedApps;
+
+      if (apps.isEmpty) {
+        debugPrint('❌ no apps selected');
+        state = state.copyWith(
+          phase: BlockingPhase.idle,
+          error: 'no_apps_selected',
+        );
+        return;
+      }
+
+      for (final pkg in apps) {
+        await _blockingService.startMonitoring(
+          pkg,
+          state.selectedMinutes,
+        );
+      }
     }
 
     final totalSeconds = state.selectedMinutes * 60;
-
     state = state.copyWith(
       phase: BlockingPhase.active,
       remainingSeconds: totalSeconds,
@@ -251,6 +277,8 @@ class HomeViewModel extends _$HomeViewModel {
       },
     );
   }
+
+
   void _onSessionComplete() {
     _blockingService.stopAllMonitoring();
     state = state.copyWith(

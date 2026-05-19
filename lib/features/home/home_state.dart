@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../../data/models/timer_config.dart';
 import '../../../data/models/streak.dart';
+import '../../core/constants/app_constants.dart';
 
 
 enum BlockingPhase {
@@ -25,18 +26,18 @@ class HomeState {
   final int remainingSeconds;
   final int breakRemainingSeconds;
 
-  const HomeState({
-    this.trackedApps = const [],
-    this.streak,
-    this.isLoading = false,
-    this.error,
-    this.blockingType = 'all_apps',
-    this.blockedApps = const [],
-    this.allowedApps = const [],
-    this.selectedMinutes = 30,
-    this.phase = BlockingPhase.idle,
-    this.remainingSeconds = 0,
-    this.breakRemainingSeconds = 0,
+   const HomeState({
+     this.trackedApps = const [],
+     this.streak,
+     this.isLoading = false,
+     this.error,
+     this.blockingType = AppConstants.blockingTypeAllApps, // keep const default
+     this.blockedApps = const [],
+     this.allowedApps = const [],
+     this.selectedMinutes = 30,
+     this.phase = BlockingPhase.idle,
+     this.remainingSeconds = 0,
+     this.breakRemainingSeconds = 0,
   });
 
   bool get isBlocking =>

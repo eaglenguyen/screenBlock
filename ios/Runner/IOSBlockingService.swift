@@ -51,54 +51,30 @@ class IOSBlockingService: NSObject {
         blockingMode: String,
         limitMinutes: Int
     ) {
-        // save config to shared defaults
-        // so DeviceActivityMonitor extension can read it
+        print("🔵 startBlocking called")
+        print("🔵 blockingMode: \(blockingMode)")
+        print("🔵 limitMinutes: \(limitMinutes)")
+
         sharedDefaults?.set(blockingMode, forKey: "blockingMode")
-        
-        // for iOS we use FamilyActivityPicker selection
-        // stored from when user picked apps
-        // start monitoring with time threshold
-        let schedule = DeviceActivitySchedule(
-            intervalStart: DateComponents(
-                hour: 0, minute: 0
-            ),
-            intervalEnd: DateComponents(
-                hour: 23, minute: 59
-            ),
-            repeats: false
-        )
-        
-        let threshold = DateComponents(
-            minute: limitMinutes
-        )
-        
-        let event = DeviceActivityEvent(
-            applications: getStoredAppTokens(
-                mode: blockingMode
-            ),
-            threshold: threshold
-        )
-        
-        do {
-            try activityCenter.startMonitoring(
-                activityName,
-                during: schedule,
-                events: [
-                    DeviceActivityEvent.Name(
-                        "com.eagle.screenblock.threshold"
-                    ): event
-                ]
-            )
-            print("✅ iOS monitoring started")
-        } catch {
-            print("❌ monitoring failed: \(error)")
+
+        let appTokens = getStoredAppTokens(mode: blockingMode)
+        print("🔵 found \(appTokens.count) saved app tokens")
+
+        guard !appTokens.isEmpty else {
+            print("❌ no app tokens found")
+            return
         }
+
+        // immediately shield apps — same as Android instant blocking
+        store.shield.applications = appTokens
+        print("✅ apps shielded immediately: \(appTokens.count)")
     }
     
+    
     func stopBlocking() {
-        activityCenter.stopMonitoring([activityName])
         store.clearAllSettings()
-        print("✅ iOS monitoring stopped")
+        activityCenter.stopMonitoring([activityName])
+        print("✅ iOS blocking stopped — shield cleared")
     }
     
     // MARK: - App Selection
@@ -107,8 +83,27 @@ class IOSBlockingService: NSObject {
         _ selection: FamilyActivitySelection,
         forKey key: String
     ) {
-        if let data = try? JSONEncoder().encode(selection) {
-            sharedDefaults?.set(data, forKey: key)
+        guard let defaults = sharedDefaults else {
+            print("🦅 sharedDefaults nil")
+            return
+        }
+
+        if selection.applicationTokens.isEmpty &&
+           selection.categoryTokens.isEmpty {
+            // clear the saved selection
+            defaults.removeObject(forKey: key)
+            defaults.synchronize()
+            print("🦅 cleared selection for key: \(key)")
+            return
+        }
+
+        do {
+            let data = try JSONEncoder().encode(selection)
+            defaults.set(data, forKey: key)
+            defaults.synchronize()
+            print("🦅 saved \(selection.applicationTokens.count) tokens for key: \(key)")
+        } catch {
+            print("🦅 encoding failed: \(error)")
         }
     }
     

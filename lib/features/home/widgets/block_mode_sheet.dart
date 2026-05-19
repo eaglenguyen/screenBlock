@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../domain/platform/ios_blocking_service.dart';
+import '../../../providers/blocking_service_provider.dart';
 import '../home_viewmodel.dart';
 import 'app_list_sheet.dart';
 
@@ -231,25 +235,72 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
 
   // ── App list bottom sheet ────────────────────────
   void _openAppListSheet(bool isAllApps) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (_) => AppListSheet(
-        isBlockList: !isAllApps,
-        initialApps: isAllApps ? _allowedApps : _blockedApps,
-        onSave: (apps) {
-          setState(() {
-            if (isAllApps) {
-              _allowedApps = apps;
-            } else {
-              _blockedApps = apps;
-            }
-          });
-        },
-      ),
-    );
+    if (Platform.isIOS) {
+      // iOS uses FamilyActivityPicker
+      _showIOSAppPicker(isAllApps);
+    } else {
+      // Android uses our custom AppListSheet
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => AppListSheet(
+          isBlockList: !isAllApps,
+          initialApps: isAllApps
+              ? _allowedApps
+              : _blockedApps,
+          onSave: (apps) {
+            setState(() {
+              if (isAllApps) {
+                _allowedApps = apps;
+              } else {
+                _blockedApps = apps;
+              }
+            });
+          },
+        ),
+      );
+    }
+  }
+
+  Future<void> _showIOSAppPicker(bool isAllApps) async {
+    try {
+      final service = ref.read(blockingServiceProvider)
+      as IOSBlockingService;
+
+      // save mode first
+      final count = await service.showAppPicker(
+        blockingMode: isAllApps
+            ? AppConstants.blockingTypeAllApps
+            : AppConstants.blockingTypeSpecificApps,
+      );
+
+      if (mounted && (count ?? 0) > 0) {
+        setState(() {
+          final placeholders = List.generate(
+            count!,
+                (i) => 'ios_app_$i',
+          );
+          if (isAllApps) {
+            _allowedApps = placeholders;
+          } else {
+            _blockedApps = placeholders;
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${count} app${count == 1 ? '' : 's'} selected',
+            ),
+            backgroundColor: AppColors.backgroundCard,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ iOS app picker error: $e');
+    }
   }
 
   // ── Set mode button ──────────────────────────────
