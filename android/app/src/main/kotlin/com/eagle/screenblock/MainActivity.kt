@@ -1,4 +1,4 @@
-package com.example.screenblock
+package com.eagle.screenblock
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -16,9 +16,9 @@ import android.util.Log
 class MainActivity : FlutterActivity() {
 
     companion object {
-        const val METHOD_CHANNEL = "com.example.screenblock/accessibility"
-        const val EVENT_CHANNEL = "com.example.screenblock/foreground_app"
-        const val BLOCK_CHANNEL = "com.example.screenblock/block"
+        const val METHOD_CHANNEL = "com.eagle.screenblock/accessibility"
+        const val EVENT_CHANNEL = "com.eagle.screenblock/foreground_app"
+        const val BLOCK_CHANNEL = "com.eagle.screenblock/block"
 
     }
 
@@ -109,7 +109,7 @@ class MainActivity : FlutterActivity() {
                     }
                     "dismissBlockScreen" -> {
                         sendBroadcast(
-                            Intent("com.example.screenblock.BLOCK_DISMISSED")
+                            Intent("com.eagle.screenblock.BLOCK_DISMISSED")
                         )
                         result.success(null)
                     }
@@ -125,13 +125,13 @@ class MainActivity : FlutterActivity() {
 
         registerReceiver(
             blockDismissedReceiver,
-            IntentFilter("com.example.screenblock.BLOCK_DISMISSED"),
+            IntentFilter("com.eagle.screenblock.BLOCK_DISMISSED"),
             RECEIVER_NOT_EXPORTED
         )
 
         registerReceiver(
             blockForDayReceiver,
-            IntentFilter("com.example.screenblock.BLOCK_FOR_DAY"),
+            IntentFilter("com.eagle.screenblock.BLOCK_FOR_DAY"),
             RECEIVER_NOT_EXPORTED
         )
     }

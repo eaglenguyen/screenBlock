@@ -13,7 +13,7 @@ class _OverlayScreenState extends State<OverlayScreen>
     with TickerProviderStateMixin {
 
   static const _blockChannel = MethodChannel(
-    'com.example.screenblock/block',
+    'com.eagle.screenblock/block',
   );
 
   // ── Animation controllers ────────────────────────

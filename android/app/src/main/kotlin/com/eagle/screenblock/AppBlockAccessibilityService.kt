@@ -1,4 +1,4 @@
-package com.example.screenblock
+package com.eagle.screenblock
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
@@ -55,7 +55,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
             if (packageName.contains("systemui") ||
                 packageName.contains("launcher") ||
                 packageName == "android" ||
-                packageName == "com.example.screenblock") return
+                packageName == "com.eagle.screenblock") return
 
             // always track current foreground app
             // even if exempted — so we know where user is

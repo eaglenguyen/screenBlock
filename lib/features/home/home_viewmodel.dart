@@ -351,7 +351,7 @@ class HomeViewModel extends _$HomeViewModel {
       ref.read(blockingServiceProvider);
 
   static const _methodChannel = MethodChannel(
-    'com.example.screenblock/block',
+    'com.eagle.screenblock/block',
   );
 
   void clearError() {

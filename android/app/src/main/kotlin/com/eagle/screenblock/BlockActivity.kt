@@ -1,4 +1,4 @@
-package com.example.screenblock
+package com.eagle.screenblock
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,8 +15,8 @@ class BlockActivity : FlutterActivity() {
 
     companion object {
         private const val EXTRA_PACKAGE_NAME = "blocked_package"
-        private const val ACTION_DISMISS = "com.example.screenblock.DISMISS_BLOCK"
-        private const val BLOCK_CHANNEL = "com.example.screenblock/block"
+        private const val ACTION_DISMISS = "com.eagle.screenblock.DISMISS_BLOCK"
+        private const val BLOCK_CHANNEL = "com.eagle.screenblock/block"
 
         fun start(context: Context, packageName: String) {
             val intent = Intent(context, BlockActivity::class.java).apply {
@@ -53,7 +53,7 @@ class BlockActivity : FlutterActivity() {
                     // this is synchronous — no broadcast delay
                     AppBlockAccessibilityService.addExemption(blockedPackage)
 
-                    sendBroadcast(Intent("com.example.screenblock.BLOCK_DISMISSED"))
+                    sendBroadcast(Intent("com.eagle.screenblock.BLOCK_DISMISSED"))
                     result.success(null)
 
                     android.os.Handler(android.os.Looper.getMainLooper())
@@ -66,7 +66,7 @@ class BlockActivity : FlutterActivity() {
                     Log.d("BlockActivity", "goHome called — sending BLOCK_DISMISSED broadcast")
 
                     // reset block flag in main isolate
-                    sendBroadcast(Intent("com.example.screenblock.BLOCK_DISMISSED"))
+                    sendBroadcast(Intent("com.eagle.screenblock.BLOCK_DISMISSED"))
                     // don't open — send to Android home screen
                     val homeIntent = Intent(Intent.ACTION_MAIN).apply {
                         addCategory(Intent.CATEGORY_HOME)
@@ -105,6 +105,6 @@ class BlockActivity : FlutterActivity() {
         super.onDestroy()
         unregisterReceiver(dismissReceiver)
         // notify main engine that block screen was dismissed
-        sendBroadcast(Intent("com.example.screenblock.BLOCK_DISMISSED"))
+        sendBroadcast(Intent("com.eagle.screenblock.BLOCK_DISMISSED"))
     }
 }

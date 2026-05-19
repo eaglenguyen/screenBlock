@@ -85,11 +85,11 @@ Widget _buildTimerDisplay() {
   return Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      _timerBlock('00', 'Hours'),
+      Flexible(child: _timerBlock('00', 'Hours')),
       _timerColon(),
-      _timerBlock('00', 'Minutes'),
+      Flexible(child: _timerBlock('00', 'Minutes')),
       _timerColon(),
-      _timerBlock('00', 'Seconds'),
+      Flexible(child: _timerBlock('00', 'Seconds')),
     ],
   );
 }
@@ -97,7 +97,7 @@ Widget _buildTimerDisplay() {
 Widget _timerBlock(String value, String label) {
   return Container(
     padding: const EdgeInsets.symmetric(
-      horizontal: 12, vertical: 10,
+      horizontal: 8, vertical: 10,
     ),
     decoration: BoxDecoration(
       color: AppColors.backgroundSubtle,
@@ -111,7 +111,7 @@ Widget _timerBlock(String value, String label) {
       children: [
         Text(value,
           style: AppTextStyles.displayMedium.copyWith(
-            fontSize: 62,
+            fontSize: 48,
             color: AppColors.textSecondary,
           ),
         ),

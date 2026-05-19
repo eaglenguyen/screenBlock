@@ -9,13 +9,13 @@ class AndroidBlockingService implements BlockingService {
 
   // ── Channels ─────────────────────────────────────
   static const _methodChannel = MethodChannel(
-    'com.example.screenblock/accessibility',
+    'com.eagle.screenblock/accessibility',
   );
   static const _eventChannel = EventChannel(
-    'com.example.screenblock/foreground_app',
+    'com.eagle.screenblock/foreground_app',
   );
   static const _blockChannel = MethodChannel(
-    'com.example.screenblock/block',
+    'com.eagle.screenblock/block',
   );
 
   // ── State ─────────────────────────────────────────

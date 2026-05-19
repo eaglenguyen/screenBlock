@@ -1,65 +1,48 @@
+//
+//  IOSMethodChannelhandler.swift
+//  Runner
+//
+//  Created by Egor on 5/18/26.
+//
 import UIKit
 import FamilyControls
-import Flutter
 
-@main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    var window: UIWindow?
-
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions:
-            [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
-
-        let flutterEngine = FlutterEngine(name: "main engine")
-        
-        // warm up the engine first
-        flutterEngine.run()
-        GeneratedPluginRegistrant.register(with: flutterEngine)
-
-        if #available(iOS 16.0, *) {
-            setupChannel(engine: flutterEngine)
-        }
-
-        let flutterVC = FlutterViewController(
-            engine: flutterEngine,
-            nibName: nil,
-            bundle: nil
-        )
-        
-
-        window = UIWindow(frame: UIScreen.main.bounds)
-              window?.rootViewController = flutterVC
-              window?.makeKeyAndVisible()
-
-        return true
-    }
-
-    @available(iOS 16.0, *)
-    private func setupChannel(engine: FlutterEngine) {
+@available(iOS 16.0, *)
+class IOSMethodChannelHandler {
+    
+    private let service = IOSBlockingService.shared
+    
+    
+    func register(with controller: FlutterViewController) {
         let channel = FlutterMethodChannel(
             name: "com.eagle.screenblock/ios_blocking",
-            binaryMessenger: engine.binaryMessenger
+            binaryMessenger: controller.binaryMessenger
         )
-        channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { return }
-            Task { await self.handleMethodCall(call, result: result) }
+        channel.setMethodCallHandler(handle)
+    }
+    
+    private func handle(
+        _ call: FlutterMethodCall,
+        result: @escaping FlutterResult
+    ) {
+        Task {
+            await handleAsync(call, result: result)
         }
     }
-
-    @available(iOS 16.0, *)
-    private func handleMethodCall(
+    
+    private func handleAsync(
         _ call: FlutterMethodCall,
         result: @escaping FlutterResult
     ) async {
-        let service = IOSBlockingService.shared
         switch call.method {
+            
         case "requestAuthorization":
-            result(await service.requestAuthorization())
+            let granted = await service.requestAuthorization()
+            result(granted)
+            
         case "isAuthorized":
             result(service.isAuthorized())
+            
         case "startBlocking":
             guard let args = call.arguments as? [String: Any],
                   let packageNames = args["packageNames"] as? [String],
@@ -79,27 +62,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 limitMinutes: limitMinutes
             )
             result(nil)
+            
         case "stopBlocking":
             service.stopBlocking()
             result(nil)
+            
         case "showAppPicker":
             await showAppPicker(result: result)
+            
         default:
             result(FlutterMethodNotImplemented)
         }
     }
-
-    @available(iOS 16.0, *)
+    
+    // MARK: - App Picker
     @MainActor
-    private func showAppPicker(result: @escaping FlutterResult) async {
-        guard let rootVC = window?.rootViewController else {
+    private func showAppPicker(
+        result: @escaping FlutterResult
+    ) async {
+        // FamilyActivityPicker must be shown as a SwiftUI view
+        // We present it modally over the Flutter view
+        guard let windowScene = UIApplication.shared
+            .connectedScenes
+            .first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?
+            .rootViewController
+        else {
             result(FlutterError(
                 code: "NO_VIEW",
-                message: "No view controller",
+                message: "Could not find root view controller",
                 details: nil
             ))
             return
         }
+        
         let picker = FamilyActivityPickerViewController(
             service: IOSBlockingService.shared,
             onDismiss: { result(nil) }

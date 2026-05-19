@@ -1,13 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
-import 'features/appPicker/app_picker_screen.dart';
+import 'features/bottomNav/shell_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/home/schedule/schedule_screen.dart';
 import 'features/home/schedule/widgets/app_list_screen.dart';
 import 'features/paywall/paywall_screen.dart';
 import 'features/settings/settings_screen.dart';
-import 'features/shell/shell_screen.dart';
 import 'features/stats/stats_screen.dart';
 import 'features/timer/timer_screen.dart';
 
