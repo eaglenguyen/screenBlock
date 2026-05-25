@@ -1,6 +1,7 @@
 import UIKit
 import FamilyControls
 import Flutter
+import os
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -12,6 +13,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions:
             [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+
+        os_log("🦅🦅🦅 APP LAUNCHED", log: .default, type: .fault)
 
         let flutterEngine = FlutterEngine(name: "main engine")
         
@@ -39,6 +42,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS 16.0, *)
     private func setupChannel(engine: FlutterEngine) {
+        IOSBlockingService.shared.checkAuthorizationStatus()
         let channel = FlutterMethodChannel(
             name: "com.eagle.screenblock/ios_blocking",
             binaryMessenger: engine.binaryMessenger
@@ -68,6 +72,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 )
                 sharedDefaults?.set(mode, forKey: "blockingMode")
                 print("✅ saved blockingMode: \(mode)")
+            }
+            result(nil)
+        case "openScreenTime":
+            if let url = URL(string: "App-prefs:") {
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(url)
+                }
             }
             result(nil)
         case "startBlocking":

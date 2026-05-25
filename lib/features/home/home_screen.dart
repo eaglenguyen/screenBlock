@@ -59,6 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       onTimerTapped: _onTimerTapped,
                       blockingType: state.blockingType,
                       selectedMinutes: state.selectedMinutes,
+                      blockedTime: state.formattedBlockedTime,
                     )
                   else if (state.phase == BlockingPhase.countdown)
                     CountdownCard(

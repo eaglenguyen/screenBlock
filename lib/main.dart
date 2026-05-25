@@ -5,6 +5,7 @@ import 'UI/overlay_screen.dart';
 import 'app_router.dart';
 import 'core/constants/hivebox_names.dart';
 import 'core/theme/app_theme.dart';
+import 'data/models/block_session.dart';
 import 'data/models/blocked_app.dart';
 import 'data/models/schedule.dart';
 import 'data/models/streak.dart';
@@ -25,6 +26,7 @@ void main() async {
   Hive.registerAdapter(UsageLogAdapter());
   Hive.registerAdapter(StreakAdapter());
   Hive.registerAdapter(ScheduleAdapter());
+  Hive.registerAdapter(BlockSessionAdapter());
 
 
   // open boxes
@@ -34,6 +36,7 @@ void main() async {
   await Hive.openBox<Streak>(HiveBoxNames.streaks);
   await Hive.openBox(HiveBoxNames.settings);
   await Hive.openBox<Schedule>(HiveBoxNames.schedules);
+  await Hive.openBox<BlockSession>(HiveBoxNames.blockSessions);
 
 
 

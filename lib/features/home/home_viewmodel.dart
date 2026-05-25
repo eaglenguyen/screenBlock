@@ -4,14 +4,17 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screenblock/data/repositoryImpl/UsageStreakRepo.dart';
 import '../../../domain/platform/blocking_service.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/hivebox_names.dart';
 import '../../data/models/timer_config.dart';
 import '../../data/repositories/BlockingRepo.dart';
+import '../../data/repositoryImpl/block_session_repository.dart';
 import 'home_state.dart';
 
 part 'home_viewmodel.g.dart';
@@ -26,6 +29,8 @@ class HomeViewModel extends _$HomeViewModel {
   Timer? _countdownTimer;
   Timer? _sessionTimer;
   Timer? _breakTimer;
+  bool _initialized = false;
+
   static String _defaultBlockingType() =>
       Platform.isIOS
           ? AppConstants.blockingTypeSpecificApps
@@ -33,8 +38,10 @@ class HomeViewModel extends _$HomeViewModel {
 
   @override
   HomeState build() {
+    ref.keepAlive();
     // only cleanup logic lives here
     ref.onDispose(() {
+      _initialized = false;
       _usageSubscription?.cancel();
       _overlaySubscription?.cancel();
       _countdownTimer?.cancel();
@@ -53,10 +60,20 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── Called once from HomeScreen.initState ────────
   void init() {
+    if (_initialized) return;
+    _initialized = true;
+
     _setupStreams();
     loadTrackedApps();
+    loadTodayBlockedTime();
+    _loadBlockingConfig();
   }
 
+
+  void loadTodayBlockedTime() {
+    final duration = _sessionRepo.getTodayTotalDuration();
+    state = state.copyWith(todayBlockedTime: duration);
+  }
   // ── Stream setup ─────────────────────────────────
   void _setupStreams() {
     if (_streamsInitialized) return;
@@ -226,6 +243,12 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> _beginActiveBlocking() async {
     _blockingService.setBlockingMode(state.blockingType);
 
+    // start session in Hive
+    final sessionKey = await _sessionRepo.startSession(
+      blockingType: state.blockingType,
+      selectedMinutes: state.selectedMinutes,
+    );
+
     if (Platform.isIOS) {
       // iOS — tokens already saved in UserDefaults by FamilyActivityPicker
       // just start monitoring with the limit minutes
@@ -261,6 +284,7 @@ class HomeViewModel extends _$HomeViewModel {
     state = state.copyWith(
       phase: BlockingPhase.active,
       remainingSeconds: totalSeconds,
+      activeSessionKey: sessionKey,
     );
 
     _sessionTimer?.cancel();
@@ -279,32 +303,78 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
 
-  void _onSessionComplete() {
+  void _onSessionComplete() async {
     _blockingService.stopAllMonitoring();
+
+    // end session in Hive as completed
+    if (state.activeSessionKey != null) {
+      await _sessionRepo.endSession(
+        key: state.activeSessionKey!,
+        completed: true, // timer expired naturally
+      );
+    }
+
+    await Future.delayed(const Duration(milliseconds: 100));
+    // refresh today's total
+    loadTodayBlockedTime();
+
+
+
     state = state.copyWith(
       phase: BlockingPhase.idle,
       remainingSeconds: 0,
+      activeSessionKey: null,
     );
   }
 
 
 
   // Block Modes
+  void _saveBlockingConfig() {
+    final box = Hive.box(HiveBoxNames.settings);
+    box.put('blockingType', state.blockingType);
+    box.put('blockedApps', state.blockedApps);
+    box.put('allowedApps', state.allowedApps);
+  }
 
   void setBlockingType(String type) {
     state = state.copyWith(blockingType: type);
+    _saveBlockingConfig();
+
   }
 
   void setBlockedApps(List<String> apps) {
     state = state.copyWith(blockedApps: apps);
+    // persist to Hive
+    _saveBlockingConfig();
   }
 
   void setAllowedApps(List<String> apps) {
     state = state.copyWith(allowedApps: apps);
+    _saveBlockingConfig();
+
   }
 
   void setSelectedMinutes(int minutes) {
     state = state.copyWith(selectedMinutes: minutes);
+  }
+
+  void _loadBlockingConfig() {
+    final box = Hive.box(HiveBoxNames.settings);
+    final blockingType = box.get('blockingType',
+        defaultValue: Platform.isIOS
+            ? AppConstants.blockingTypeSpecificApps
+            : AppConstants.blockingTypeAllApps);
+    final blockedApps = box.get('blockedApps',
+        defaultValue: <String>[]);
+    final allowedApps = box.get('allowedApps',
+        defaultValue: <String>[]);
+
+    state = state.copyWith(
+      blockingType: blockingType,
+      blockedApps: List<String>.from(blockedApps),
+      allowedApps: List<String>.from(allowedApps),
+    );
   }
 
 
@@ -322,10 +392,25 @@ class HomeViewModel extends _$HomeViewModel {
     _sessionTimer?.cancel();
     _breakTimer?.cancel();
     await _blockingService.stopAllMonitoring();
+
+    // end session in Hive
+    if (state.activeSessionKey != null) {
+      await _sessionRepo.endSession(
+        key: state.activeSessionKey!,
+        completed: false, // gave up
+      );
+    }
+
+    // 👇 small delay to ensure Hive write is complete
+    await Future.delayed(const Duration(milliseconds: 100));
+    // refresh today's total
+    loadTodayBlockedTime();
+
     state = state.copyWith(
       phase: BlockingPhase.idle,
       remainingSeconds: 0,
       breakRemainingSeconds: 0,
+      activeSessionKey: null,
     );
   }
 
@@ -335,6 +420,9 @@ class HomeViewModel extends _$HomeViewModel {
     await _blockingService.stopAllMonitoring();
 
     final breakSeconds = minutes * 60;
+    // 👇 save current remaining seconds before break
+    final savedRemainingSeconds = state.remainingSeconds;
+
     state = state.copyWith(
       phase: BlockingPhase.onBreak,
       breakRemainingSeconds: breakSeconds,
@@ -347,7 +435,7 @@ class HomeViewModel extends _$HomeViewModel {
         final remaining = state.breakRemainingSeconds - 1;
         if (remaining <= 0) {
           timer.cancel();
-          _resumeAfterBreak();
+          _resumeAfterBreak(savedRemainingSeconds); // 👈 pass saved seconds
         } else {
           state = state.copyWith(
             breakRemainingSeconds: remaining,
@@ -359,18 +447,59 @@ class HomeViewModel extends _$HomeViewModel {
 
   Future<void> endBreak() async {
     _breakTimer?.cancel();
-    await _beginActiveBlocking();
+    _resumeAfterBreak(state.remainingSeconds);
   }
 
-  Future<void> _resumeAfterBreak() async {
-    await _beginActiveBlocking();
-  }
+  Future<void> _resumeAfterBreak(int remainingSeconds) async {
+    _blockingService.setBlockingMode(state.blockingType);
 
+    final apps = state.blockingType ==
+        AppConstants.blockingTypeSpecificApps
+        ? state.blockedApps
+        : state.allowedApps;
+
+    if (Platform.isIOS) {
+      await _blockingService.startMonitoring(
+        'ios_apps',
+        state.selectedMinutes,
+      );
+    } else {
+      for (final pkg in apps) {
+        await _blockingService.startMonitoring(
+          pkg,
+          state.selectedMinutes,
+        );
+      }
+    }
+
+    // 👇 resume from saved remaining seconds, not full duration
+    state = state.copyWith(
+      phase: BlockingPhase.active,
+      remainingSeconds: remainingSeconds,
+    );
+
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer.periodic(
+      const Duration(seconds: 1),
+          (timer) {
+        final remaining = state.remainingSeconds - 1;
+        if (remaining <= 0) {
+          timer.cancel();
+          _onSessionComplete();
+        } else {
+          state = state.copyWith(remainingSeconds: remaining);
+        }
+      },
+    );
+  }
 
 
   // ── Getters ──────────────────────────────────────
   BlockingRepository get _blockingRepo =>
       ref.read(blockingRepositoryProvider);
+
+  BlockSessionRepository get _sessionRepo =>
+      ref.read(blockSessionRepositoryProvider);
 
   UsageStreakRepo get _usageRepo =>
       ref.read(usageRepositoryProvider);

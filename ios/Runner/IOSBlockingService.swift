@@ -126,10 +126,53 @@ class IOSBlockingService: NSObject {
     
     // MARK: - Usage Stats
     
-    func getTodayUsage() async -> [String: Int] {
-        // DeviceActivityReport handles this in iOS 16.2+
-        // return empty for now — will implement with
-        // DeviceActivityReport extension
-        return [:]
+    func fetchTodayUsage() async -> [[String: Any]] {
+        // DeviceActivityReport runs in the extension
+        // we trigger it and return results via shared defaults
+        let center = DeviceActivityCenter()
+        
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfDay = calendar.startOfDay(for: now)
+        
+        let schedule = DeviceActivitySchedule(
+            intervalStart: calendar.dateComponents(
+                [.hour, .minute],
+                from: startOfDay
+            ),
+            intervalEnd: calendar.dateComponents(
+                [.hour, .minute],
+                from: now
+            ),
+            repeats: false
+        )
+        
+        do {
+            try center.startMonitoring(
+                DeviceActivityName("com.eagle.screenblock.stats"),
+                during: schedule
+            )
+        } catch {
+            print("❌ stats monitoring error: \(error)")
+        }
+        
+        return []
+    }
+    
+    func checkAuthorizationStatus() {
+        let status = center.authorizationStatus
+        NSLog("🦅 FamilyControls auth status: \(status)")
+        switch status {
+        case .notDetermined:
+            NSLog("🦅 not determined — needs authorization")
+        case .denied:
+            NSLog("🦅 denied — user rejected")
+        case .approved:
+            NSLog("🦅 approved ✅")
+        case .approvedWithDataAccess:
+            NSLog("🦅 approved WITH data access ✅ — stats should work")
+        @unknown default:
+            NSLog("🦅 unknown status")
+        }
     }
 }

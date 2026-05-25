@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenblock/features/stats/stats_state.dart';
 import 'package:screenblock/features/stats/stats_viewmodel.dart';
@@ -28,9 +31,13 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final state = ref.watch(statsViewModelProvider);
 
+
+
     return Scaffold(
+
       backgroundColor: AppColors.background,
       body: Column(
         children: [
@@ -71,6 +78,17 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             ),
           ),
           const Spacer(),
+          if (Platform.isIOS) ...[
+            _iconButton(
+              icon: Icons.access_time_rounded,
+              onTap: () async {
+                await const MethodChannel(
+                  'com.eagle.screenblock/ios_blocking',
+                ).invokeMethod('openScreenTime');
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
           _iconButton(
             icon: Icons.refresh_rounded,
             onTap: () => ref

@@ -9,6 +9,8 @@ enum BlockingPhase {
   countdown,   // 3 second countdown
   active,      // actively blocking with timer
   onBreak,     // break in progress
+  completed,
+  claimXp,
 }
 
 
@@ -26,6 +28,9 @@ class HomeState {
   final int remainingSeconds;
   final int breakRemainingSeconds;
 
+  final String? activeSessionKey;  // 👈 add
+  final Duration todayBlockedTime; // 👈 add
+
    const HomeState({
      this.trackedApps = const [],
      this.streak,
@@ -38,12 +43,27 @@ class HomeState {
      this.phase = BlockingPhase.idle,
      this.remainingSeconds = 0,
      this.breakRemainingSeconds = 0,
+
+     this.activeSessionKey,
+     this.todayBlockedTime = Duration.zero,
   });
 
   bool get isBlocking =>
       phase == BlockingPhase.active ||
           phase == BlockingPhase.countdown ||
           phase == BlockingPhase.onBreak;
+
+
+  // formatted for display HH:MM:SS
+  String get formattedBlockedTime {
+    final h = todayBlockedTime.inHours
+        .toString().padLeft(2, '0');
+    final m = (todayBlockedTime.inMinutes % 60)
+        .toString().padLeft(2, '0');
+    final s = (todayBlockedTime.inSeconds % 60)
+        .toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
 
   String get formattedTime {
     final h = (remainingSeconds ~/ 3600)
@@ -67,6 +87,8 @@ class HomeState {
     BlockingPhase? phase,
     int? remainingSeconds,
     int? breakRemainingSeconds,
+    String? activeSessionKey,
+    Duration? todayBlockedTime,
   }) {
     return HomeState(
       trackedApps: trackedApps ?? this.trackedApps,
@@ -81,6 +103,8 @@ class HomeState {
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       breakRemainingSeconds:
       breakRemainingSeconds ?? this.breakRemainingSeconds,
+      activeSessionKey: activeSessionKey ?? this.activeSessionKey,
+      todayBlockedTime: todayBlockedTime ?? this.todayBlockedTime,
     );
   }
 

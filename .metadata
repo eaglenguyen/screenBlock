@@ -5,7 +5,7 @@
 
 version:
   revision: "3b62efc2a3da49882f43c372e0bc53daef7295a6"
-  channel: "stable"
+  channel: "[user-branch]"
 
 project_type: app
 
@@ -13,9 +13,6 @@ project_type: app
 migration:
   platforms:
     - platform: root
-      create_revision: 3b62efc2a3da49882f43c372e0bc53daef7295a6
-      base_revision: 3b62efc2a3da49882f43c372e0bc53daef7295a6
-    - platform: android
       create_revision: 3b62efc2a3da49882f43c372e0bc53daef7295a6
       base_revision: 3b62efc2a3da49882f43c372e0bc53daef7295a6
     - platform: ios

@@ -11,9 +11,9 @@ class TimerCard extends StatelessWidget {
   final ValueChanged<String> onSelectorTapped;
   final VoidCallback onBlockModeTapped;
   final String blockingType;
-  final VoidCallback onTimerTapped;   // 👈 add
-  final int selectedMinutes;          // 👈 add
-
+  final VoidCallback onTimerTapped;
+  final int selectedMinutes;
+  final String blockedTime;
 
   const TimerCard({
     super.key,
@@ -21,8 +21,9 @@ class TimerCard extends StatelessWidget {
     required this.onSelectorTapped,
     required this.onBlockModeTapped,
     required this.blockingType,
-    required this.onTimerTapped,    // 👈 add
-    required this.selectedMinutes,  // 👈 add
+    required this.onTimerTapped,
+    required this.selectedMinutes,
+    required this.blockedTime,
 
   });
 
@@ -62,34 +63,41 @@ Widget build (BuildContext context){
   );
 }
 
-Widget _buildRecordPill() {
-  return Container(
-    padding: const EdgeInsets.symmetric(
-      horizontal: 14, vertical: 5,
-    ),
-    decoration: BoxDecoration(
-      color: AppColors.backgroundSubtle,
-      borderRadius: BorderRadius.circular(50),
-    ),
-    child: Text(
-      'No record set yet',
-      style: AppTextStyles.bodySmall.copyWith(
-        fontSize: 15,
-
+  Widget _buildRecordPill() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14, vertical: 5,
       ),
-    ),
-  );
-}
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSubtle,
+        borderRadius: BorderRadius.circular(50),
+      ),
+      child: Text(
+        blockedTime == '00:00:00'
+            ? 'No sessions today yet'
+            : 'Today\'s blocked time',
+        style: AppTextStyles.bodySmall.copyWith(fontSize: 15),
+      ),
+    );
+  }
 
 Widget _buildTimerDisplay() {
+  // parse HH:MM:SS from state
+  final parts = blockedTime.split(':');
+  final hours = parts[0];
+  final minutes = parts[1];
+  final seconds = parts[2];
+
+
+
   return Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      Flexible(child: _timerBlock('00', 'Hours')),
+      Flexible(child: _timerBlock(hours, 'Hours')),
       _timerColon(),
-      Flexible(child: _timerBlock('00', 'Minutes')),
+      Flexible(child: _timerBlock(minutes, 'Minutes')),
       _timerColon(),
-      Flexible(child: _timerBlock('00', 'Seconds')),
+      Flexible(child: _timerBlock(seconds, 'Seconds')),
     ],
   );
 }

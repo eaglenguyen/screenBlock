@@ -3,6 +3,7 @@ import 'package:screenblock/data/repositoryImpl/BlockingRepoImpl.dart';
 import 'package:screenblock/data/repositoryImpl/UsageStreakRepo.dart';
 
 import '../data/repositories/BlockingRepo.dart';
+import '../data/repositoryImpl/block_session_repository.dart';
 
 
 // interface bound to impl — swap impl here to move to Drift, Isar, or Supabase
@@ -13,4 +14,9 @@ final blockingRepositoryProvider = Provider<BlockingRepository>((ref) {
 // no interface — direct impl
 final usageRepositoryProvider = Provider<UsageStreakRepo>((ref) {
   return UsageStreakRepo();
+});
+
+final blockSessionRepositoryProvider =
+    Provider<BlockSessionRepository>((ref) {
+      return BlockSessionRepository();
 });

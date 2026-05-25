@@ -29,8 +29,8 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
     super.initState();
     final state = ref.read(homeViewModelProvider);
     _selectedMode = state.blockingType;
-    _blockedApps = List.from(state.blockedApps);
-    _allowedApps = List.from(state.allowedApps);
+    _blockedApps = List<String>.from(state.blockedApps);
+    _allowedApps = List<String>.from(state.allowedApps);
   }
 
   bool get _isAllApps =>
@@ -324,8 +324,8 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
   void _onSetMode() {
     ref.read(homeViewModelProvider.notifier)
       ..setBlockingType(_selectedMode)
-      ..setBlockedApps(_blockedApps)
-      ..setAllowedApps(_allowedApps);
+      ..setBlockedApps(List<String>.from(_blockedApps))
+      ..setAllowedApps(List<String>.from(_allowedApps));
     Navigator.pop(context);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app_usage/app_usage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,6 +16,15 @@ class StatsViewModel extends _$StatsViewModel {
   }
 
   Future<void> loadStats() async {
+    if (Platform.isIOS) {
+      // iOS doesn't support AppUsage
+      state = state.copyWith(
+        isLoading: false,
+        appStats: [],
+        totalUsage: Duration.zero,
+      );
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
 
     try {
