@@ -87,7 +87,7 @@ Widget _buildXpBadge(HomeState state) {
           ),
         ),
         const SizedBox(width: 5),
-        Text('0 XP', style: AppTextStyles.labelMedium),
+        Text('${state.totalXp} XP', style: AppTextStyles.labelMedium),
       ],
     ),
   );

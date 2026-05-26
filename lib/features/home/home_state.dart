@@ -28,25 +28,88 @@ class HomeState {
   final int remainingSeconds;
   final int breakRemainingSeconds;
 
-  final String? activeSessionKey;  // 👈 add
-  final Duration todayBlockedTime; // 👈 add
+  final String? activeSessionKey;
+  final Duration todayBlockedTime;
+  final int xpEarned;
+  final int totalXp;
 
-   const HomeState({
-     this.trackedApps = const [],
-     this.streak,
-     this.isLoading = false,
-     this.error,
-     this.blockingType = AppConstants.blockingTypeAllApps, // keep const default
-     this.blockedApps = const [],
-     this.allowedApps = const [],
-     this.selectedMinutes = 30,
-     this.phase = BlockingPhase.idle,
-     this.remainingSeconds = 0,
-     this.breakRemainingSeconds = 0,
+  final DateTime? sessionStartTime;
+  final DateTime? breakStartTime;
+  final DateTime? countdownStartTime;
+  final int originalBreakSeconds;
 
-     this.activeSessionKey,
-     this.todayBlockedTime = Duration.zero,
+
+
+  const HomeState({
+    this.trackedApps = const [],
+    this.streak,
+    this.isLoading = false,
+    this.error,
+    this.blockingType = AppConstants.blockingTypeAllApps, // keep const default
+    this.blockedApps = const [],
+    this.allowedApps = const [],
+    this.selectedMinutes = 30,
+    this.phase = BlockingPhase.idle,
+    this.remainingSeconds = 0,
+    this.breakRemainingSeconds = 0,
+    this.activeSessionKey,
+    this.todayBlockedTime = Duration.zero,
+    this.xpEarned = 0,
+    this.totalXp = 0,
+    this.sessionStartTime,
+    this.breakStartTime,
+    this.countdownStartTime,
+    this.originalBreakSeconds = 0,
+
   });
+
+
+
+  HomeState copyWith({
+    List<TimerConfig>? trackedApps,
+    Streak? streak,
+    bool? isLoading,
+    String? error,
+    String? blockingType,
+    List<String>? blockedApps,
+    List<String>? allowedApps,
+    int? selectedMinutes,
+    BlockingPhase? phase,
+    int? remainingSeconds,
+    int? breakRemainingSeconds,
+    String? activeSessionKey,
+    Duration? todayBlockedTime,
+    int? xpEarned,
+    int? totalXp,
+    DateTime? sessionStartTime,
+    DateTime? breakStartTime,
+    DateTime? countdownStartTime,
+    int? originalBreakSeconds,
+  }) {
+    return HomeState(
+      trackedApps: trackedApps ?? this.trackedApps,
+      streak: streak ?? this.streak,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+      blockingType: blockingType ?? this.blockingType,
+      blockedApps: blockedApps ?? this.blockedApps,
+      allowedApps: allowedApps ?? this.allowedApps,
+      selectedMinutes: selectedMinutes ?? this.selectedMinutes,
+      phase: phase ?? this.phase,
+      remainingSeconds: remainingSeconds ?? this.remainingSeconds,
+      breakRemainingSeconds:
+      breakRemainingSeconds ?? this.breakRemainingSeconds,
+      activeSessionKey: activeSessionKey ?? this.activeSessionKey,
+      todayBlockedTime: todayBlockedTime ?? this.todayBlockedTime,
+      xpEarned: xpEarned ?? this.xpEarned,
+      totalXp: totalXp ?? this.totalXp,
+      sessionStartTime: sessionStartTime ?? this.sessionStartTime,
+      breakStartTime: breakStartTime ?? this.breakStartTime,
+      countdownStartTime: countdownStartTime ?? this.countdownStartTime,
+      originalBreakSeconds: originalBreakSeconds ?? this.originalBreakSeconds
+
+    );
+  }
 
   bool get isBlocking =>
       phase == BlockingPhase.active ||
@@ -74,39 +137,4 @@ class HomeState {
         .toString().padLeft(2, '0');
     return '$h:$m:$s';
   }
-
-  HomeState copyWith({
-    List<TimerConfig>? trackedApps,
-    Streak? streak,
-    bool? isLoading,
-    String? error,
-    String? blockingType,
-    List<String>? blockedApps,
-    List<String>? allowedApps,
-    int? selectedMinutes,
-    BlockingPhase? phase,
-    int? remainingSeconds,
-    int? breakRemainingSeconds,
-    String? activeSessionKey,
-    Duration? todayBlockedTime,
-  }) {
-    return HomeState(
-      trackedApps: trackedApps ?? this.trackedApps,
-      streak: streak ?? this.streak,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
-      blockingType: blockingType ?? this.blockingType,
-      blockedApps: blockedApps ?? this.blockedApps,
-      allowedApps: allowedApps ?? this.allowedApps,
-      selectedMinutes: selectedMinutes ?? this.selectedMinutes,
-      phase: phase ?? this.phase,
-      remainingSeconds: remainingSeconds ?? this.remainingSeconds,
-      breakRemainingSeconds:
-      breakRemainingSeconds ?? this.breakRemainingSeconds,
-      activeSessionKey: activeSessionKey ?? this.activeSessionKey,
-      todayBlockedTime: todayBlockedTime ?? this.todayBlockedTime,
-    );
-  }
-
-
 }

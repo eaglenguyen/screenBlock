@@ -67,7 +67,35 @@ class HomeViewModel extends _$HomeViewModel {
     loadTrackedApps();
     loadTodayBlockedTime();
     _loadBlockingConfig();
+
+    // load saved XP
+    final savedXp = _loadTotalXp();
+    state = state.copyWith(totalXp: savedXp);
   }
+
+  int _loadTotalXp() {
+    final box = Hive.box(HiveBoxNames.settings);
+    return box.get('totalXp', defaultValue: 0) as int;
+  }
+
+  Future<void> _saveTotalXp(int xp) async {
+    final box = Hive.box(HiveBoxNames.settings);
+    await box.put('totalXp', xp);
+  }
+
+  Future<void> claimXp() async {
+    final newTotal = state.totalXp + state.xpEarned;
+    await _saveTotalXp(newTotal);
+
+    state = state.copyWith(
+      phase: BlockingPhase.idle,
+      totalXp: newTotal,
+      xpEarned: 0,
+      remainingSeconds: 0,
+    );
+  }
+
+
 
 
   void loadTodayBlockedTime() {
@@ -217,10 +245,13 @@ class HomeViewModel extends _$HomeViewModel {
       return;
     }
 
+    final countdownStart = DateTime.now();
+
     // start 3 second countdown
     state = state.copyWith(
       phase: BlockingPhase.countdown,
       remainingSeconds: 3,
+      countdownStartTime: countdownStart,
     );
 
     _countdownTimer?.cancel();
@@ -229,12 +260,16 @@ class HomeViewModel extends _$HomeViewModel {
     _countdownTimer = Timer.periodic(
       const Duration(seconds: 1),
           (timer) async {
-        count--;
-        if (count <= 0) {
+        final elapsed = DateTime.now()
+            .difference(state.countdownStartTime!)
+            .inSeconds;
+        final remaining = 3 - elapsed;
+
+        if (remaining <= 0) {
           timer.cancel();
           await _beginActiveBlocking();
         } else {
-          state = state.copyWith(remainingSeconds: count);
+          state = state.copyWith(remainingSeconds: remaining);
         }
       },
     );
@@ -243,28 +278,18 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> _beginActiveBlocking() async {
     _blockingService.setBlockingMode(state.blockingType);
 
-    // start session in Hive
-    final sessionKey = await _sessionRepo.startSession(
-      blockingType: state.blockingType,
-      selectedMinutes: state.selectedMinutes,
-    );
-
     if (Platform.isIOS) {
-      // iOS — tokens already saved in UserDefaults by FamilyActivityPicker
-      // just start monitoring with the limit minutes
       await _blockingService.startMonitoring(
-        'ios_apps', // placeholder — iOS uses saved tokens not package names
+        'ios_apps',
         state.selectedMinutes,
       );
     } else {
-      // Android — pass actual package names
       final apps = state.blockingType ==
           AppConstants.blockingTypeSpecificApps
           ? state.blockedApps
           : state.allowedApps;
 
       if (apps.isEmpty) {
-        debugPrint('❌ no apps selected');
         state = state.copyWith(
           phase: BlockingPhase.idle,
           error: 'no_apps_selected',
@@ -280,18 +305,31 @@ class HomeViewModel extends _$HomeViewModel {
       }
     }
 
-    final totalSeconds = state.selectedMinutes * 60;
+    final sessionKey = await _sessionRepo.startSession(
+      blockingType: state.blockingType,
+      selectedMinutes: state.selectedMinutes,
+    );
+
+    final totalSeconds = state.selectedMinutes * 60; // math that converts int into seconds
+    final startTime = DateTime.now(); // 👈 wall clock start
+
     state = state.copyWith(
       phase: BlockingPhase.active,
       remainingSeconds: totalSeconds,
       activeSessionKey: sessionKey,
+      sessionStartTime: startTime, // 👈 save start time
     );
 
     _sessionTimer?.cancel();
     _sessionTimer = Timer.periodic(
       const Duration(seconds: 1),
           (timer) {
-        final remaining = state.remainingSeconds - 1;
+        // calculate remaining from wall clock not tick count
+        final elapsed = DateTime.now()
+            .difference(state.sessionStartTime!)
+            .inSeconds;
+        final remaining = totalSeconds - elapsed;
+
         if (remaining <= 0) {
           timer.cancel();
           _onSessionComplete();
@@ -301,6 +339,60 @@ class HomeViewModel extends _$HomeViewModel {
       },
     );
   }
+
+  void onAppResumed() {
+    switch (state.phase) {
+      case BlockingPhase.active:
+        if (state.sessionStartTime == null) return;
+        final totalSeconds = state.selectedMinutes * 60;
+        final elapsed = DateTime.now()
+            .difference(state.sessionStartTime!)
+            .inSeconds;
+        final remaining = totalSeconds - elapsed;
+        if (remaining <= 0) {
+          _sessionTimer?.cancel();
+          _onSessionComplete();
+        } else {
+          state = state.copyWith(remainingSeconds: remaining);
+        }
+
+      case BlockingPhase.onBreak:
+        if (state.breakStartTime == null) return;
+        final breakElapsed = DateTime.now()
+            .difference(state.breakStartTime!)
+            .inSeconds;
+        final breakRemaining = state.originalBreakSeconds - breakElapsed;
+        if (breakRemaining <= 0) {
+          _breakTimer?.cancel();
+          _resumeAfterBreak(state.remainingSeconds);
+        } else {
+          state = state.copyWith(breakRemainingSeconds: breakRemaining);
+        }
+
+      case BlockingPhase.countdown:
+        if (state.countdownStartTime == null) return;
+        final countdownElapsed = DateTime.now()
+            .difference(state.countdownStartTime!)
+            .inSeconds;
+        final countdownRemaining = 3 - countdownElapsed;
+        if (countdownRemaining <= 0) {
+          _countdownTimer?.cancel();
+          _beginActiveBlocking();
+        } else {
+          state = state.copyWith(remainingSeconds: countdownRemaining);
+        }
+
+      default:
+        break;
+    }
+  }
+
+  void finishAndUnblock() {
+    state = state.copyWith(
+      phase: BlockingPhase.claimXp,
+    );
+  }
+
 
 
   void _onSessionComplete() async {
@@ -318,12 +410,15 @@ class HomeViewModel extends _$HomeViewModel {
     // refresh today's total
     loadTodayBlockedTime();
 
+    // calculate XP — 1 XP per minute blocked
+    final xpEarned = state.selectedMinutes;
 
 
     state = state.copyWith(
-      phase: BlockingPhase.idle,
+      phase: BlockingPhase.completed,
       remainingSeconds: 0,
       activeSessionKey: null,
+      xpEarned : xpEarned,
     );
   }
 
@@ -421,21 +516,27 @@ class HomeViewModel extends _$HomeViewModel {
 
     final breakSeconds = minutes * 60;
     // 👇 save current remaining seconds before break
-    final savedRemainingSeconds = state.remainingSeconds;
+    final breakStartTime = DateTime.now();
 
     state = state.copyWith(
       phase: BlockingPhase.onBreak,
       breakRemainingSeconds: breakSeconds,
+      breakStartTime: breakStartTime,
+      originalBreakSeconds: breakSeconds
     );
 
     _breakTimer?.cancel();
     _breakTimer = Timer.periodic(
       const Duration(seconds: 1),
           (timer) {
-        final remaining = state.breakRemainingSeconds - 1;
+        final elapsed = DateTime.now()
+            .difference(state.breakStartTime!)
+            .inSeconds;
+        final remaining = breakSeconds - elapsed;
+
         if (remaining <= 0) {
           timer.cancel();
-          _resumeAfterBreak(savedRemainingSeconds); // 👈 pass saved seconds
+          _resumeAfterBreak(state.remainingSeconds);
         } else {
           state = state.copyWith(
             breakRemainingSeconds: remaining,

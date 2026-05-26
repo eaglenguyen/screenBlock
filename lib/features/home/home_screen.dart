@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:screenblock/features/home/timer/break_sheet.dart';
-import 'package:screenblock/features/home/timer/countdown_card.dart';
-import 'package:screenblock/features/home/timer/active_blocking_card.dart';
+import 'package:screenblock/features/home/cards/countdown_card.dart';
+import 'package:screenblock/features/home/cards/active_blocking_card.dart';
 import 'package:screenblock/features/home/widgets/app_list_sheet.dart';
 import 'package:screenblock/features/home/widgets/block_mode_sheet.dart';
 import 'package:screenblock/features/home/widgets/focus_stats.dart';
 import 'package:screenblock/features/home/widgets/home_header.dart';
-import 'package:screenblock/features/home/timer/timer_card.dart';
+import 'package:screenblock/features/home/cards/timer_card.dart';
 import 'package:screenblock/features/home/timer/timer_picker_sheet.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'cards/claim_xp_card.dart';
+import 'cards/session_completed_card.dart';
 import 'home_state.dart';
 import 'home_viewmodel.dart';
 
@@ -22,15 +24,30 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // 👈 add
     // trigger load after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeViewModelProvider.notifier).init();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // 👈 add
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // app came back to foreground — sync timer
+      ref.read(homeViewModelProvider.notifier).onAppResumed();
+    }
   }
 
   @override
@@ -50,9 +67,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               child: Column(
                 children: [
-                  // swap card based on phase
-                  if (state.phase == BlockingPhase.idle)
-                    TimerCard(
+                  // swap card based on phases
+                  switch (state.phase) {
+                    BlockingPhase.idle => TimerCard(
                       onBlockNow: _onBlockNowTapped,
                       onSelectorTapped: _onSelectorTapped,
                       onBlockModeTapped: _onBlockModeTapped,
@@ -60,25 +77,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       blockingType: state.blockingType,
                       selectedMinutes: state.selectedMinutes,
                       blockedTime: state.formattedBlockedTime,
-                    )
-                  else if (state.phase == BlockingPhase.countdown)
-                    CountdownCard(
+                    ),
+                    BlockingPhase.countdown => CountdownCard(
                       count: state.remainingSeconds,
                       onCancel: _onCancelCountdown,
-                    )
-                  else
-                    ActiveBlockingCard(
-                      state: state,
-                      onTakeBreak: _onTakeBreak,
-                      onGiveUp: _onGiveUp,
-                      onEndBreak: () => ref
-                          .read(homeViewModelProvider.notifier)
-                          .endBreak(),
-                      onBlockListTapped: _onBlockListTapped,
                     ),
+                    BlockingPhase.active || BlockingPhase.onBreak =>
+                        ActiveBlockingCard(
+                          state: state,
+                          onTakeBreak: _onTakeBreak,
+                          onGiveUp: _onGiveUp,
+                          onEndBreak: () => ref
+                              .read(homeViewModelProvider.notifier)
+                              .endBreak(),
+                          onBlockListTapped: _onBlockListTapped,
+                        ),
+                    BlockingPhase.completed => SessionCompletedCard(
+                      selectedMinutes: state.selectedMinutes,
+                      xpEarned: state.xpEarned,
+                      onFinish: () => ref
+                          .read(homeViewModelProvider.notifier)
+                          .finishAndUnblock(),
+                    ),
+                    BlockingPhase.claimXp => ClaimXpCard(
+                      xpEarned: state.xpEarned,
+                      sessionMinutes: state.selectedMinutes,
+                      todayBlocked: state.formattedBlockedTime,
+                      totalXp: state.totalXp,
+                      onClaim: () => ref
+                          .read(homeViewModelProvider.notifier)
+                          .claimXp(),
+                    ),
+                  },
                   const SizedBox(height: 12),
-                  FocusStatsCard(state: state),
-
+                  if (state.phase == BlockingPhase.idle ||
+                      state.phase == BlockingPhase.countdown)
+                    FocusStatsCard(state: state),
                 ],
               ),
             ),
