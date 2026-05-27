@@ -92,9 +92,13 @@ class HomeViewModel extends _$HomeViewModel {
       totalXp: newTotal,
       xpEarned: 0,
       remainingSeconds: 0,
+      shouldAnimateBlockedTime: true,
     );
   }
 
+  void resetAnimateBlockedTime() {
+    state = state.copyWith(shouldAnimateBlockedTime: false);
+  }
 
 
 

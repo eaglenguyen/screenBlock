@@ -37,6 +37,7 @@ class HomeState {
   final DateTime? breakStartTime;
   final DateTime? countdownStartTime;
   final int originalBreakSeconds;
+  final bool shouldAnimateBlockedTime;
 
 
 
@@ -60,6 +61,7 @@ class HomeState {
     this.breakStartTime,
     this.countdownStartTime,
     this.originalBreakSeconds = 0,
+    this.shouldAnimateBlockedTime = false,
 
   });
 
@@ -85,6 +87,8 @@ class HomeState {
     DateTime? breakStartTime,
     DateTime? countdownStartTime,
     int? originalBreakSeconds,
+    bool? shouldAnimateBlockedTime,
+
   }) {
     return HomeState(
       trackedApps: trackedApps ?? this.trackedApps,
@@ -106,7 +110,8 @@ class HomeState {
       sessionStartTime: sessionStartTime ?? this.sessionStartTime,
       breakStartTime: breakStartTime ?? this.breakStartTime,
       countdownStartTime: countdownStartTime ?? this.countdownStartTime,
-      originalBreakSeconds: originalBreakSeconds ?? this.originalBreakSeconds
+      originalBreakSeconds: originalBreakSeconds ?? this.originalBreakSeconds,
+      shouldAnimateBlockedTime: shouldAnimateBlockedTime ?? this.shouldAnimateBlockedTime,
 
     );
   }

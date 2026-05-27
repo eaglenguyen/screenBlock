@@ -77,6 +77,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
                       blockingType: state.blockingType,
                       selectedMinutes: state.selectedMinutes,
                       blockedTime: state.formattedBlockedTime,
+                      shouldAnimate: state.shouldAnimateBlockedTime,
+                      onAnimationStarted: () => ref
+                          .read(homeViewModelProvider.notifier)
+                          .resetAnimateBlockedTime(),
                     ),
                     BlockingPhase.countdown => CountdownCard(
                       count: state.remainingSeconds,

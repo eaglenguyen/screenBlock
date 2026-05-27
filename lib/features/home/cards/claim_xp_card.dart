@@ -41,7 +41,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
     super.initState();
 
     _confettiController = ConfettiController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 2),
     );
 
     _controller = AnimationController(
