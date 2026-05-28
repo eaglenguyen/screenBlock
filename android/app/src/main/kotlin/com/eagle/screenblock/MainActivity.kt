@@ -30,9 +30,12 @@ class MainActivity : FlutterActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             // notify Flutter that block screen was dismissed
             Log.d("MainActivity", "BLOCK_DISMISSED received — calling onBlockDismissed")
+            Log.d("MainActivity", "blockMethodChannel is null: ${blockMethodChannel == null}")
             blockMethodChannel?.invokeMethod("onBlockDismissed", null)
         }
     }
+
+
 
     private val blockForDayReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -83,12 +86,20 @@ class MainActivity : FlutterActivity() {
                         blockMethodChannel?.invokeMethod("onBlockDismissed", null)
                     }
                 }
+
+                AppBlockAccessibilityService.overlayDismissedCallback = {
+                    runOnUiThread {
+                        blockMethodChannel?.invokeMethod("onBlockDismissed", null)
+                    }
+                }
             }
 
             override fun onCancel(arguments: Any?) {
                 eventSink = null
                 AppBlockAccessibilityService.eventCallback = null
                 AppBlockAccessibilityService.overlayResetCallback = null
+                AppBlockAccessibilityService.overlayDismissedCallback = null
+
 
             }
         }

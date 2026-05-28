@@ -1,15 +1,25 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../domain/platform/ios_blocking_service.dart';
+import '../../../../providers/blocking_service_provider.dart';
+import '../../../home/widgets/app_list_sheet.dart';
 
+import '../../home_viewmodel.dart';
 
-class BlockedAppsCard extends StatelessWidget {
+class BlockedAppsCard extends ConsumerWidget {
   const BlockedAppsCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final homeState = ref.watch(homeViewModelProvider);
+    final blockedCount = homeState.blockedApps.length;
+    final allowedCount = homeState.allowedApps.length;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.backgroundCard,
@@ -22,11 +32,8 @@ class BlockedAppsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // header
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-              16, 16, 16, 8,
-            ),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -43,17 +50,26 @@ class BlockedAppsCard extends StatelessWidget {
             ),
           ),
 
-          const Divider(height: 0.5, thickness: 0.5,
+          const Divider(
+            height: 0.5,
+            thickness: 0.5,
             color: AppColors.border,
           ),
 
-          // block list row
           _listRow(
             context,
+            ref,
             emoji: '🔒',
             title: 'Block List',
-            subtitle: "When Session Type is 'Specific Apps', only these apps will be blocked",
-            onTap: () => context.push('/block-list'),
+            subtitle:
+            "When Session Type is 'Specific Apps', only these apps will be blocked",
+            count: blockedCount,
+            onTap: () => _openAppSheet(
+              context,
+              ref,
+              isBlockList: true,
+              initialApps: homeState.blockedApps,
+            ),
           ),
 
           const Divider(
@@ -64,24 +80,100 @@ class BlockedAppsCard extends StatelessWidget {
             endIndent: 16,
           ),
 
-          // allow list row
           _listRow(
             context,
+            ref,
             emoji: '👍',
             title: 'Allow List',
-            subtitle: "When Session Type is 'All Apps', all apps except these will be blocked",
-            onTap: () => context.push('/allow-list'),
+            subtitle:
+            "When Session Type is 'All Apps', all apps except these will be blocked",
+            count: allowedCount,
+            onTap: () => _openAppSheet(
+              context,
+              ref,
+              isBlockList: false,
+              initialApps: homeState.allowedApps,
+            ),
           ),
         ],
       ),
     );
   }
+  void _openAppSheet(
+      BuildContext context,
+      WidgetRef ref, {
+        required bool isBlockList,
+        required List<String> initialApps,
+      }) {
+    final notifier = ref.read(homeViewModelProvider.notifier);
+
+    if (Platform.isIOS) {
+      _showIOSAppPicker(
+        context,
+        ref,
+        isBlockList: isBlockList,
+        notifier: notifier,
+      );
+    } else {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        useRootNavigator: true,
+        builder: (_) => AppListSheet(
+          isBlockList: isBlockList,
+          initialApps: initialApps,
+          onSave: (apps) {
+            if (isBlockList) {
+              notifier.setBlockedApps(apps);
+            } else {
+              notifier.setAllowedApps(apps);
+            }
+          },
+        ),
+      );
+    }
+  }
+
+  Future<void> _showIOSAppPicker(
+      BuildContext context,
+      WidgetRef ref, {
+        required bool isBlockList,
+        required HomeViewModel notifier,
+      }) async {
+    try {
+      final service = ref.read(blockingServiceProvider)
+      as IOSBlockingService;
+
+      final count = await service.showAppPicker(
+        blockingMode: isBlockList
+            ? AppConstants.blockingTypeSpecificApps
+            : AppConstants.blockingTypeAllApps,
+      );
+
+      if ((count ?? 0) > 0) {
+        final placeholders = List.generate(
+          count!,
+              (i) => 'ios_app_$i',
+        );
+        if (isBlockList) {
+          notifier.setBlockedApps(placeholders);
+        } else {
+          notifier.setAllowedApps(placeholders);
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ iOS app picker error: $e');
+    }
+  }
 
   Widget _listRow(
-      BuildContext context, {
+      BuildContext context,
+      WidgetRef ref, {
         required String emoji,
         required String title,
         required String subtitle,
+        required int count,
         required VoidCallback onTap,
       }) {
     return InkWell(
@@ -94,25 +186,43 @@ class BlockedAppsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(emoji,
-                  style: const TextStyle(fontSize: 18),
-                ),
+                Text(emoji, style: const TextStyle(fontSize: 18)),
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    fontSize: 16,
-                  ),
+                  style: AppTextStyles.labelMedium
+                      .copyWith(fontSize: 16),
                 ),
+                if (count > 0) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.gold
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.gold,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 6),
             Text(subtitle, style: AppTextStyles.bodySmall),
             const SizedBox(height: 10),
-            // collapsed app preview row
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 14, vertical: 12,
+                horizontal: 14,
+                vertical: 12,
               ),
               decoration: BoxDecoration(
                 color: AppColors.backgroundSubtle,
@@ -125,11 +235,15 @@ class BlockedAppsCard extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    title == 'Block List'
-                        ? 'Blocked Apps'
-                        : 'Allowed Apps',
+                    count > 0
+                        ? '$count app${count == 1 ? '' : 's'} selected'
+                        : title == 'Block List'
+                        ? 'No apps blocked'
+                        : 'No apps allowed',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
+                      color: count > 0
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
                     ),
                   ),
                   const Spacer(),

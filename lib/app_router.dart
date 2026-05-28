@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'features/bottomNav/shell_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/home/schedule/schedule_screen.dart';
-import 'features/home/schedule/widgets/app_list_screen.dart';
 import 'features/paywall/paywall_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/stats/stats_screen.dart';
@@ -58,24 +57,6 @@ class AppRouter {
         path: '/paywall',
         name: 'paywall',
         builder: (context, state) => const PaywallScreen(),
-      ),
-      GoRoute(
-        path: '/block-list',
-        name: 'block-list',
-        builder: (context, state) => AppListScreen(
-          isBlockList: true,
-          apps: const [],         // will come from state later
-          onAppsChanged: (_) {},  // will connect to viewmodel
-        ),
-      ),
-      GoRoute(
-        path: '/allow-list',
-        name: 'allow-list',
-        builder: (context, state) => AppListScreen(
-          isBlockList: false,
-          apps: const [],
-          onAppsChanged: (_) {},
-        ),
       ),
       GoRoute(
         path: '/app-picker',

@@ -40,7 +40,7 @@ class AndroidBlockingService implements BlockingService {
       String packageName,
       int limitMinutes,
       ) async {
-    debugPrint('🟡 startMonitoring: $packageName');
+    debugPrint('🟢 startMonitoring: $packageName monitored=$_monitoredApps');
     _monitoredApps[packageName] = limitMinutes;
     _overlayShowing = false;
     _startListening();
@@ -57,6 +57,8 @@ class AndroidBlockingService implements BlockingService {
 
   @override
   Future<void> stopAllMonitoring() async {
+    debugPrint('🔴 stopAllMonitoring called — stack trace:');
+    debugPrint(StackTrace.current.toString());
     _monitoredApps.clear();
     _overlayShowing = false;
     _blockingMode = 'specific_apps';
@@ -184,7 +186,7 @@ class AndroidBlockingService implements BlockingService {
       debugPrint('🟡 methodChannel received: ${call.method}');
       switch (call.method) {
         case 'onBlockDismissed':
-          debugPrint('🟢 resetting _overlayShowing');
+          debugPrint('🟢 onBlockDismissed received — resetting _overlayShowing');
           _overlayShowing = false;
           break;
         case 'blockForDay':
@@ -202,8 +204,11 @@ class AndroidBlockingService implements BlockingService {
   }
 
   void _onForegroundAppChanged(String packageName) {
-    debugPrint('🔵 _onForegroundAppChanged: $packageName — overlayShowing: $_overlayShowing');
-    if (_overlayShowing) return;
+    debugPrint('🔵 foreground: $packageName monitored=$_monitoredApps mode=$_blockingMode');
+    if (_overlayShowing) {
+      debugPrint('🔴 overlay still showing — skipping block');
+      return;
+    }
 
     debugPrint('🔵 _onForegroundAppChanged: $packageName');
     debugPrint('🔵 _blockingMode: $_blockingMode');

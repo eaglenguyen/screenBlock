@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hive/hive.dart';
 import '../../../core/constants/hivebox_names.dart';
 import '../../../data/models/schedule.dart';
+import '../../../services/schedule_checker.dart';
 import 'schedule_state.dart';
 
 part 'schedule_viewmodel.g.dart';
@@ -57,6 +59,13 @@ class ScheduleViewModel extends _$ScheduleViewModel {
       );
 
       await _box.put(schedule.id, schedule);
+
+      debugPrint('📅 Saved schedule: ${schedule.name} id=${schedule.id}');
+      debugPrint('📅 Box now has ${_box.length} schedules');
+
+      // trigger checker immediately after save
+      ScheduleChecker.instance.checkNow();
+
       loadSchedules();
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -73,6 +82,8 @@ class ScheduleViewModel extends _$ScheduleViewModel {
     if (schedule == null) return;
     schedule.isActive = !schedule.isActive;
     await schedule.save();
+    ScheduleChecker.instance.checkNow(); // 👈 add
+
     loadSchedules();
   }
 }

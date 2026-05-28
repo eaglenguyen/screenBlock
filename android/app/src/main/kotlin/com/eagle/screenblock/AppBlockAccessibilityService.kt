@@ -15,6 +15,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
         private val exemptedPackages = mutableSetOf<String>()
         var currentForegroundApp: String? = null
         var overlayResetCallback: (() -> Unit)? = null
+        var overlayDismissedCallback: (() -> Unit)? = null
 
         fun addExemption(packageName: String) {
             exemptedPackages.add(packageName)

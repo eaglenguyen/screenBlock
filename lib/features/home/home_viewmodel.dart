@@ -15,6 +15,7 @@ import '../../core/constants/hivebox_names.dart';
 import '../../data/models/timer_config.dart';
 import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
+import '../../services/schedule_checker.dart';
 import 'home_state.dart';
 
 part 'home_viewmodel.g.dart';
@@ -71,6 +72,15 @@ class HomeViewModel extends _$HomeViewModel {
     // load saved XP
     final savedXp = _loadTotalXp();
     state = state.copyWith(totalXp: savedXp);
+
+    ScheduleChecker.instance.onScheduleStarted = () {
+      state = state.copyWith(isScheduleActive: true);
+    };
+    ScheduleChecker.instance.onScheduleStopped = () {
+      state = state.copyWith(isScheduleActive: false);
+    };
+    // start schedule checker
+    ScheduleChecker.instance.start(_blockingService);
   }
 
   int _loadTotalXp() {

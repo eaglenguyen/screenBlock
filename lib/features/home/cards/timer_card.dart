@@ -48,20 +48,19 @@ class _TimerCardState extends State<TimerCard>
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     );
+
+    if (widget.shouldAnimate) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onAnimationStarted?.call(); // reset flag
+        _startSlotSpin(to: widget.blockedTime);
+      });
+    }
   }
 
   @override
   void didUpdateWidget(TimerCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (widget.shouldAnimate && !oldWidget.shouldAnimate && !_isSpinning) {
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // call back to parent to reset flag
-        // pass a resetFlag callback from HomeScreen
-      });
-      _startSlotSpin(to: widget.blockedTime);
-    } else if (!widget.shouldAnimate) {
+    if (!_isSpinning) {
       setState(() => _displayTime = widget.blockedTime);
     }
   }
@@ -75,53 +74,49 @@ class _TimerCardState extends State<TimerCard>
     final finalMinutes = parts[1];
     final finalSeconds = parts[2];
 
-    // spin fast for 1.5s then settle
-    final spinDuration = const Duration(milliseconds: 1500);
-    final settleDuration = const Duration(milliseconds: 500);
-    final tickInterval = const Duration(milliseconds: 60);
+    // fast spin phase — 800ms
+    const spinDuration = Duration(milliseconds: 800);
+    const tickInterval = Duration(milliseconds: 100); // 👈 slower = smoother
 
     final stopwatch = Stopwatch()..start();
 
-    // fast spin phase
     while (stopwatch.elapsed < spinDuration) {
       await Future.delayed(tickInterval);
       if (!mounted) return;
+
+      final n = stopwatch.elapsed.inMilliseconds;
       setState(() {
         _spinValues = [
-          _randomTwoDigit(),
-          _randomTwoDigit(),
-          _randomTwoDigit(),
+          ((n ~/ 7) % 60).toString().padLeft(2, '0'),
+          ((n ~/ 5) % 60).toString().padLeft(2, '0'),
+          ((n ~/ 3) % 60).toString().padLeft(2, '0'),
         ];
       });
       HapticFeedback.lightImpact();
     }
 
-    // settle phase — each digit locks in one by one
-    await Future.delayed(settleDuration ~/ 3);
+    // settle — each digit locks in with 200ms gap
+    await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
-    setState(() => _spinValues = [finalHours, _randomTwoDigit(), _randomTwoDigit()]);
+    setState(() => _spinValues = [finalHours, ((stopwatch.elapsed.inMilliseconds ~/ 5) % 60).toString().padLeft(2, '0'), ((stopwatch.elapsed.inMilliseconds ~/ 3) % 60).toString().padLeft(2, '0')]);
     HapticFeedback.mediumImpact();
 
-    await Future.delayed(settleDuration ~/ 3);
+    await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
-    setState(() => _spinValues = [finalHours, finalMinutes, _randomTwoDigit()]);
+    setState(() => _spinValues = [finalHours, finalMinutes, ((stopwatch.elapsed.inMilliseconds ~/ 3) % 60).toString().padLeft(2, '0')]);
     HapticFeedback.mediumImpact();
 
-    await Future.delayed(settleDuration ~/ 3);
+    await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
     setState(() => _spinValues = [finalHours, finalMinutes, finalSeconds]);
     HapticFeedback.heavyImpact();
 
-    // final settle
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 150));
     if (!mounted) return;
     setState(() {
       _displayTime = to;
       _isSpinning = false;
     });
-
-    // reset flag in viewmodel
-    // so animation doesn't retrigger on rebuild
   }
 
   String _randomTwoDigit() {
@@ -209,7 +204,7 @@ class _TimerCardState extends State<TimerCard>
 
   Widget _timerBlock(String value, String label) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 150),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
         color: _isSpinning
@@ -225,31 +220,31 @@ class _TimerCardState extends State<TimerCard>
       ),
       child: Column(
         children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 50),
-            transitionBuilder: (child, animation) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, -1),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOut,
-                )),
-                child: FadeTransition(
-                  opacity: animation,
+          SizedBox(
+            height: 58,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 120),
+              transitionBuilder: (child, animation) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  )),
                   child: child,
+                );
+              },
+              child: Text(
+                value,
+                key: ValueKey(value),
+                style: AppTextStyles.displayMedium.copyWith(
+                  fontSize: 48,
+                  color: _isSpinning
+                      ? AppColors.gold
+                      : AppColors.textSecondary,
                 ),
-              );
-            },
-            child: Text(
-              value,
-              key: ValueKey('$value${DateTime.now().millisecondsSinceEpoch ~/ 50}'),
-              style: AppTextStyles.displayMedium.copyWith(
-                fontSize: 48,
-                color: _isSpinning
-                    ? AppColors.gold
-                    : AppColors.textSecondary,
               ),
             ),
           ),

@@ -67,6 +67,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
               ),
               child: Column(
                 children: [
+                  if (state.isScheduleActive)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.gold.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.gold.withValues(alpha: 0.3),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            color: AppColors.gold,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Scheduled blocking is active',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.gold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   // swap card based on phases
                   switch (state.phase) {
                     BlockingPhase.idle => TimerCard(

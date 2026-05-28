@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:screenblock/providers/blocking_service_provider.dart';
+import 'package:screenblock/services/schedule_checker.dart';
 import 'UI/overlay_screen.dart';
 import 'app_router.dart';
 import 'core/constants/hivebox_names.dart';
@@ -59,17 +61,20 @@ void overlayMain() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // start schedule checker
+    final blockingService = ref.read(blockingServiceProvider);
+    ScheduleChecker.instance.start(blockingService);
+
     return MaterialApp.router(
       title: 'ScreenBlocker',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       routerConfig: AppRouter.router,
     );
-
   }
 }

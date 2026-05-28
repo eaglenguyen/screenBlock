@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +7,9 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/schedule.dart';
+import '../../../../domain/platform/ios_blocking_service.dart';
+import '../../../../providers/blocking_service_provider.dart';
+import '../../widgets/app_list_sheet.dart';
 import '../schedule_viewmodel.dart';
 
 
@@ -29,6 +34,9 @@ class _SessionBottomSheetState
   late String _endTime;
   late List<int> _selectedDays;
   late String _blockingType;
+  late List<String> _blockedApps;
+  late List<String> _allowedApps;
+
 
   bool get isEditing => widget.existingSchedule != null;
 
@@ -44,6 +52,8 @@ class _SessionBottomSheetState
     _selectedDays = s?.days ?? [0, 1, 2, 3, 4];
     _blockingType = s?.blockingType ??
         AppConstants.blockingTypeAllApps;
+    _blockedApps = List.from(s?.blockedApps ?? []);
+    _allowedApps = List.from(s?.allowedApps ?? []);
   }
 
   @override
@@ -277,50 +287,127 @@ class _SessionBottomSheetState
     );
   }
 
-  Widget _buildListRow() {
-    final isAllApps =
-        _blockingType == AppConstants.blockingTypeAllApps;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.border,
-          width: 0.5,
+  void _openAppPicker(bool isAllApps) {
+    if (Platform.isIOS) {
+      _showIOSAppPicker(isAllApps);
+    } else {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        useRootNavigator: true,
+        builder: (_) => AppListSheet(
+          isBlockList: !isAllApps,
+          initialApps: isAllApps ? _allowedApps : _blockedApps,
+          onSave: (apps) {
+            setState(() {
+              if (isAllApps) {
+                _allowedApps = apps;
+              } else {
+                _blockedApps = apps;
+              }
+            });
+          },
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                isAllApps ? 'Allow List' : 'Block List',
-                style: AppTextStyles.bodyLarge,
-              ),
-              const Spacer(),
-              const Icon(
-                Icons.apps_rounded,
-                color: AppColors.textSecondary,
-                size: 18,
-              ),
-              const SizedBox(width: 4),
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textSecondary,
-                size: 18,
-              ),
-            ],
+      );
+    }
+  }
+
+  Future<void> _showIOSAppPicker(bool isAllApps) async {
+    try {
+      final service = ref.read(blockingServiceProvider)
+      as IOSBlockingService;
+
+      final count = await service.showAppPicker(
+        blockingMode: isAllApps
+            ? AppConstants.blockingTypeAllApps
+            : AppConstants.blockingTypeSpecificApps,
+      );
+
+      if (mounted && (count ?? 0) > 0) {
+        setState(() {
+          final placeholders = List.generate(
+            count!,
+                (i) => 'ios_app_$i',
+          );
+          if (isAllApps) {
+            _allowedApps = placeholders;
+          } else {
+            _blockedApps = placeholders;
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ iOS app picker error: $e');
+    }
+  }
+
+  Widget _buildListRow() {
+    final isAllApps = _blockingType == AppConstants.blockingTypeAllApps;
+    final count = isAllApps ? _allowedApps.length : _blockedApps.length;
+
+    return GestureDetector(
+      onTap: () => _openAppPicker(isAllApps),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSubtle,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.border,
+            width: 0.5,
           ),
-          const SizedBox(height: 4),
-          Text(
-            isAllApps
-                ? 'All apps except these will be blocked'
-                : 'Only these apps will be blocked',
-            style: AppTextStyles.bodySmall,
-          ),
-        ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        isAllApps ? 'Allow List' : 'Block List',
+                        style: AppTextStyles.bodyLarge,
+                      ),
+                      if (count > 0) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.gold.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Text(
+                            '$count',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.gold,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isAllApps
+                        ? 'All apps except these will be blocked'
+                        : 'Only these apps will be blocked',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -541,10 +628,8 @@ class _SessionBottomSheetState
       endTime: _endTime,
       days: _selectedDays,
       blockingType: _blockingType,
-      blockedApps:
-      widget.existingSchedule?.blockedApps ?? [],
-      allowedApps:
-      widget.existingSchedule?.allowedApps ?? [],
+      blockedApps: _blockedApps,  // 👈 use local state
+      allowedApps: _allowedApps,
     );
 
     if (mounted) Navigator.pop(context);

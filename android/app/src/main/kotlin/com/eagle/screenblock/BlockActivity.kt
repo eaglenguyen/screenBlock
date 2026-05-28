@@ -64,6 +64,7 @@ class BlockActivity : FlutterActivity() {
                 }
                 "goHome" -> {
                     Log.d("BlockActivity", "goHome called — sending BLOCK_DISMISSED broadcast")
+                    AppBlockAccessibilityService.overlayDismissedCallback?.invoke()
 
                     // reset block flag in main isolate
                     sendBroadcast(Intent("com.eagle.screenblock.BLOCK_DISMISSED"))
@@ -104,7 +105,5 @@ class BlockActivity : FlutterActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(dismissReceiver)
-        // notify main engine that block screen was dismissed
-        sendBroadcast(Intent("com.eagle.screenblock.BLOCK_DISMISSED"))
     }
 }
