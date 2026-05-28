@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import '../core/constants/app_constants.dart';
 import '../core/constants/hivebox_names.dart';
 import '../data/models/schedule.dart';
+import '../domain/platform/android_blocking_service.dart';
 import '../domain/platform/blocking_service.dart';
 
 class ScheduleChecker {
@@ -46,7 +47,7 @@ class ScheduleChecker {
     _check();
   }
 
-  void _check() {
+  Future<void> _check() async {
     final box = Hive.box<Schedule>(HiveBoxNames.schedules);
     final schedules = box.values.where((s) => s.isActive).toList();
 
@@ -88,7 +89,7 @@ class ScheduleChecker {
       // should be blocking
       if (!_isScheduleBlocking ||
           _activeScheduleId != matchingSchedule.id) {
-        _startScheduleBlocking(matchingSchedule);
+        await _startScheduleBlocking(matchingSchedule);
       }
     } else {
       // should not be blocking
@@ -101,18 +102,15 @@ class ScheduleChecker {
     debugPrint('📅 Found ${schedules.length} active schedules');
   }
 
-  void _startScheduleBlocking(Schedule schedule) {
+  Future<void> _startScheduleBlocking(Schedule schedule) async {
     if (_blockingService == null) return;
     debugPrint('📅 Schedule starting: ${schedule.name}');
 
     _blockingService!.setBlockingMode(schedule.blockingType);
 
     if (Platform.isIOS) {
-      // iOS reads saved FamilyControls tokens from UserDefaults
-      // just trigger startMonitoring with ios_apps placeholder
       _blockingService!.startMonitoring('ios_apps', 999);
     } else {
-      // Android — pass actual package names
       final apps = schedule.blockingType ==
           AppConstants.blockingTypeSpecificApps
           ? schedule.blockedApps
@@ -124,7 +122,16 @@ class ScheduleChecker {
       }
 
       for (final pkg in apps) {
-        _blockingService!.startMonitoring(pkg, 999);
+        await _blockingService!.startMonitoring(pkg, 999);
+      }
+
+      // mark as schedule so _restoreSession ignores it
+      if (_blockingService is AndroidBlockingService) {
+        await (_blockingService as AndroidBlockingService)
+            .persistBlockingState(
+          sessionMinutes: 999,
+          sessionType: 'schedule',
+        );
       }
     }
 

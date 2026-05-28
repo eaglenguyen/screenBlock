@@ -12,6 +12,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../providers/blocking_service_provider.dart';
 import 'cards/claim_xp_card.dart';
 import 'cards/session_completed_card.dart';
 import 'home_state.dart';
@@ -47,6 +48,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
     if (state == AppLifecycleState.resumed) {
       // app came back to foreground — sync timer
       ref.read(homeViewModelProvider.notifier).onAppResumed();
+      // 👇 reset overlay state on every resume
+      ref.read(blockingServiceProvider).resetOverlayState();
     }
   }
 

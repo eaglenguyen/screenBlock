@@ -641,15 +641,12 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   Future<void> _restoreSession() async {
-    debugPrint('🔄 _restoreSession started');
-
     try {
       if (Platform.isIOS) {
-        debugPrint('🔄 iOS restore path');
-
         final result = await const MethodChannel(
           'com.eagle.screenblock/ios_blocking',
-        ).invokeMethod<Map>('getPersistedSession');
+        ).invokeMethod<Map>('getPersistedSession')
+            .timeout(const Duration(seconds: 3));
 
         if (result?['isBlocking'] == true) {
           final startTime = DateTime.fromMillisecondsSinceEpoch(
@@ -663,7 +660,6 @@ class HomeViewModel extends _$HomeViewModel {
           final remaining = totalSeconds - elapsed;
 
           if (remaining > 0) {
-            debugPrint('🔄 Restoring iOS session — ${remaining}s remaining');
             state = state.copyWith(
               phase: BlockingPhase.active,
               remainingSeconds: remaining,
@@ -672,26 +668,29 @@ class HomeViewModel extends _$HomeViewModel {
             );
             _startSessionTimer(totalSeconds, startTime);
           } else {
-            // session expired while app was killed
             await _blockingService.stopAllMonitoring();
           }
         }
       } else {
-        debugPrint('🔄 Android restore path');
-
-        // Android — check SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        debugPrint('🔄 got prefs');
+        final prefs = await SharedPreferences.getInstance()
+            .timeout(const Duration(seconds: 3));
 
         final isBlocking = prefs.getBool('isBlocking') ?? false;
-        debugPrint('🔄 isBlocking=$isBlocking');
+        final sessionType = prefs.getString('sessionType') ?? 'manual';
 
-        if (isBlocking) {
+        debugPrint('🔄 isBlocking=$isBlocking sessionType=$sessionType');
+
+        // only restore manual sessions — not schedule sessions
+        if (isBlocking && sessionType == 'manual') {
           final startTimeMs = prefs.getInt('sessionStartTime') ?? 0;
-          final startTime = DateTime.fromMillisecondsSinceEpoch(
-            startTimeMs,
-          );
           final minutes = prefs.getInt('sessionMinutes') ?? 30;
+
+          if (startTimeMs == 0 || minutes == 0) {
+            await prefs.setBool('isBlocking', false);
+            return;
+          }
+
+          final startTime = DateTime.fromMillisecondsSinceEpoch(startTimeMs);
           final totalSeconds = minutes * 60;
           final elapsed = DateTime.now()
               .difference(startTime)
@@ -699,7 +698,7 @@ class HomeViewModel extends _$HomeViewModel {
           final remaining = totalSeconds - elapsed;
 
           if (remaining > 0) {
-            debugPrint('🔄 Restoring Android session — ${remaining}s remaining');
+            debugPrint('🔄 Restoring manual session — ${remaining}s remaining');
             state = state.copyWith(
               phase: BlockingPhase.active,
               remainingSeconds: remaining,
@@ -708,17 +707,22 @@ class HomeViewModel extends _$HomeViewModel {
             );
             _startSessionTimer(totalSeconds, startTime);
           } else {
-            // session expired while app was killed
             await _blockingService.stopAllMonitoring();
+            await prefs.setBool('isBlocking', false);
           }
         }
       }
     } catch (e) {
       debugPrint('❌ restore session error: $e');
+      try {
+        if (!Platform.isIOS) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isBlocking', false);
+        }
+      } catch (_) {}
     }
-    debugPrint('🔄 _restoreSession complete');
-
   }
+
 
 
   // ── Getters ──────────────────────────────────────

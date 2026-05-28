@@ -37,9 +37,14 @@ class AndroidBlockingService implements BlockingService {
   // ── SharedPref ────────────────────────────────────
 
   // save monitored apps when blocking starts
-  Future<void> persistBlockingState({int sessionMinutes = 30}) async {
+  Future<void> persistBlockingState({
+    int sessionMinutes = 30,
+    String sessionType = 'manual',
+
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isBlocking', true);
+    await prefs.setString('sessionType', sessionType);
     await prefs.setString('blockingMode', _blockingMode);
     await prefs.setStringList(
       'monitoredApps',
@@ -57,6 +62,8 @@ class AndroidBlockingService implements BlockingService {
       'sessionMinutes',
       sessionMinutes, // 👈 add
     );
+    debugPrint('💾 persistBlockingState: sessionType=$sessionType sessionMinutes=$sessionMinutes');
+
   }
 
   // restore on AccessibilityService reconnect
@@ -91,7 +98,8 @@ class AndroidBlockingService implements BlockingService {
       String packageName,
       int limitMinutes,
       ) async {
-
+    debugPrint('🟢 startMonitoring: $packageName limit=$limitMinutes');
+    debugPrint('🟢 _monitoredApps before: $_monitoredApps');
     // restore state first if coming back from kill
     if (_monitoredApps.isEmpty) {
       await _restoreBlockingState();
@@ -101,6 +109,8 @@ class AndroidBlockingService implements BlockingService {
     await persistBlockingState();
     _overlayShowing = false;
     _startListening();
+    debugPrint('🟢 _monitoredApps after: $_monitoredApps');
+
   }
 
   @override
@@ -227,18 +237,24 @@ class AndroidBlockingService implements BlockingService {
   // ── Private ───────────────────────────────────────
 
   void _startListening() {
+    debugPrint('🎧 _startListening called — setting up event channel');
     _foregroundAppSubscription?.cancel();
 
     _foregroundAppSubscription = _eventChannel
         .receiveBroadcastStream()
         .listen(
           (dynamic data) {
-        if (data is String) {
+            debugPrint('📡 event channel received: $data');
+
+            if (data is String) {
           _onForegroundAppChanged(data);
         }
       },
       onError: (error) {
         debugPrint('❌ event channel error: $error');
+      },
+      onDone: () {
+        debugPrint('⚠️ event channel closed');
       },
     );
 

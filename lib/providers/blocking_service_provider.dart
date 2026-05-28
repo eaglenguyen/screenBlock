@@ -8,7 +8,6 @@ import '../domain/platform/android_blocking_service.dart';
 final blockingServiceProvider = Provider<BlockingService>((ref) {
   const useStub = false;
 
-
   final service = useStub
       ? StubBlockingService()
       : Platform.isAndroid
@@ -16,6 +15,9 @@ final blockingServiceProvider = Provider<BlockingService>((ref) {
       : Platform.isIOS
       ? IOSBlockingService()
       : throw UnsupportedError('Platform not supported');
+
+  // reset overlay state on every provider creation
+  service.resetOverlayState();
 
   ref.keepAlive();
   return service;

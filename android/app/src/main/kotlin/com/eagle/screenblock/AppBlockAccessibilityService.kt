@@ -16,6 +16,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
         var currentForegroundApp: String? = null
         var overlayResetCallback: (() -> Unit)? = null
         var overlayDismissedCallback: (() -> Unit)? = null
+        var isOverlayShowing = false
 
         fun addExemption(packageName: String) {
             exemptedPackages.add(packageName)
@@ -70,6 +71,9 @@ class AppBlockAccessibilityService : AccessibilityService() {
                 return
             }
 
+            // 👇 check Kotlin-side flag instead of Dart-side
+            if (isOverlayShowing) return
+
             eventCallback?.invoke(packageName)
         }
     }
@@ -77,6 +81,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         isRunning = true
+        isOverlayShowing = false
         val info = AccessibilityServiceInfo().apply {
             eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
