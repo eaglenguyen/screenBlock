@@ -28,6 +28,8 @@ class ScheduleViewModel extends _$ScheduleViewModel {
         schedules: schedules,
         isLoading: false,
       );
+      ScheduleChecker.instance.checkNow(); // 👈 move here
+
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -64,7 +66,7 @@ class ScheduleViewModel extends _$ScheduleViewModel {
       debugPrint('📅 Box now has ${_box.length} schedules');
 
       // trigger checker immediately after save
-      ScheduleChecker.instance.checkNow();
+      // ScheduleChecker.instance.checkNow();
 
       loadSchedules();
     } catch (e) {
@@ -82,7 +84,7 @@ class ScheduleViewModel extends _$ScheduleViewModel {
     if (schedule == null) return;
     schedule.isActive = !schedule.isActive;
     await schedule.save();
-    ScheduleChecker.instance.checkNow(); // 👈 add
+    //ScheduleChecker.instance.checkNow(); // 👈 add
 
     loadSchedules();
   }

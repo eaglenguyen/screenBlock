@@ -8,7 +8,6 @@ import 'blocking_service.dart';
 
 class AndroidBlockingService implements BlockingService {
 
-  // ── Channels ─────────────────────────────────────
   static const _methodChannel = MethodChannel(
     'com.eagle.screenblock/accessibility',
   );
@@ -19,7 +18,6 @@ class AndroidBlockingService implements BlockingService {
     'com.eagle.screenblock/block',
   );
 
-  // ── State ─────────────────────────────────────────
   final _eventController = StreamController<AppUsageEvent>.broadcast();
   final Map<String, int> _monitoredApps = {};
   StreamSubscription? _foregroundAppSubscription;
@@ -28,49 +26,48 @@ class AndroidBlockingService implements BlockingService {
   final Set<String> _temporarilyExempted = {};
   bool _methodHandlerRegistered = false;
 
-
-  // ── BlockingService interface ─────────────────────
-
   @override
   Stream<AppUsageEvent> get usageEvents => _eventController.stream;
 
-  // ── SharedPref ────────────────────────────────────
+  // ── Native SharedPreferences ──────────────────────
 
-  // save monitored apps when blocking starts
+  Future<void> _saveNativeBlockingState({required bool isBlocking}) async {
+    try {
+      await _methodChannel.invokeMethod('saveBlockingState', {
+        'isBlocking': isBlocking,
+        'mode': _blockingMode,
+        'apps': _monitoredApps.keys.toList(),
+      });
+      debugPrint('💾 native state saved: isBlocking=$isBlocking apps=${_monitoredApps.keys.toList()}');
+    } catch (e) {
+      debugPrint('❌ saveNativeBlockingState error: $e');
+    }
+  }
+
+  // ── Flutter SharedPreferences ─────────────────────
+
   Future<void> persistBlockingState({
     int sessionMinutes = 30,
     String sessionType = 'manual',
-
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isBlocking', true);
     await prefs.setString('sessionType', sessionType);
     await prefs.setString('blockingMode', _blockingMode);
-    await prefs.setStringList(
-      'monitoredApps',
-      _monitoredApps.keys.toList(),
-    );
-    await prefs.setString(
-      'monitoredLimits',
-      _monitoredApps.values.join(','),
-    );
-    await prefs.setInt(
-      'sessionStartTime',
-      DateTime.now().millisecondsSinceEpoch,
-    );
-    await prefs.setInt(
-      'sessionMinutes',
-      sessionMinutes, // 👈 add
-    );
-    debugPrint('💾 persistBlockingState: sessionType=$sessionType sessionMinutes=$sessionMinutes');
+    await prefs.setStringList('monitoredApps', _monitoredApps.keys.toList());
+    await prefs.setString('monitoredLimits', _monitoredApps.values.join(','));
+    await prefs.setInt('sessionStartTime', DateTime.now().millisecondsSinceEpoch);
+    await prefs.setInt('sessionMinutes', sessionMinutes);
 
+    // save to native prefs for Kotlin direct access when app is killed
+    await _saveNativeBlockingState(isBlocking: true);
+
+    debugPrint('💾 persistBlockingState: sessionType=$sessionType sessionMinutes=$sessionMinutes');
   }
 
-  // restore on AccessibilityService reconnect
   Future<void> _restoreBlockingState() async {
     final prefs = await SharedPreferences.getInstance();
     final isBlocking = prefs.getBool('isBlocking') ?? false;
-
     if (!isBlocking) return;
 
     final mode = prefs.getString('blockingMode') ?? 'specific_apps';
@@ -82,35 +79,24 @@ class AndroidBlockingService implements BlockingService {
 
     _blockingMode = mode;
     for (int i = 0; i < apps.length; i++) {
-      _monitoredApps[apps[i]] = i < limitList.length
-          ? limitList[i]
-          : 30;
+      _monitoredApps[apps[i]] = i < limitList.length ? limitList[i] : 30;
     }
-
     debugPrint('🔄 Restored blocking state: $_monitoredApps');
   }
 
   // ── Monitoring ────────────────────────────────────
-
 
   @override
   Future<void> startMonitoring(
       String packageName,
       int limitMinutes,
       ) async {
-    debugPrint('🟢 startMonitoring: $packageName limit=$limitMinutes');
-    debugPrint('🟢 _monitoredApps before: $_monitoredApps');
-    // restore state first if coming back from kill
     if (_monitoredApps.isEmpty) {
       await _restoreBlockingState();
     }
-
     _monitoredApps[packageName] = limitMinutes;
-    await persistBlockingState();
     _overlayShowing = false;
     _startListening();
-    debugPrint('🟢 _monitoredApps after: $_monitoredApps');
-
   }
 
   @override
@@ -124,17 +110,20 @@ class AndroidBlockingService implements BlockingService {
 
   @override
   Future<void> stopAllMonitoring() async {
+    debugPrint('🔴 stopAllMonitoring called');
+    debugPrint(StackTrace.current.toString());
     _monitoredApps.clear();
     _overlayShowing = false;
     _blockingMode = 'specific_apps';
 
-    // clear persisted state
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isBlocking', false);
     await prefs.remove('monitoredApps');
     await prefs.remove('monitoredLimits');
     await prefs.remove('sessionStartTime');
 
+    // clear native state
+    await _saveNativeBlockingState(isBlocking: false);
 
     _foregroundAppSubscription?.cancel();
     _foregroundAppSubscription = null;
@@ -169,7 +158,6 @@ class AndroidBlockingService implements BlockingService {
     debugPrint('🟡 blockingMode set to: $mode');
     _blockingMode = mode;
   }
-
 
   // ── Permissions ───────────────────────────────────
 
@@ -224,9 +212,7 @@ class AndroidBlockingService implements BlockingService {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
       final usage = await AppUsage().getAppUsage(startOfDay, now);
-      final matches = usage.where(
-            (u) => u.packageName == packageName,
-      );
+      final matches = usage.where((u) => u.packageName == packageName);
       if (matches.isEmpty) return 0;
       return matches.first.usage.inMinutes;
     } catch (e) {
@@ -237,41 +223,32 @@ class AndroidBlockingService implements BlockingService {
   // ── Private ───────────────────────────────────────
 
   void _startListening() {
-    debugPrint('🎧 _startListening called — setting up event channel');
     _foregroundAppSubscription?.cancel();
 
     _foregroundAppSubscription = _eventChannel
         .receiveBroadcastStream()
         .listen(
           (dynamic data) {
-            debugPrint('📡 event channel received: $data');
-
-            if (data is String) {
+        if (data is String) {
           _onForegroundAppChanged(data);
         }
       },
       onError: (error) {
         debugPrint('❌ event channel error: $error');
       },
-      onDone: () {
-        debugPrint('⚠️ event channel closed');
-      },
     );
 
-    // only register handler once
     if (_methodHandlerRegistered) return;
     _methodHandlerRegistered = true;
 
     _methodChannel.setMethodCallHandler((call) async {
-      debugPrint('🟡 methodChannel received: ${call.method}');
       switch (call.method) {
         case 'onBlockDismissed':
-          debugPrint('🟢 onBlockDismissed received — resetting _overlayShowing');
+          debugPrint('🟢 onBlockDismissed — resetting _overlayShowing');
           _overlayShowing = false;
           break;
         case 'blockForDay':
           final packageName = call.arguments as String;
-          debugPrint('🟡 blocking for day: $packageName');
           _eventController.add(AppUsageEvent(
             packageName: packageName,
             type: AppEventType.appBlocked,
@@ -284,15 +261,7 @@ class AndroidBlockingService implements BlockingService {
   }
 
   void _onForegroundAppChanged(String packageName) {
-    debugPrint('🔵 foreground: $packageName monitored=$_monitoredApps mode=$_blockingMode');
-    if (_overlayShowing) {
-      debugPrint('🔴 overlay still showing — skipping block');
-      return;
-    }
-
-    debugPrint('🔵 _onForegroundAppChanged: $packageName');
-    debugPrint('🔵 _blockingMode: $_blockingMode');
-    debugPrint('🔵 _monitoredApps: $_monitoredApps');
+    if (_overlayShowing) return;
 
     if (_blockingMode == 'specific_apps') {
       _handleSpecificAppsMode(packageName);
@@ -317,7 +286,6 @@ class AndroidBlockingService implements BlockingService {
   }
 
   void _handleAllAppsMode(String packageName) {
-    // allow apps in monitored list, block everything else
     if (_temporarilyExempted.contains(packageName)) return;
     if (_monitoredApps.containsKey(packageName)) return;
 

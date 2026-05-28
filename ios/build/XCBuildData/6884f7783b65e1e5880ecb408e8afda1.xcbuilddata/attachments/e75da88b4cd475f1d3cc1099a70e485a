@@ -1,0 +1,5 @@
+ extern const unsigned char Pods_ShieldActionExtensionVersionString[];
+ extern const double Pods_ShieldActionExtensionVersionNumber;
+
+ const unsigned char Pods_ShieldActionExtensionVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:Pods_ShieldActionExtension  PROJECT:Pods-1" "\n";
+ const double Pods_ShieldActionExtensionVersionNumber __attribute__ ((used)) = (double)1.;

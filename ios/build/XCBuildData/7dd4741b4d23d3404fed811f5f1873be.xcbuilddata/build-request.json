@@ -1,0 +1,94 @@
+{
+  "buildCommand" : {
+    "command" : "prepareForIndexing",
+    "enableIndexBuildArena" : false,
+    "targets" : null
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e989da425bb6d6d5d8dbb95e4afffb82217"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98788fba751c4f2899364af0d133f30305"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e989e6a0040d9ac891ed75cf9a806e550e0"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98312b4bc59bbbe2c06c205bf4da6737f5"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98483832d3c820398e9d40e1a6904b03fe"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e986a37e545ec10d2692e0ef9874f9f6401"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e981662e49d2d7191ee47b5f6c8f6c8aa1e"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98b0f638c99ac593829a518d6a6a45d8d0"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e9821a12af8510f5a5a4842f587aedc172a"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e9833260f06b6ffe5cdf6831b2907a4b8de"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98634477ab4dce976608a26f9c0d0a7774"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98f49b18868e69e442795477541dae1d9f"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e987434bc9491ab71790f372f1bf966d056"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98ea5908b4aebcc3d817894c4e2bc86fb5"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98b82d160a1e7e21b702cf0e5b9c616a8f"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e9828cab1f188854e0a973e6ff6905c5ffe"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98e0be3b0d5ad56f1985578b1f97431765"
+    }
+  ],
+  "containerPath" : "/Users/egor/screenblock/ios/Pods/Pods.xcodeproj",
+  "continueBuildingAfterErrors" : true,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "",
+      "buildProductsPath" : "",
+      "derivedDataPath" : "/Users/egor/Library/Developer/Xcode/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/egor/Library/Developer/Xcode/DerivedData/Pods-btgqacqvmbmllfghsxqwsguxxdlc/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/egor/Library/Developer/Xcode/DerivedData/Pods-btgqacqvmbmllfghsxqwsguxxdlc/Index.noindex/PrecompiledHeaders",
+      "pchPath" : ""
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "synthesized" : {
+        "table" : {
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "NO",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "qos" : "default",
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : true,
+  "useImplicitDependencies" : false,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : false
+}

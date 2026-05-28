@@ -105,7 +105,10 @@ class ScheduleChecker {
   Future<void> _startScheduleBlocking(Schedule schedule) async {
     if (_blockingService == null) return;
     debugPrint('📅 Schedule starting: ${schedule.name}');
-
+    debugPrint('📅 _startScheduleBlocking: ${schedule.name}');
+    debugPrint('📅 blockingType: ${schedule.blockingType}');
+    debugPrint('📅 blockedApps: ${schedule.blockedApps}');
+    debugPrint('📅 allowedApps: ${schedule.allowedApps}');
     _blockingService!.setBlockingMode(schedule.blockingType);
 
     if (Platform.isIOS) {
@@ -115,6 +118,9 @@ class ScheduleChecker {
           AppConstants.blockingTypeSpecificApps
           ? schedule.blockedApps
           : schedule.allowedApps;
+
+      debugPrint('📅 apps to monitor: $apps');
+      debugPrint('📅 apps isEmpty: ${apps.isEmpty}');
 
       if (apps.isEmpty) {
         debugPrint('📅 Schedule has no apps — skipping');

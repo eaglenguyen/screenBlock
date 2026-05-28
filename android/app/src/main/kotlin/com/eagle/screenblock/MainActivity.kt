@@ -19,23 +19,17 @@ class MainActivity : FlutterActivity() {
         const val METHOD_CHANNEL = "com.eagle.screenblock/accessibility"
         const val EVENT_CHANNEL = "com.eagle.screenblock/foreground_app"
         const val BLOCK_CHANNEL = "com.eagle.screenblock/block"
-
     }
 
     private var eventSink: EventChannel.EventSink? = null
     private var blockMethodChannel: MethodChannel? = null
 
-
     private val blockDismissedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            // notify Flutter that block screen was dismissed
-            Log.d("MainActivity", "BLOCK_DISMISSED received — calling onBlockDismissed")
-            Log.d("MainActivity", "blockMethodChannel is null: ${blockMethodChannel == null}")
+            Log.d("MainActivity", "BLOCK_DISMISSED received")
             blockMethodChannel?.invokeMethod("onBlockDismissed", null)
         }
     }
-
-
 
     private val blockForDayReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -44,12 +38,10 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-
-
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        // method channel — for permission checks and requests
+        // method channel
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             METHOD_CHANNEL
@@ -62,31 +54,49 @@ class MainActivity : FlutterActivity() {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                     result.success(null)
                 }
+                "saveBlockingState" -> {
+                    val apps = call.argument<List<String>>("apps") ?: emptyList()
+                    val mode = call.argument<String>("mode") ?: "specific_apps"
+                    val isBlocking = call.argument<Boolean>("isBlocking") ?: false
+
+                    val nativePrefs = getSharedPreferences(
+                        "screenblock_native",
+                        Context.MODE_PRIVATE
+                    )
+                    nativePrefs.edit()
+                        .putBoolean("isBlocking", isBlocking)
+                        .putString("blockingMode", mode)
+                        .putStringSet("monitoredApps", apps.toHashSet())
+                        .apply()
+
+                    Log.d("MainActivity",
+                        "saveBlockingState: isBlocking=$isBlocking mode=$mode apps=$apps")
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }
 
-
-        // event channel — streams foreground app changes to Flutter
+        // event channel
         EventChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             EVENT_CHANNEL
         ).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, sink: EventChannel.EventSink?) {
                 eventSink = sink
-                // set callback on the accessibility service
                 AppBlockAccessibilityService.eventCallback = { packageName ->
                     runOnUiThread {
                         eventSink?.success(packageName)
                     }
                 }
-                // 👈 add this — resets _overlayShowing in Flutter
+                // 👇 reset when Flutter reconnects
+                AppBlockAccessibilityService.isOverlayShowing = false
+
                 AppBlockAccessibilityService.overlayResetCallback = {
                     runOnUiThread {
                         blockMethodChannel?.invokeMethod("onBlockDismissed", null)
                     }
                 }
-
                 AppBlockAccessibilityService.overlayDismissedCallback = {
                     runOnUiThread {
                         blockMethodChannel?.invokeMethod("onBlockDismissed", null)
@@ -99,13 +109,10 @@ class MainActivity : FlutterActivity() {
                 AppBlockAccessibilityService.eventCallback = null
                 AppBlockAccessibilityService.overlayResetCallback = null
                 AppBlockAccessibilityService.overlayDismissedCallback = null
-
-
             }
-        }
-        )
+        })
 
-        // ── Block method channel ─────────────────────
+        // block method channel
         blockMethodChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             BLOCK_CHANNEL
@@ -128,18 +135,15 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         registerReceiver(
             blockDismissedReceiver,
             IntentFilter("com.eagle.screenblock.BLOCK_DISMISSED"),
             RECEIVER_NOT_EXPORTED
         )
-
         registerReceiver(
             blockForDayReceiver,
             IntentFilter("com.eagle.screenblock.BLOCK_FOR_DAY"),
@@ -154,8 +158,6 @@ class MainActivity : FlutterActivity() {
         eventSink = null
         AppBlockAccessibilityService.eventCallback = null
     }
-
-
 
     private fun isAccessibilityEnabled(): Boolean {
         val expectedServiceName =
