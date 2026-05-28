@@ -51,14 +51,16 @@ class IOSBlockingService: NSObject {
         blockingMode: String,
         limitMinutes: Int
     ) {
-        print("🔵 startBlocking called")
-        print("🔵 blockingMode: \(blockingMode)")
-        print("🔵 limitMinutes: \(limitMinutes)")
-
+        sharedDefaults?.set(true, forKey: "isBlocking")
         sharedDefaults?.set(blockingMode, forKey: "blockingMode")
-
+        sharedDefaults?.set(
+            Date().timeIntervalSince1970,
+            forKey: "sessionStartTime"
+        )
+        sharedDefaults?.set(limitMinutes, forKey: "sessionMinutes")
+        
+        // immediately shield apps
         let appTokens = getStoredAppTokens(mode: blockingMode)
-        print("🔵 found \(appTokens.count) saved app tokens")
 
         guard !appTokens.isEmpty else {
             print("❌ no app tokens found")
@@ -67,14 +69,15 @@ class IOSBlockingService: NSObject {
 
         // immediately shield apps — same as Android instant blocking
         store.shield.applications = appTokens
-        print("✅ apps shielded immediately: \(appTokens.count)")
     }
     
     
     func stopBlocking() {
+        // clear session state
+        sharedDefaults?.set(false, forKey: "isBlocking")
+        sharedDefaults?.removeObject(forKey: "sessionStartTime")
         store.clearAllSettings()
         activityCenter.stopMonitoring([activityName])
-        print("✅ iOS blocking stopped — shield cleared")
     }
     
     // MARK: - App Selection

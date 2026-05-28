@@ -3,6 +3,7 @@ import 'package:app_usage/app_usage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'blocking_service.dart';
 
 class AndroidBlockingService implements BlockingService {
@@ -33,15 +34,71 @@ class AndroidBlockingService implements BlockingService {
   @override
   Stream<AppUsageEvent> get usageEvents => _eventController.stream;
 
+  // ── SharedPref ────────────────────────────────────
+
+  // save monitored apps when blocking starts
+  Future<void> persistBlockingState({int sessionMinutes = 30}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isBlocking', true);
+    await prefs.setString('blockingMode', _blockingMode);
+    await prefs.setStringList(
+      'monitoredApps',
+      _monitoredApps.keys.toList(),
+    );
+    await prefs.setString(
+      'monitoredLimits',
+      _monitoredApps.values.join(','),
+    );
+    await prefs.setInt(
+      'sessionStartTime',
+      DateTime.now().millisecondsSinceEpoch,
+    );
+    await prefs.setInt(
+      'sessionMinutes',
+      sessionMinutes, // 👈 add
+    );
+  }
+
+  // restore on AccessibilityService reconnect
+  Future<void> _restoreBlockingState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isBlocking = prefs.getBool('isBlocking') ?? false;
+
+    if (!isBlocking) return;
+
+    final mode = prefs.getString('blockingMode') ?? 'specific_apps';
+    final apps = prefs.getStringList('monitoredApps') ?? [];
+    final limits = prefs.getString('monitoredLimits') ?? '';
+    final limitList = limits.split(',')
+        .map((e) => int.tryParse(e) ?? 30)
+        .toList();
+
+    _blockingMode = mode;
+    for (int i = 0; i < apps.length; i++) {
+      _monitoredApps[apps[i]] = i < limitList.length
+          ? limitList[i]
+          : 30;
+    }
+
+    debugPrint('🔄 Restored blocking state: $_monitoredApps');
+  }
+
   // ── Monitoring ────────────────────────────────────
+
 
   @override
   Future<void> startMonitoring(
       String packageName,
       int limitMinutes,
       ) async {
-    debugPrint('🟢 startMonitoring: $packageName monitored=$_monitoredApps');
+
+    // restore state first if coming back from kill
+    if (_monitoredApps.isEmpty) {
+      await _restoreBlockingState();
+    }
+
     _monitoredApps[packageName] = limitMinutes;
+    await persistBlockingState();
     _overlayShowing = false;
     _startListening();
   }
@@ -57,11 +114,18 @@ class AndroidBlockingService implements BlockingService {
 
   @override
   Future<void> stopAllMonitoring() async {
-    debugPrint('🔴 stopAllMonitoring called — stack trace:');
-    debugPrint(StackTrace.current.toString());
     _monitoredApps.clear();
     _overlayShowing = false;
     _blockingMode = 'specific_apps';
+
+    // clear persisted state
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isBlocking', false);
+    await prefs.remove('monitoredApps');
+    await prefs.remove('monitoredLimits');
+    await prefs.remove('sessionStartTime');
+
+
     _foregroundAppSubscription?.cancel();
     _foregroundAppSubscription = null;
   }

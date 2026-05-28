@@ -7,6 +7,7 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screenblock/data/repositoryImpl/UsageStreakRepo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../domain/platform/blocking_service.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/blocking_service_provider.dart';
@@ -15,6 +16,7 @@ import '../../core/constants/hivebox_names.dart';
 import '../../data/models/timer_config.dart';
 import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
+import '../../domain/platform/android_blocking_service.dart';
 import '../../services/schedule_checker.dart';
 import 'home_state.dart';
 
@@ -81,6 +83,8 @@ class HomeViewModel extends _$HomeViewModel {
     };
     // start schedule checker
     ScheduleChecker.instance.start(_blockingService);
+
+    _restoreSession();
   }
 
   int _loadTotalXp() {
@@ -315,6 +319,14 @@ class HomeViewModel extends _$HomeViewModel {
         await _blockingService.startMonitoring(
           pkg,
           state.selectedMinutes,
+        );
+      }
+
+      // 👇 persist blocking state with session minutes
+      if (_blockingService is AndroidBlockingService) {
+        await (_blockingService as AndroidBlockingService)
+            .persistBlockingState(
+          sessionMinutes: state.selectedMinutes,
         );
       }
     }
@@ -606,6 +618,106 @@ class HomeViewModel extends _$HomeViewModel {
         }
       },
     );
+  }
+
+  void _startSessionTimer(int totalSeconds, DateTime startTime) {
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer.periodic(
+      const Duration(seconds: 1),
+          (timer) {
+        final elapsed = DateTime.now()
+            .difference(startTime)
+            .inSeconds;
+        final remaining = totalSeconds - elapsed;
+
+        if (remaining <= 0) {
+          timer.cancel();
+          _onSessionComplete();
+        } else {
+          state = state.copyWith(remainingSeconds: remaining);
+        }
+      },
+    );
+  }
+
+  Future<void> _restoreSession() async {
+    debugPrint('🔄 _restoreSession started');
+
+    try {
+      if (Platform.isIOS) {
+        debugPrint('🔄 iOS restore path');
+
+        final result = await const MethodChannel(
+          'com.eagle.screenblock/ios_blocking',
+        ).invokeMethod<Map>('getPersistedSession');
+
+        if (result?['isBlocking'] == true) {
+          final startTime = DateTime.fromMillisecondsSinceEpoch(
+            ((result!['startTime'] as double) * 1000).round(),
+          );
+          final minutes = result['minutes'] as int;
+          final totalSeconds = minutes * 60;
+          final elapsed = DateTime.now()
+              .difference(startTime)
+              .inSeconds;
+          final remaining = totalSeconds - elapsed;
+
+          if (remaining > 0) {
+            debugPrint('🔄 Restoring iOS session — ${remaining}s remaining');
+            state = state.copyWith(
+              phase: BlockingPhase.active,
+              remainingSeconds: remaining,
+              selectedMinutes: minutes,
+              sessionStartTime: startTime,
+            );
+            _startSessionTimer(totalSeconds, startTime);
+          } else {
+            // session expired while app was killed
+            await _blockingService.stopAllMonitoring();
+          }
+        }
+      } else {
+        debugPrint('🔄 Android restore path');
+
+        // Android — check SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        debugPrint('🔄 got prefs');
+
+        final isBlocking = prefs.getBool('isBlocking') ?? false;
+        debugPrint('🔄 isBlocking=$isBlocking');
+
+        if (isBlocking) {
+          final startTimeMs = prefs.getInt('sessionStartTime') ?? 0;
+          final startTime = DateTime.fromMillisecondsSinceEpoch(
+            startTimeMs,
+          );
+          final minutes = prefs.getInt('sessionMinutes') ?? 30;
+          final totalSeconds = minutes * 60;
+          final elapsed = DateTime.now()
+              .difference(startTime)
+              .inSeconds;
+          final remaining = totalSeconds - elapsed;
+
+          if (remaining > 0) {
+            debugPrint('🔄 Restoring Android session — ${remaining}s remaining');
+            state = state.copyWith(
+              phase: BlockingPhase.active,
+              remainingSeconds: remaining,
+              selectedMinutes: minutes,
+              sessionStartTime: startTime,
+            );
+            _startSessionTimer(totalSeconds, startTime);
+          } else {
+            // session expired while app was killed
+            await _blockingService.stopAllMonitoring();
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ restore session error: $e');
+    }
+    debugPrint('🔄 _restoreSession complete');
+
   }
 
 

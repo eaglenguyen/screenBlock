@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
 import 'features/bottomNav/shell_screen.dart';
@@ -7,7 +6,6 @@ import 'features/home/schedule/schedule_screen.dart';
 import 'features/paywall/paywall_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/stats/stats_screen.dart';
-import 'features/timer/timer_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -16,7 +14,6 @@ class AppRouter {
   static final router = GoRouter(
     initialLocation: '/home',
     routes: [
-
       // ShellRoute wraps all tab screens
       // ShellScreen renders once and stays mounted
       ShellRoute(
@@ -49,20 +46,9 @@ class AppRouter {
 
       // routes outside the shell — no bottom nav
       GoRoute(
-        path: '/timer-config',
-        name: 'timer-config',
-        builder: (context, state) => const TimerScreen(),
-      ),
-      GoRoute(
         path: '/paywall',
         name: 'paywall',
         builder: (context, state) => const PaywallScreen(),
-      ),
-      GoRoute(
-        path: '/app-picker',
-        name: 'app-picker',
-        builder: (context, state) => const SizedBox(),
-        // app picker is shown as bottom sheet not a route
       ),
     ],
   );

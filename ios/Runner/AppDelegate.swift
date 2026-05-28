@@ -60,6 +60,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
+    
         case "requestAuthorization":
             result(await service.requestAuthorization())
         case "isAuthorized":
@@ -103,10 +104,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         case "stopBlocking":
             service.stopBlocking()
             result(nil)
+        case "getPersistedSession":
+            let sharedDefaults = UserDefaults(
+                    suiteName: "group.com.eagle.screenblock"
+                )
+            let isBlocking = sharedDefaults?.bool(
+                forKey: "isBlocking"
+            ) ?? false
+            
+            if isBlocking {
+                let startTime = sharedDefaults?.double(
+                    forKey: "sessionStartTime"
+                ) ?? 0
+                let minutes = sharedDefaults?.integer(
+                    forKey: "sessionMinutes"
+                ) ?? 0
+                result([
+                    "isBlocking": true,
+                    "startTime": startTime,
+                    "minutes": minutes,
+                ])
+            } else {
+                result(["isBlocking": false])
+            }
         case "showAppPicker":
             await showAppPicker(result: result)
         default:
             result(FlutterMethodNotImplemented)
+            
         }
     }
 
