@@ -68,7 +68,8 @@ dependencies:
   go_router: ^17.2.3
   url_launcher: ^6.2.0
   confetti: ^0.7.0
-
+  font_awesome_flutter: ^10.7.0
+  flutter_svg: ^2.0.10+1
 
 
 
@@ -96,6 +97,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/lottie/
+    - assets/icons/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

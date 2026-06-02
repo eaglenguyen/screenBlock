@@ -6,7 +6,7 @@ part of 'schedule_viewmodel.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$scheduleViewModelHash() => r'888cd8b5edcd1573f198950283d2cee06e40b0e6';
+String _$scheduleViewModelHash() => r'1ef22a94284d947a29c0e53eab007e4b71aee481';
 
 /// See also [ScheduleViewModel].
 @ProviderFor(ScheduleViewModel)

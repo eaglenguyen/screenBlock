@@ -41,6 +41,9 @@ void main() async {
   await Hive.openBox<BlockSession>(HiveBoxNames.blockSessions);
 
 
+  // 👇 temporary — forces onboarding every launch for testing
+  final settings = Hive.box(HiveBoxNames.settings);
+  await settings.put('onboardingComplete', false);
 
 
   runApp(

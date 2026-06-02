@@ -1,7 +1,8 @@
+import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../domain/platform/blocking_service.dart';
 import '../../../providers/blocking_service_provider.dart';
+import '../../core/constants/hivebox_names.dart';
 import 'onboarding_state.dart';
 
 part 'onboarding_viewmodel.g.dart';
@@ -9,62 +10,76 @@ part 'onboarding_viewmodel.g.dart';
 @riverpod
 class OnboardingViewModel extends _$OnboardingViewModel {
 
-  static const String _onboardingCompleteKey = 'onboarding_complete';
-
   @override
   OnboardingState build() {
-    _checkPermissions();
     return const OnboardingState();
   }
 
-  BlockingService get _service =>
-      ref.read(blockingServiceProvider);
+  BlockingService get _service => ref.read(blockingServiceProvider);
 
-  // ── Navigation ──────────────────────────────────
-  void nextStep() {
-    final steps = OnboardingStep.values;
-    final currentIndex = steps.indexOf(state.currentStep);
-    if (currentIndex < steps.length - 1) {
-      state = state.copyWith(
-        currentStep: steps[currentIndex + 1],
-      );
-    }
-  }
-
+  // ── Navigation ───────────────────────────────────
   void goToStep(OnboardingStep step) {
     state = state.copyWith(currentStep: step);
   }
 
-  // ── Chat answers ────────────────────────────────
-  void setScreenTimeRange(String range) {
-    state = state.copyWith(screenTimeRange: range);
+  // ── Personalization setters ───────────────────────
+  void setUserName(String name) {
+    state = state.copyWith(userName: name.trim());
   }
 
-  void setAgeRange(String range) {
-    state = state.copyWith(ageRange: range);
+  void setDailyScreenTime(String range) {
+    state = state.copyWith(
+      dailyScreenTime: range,
+      dailyHours: _parseHours(range),
+    );
   }
 
-  void setFeelingAboutUsage(String feeling) {
-    state = state.copyWith(feelingAboutUsage: feeling);
+  void setMainStruggle(String struggle) {
+    state = state.copyWith(mainStruggle: struggle);
   }
 
   void setGoal(String goal) {
     state = state.copyWith(goal: goal);
   }
 
-  // ── Permissions ─────────────────────────────────
+  void setHearAboutUs(String source) {
+    state = state.copyWith(hearAboutUs: source);
+  }
+
+  // ── Hours parser ──────────────────────────────────
+  double _parseHours(String range) {
+    switch (range) {
+      case 'Less than 1 hour': return 0.5;
+      case '1–2 hours':        return 1.5;
+      case '2–3 hours':        return 2.5;
+      case '3–4 hours':        return 3.5;
+      case '4–5 hours':        return 4.5;
+      case '5–6 hours':        return 5.5;
+      case '6–7 hours':        return 6.5;
+      case '7+ hours':         return 8.0;
+      default:                 return 3.5;
+    }
+  }
+
+  // ── Permissions ───────────────────────────────────
   Future<void> _checkPermissions() async {
     final hasUsage = await _service.hasUsageStatsPermission();
     final hasOverlay = await _service.hasOverlayPermission();
+    final hasAccessibility =
+    await _service.hasAccessibilityPermission();
     state = state.copyWith(
       hasUsagePermission: hasUsage,
       hasOverlayPermission: hasOverlay,
+      hasAccessibilityPermission: hasAccessibility,
     );
+  }
+
+  Future<void> recheckPermissions() async {
+    await _checkPermissions();
   }
 
   Future<void> requestUsagePermission() async {
     await _service.requestUsageStatsPermission();
-    // re-check after user returns from settings
     await _checkPermissions();
   }
 
@@ -73,15 +88,32 @@ class OnboardingViewModel extends _$OnboardingViewModel {
     await _checkPermissions();
   }
 
-  // ── Complete ─────────────────────────────────────
+  Future<void> requestAccessibilityPermission() async {
+    await _service.requestAccessibilityPermission();
+    await _checkPermissions();
+  }
+
+  // ── Save personalization to Hive ──────────────────
+  Future<void> savePersonalizationData() async {
+    final box = Hive.box(HiveBoxNames.settings);
+    await box.put('userName', state.userName ?? '');
+    await box.put('dailyScreenTime', state.dailyScreenTime ?? '');
+    await box.put('dailyHours', state.dailyHours ?? 3.5);
+    await box.put('mainStruggle', state.mainStruggle ?? '');
+    await box.put('goal', state.goal ?? '');
+    await box.put('hearAboutUs', state.hearAboutUs ?? '');
+  }
+
+  // ── Complete ──────────────────────────────────────
   Future<void> completeOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_onboardingCompleteKey, true);
+    await savePersonalizationData();
+    final box = Hive.box(HiveBoxNames.settings);
+    await box.put('onboardingComplete', true);
     state = state.copyWith(isComplete: true);
   }
 
-  static Future<bool> isOnboardingComplete() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_onboardingCompleteKey) ?? false;
+  static bool isOnboardingComplete() {
+    final box = Hive.box(HiveBoxNames.settings);
+    return box.get('onboardingComplete', defaultValue: false) as bool;
   }
 }
