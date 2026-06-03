@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:screenblock/features/onboarding/onboarding_chat_screen.dart';
-
+import 'onboarding_animations.dart';
+import 'onboarding_chat_screen.dart';
 import 'onboarding_demo_screens.dart';
 import 'onboarding_viewmodel.dart';
+
+
 
 class OnboardingSteps {
   static const int welcome = 0;
@@ -17,10 +18,7 @@ class OnboardingSteps {
 }
 
 class OnboardingWelcomeFlow extends ConsumerStatefulWidget {
-
-  const OnboardingWelcomeFlow({
-    super.key,
-  });
+  const OnboardingWelcomeFlow({super.key});
 
   @override
   ConsumerState<OnboardingWelcomeFlow> createState() =>
@@ -39,6 +37,11 @@ class _OnboardingWelcomeFlowState
     setState(() => _currentStep++);
   }
 
+  void _previousStep() {
+    HapticFeedback.lightImpact();
+    setState(() => _currentStep--);
+  }
+
   void _onUsernameSubmitted(String name) {
     if (name.trim().isEmpty) return;
     _userName = name.trim();
@@ -50,11 +53,6 @@ class _OnboardingWelcomeFlowState
     _nextStep();
   }
 
-  void _previousStep() {
-    HapticFeedback.lightImpact();
-    setState(() => _currentStep--);
-  }
-
   Future<void> _onComplete() async {
     await ref
         .read(onboardingViewModelProvider.notifier)
@@ -62,11 +60,10 @@ class _OnboardingWelcomeFlowState
     if (mounted) context.go('/home');
   }
 
-
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 380),
+      duration: const Duration(milliseconds: 600),
       transitionBuilder: (child, animation) {
         return SlideTransition(
           position: Tween<Offset>(
@@ -82,7 +79,6 @@ class _OnboardingWelcomeFlowState
       child: _buildStep(),
     );
   }
-
 
   Widget _buildStep() {
     switch (_currentStep) {
@@ -121,12 +117,10 @@ class _OnboardingWelcomeFlowState
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _onComplete();
         });
-        return const SizedBox.shrink();    }
+        return const SizedBox.shrink();
+    }
   }
-
 }
-
-
 
 // ── Screen 1 — Welcome ────────────────────────────────
 
@@ -139,43 +133,17 @@ class _WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<_WelcomeScreen>
-    with SingleTickerProviderStateMixin {
-
-  late AnimationController _ctrl;
-  late Animation<double> _fade;
-  late Animation<double> _scale;
-  late Animation<Offset> _slide;
+    with SingleTickerProviderStateMixin, OnboardingEntranceMixin {
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _fade = CurvedAnimation(
-      parent: _ctrl,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    );
-    _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
-      ),
-    );
-    _slide = Tween<Offset>(
-      begin: const Offset(0, 0.25),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _ctrl,
-      curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
-    ));
-    _ctrl.forward();
+    initEntrance(elementCount: 4);
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    disposeEntrance();
     super.dispose();
   }
 
@@ -193,91 +161,81 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
               child: Column(
                 children: [
                   const Spacer(flex: 2),
-                  FadeTransition(
-                    opacity: _fade,
-                    child: ScaleTransition(
-                      scale: _scale,
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 88,
-                            height: 88,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEDB82A)
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: const Color(0xFFEDB82A)
-                                    .withValues(alpha: 0.4),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text('🛡️',
-                                  style: TextStyle(fontSize: 42)),
-                            ),
-                          ),
-                          const SizedBox(height: 28),
-                          const Text(
-                            'ScreenBlock',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 40,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'Break free from endless scrolling\nand reclaim your time',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.45),
-                              fontSize: 17,
-                              height: 1.55,
-                            ),
-                          ),
-                        ],
+
+                  // element 0 — logo
+                  staggered(
+                    0,
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEDB82A)
+                            .withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: const Color(0xFFEDB82A)
+                              .withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text('🛡️',
+                            style: TextStyle(fontSize: 42)),
                       ),
                     ),
                   ),
-                  const Spacer(flex: 3),
-                  SlideTransition(
-                    position: _slide,
-                    child: FadeTransition(
-                      opacity: _fade,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: widget.onGetStarted,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFEDB82A),
-                                foregroundColor: const Color(0xFF1A1208),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 20),
-                                shape: const StadiumBorder(),
-                                textStyle: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                              child: const Text('Get Started →'),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Free 3-day trial · No credit card required',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.28),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
+                  const SizedBox(height: 28),
+
+                  // element 1 — title with gold word
+                  staggered(
+                    1,
+                    const GoldText(
+                      text: 'Screen\nBlock',
+                      goldWord: 'Block',
+                      fontSize: 44,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // element 2 — subtitle
+                  staggered(
+                    2,
+                    Text(
+                      'Break free from endless scrolling\nand reclaim your time',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontSize: 17,
+                        height: 1.55,
                       ),
                     ),
+                  ),
+
+                  const Spacer(flex: 3),
+
+                  // element 3 — button + note
+                  staggered(
+                    3,
+                    SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                        ShimmerButton(
+                          label: 'Get Started →',
+                          onTap: widget.onGetStarted,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Free 3-day trial · No credit card required',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.28),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   ),
                 ],
               ),
@@ -294,7 +252,6 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
 class _UsernameScreen extends StatefulWidget {
   final Function(String name) onContinue;
   final VoidCallback onBack;
-
   const _UsernameScreen({
     super.key,
     required this.onContinue,
@@ -305,13 +262,16 @@ class _UsernameScreen extends StatefulWidget {
   State<_UsernameScreen> createState() => _UsernameScreenState();
 }
 
-class _UsernameScreenState extends State<_UsernameScreen> {
+class _UsernameScreenState extends State<_UsernameScreen>
+    with SingleTickerProviderStateMixin, OnboardingEntranceMixin {
+
   final TextEditingController _ctrl = TextEditingController();
   bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
+    initEntrance(elementCount: 4);
     _ctrl.addListener(() {
       setState(() => _hasText = _ctrl.text.trim().isNotEmpty);
     });
@@ -320,6 +280,7 @@ class _UsernameScreenState extends State<_UsernameScreen> {
   @override
   void dispose() {
     _ctrl.dispose();
+    disposeEntrance();
     super.dispose();
   }
 
@@ -336,125 +297,134 @@ class _UsernameScreenState extends State<_UsernameScreen> {
               padding: const EdgeInsets.fromLTRB(28, 24, 28, 36),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: widget.onBack,
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              width: 0.5,
+                  // element 0 — back + progress
+                  staggered(
+                    0,
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: widget.onBack,
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                              size: 16,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white,
-                            size: 16,
-                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildProgressBar(step: 1, total: 3)),
-                    ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildProgressBar(step: 1, total: 3),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 60),
 
-                  // centered headline
-                  const Text(
-                    'Choose a username',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
+                  // element 1 — headline with gold word
+                  staggered(
+                    1,
+                    const GoldText(
+                      text: 'Choose a username',
+                      goldWord: 'username',
                       fontSize: 34,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
-                      height: 1.1,
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Text(
-                    'This is how we\'ll address you\nthroughout the app',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 44),
 
-                  // text field
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF252542),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: _hasText
-                            ? const Color(0xFFEDB82A).withValues(alpha: 0.5)
-                            : const Color(0xFF2A2A48),
-                        width: _hasText ? 1.5 : 0.5,
-                      ),
-                    ),
-                    child: TextField(
-                      controller: _ctrl,
-                      autofocus: true,
-                      textAlign: TextAlign.center,
-                      textCapitalization: TextCapitalization.words,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'your name...',
-                        hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
+                  // element 2 — subtitle + text field
+                  staggered(
+                    2,
+                    Column(
+                      children: [
+                        Text(
+                          'This is how we\'ll address you\nthroughout the app',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.4),
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
                         ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 20,
+                        const SizedBox(height: 44),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF252542),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: _hasText
+                                  ? const Color(0xFFEDB82A)
+                                  .withValues(alpha: 0.5)
+                                  : const Color(0xFF2A2A48),
+                              width: _hasText ? 1.5 : 0.5,
+                            ),
+                            boxShadow: _hasText
+                                ? [
+                              BoxShadow(
+                                color: const Color(0xFFEDB82A)
+                                    .withValues(alpha: 0.12),
+                                blurRadius: 12,
+                                spreadRadius: 1,
+                              ),
+                            ]
+                                : null,
+                          ),
+                          child: TextField(
+                            controller: _ctrl,
+                            autofocus: true,
+                            textAlign: TextAlign.center,
+                            textCapitalization: TextCapitalization.words,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'your name...',
+                              hintStyle: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 20,
+                              ),
+                            ),
+                            onSubmitted: (_) {
+                              if (_hasText) widget.onContinue(_ctrl.text);
+                            },
+                          ),
                         ),
-                      ),
-                      onSubmitted: (_) {
-                        if (_hasText) widget.onContinue(_ctrl.text);
-                      },
+                      ],
                     ),
                   ),
 
                   const Spacer(),
 
-                  AnimatedOpacity(
-                    opacity: _hasText ? 1.0 : 0.35,
-                    duration: const Duration(milliseconds: 200),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _hasText
+                  // element 3 — button
+                  staggered(
+                    3,
+                    AnimatedOpacity(
+                      opacity: _hasText ? 1.0 : 0.35,
+                      duration: const Duration(milliseconds: 200),
+                      child: ShimmerButton(
+                        label: 'Continue →',
+                        onTap: _hasText
                             ? () => widget.onContinue(_ctrl.text)
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEDB82A),
-                          foregroundColor: const Color(0xFF1A1208),
-                          disabledBackgroundColor:
-                          const Color(0xFFEDB82A).withValues(alpha: 0.35),
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: const StadiumBorder(),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        child: const Text('Continue →'),
+                            : () {},
                       ),
                     ),
                   ),
@@ -484,7 +454,8 @@ class _ReferralScreen extends StatefulWidget {
   State<_ReferralScreen> createState() => _ReferralScreenState();
 }
 
-class _ReferralScreenState extends State<_ReferralScreen> {
+class _ReferralScreenState extends State<_ReferralScreen>
+    with SingleTickerProviderStateMixin, OnboardingEntranceMixin {
   String? _selected;
 
   final List<Map<String, dynamic>> _options = [
@@ -515,6 +486,17 @@ class _ReferralScreenState extends State<_ReferralScreen> {
       'emoji': '✨',
     },
   ];
+  @override
+  void initState() {
+    super.initState();
+    initEntrance(elementCount: 3);
+  }
+
+  @override
+  void dispose() {
+    disposeEntrance();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -529,110 +511,91 @@ class _ReferralScreenState extends State<_ReferralScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: widget.onBack,
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              width: 0.5,
+                  // element 0 — back + progress
+                  staggered(
+                    0,
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: widget.onBack,
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                              size: 16,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white,
-                            size: 16,
-                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildProgressBar(step: 1, total: 3)),
-                    ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildProgressBar(step: 2, total: 3),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 44),
 
-                  // centered headline
-                  const Text(
-                    'Where did you\nhear about us?',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
+                  // element 1 — headline with gold word
+                  staggered(
+                    1,
+                    const GoldText(
+                      text: 'Where did you\nhear about us?',
+                      goldWord: 'hear',
                       fontSize: 34,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
-                      height: 1.1,
                     ),
                   ),
                   const SizedBox(height: 32),
 
-                  // full width vertical list
+                  // element 2 — options list
                   Expanded(
-                    child: ListView.separated(
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _options.length,
-                      separatorBuilder: (_, __) =>
-                      const SizedBox(height: 10),
-                      itemBuilder: (context, i) {
-                        final opt = _options[i];
-                        final isSelected = _selected == opt['label'];
-                        return GestureDetector(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            setState(() => _selected = opt['label']);
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 18,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFEDB82A)
-                                  .withValues(alpha: 0.1)
-                                  : const Color(0xFF1E1E35),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected
-                                    ? const Color(0xFFEDB82A)
-                                    .withValues(alpha: 0.6)
-                                    : const Color(0xFF2A2A48),
-                                width: isSelected ? 1.5 : 0.5,
-                              ),
-                            ),
+                      child: staggered(
+                        2,
+                        ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _options.length,
+                          separatorBuilder: (_, __) =>
+                          const SizedBox(height: 10),
+                          itemBuilder: (context, i) {
+                            final opt = _options[i];
+                            final isSelected = _selected == opt['label'];
+                            return AnimatedOptionCard(
+                              isSelected: isSelected,
+                              onTap: () {
+                                setState(() => _selected = opt['label'] as String);
+                              },
                             child: Row(
                               children: [
+                                // icon container
                                 Container(
                                   width: 38,
                                   height: 38,
                                   decoration: BoxDecoration(
-                                    color: (opt['bgColor'] as Color).withValues(alpha: 0.15),
+                                    color: (opt['bgColor'] as Color)
+                                        .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: (opt['bgColor'] as Color).withValues(alpha: 0.3),
+                                      color: (opt['bgColor'] as Color)
+                                          .withValues(alpha: 0.3),
                                       width: 0.5,
                                     ),
                                   ),
                                   child: Center(
                                     child: opt['icon'] != null
-                                        ? SvgPicture.asset(
-                                      opt['icon'] as String,
-                                      width: 20,
-                                      height: 20,
-                                      colorFilter: ColorFilter.mode(
-                                        opt['bgColor'] as Color,
-                                        BlendMode.srcIn,
-                                      ),
-                                    )
+                                        ? Text('') // replace with SvgPicture.asset
                                         : Text(
                                       opt['emoji'] as String,
-                                      style: const TextStyle(fontSize: 18),
+                                      style: const TextStyle(
+                                          fontSize: 18),
                                     ),
                                   ),
                                 ),
@@ -650,25 +613,12 @@ class _ReferralScreenState extends State<_ReferralScreen> {
                                   ),
                                 ),
                                 const Spacer(),
-                                if (isSelected)
-                                  Container(
-                                    width: 22,
-                                    height: 22,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFEDB82A),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.check,
-                                      color: Color(0xFF1A1208),
-                                      size: 14,
-                                    ),
-                                  ),
+                                AnimatedCheckmark(visible: isSelected),
                               ],
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
 
@@ -677,27 +627,11 @@ class _ReferralScreenState extends State<_ReferralScreen> {
                   AnimatedOpacity(
                     opacity: _selected != null ? 1.0 : 0.35,
                     duration: const Duration(milliseconds: 200),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _selected != null
-                            ? () => widget.onSelected(_selected!)
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEDB82A),
-                          foregroundColor: const Color(0xFF1A1208),
-                          disabledBackgroundColor:
-                          const Color(0xFFEDB82A).withValues(alpha: 0.35),
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: const StadiumBorder(),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        child: const Text('Continue →'),
-                      ),
+                    child: ShimmerButton(
+                      label: 'Continue →',
+                      onTap: _selected != null
+                          ? () => widget.onSelected(_selected!)
+                          : () {},
                     ),
                   ),
                 ],
@@ -771,12 +705,14 @@ Widget _buildCircles() {
 Widget _buildProgressBar({required int step, required int total}) {
   return Row(
     children: List.generate(total, (i) {
+      final isActive = i < step;
       return Expanded(
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
           margin: EdgeInsets.only(right: i < total - 1 ? 6 : 0),
           height: 3.5,
           decoration: BoxDecoration(
-            color: i < step
+            color: isActive
                 ? const Color(0xFFEDB82A)
                 : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(2),

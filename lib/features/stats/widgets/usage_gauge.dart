@@ -87,7 +87,7 @@ class _UsageGaugeState extends State<UsageGauge>
   Widget _buildGauge() {
     return SizedBox(
       width: 200,
-      height: 120,
+      height: 200,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -95,7 +95,7 @@ class _UsageGaugeState extends State<UsageGauge>
             animation: _animation,
             builder: (context, _) {
               return CustomPaint(
-                size: const Size(200, 120),
+                size: const Size(200, 200),
                 painter: _GaugePainter(
                   value: _animation.value,
                   isOverGoal: widget.state.isOverGoal,
@@ -103,43 +103,38 @@ class _UsageGaugeState extends State<UsageGauge>
               );
             },
           ),
-          Positioned(
-            bottom: 8,
-            child: Column(
-              children: [
-                Text(
-                  widget.state.formattedTotal,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -1,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.state.formattedTotal,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${widget.state.percentLeft}% left',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: widget.state.isOverGoal
+                          ? AppColors.error
+                          : AppColors.gold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${widget.state.percentLeft}% left',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: widget.state.isOverGoal
-                            ? AppColors.error
-                            : AppColors.gold,
-                      ),
-                    ),
-                    Text(
-                      '  |  ',
-                      style: AppTextStyles.bodySmall,
-                    ),
-                    Text(
-                      widget.state.formattedGoal,
-                      style: AppTextStyles.bodySmall,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  Text('  |  ', style: AppTextStyles.bodySmall),
+                  Text(
+                    widget.state.formattedGoal,
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -186,10 +181,10 @@ class _GaugePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height - 10);
+    final center = Offset(size.width / 2, size.height / 2); // 👈 was size.height - 10
     final radius = size.width / 2 - 16;
-    const startAngle = pi;
-    const sweepAngle = pi;
+    const startAngle = -pi / 2; // 👈 start at top
+    const sweepAngle = 2 * pi;  // 👈 full circle
 
     final trackPaint = Paint()
       ..color = const Color(0xFF252542)
@@ -205,7 +200,6 @@ class _GaugePainter extends CustomPainter {
       ..strokeWidth = 16
       ..strokeCap = StrokeCap.round;
 
-    // background track
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       startAngle,
@@ -214,12 +208,11 @@ class _GaugePainter extends CustomPainter {
       trackPaint,
     );
 
-    // filled arc
     if (value > 0) {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,
-        sweepAngle * value,
+        sweepAngle * value.clamp(0.0, 1.0),
         false,
         fillPaint,
       );

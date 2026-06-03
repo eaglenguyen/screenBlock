@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:screenblock/features/stats/stats_state.dart';
 import 'package:screenblock/features/stats/stats_viewmodel.dart';
 import 'package:screenblock/features/stats/widgets/app_usage_list.dart';
 import 'package:screenblock/features/stats/widgets/usage_gauge.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../core/constants/hivebox_names.dart';
 
 
 class StatsScreen extends ConsumerStatefulWidget {
@@ -28,6 +30,167 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       ref.read(statsViewModelProvider.notifier).loadStats();
     });
   }
+
+  void _showGoalPicker(BuildContext context) {
+    // start at current saved value
+    double selectedHours = StatsState.loadGoalHours();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final totalMinutes = (selectedHours * 60).round();
+          final hours = totalMinutes ~/ 60;
+          final minutes = totalMinutes % 60;
+
+          String formattedLabel() {
+            if (hours == 0) return '${minutes}m';
+            if (minutes == 0) return '${hours}h';
+            return '${hours}h ${minutes}m';
+          }
+
+          return Container(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1E1E35),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // drag handle
+                Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+
+                Text(
+                  'Daily Screen Time Goal',
+                  style: AppTextStyles.headlineSmall,
+                ),
+                const SizedBox(height: 32),
+
+                // big time display
+                Text(
+                  formattedLabel(),
+                  style: const TextStyle(
+                    color: Color(0xFFEDB82A),
+                    fontSize: 52,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'per day',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.4),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // slider
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    activeTrackColor: const Color(0xFFEDB82A),
+                    inactiveTrackColor:
+                    const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                    thumbColor: const Color(0xFFEDB82A),
+                    overlayColor:
+                    const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 10,
+                    ),
+                    trackHeight: 5,
+                    overlayShape: const RoundSliderOverlayShape(
+                      overlayRadius: 22,
+                    ),
+                  ),
+                  child: Slider(
+                    value: selectedHours,
+                    min: 0.5,
+                    max: 7.0,
+                    divisions: 13, // 0.5h increments = 13 steps
+                    onChanged: (val) {
+                      HapticFeedback.selectionClick();
+                      setModalState(() => selectedHours = val);
+                    },
+                  ),
+                ),
+
+                // min/max labels
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '30m',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        '7h',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // save button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final box = Hive.box(HiveBoxNames.settings);
+                      await box.put(
+                        'dailyScreenTimeGoal',
+                        selectedHours,
+                      );
+                      if (context.mounted) Navigator.pop(context);
+                      ref
+                          .read(statsViewModelProvider.notifier)
+                          .loadStats();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEDB82A),
+                      foregroundColor: const Color(0xFF1A1208),
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: const StadiumBorder(),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    child: const Text('Save Goal'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +260,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           ),
           const SizedBox(width: 8),
           _iconButton(
-            icon: Icons.settings_outlined,
-            onTap: () {},
+            icon: Icons.punch_clock,
+            onTap: () => _showGoalPicker(context),
           ),
         ],
       ),

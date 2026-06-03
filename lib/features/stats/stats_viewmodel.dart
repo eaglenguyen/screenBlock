@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:app_usage/app_usage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../core/constants/hivebox_names.dart';
 import 'stats_state.dart';
 
 part 'stats_viewmodel.g.dart';
@@ -16,12 +18,16 @@ class StatsViewModel extends _$StatsViewModel {
   }
 
   Future<void> loadStats() async {
+    final goalHours = StatsState.loadGoalHours(); // 👈 use the static method
+
+
     if (Platform.isIOS) {
       // iOS doesn't support AppUsage
       state = state.copyWith(
         isLoading: false,
         appStats: [],
         totalUsage: Duration.zero,
+        dailyGoalHours: goalHours
       );
       return;
     }
@@ -73,6 +79,7 @@ class StatsViewModel extends _$StatsViewModel {
         appStats: stats,
         totalUsage: total,
         isLoading: false,
+        dailyGoalHours: goalHours
       );
     } catch (e) {
       debugPrint('❌ stats load error: $e');

@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import '../../../data/models/usage_log.dart';
 import '../../../data/models/streak.dart';
-
-
+import '../../../core/constants/hivebox_names.dart';
 
 @immutable
 class AppUsageStat {
   final String packageName;
   final String appName;
   final Duration usage;
-  final double proportion; // 0.0 - 1.0 of total usage
+  final double proportion;
 
   const AppUsageStat({
     required this.packageName,
@@ -32,32 +32,43 @@ class StatsState {
   final Duration totalUsage;
   final bool isLoading;
   final String? error;
-
-  // hardcoded 2h daily goal
-  static const Duration dailyGoal = Duration(hours: 2);
+  final double dailyGoalHours; // 👈 now dynamic from Hive
 
   const StatsState({
     this.appStats = const [],
     this.totalUsage = Duration.zero,
     this.isLoading = false,
     this.error,
+    this.dailyGoalHours = 2.0, // default 2 hours
   });
 
-  // how much of goal is remaining
+  // read goal from Hive — falls back to 2h
+  static double loadGoalHours() {
+    try {
+      final box = Hive.box(HiveBoxNames.settings);
+      return (box.get('dailyScreenTimeGoal', defaultValue: 2.0) as num)
+          .toDouble();
+    } catch (_) {
+      return 2.0;
+    }
+  }
+
+  Duration get dailyGoal =>
+      Duration(minutes: (dailyGoalHours * 60).round());
+
   Duration get remaining {
     final diff = dailyGoal - totalUsage;
     return diff.isNegative ? Duration.zero : diff;
   }
 
-  // percentage of goal remaining 0-100
   int get percentLeft {
     if (totalUsage >= dailyGoal) return 0;
     return ((remaining.inMinutes / dailyGoal.inMinutes) * 100)
         .round();
   }
 
-  // arc fill 0.0-1.0 — caps at 1.0 if over goal
   double get gaugeValue {
+    if (dailyGoal.inMinutes == 0) return 0;
     return (totalUsage.inMinutes / dailyGoal.inMinutes)
         .clamp(0.0, 1.0);
   }
@@ -72,8 +83,12 @@ class StatsState {
   }
 
   String get formattedGoal {
-    final hours = dailyGoal.inHours;
-    return '${hours}h goal';
+    final totalMinutes = (dailyGoalHours * 60).round();
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    if (hours == 0) return '${minutes}m goal';
+    if (minutes == 0) return '${hours}h goal';
+    return '${hours}h ${minutes}m goal';
   }
 
   StatsState copyWith({
@@ -81,12 +96,14 @@ class StatsState {
     Duration? totalUsage,
     bool? isLoading,
     String? error,
+    double? dailyGoalHours,
   }) {
     return StatsState(
       appStats: appStats ?? this.appStats,
       totalUsage: totalUsage ?? this.totalUsage,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
+      dailyGoalHours: dailyGoalHours ?? this.dailyGoalHours,
     );
   }
 }
