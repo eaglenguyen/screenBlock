@@ -5,12 +5,18 @@ import '../home_state.dart';
 
 
 class HomeHeader extends StatelessWidget {
+
+  final HomeState state;
+  final GlobalKey? xpBadgeKey;
+
+
   const HomeHeader({
     super.key,
     required this.state,
+    this.xpBadgeKey, 
+
   });
 
-  final HomeState state;
 
 
   @override
@@ -78,6 +84,7 @@ Widget _buildStreakBadge(HomeState state) {
 
 Widget _buildXpBadge(HomeState state) {
   return _badge(
+    key: xpBadgeKey,
     child: Row(
       children: [
         const Text('⚡',
@@ -95,8 +102,9 @@ Widget _buildXpBadge(HomeState state) {
 
 }
 
-  Widget _badge({required Widget child}) {
+  Widget _badge({required Widget child, Key? key}) {
     return Container(
+      key: key,
       padding: const EdgeInsets.symmetric(
         horizontal: 14, vertical: 7,
       ),

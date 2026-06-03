@@ -619,6 +619,23 @@ class _SessionBottomSheetState
   Future<void> _onSave() async {
     if (_nameController.text.trim().isEmpty) return;
 
+    // validate times
+    final startParts = _startTime.split(':');
+    final endParts = _endTime.split(':');
+    final startMinutes = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+    final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+
+    // allow overnight (end < start) but not equal
+    if (startMinutes == endMinutes) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Start and end time cannot be the same'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     await ref
         .read(scheduleViewModelProvider.notifier)
         .saveSchedule(
@@ -628,7 +645,7 @@ class _SessionBottomSheetState
       endTime: _endTime,
       days: _selectedDays,
       blockingType: _blockingType,
-      blockedApps: _blockedApps,  // 👈 use local state
+      blockedApps: _blockedApps,
       allowedApps: _allowedApps,
     );
 

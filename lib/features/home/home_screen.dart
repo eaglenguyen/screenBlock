@@ -13,10 +13,14 @@ import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../providers/blocking_service_provider.dart';
+import '../../services/xp_animation.dart';
 import 'cards/claim_xp_card.dart';
 import 'cards/session_completed_card.dart';
 import 'home_state.dart';
 import 'home_viewmodel.dart';
+
+final GlobalKey _xpBadgeKey = GlobalKey();
+
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +30,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObserver {
+  bool _hasShownXpAnimation = false;
 
   @override
   void initState() {
@@ -55,14 +60,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
-
     final state = ref.watch(homeViewModelProvider);
+
+    ref.listen(homeViewModelProvider, (previous, next) {
+      debugPrint('🟡 phase change: ${previous?.phase} → ${next.phase}');
+      if (previous?.phase == BlockingPhase.claimXp &&
+          next.phase == BlockingPhase.idle &&
+          !_hasShownXpAnimation) {
+        debugPrint('✅ XP animation should trigger');
+        debugPrint('✅ xpEarned: ${previous?.xpEarned}');
+        _hasShownXpAnimation = true;
+        // 👇 capture overlay before async gap
+        final overlay = Overlay.of(context);
+        // small delay to let home screen render first
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            debugPrint('✅ calling showXpGain');
+            XpAnimation.instance.showXpGain(
+              overlay:overlay,
+              xpBadgeKey: _xpBadgeKey,
+              xpAmount: previous?.xpEarned ?? 0,
+            );
+            // reset flag after animation
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              _hasShownXpAnimation = false;
+            });
+          }
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          HomeHeader(state: state),
+
+          HomeHeader(
+              state: state,
+              xpBadgeKey: _xpBadgeKey,
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(

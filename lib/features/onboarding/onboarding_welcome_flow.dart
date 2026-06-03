@@ -2,22 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:screenblock/features/onboarding/onboarding_chat_screen.dart';
+
+import 'onboarding_demo_screens.dart';
+import 'onboarding_viewmodel.dart';
 
 class OnboardingSteps {
   static const int welcome = 0;
   static const int username = 1;
   static const int referral = 2;
   static const int chat = 3;
+  static const int demo = 4;
 }
 
 class OnboardingWelcomeFlow extends ConsumerStatefulWidget {
-  final Widget chatScreen;
-  final VoidCallback? onComplete;
 
   const OnboardingWelcomeFlow({
     super.key,
-    required this.chatScreen,
-    this.onComplete,
   });
 
   @override
@@ -48,6 +50,19 @@ class _OnboardingWelcomeFlowState
     _nextStep();
   }
 
+  void _previousStep() {
+    HapticFeedback.lightImpact();
+    setState(() => _currentStep--);
+  }
+
+  Future<void> _onComplete() async {
+    await ref
+        .read(onboardingViewModelProvider.notifier)
+        .completeOnboarding();
+    if (mounted) context.go('/home');
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
@@ -68,6 +83,7 @@ class _OnboardingWelcomeFlowState
     );
   }
 
+
   Widget _buildStep() {
     switch (_currentStep) {
       case OnboardingSteps.welcome:
@@ -79,22 +95,38 @@ class _OnboardingWelcomeFlowState
         return _UsernameScreen(
           key: const ValueKey('username'),
           onContinue: _onUsernameSubmitted,
+          onBack: _previousStep,
         );
       case OnboardingSteps.referral:
         return _ReferralScreen(
           key: const ValueKey('referral'),
           onSelected: _onReferralSelected,
+          onBack: _previousStep,
         );
       case OnboardingSteps.chat:
         return KeyedSubtree(
           key: const ValueKey('chat'),
-          child: widget.chatScreen,
+          child: OnboardingChatScreen(
+            onChatComplete: _nextStep,
+          ),
+        );
+      case OnboardingSteps.demo:
+        return KeyedSubtree(
+          key: const ValueKey('demo'),
+          child: OnboardingDemoFlow(
+            onComplete: _nextStep,
+          ),
         );
       default:
-        return widget.chatScreen;
-    }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _onComplete();
+        });
+        return const SizedBox.shrink();    }
   }
+
 }
+
+
 
 // ── Screen 1 — Welcome ────────────────────────────────
 
@@ -261,7 +293,13 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
 
 class _UsernameScreen extends StatefulWidget {
   final Function(String name) onContinue;
-  const _UsernameScreen({super.key, required this.onContinue});
+  final VoidCallback onBack;
+
+  const _UsernameScreen({
+    super.key,
+    required this.onContinue,
+    required this.onBack,
+  });
 
   @override
   State<_UsernameScreen> createState() => _UsernameScreenState();
@@ -298,7 +336,32 @@ class _UsernameScreenState extends State<_UsernameScreen> {
               padding: const EdgeInsets.fromLTRB(28, 24, 28, 36),
               child: Column(
                 children: [
-                  _buildProgressBar(step: 1, total: 3),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: widget.onBack,
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildProgressBar(step: 1, total: 3)),
+                    ],
+                  ),
                   const SizedBox(height: 60),
 
                   // centered headline
@@ -409,7 +472,13 @@ class _UsernameScreenState extends State<_UsernameScreen> {
 
 class _ReferralScreen extends StatefulWidget {
   final Function(String source) onSelected;
-  const _ReferralScreen({super.key, required this.onSelected});
+  final VoidCallback onBack;
+
+  const _ReferralScreen({
+    super.key,
+    required this.onSelected,
+    required this.onBack,
+  });
 
   @override
   State<_ReferralScreen> createState() => _ReferralScreenState();
@@ -441,12 +510,6 @@ class _ReferralScreenState extends State<_ReferralScreen> {
     },
     {
       'icon': null,
-      'bgColor': const Color(0xFFEDB82A),
-      'label': 'Friends',
-      'emoji': '👥',
-    },
-    {
-      'icon': null,
       'bgColor': const Color(0xFF7070A0),
       'label': 'Other',
       'emoji': '✨',
@@ -466,7 +529,32 @@ class _ReferralScreenState extends State<_ReferralScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildProgressBar(step: 2, total: 3),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: widget.onBack,
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildProgressBar(step: 1, total: 3)),
+                    ],
+                  ),
                   const SizedBox(height: 44),
 
                   // centered headline

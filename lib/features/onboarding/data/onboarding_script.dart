@@ -42,10 +42,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
         type: MessageType.bot,
         text: 'before you even breathe',
       ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'before you even decide to',
-      ),
     ],
     userResponses: [
       'ok yes 💀',
@@ -108,12 +104,12 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
       ChatMessage(
         type: MessageType.bot,
-        text: 'that you can\'t trust yourself',
+        text: 'a habit, a routine',
         textColor: Color(0xFFEF5350),
       ),
       ChatMessage(
         type: MessageType.bot,
-        text: 'that your intentions don\'t matter',
+        text: 'that your actions don\'t matter',
         textColor: Color(0xFFEF5350),
       ),
       ChatMessage(
@@ -146,14 +142,13 @@ List<ChatStep> getOnboardingSteps(String name) => [
         type: MessageType.bot,
         text: 'app blockers → you delete them',
       ),
-      ChatMessage(type: MessageType.bot, text: 'willpower → lol'),
       ChatMessage(
         type: MessageType.bot,
         text: 'none of those fix the real problem',
       ),
       ChatMessage(
         type: MessageType.bot,
-        text: 'you never built a ritual',
+        text: 'you never broke the habit and built a healthy ritual',
         textColor: Color(0xFF4CAF50),
       ),
     ],
@@ -231,5 +226,15 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
     ],
     userResponses: ['show me 🙌'],
+  ),
+  // Screen 7 — Demo intro
+  ChatStep(
+    botMessages: [
+      ChatMessage(
+        type: MessageType.bot,
+        text: 'Sure, here is a 3 step demo of how the app works!',
+      ),
+    ],
+    userResponses: ['Nice!'],
   ),
 ];

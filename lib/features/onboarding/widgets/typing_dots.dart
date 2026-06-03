@@ -2,7 +2,7 @@
 import 'package:flutter/cupertino.dart';
 
 class TypingDots extends StatefulWidget {
-  const TypingDots();
+  const TypingDots({super.key});
 
   @override
   State<TypingDots> createState() => TypingDotsState();

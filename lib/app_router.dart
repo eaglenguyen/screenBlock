@@ -35,7 +35,7 @@ class AppRouter {
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
-        builder: (context, state) => const OnboardingWelcomeFlow(chatScreen: OnboardingChatScreen()),
+        builder: (context, state) => const OnboardingWelcomeFlow(),
       ),
 
       // shell wraps tab screens

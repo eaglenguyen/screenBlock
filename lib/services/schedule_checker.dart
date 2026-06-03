@@ -47,9 +47,9 @@ class ScheduleChecker {
     _check();
   }
 
-  Future<void> _check() async {
+  void _check() {
     final box = Hive.box<Schedule>(HiveBoxNames.schedules);
-    final schedules = box.values.where((s) => s.isActive).toList();
+    final schedules = box.values.toList();
 
     debugPrint('📅 _check() fired — ${schedules.length} total schedules');
 
@@ -59,47 +59,67 @@ class ScheduleChecker {
     final now = DateTime.now();
     final currentMinutes = now.hour * 60 + now.minute;
     final currentDay = now.weekday - 1; // 0=Mon ... 6=Sun
+    // previous day for overnight check
+    final previousDay = (currentDay - 1 + 7) % 7;
 
     debugPrint('📅 Current time: ${now.hour}:${now.minute} day=$currentDay minutes=$currentMinutes');
 
     Schedule? matchingSchedule;
 
-    for (final s in schedules) {
-      if (!s.days.contains(currentDay)) continue;
-
-      final startParts = s.startTime.split(':');
-      final endParts = s.endTime.split(':');
-
+    for (final schedule in activeSchedules) {
+      final startParts = schedule.startTime.split(':');
+      final endParts = schedule.endTime.split(':');
       final startMinutes =
           int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
       final endMinutes =
           int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
 
-      debugPrint('📅 Schedule "${s.name}": days=${s.days} start=$startMinutes end=$endMinutes');
-      debugPrint('📅   currentDay match: ${s.days.contains(currentDay)}');
-      debugPrint('📅   time match: $currentMinutes >= $startMinutes && $currentMinutes < $endMinutes = ${currentMinutes >= startMinutes && currentMinutes < endMinutes}');
-      if (currentMinutes >= startMinutes &&
-          currentMinutes < endMinutes) {
-        matchingSchedule = s;
+      final isOvernight = endMinutes < startMinutes;
+
+      bool matches = false;
+
+      if (isOvernight) {
+        // overnight schedule: e.g. 22:00 - 05:00
+        // two cases:
+        // 1. current time is AFTER start (same day)
+        //    e.g. 23:00 >= 22:00 AND day matches start day
+        // 2. current time is BEFORE end (next day)
+        //    e.g. 02:00 < 05:00 AND previous day matches schedule days
+        if (currentMinutes >= startMinutes &&
+            schedule.days.contains(currentDay)) {
+          matches = true;
+          debugPrint('📅 Overnight match (after start): ${schedule.name}');
+        } else if (currentMinutes < endMinutes &&
+            schedule.days.contains(previousDay)) {
+          matches = true;
+          debugPrint('📅 Overnight match (before end next day): ${schedule.name}');
+        }
+      } else {
+        // normal schedule: e.g. 09:00 - 17:00
+        if (currentMinutes >= startMinutes &&
+            currentMinutes < endMinutes &&
+            schedule.days.contains(currentDay)) {
+          matches = true;
+          debugPrint('📅 Normal match: ${schedule.name}');
+        }
+      }
+
+      if (matches) {
+        matchingSchedule = schedule;
         break;
       }
     }
 
     if (matchingSchedule != null) {
-      // should be blocking
       if (!_isScheduleBlocking ||
           _activeScheduleId != matchingSchedule.id) {
-        await _startScheduleBlocking(matchingSchedule);
+        _startScheduleBlocking(matchingSchedule);
       }
     } else {
-      // should not be blocking
       if (_isScheduleBlocking) {
         _stopScheduleBlocking();
       }
     }
-    // in ScheduleChecker._check()
-    debugPrint('📅 Checking schedules at ${DateTime.now().hour}:${DateTime.now().minute} day $currentDay');
-    debugPrint('📅 Found ${schedules.length} active schedules');
   }
 
   Future<void> _startScheduleBlocking(Schedule schedule) async {

@@ -322,6 +322,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
   }
 
   void _onSetMode() {
+    FocusScope.of(context).unfocus(); // 👈 dismiss keyboard first
     ref.read(homeViewModelProvider.notifier)
       ..setBlockingType(_selectedMode)
       ..setBlockedApps(List<String>.from(_blockedApps))

@@ -10,7 +10,9 @@ import 'widgets/typing_dots.dart';
 import 'widgets/onboarding_spotlight_overlay.dart';
 
 class OnboardingChatScreen extends ConsumerStatefulWidget {
-  const OnboardingChatScreen({super.key});
+  final VoidCallback? onChatComplete;
+
+  const OnboardingChatScreen({super.key, this.onChatComplete});
 
   @override
   ConsumerState<OnboardingChatScreen> createState() =>
@@ -71,10 +73,16 @@ class _OnboardingChatScreenState
   }
 
   Future<void> _onChatComplete() async {
-    await ref
-        .read(onboardingViewModelProvider.notifier)
-        .completeOnboarding();
-    if (mounted) context.go('/home');
+    if (widget.onChatComplete != null) {
+      // called from onboarding flow — go to next step
+      widget.onChatComplete!();
+    } else {
+      // standalone — complete onboarding
+      await ref
+          .read(onboardingViewModelProvider.notifier)
+          .completeOnboarding();
+      if (mounted) context.go('/home');
+    }
   }
 
   void _showNextBotMessage() {
@@ -154,6 +162,7 @@ class _OnboardingChatScreenState
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: const Color(0xFF16162A),
       body: Stack(
@@ -276,13 +285,13 @@ class _OnboardingChatScreenState
 
   Widget _buildBotBubble(String text, Color? textColor) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6, right: 64),
+      padding: const EdgeInsets.only(bottom: 10, right: 64),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 11,
+            horizontal: 18,
+            vertical: 14,
           ),
           decoration: BoxDecoration(
             color: const Color(0xFF252542),
@@ -301,11 +310,11 @@ class _OnboardingChatScreenState
             text,
             style: TextStyle(
               color: textColor ?? Colors.white,
-              fontSize: 15,
-              height: 1.4,
+              fontSize: 16,
+              height: 1.5,
               fontWeight: textColor != null
-                  ? FontWeight.w600
-                  : FontWeight.w400,
+                  ? FontWeight.w700
+                  : FontWeight.w500,
             ),
           ),
         ),
@@ -315,13 +324,13 @@ class _OnboardingChatScreenState
 
   Widget _buildUserBubble(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6, left: 64),
+      padding: const EdgeInsets.only(bottom: 10, left: 64),
       child: Align(
         alignment: Alignment.centerRight,
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 11,
+            horizontal: 18,
+            vertical: 14,
           ),
           decoration: BoxDecoration(
             color: const Color(0xFFEDB82A).withValues(alpha: 0.12),
@@ -340,9 +349,9 @@ class _OnboardingChatScreenState
             text,
             style: const TextStyle(
               color: Color(0xFFEDB82A),
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              height: 1.4,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1.5,
             ),
           ),
         ),
@@ -478,7 +487,7 @@ class _OnboardingChatScreenState
                     style: const TextStyle(
                       color: Color(0xFFEDB82A),
                       fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

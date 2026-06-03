@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:screenblock/providers/blocking_service_provider.dart';
 import 'package:screenblock/services/schedule_checker.dart';
+import 'package:screenblock/services/xp_animation.dart';
 import 'UI/overlay_screen.dart';
 import 'app_router.dart';
 import 'core/constants/hivebox_names.dart';
@@ -21,6 +22,8 @@ void main() async {
 
 
   await Hive.initFlutter();
+  await XpAnimation.instance.init();
+
 
   // register adapters
   Hive.registerAdapter(TimerConfigAdapter());

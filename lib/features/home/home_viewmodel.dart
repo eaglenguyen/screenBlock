@@ -437,7 +437,7 @@ class HomeViewModel extends _$HomeViewModel {
     loadTodayBlockedTime();
 
     // calculate XP — 1 XP per minute blocked
-    final xpEarned = state.selectedMinutes;
+    final xpEarned = state.selectedMinutes * 10;
 
 
     state = state.copyWith(

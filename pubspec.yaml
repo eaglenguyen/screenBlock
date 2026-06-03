@@ -70,6 +70,8 @@ dependencies:
   confetti: ^0.7.0
   font_awesome_flutter: ^10.7.0
   flutter_svg: ^2.0.10+1
+  google_fonts: ^6.2.1
+  just_audio: ^0.9.40
 
 
 
@@ -98,6 +100,7 @@ flutter:
   assets:
     - assets/lottie/
     - assets/icons/
+    - assets/sounds/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
