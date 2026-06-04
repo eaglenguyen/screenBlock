@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/constants/hivebox_names.dart';
+import '../../providers/repository_providers.dart';
 import 'stats_state.dart';
 
 part 'stats_viewmodel.g.dart';
@@ -18,8 +19,8 @@ class StatsViewModel extends _$StatsViewModel {
   }
 
   Future<void> loadStats() async {
-    final goalHours = StatsState.loadGoalHours(); // 👈 use the static method
-
+    final goalHours = StatsState.loadGoalHours();
+    final blockGoalHours = StatsState.loadBlockGoalHours();
 
     if (Platform.isIOS) {
       // iOS doesn't support AppUsage
@@ -50,6 +51,7 @@ class StatsViewModel extends _$StatsViewModel {
       // filter out system apps and zero usage
       final filtered = usageList.where((u) =>
       u.usage.inMinutes > 0 &&
+          u.usage.inHours < 24 &&
           !_isSystemApp(u.packageName)).toList();
 
       // sort by usage descending
@@ -60,6 +62,12 @@ class StatsViewModel extends _$StatsViewModel {
         Duration.zero,
             (sum, u) => sum + u.usage,
       );
+
+      // cap total at 24 hours
+      final cappedTotal = total.inHours >= 24
+          ? const Duration(hours: 24)
+          : total; // 👈 never show more than 24h
+
 
       // build app stats with proportions
       final stats = filtered.map((u) {
@@ -75,17 +83,25 @@ class StatsViewModel extends _$StatsViewModel {
         );
       }).toList();
 
+      final blockedDuration = await ref
+          .read(blockSessionRepositoryProvider)
+          .getTodayTotalDuration();
+
       state = state.copyWith(
-        appStats: stats,
-        totalUsage: total,
-        isLoading: false,
-        dailyGoalHours: goalHours
+          appStats: stats,
+          totalUsage: cappedTotal,
+          isLoading: false,
+          dailyGoalHours: goalHours,
+          blockGoalHours: blockGoalHours,
+          blockedToday: blockedDuration
       );
     } catch (e) {
       debugPrint('❌ stats load error: $e');
+      final isPermission = e.toString().contains('SecurityException') ||
+          e.toString().contains('permission');
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        error: isPermission ? 'permission denied' : e.toString(),
       );
     }
   }

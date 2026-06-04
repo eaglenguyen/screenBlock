@@ -180,12 +180,10 @@ class AndroidBlockingService implements BlockingService {
   @override
   Future<bool> hasUsageStatsPermission() async {
     try {
-      final now = DateTime.now();
-      final usage = await AppUsage().getAppUsage(
-        now.subtract(const Duration(hours: 1)),
-        now,
+      final result = await _methodChannel.invokeMethod<bool>(
+        'hasUsageStatsPermission',
       );
-      return usage.isNotEmpty;
+      return result ?? false;
     } catch (e) {
       return false;
     }

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../stats_state.dart';
@@ -17,209 +18,315 @@ class UsageGauge extends StatefulWidget {
 }
 
 class _UsageGaugeState extends State<UsageGauge>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
 
-  late AnimationController _controller;
-  late Animation<double> _animation;
+  late AnimationController _outerCtrl;
+  late AnimationController _innerCtrl;
+  late Animation<double> _outerAnim;
+  late Animation<double> _innerAnim;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _outerCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _animation = Tween<double>(
-      begin: 0,
-      end: widget.state.gaugeValue,
-    ).animate(CurvedAnimation(
-      parent: _controller,
+    _innerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _outerAnim = Tween<double>(begin: 0, end: widget.state.gaugeValue)
+        .animate(CurvedAnimation(
+      parent: _outerCtrl,
       curve: Curves.easeOutCubic,
     ));
-    _controller.forward();
+    _innerAnim = Tween<double>(begin: 0, end: widget.state.blockedGaugeValue)
+        .animate(CurvedAnimation(
+      parent: _innerCtrl,
+      curve: Curves.easeOutCubic,
+    ));
+    _outerCtrl.forward();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _innerCtrl.forward();
+    });
   }
 
   @override
   void didUpdateWidget(UsageGauge oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.state.gaugeValue != widget.state.gaugeValue) {
-      _animation = Tween<double>(
-        begin: _animation.value,
+      _outerAnim = Tween<double>(
+        begin: _outerAnim.value,
         end: widget.state.gaugeValue,
-      ).animate(CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutCubic,
-      ));
-      _controller
-        ..reset()
-        ..forward();
+      ).animate(CurvedAnimation(parent: _outerCtrl, curve: Curves.easeOutCubic));
+      _outerCtrl..reset()..forward();
+    }
+    if (oldWidget.state.blockedGaugeValue != widget.state.blockedGaugeValue) {
+      _innerAnim = Tween<double>(
+        begin: _innerAnim.value,
+        end: widget.state.blockedGaugeValue,
+      ).animate(CurvedAnimation(parent: _innerCtrl, curve: Curves.easeOutCubic));
+      _innerCtrl..reset()..forward();
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _outerCtrl.dispose();
+    _innerCtrl.dispose();
     super.dispose();
+  }
+
+  Color get _outerColor {
+    if (widget.state.gaugeValue >= 0.8) return const Color(0xFFE74C3C);
+    if (widget.state.gaugeValue >= 0.5) return const Color(0xFFFF8C00);
+    return const Color(0xFF4CAF50);
+  }
+
+  String _formatOverage() {
+    final over = widget.state.totalUsage - widget.state.dailyGoal;
+    final hours = over.inHours;
+    final minutes = over.inMinutes % 60;
+    if (hours > 0) return '${hours}h ${minutes}m';
+    return '${minutes}m';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
       decoration: BoxDecoration(
         color: AppColors.backgroundCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.border,
-          width: 0.5,
-        ),
+        border: Border.all(color: AppColors.border, width: 0.5),
       ),
-      child: Column(
+      child: Row(
         children: [
-          _buildGauge(),
-          const SizedBox(height: 12),
-          _buildLegend(),
+          // ── Rings (left side) ──────────────────────
+          SizedBox(
+            width: 160,
+            height: 160,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_outerAnim, _innerAnim]),
+              builder: (context, _) {
+                return CustomPaint(
+                  size: const Size(160, 160),
+                  painter: _DualRingPainter(
+                    outerValue: _outerAnim.value,
+                    innerValue: _innerAnim.value,
+                    isOverGoal: widget.state.isOverGoal,
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(width: 20),
+
+          // ── Stats (right side) ────────────────────
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // screen time stat
+                _statRow(
+                  label: 'Screen Time',
+                  value: widget.state.formattedTotal,
+                  goal: widget.state.formattedGoal,
+                  color: _outerColor,
+                  suffix: widget.state.isOverGoal
+                      ? '+${_formatOverage()} over'
+                      : '${widget.state.percentLeft}% left',
+                  isOverGoal: widget.state.isOverGoal,
+                ),
+
+                const SizedBox(height: 6),
+                Container(
+                  height: 0.5,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+                const SizedBox(height: 6),
+
+                // blocked time stat
+                _statRow(
+                  label: 'Blocked',
+                  value: widget.state.formattedBlocked,
+                  goal: widget.state.formattedBlockGoal,
+                  color: const Color(0xFF4ECDC4),
+                  suffix: widget.state.blockedGaugeValue >= 1.0
+                      ? 'Goal hit! 🎉'
+                      : '${(widget.state.blockedGaugeValue * 100).round()}% of goal',
+                  isOverGoal: false,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildGauge() {
-    return SizedBox(
-      width: 200,
-      height: 200,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: _animation,
-            builder: (context, _) {
-              return CustomPaint(
-                size: const Size(200, 200),
-                painter: _GaugePainter(
-                  value: _animation.value,
-                  isOverGoal: widget.state.isOverGoal,
-                ),
-              );
-            },
+  Widget _statRow({
+    required String label,
+    required String value,
+    required String goal,
+    required Color color,
+    required String suffix,
+    required bool isOverGoal,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: Colors.white.withValues(alpha: 0.45),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
+        ),
+        const SizedBox(height: 2),
+        RichText(
+          text: TextSpan(
             children: [
-              Text(
-                widget.state.formattedTotal,
-                style: const TextStyle(
-                  fontSize: 28,
+              TextSpan(
+                text: value,
+                style: GoogleFonts.poppins(
+                  color: color,
+                  fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
                   letterSpacing: -1,
                 ),
               ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${widget.state.percentLeft}% left',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: widget.state.isOverGoal
-                          ? AppColors.error
-                          : AppColors.gold,
-                    ),
-                  ),
-                  Text('  |  ', style: AppTextStyles.bodySmall),
-                  Text(
-                    widget.state.formattedGoal,
-                    style: AppTextStyles.bodySmall,
-                  ),
-                ],
+              TextSpan(
+                text: ' / ${goal.replaceAll(' goal', '')}',
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegend() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _legendItem(AppColors.gold, 'Used'),
-        const SizedBox(width: 16),
-        _legendItem(AppColors.backgroundSubtle, 'Remaining'),
-      ],
-    );
-  }
-
-  Widget _legendItem(Color color, String label) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          suffix,
+          style: GoogleFonts.poppins(
+            color: isOverGoal
+                ? const Color(0xFFE74C3C)
+                : color.withValues(alpha: 0.7),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: 5),
-        Text(label, style: AppTextStyles.bodySmall),
       ],
     );
   }
 }
 
-class _GaugePainter extends CustomPainter {
-  const _GaugePainter({
-    required this.value,
+class _DualRingPainter extends CustomPainter {
+  const _DualRingPainter({
+    required this.outerValue,
+    required this.innerValue,
     required this.isOverGoal,
   });
 
-  final double value;
+  final double outerValue;
+  final double innerValue;
   final bool isOverGoal;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2); // 👈 was size.height - 10
-    final radius = size.width / 2 - 16;
-    const startAngle = -pi / 2; // 👈 start at top
-    const sweepAngle = 2 * pi;  // 👈 full circle
+    final center = Offset(size.width / 2, size.height / 2);
+    const startAngle = -pi / 2;
+    const fullSweep = 2 * pi;
+    const strokeWidth = 16.0;
+    const ringGap = 8.0;
 
-    final trackPaint = Paint()
-      ..color = const Color(0xFF252542)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 16
-      ..strokeCap = StrokeCap.round;
+    final outerRadius = size.width / 2 - strokeWidth / 2 - 2;
+    final innerRadius = outerRadius - strokeWidth - ringGap;
 
-    final fillPaint = Paint()
-      ..color = isOverGoal
-          ? const Color(0xFFE74C3C)
-          : const Color(0xFFEDB82A)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 16
-      ..strokeCap = StrokeCap.round;
+    Color outerColor() {
+      if (outerValue >= 0.8) return const Color(0xFFE74C3C);
+      if (outerValue >= 0.5) return const Color(0xFFFF8C00);
+      return const Color(0xFF4CAF50);
+    }
 
+    final remainingValue = (1.0 - outerValue).clamp(0.0, 1.0);
+
+    // ── Outer track ───────────────────────────────
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      trackPaint,
+      Rect.fromCircle(center: center, radius: outerRadius),
+      startAngle, fullSweep, false,
+      Paint()
+        ..color = const Color(0xFF252542)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round,
     );
 
-    if (value > 0) {
+    // ── Outer fill (remaining) ────────────────────
+    final outerFillPaint = Paint()
+      ..color = outerColor()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    if (remainingValue > 0) {
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
+        Rect.fromCircle(center: center, radius: outerRadius),
         startAngle,
-        sweepAngle * value.clamp(0.0, 1.0),
+        fullSweep * remainingValue,
         false,
-        fillPaint,
+        outerFillPaint,
+      );
+    } else {
+      // red dot at top when over goal
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: outerRadius),
+        startAngle, 0.001, false,
+        Paint()
+          ..color = const Color(0xFFE74C3C)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+
+    // ── Inner track ───────────────────────────────
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: innerRadius),
+      startAngle, fullSweep, false,
+      Paint()
+        ..color = const Color(0xFF252542)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // ── Inner fill (blocked) ──────────────────────
+    if (innerValue > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: innerRadius),
+        startAngle,
+        fullSweep * innerValue.clamp(0.0, 1.0),
+        false,
+        Paint()
+          ..color = const Color(0xFF4ECDC4)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_GaugePainter old) =>
-      old.value != value || old.isOverGoal != isOverGoal;
+  bool shouldRepaint(_DualRingPainter old) =>
+      old.outerValue != outerValue ||
+          old.innerValue != innerValue ||
+          old.isOverGoal != isOverGoal;
 }

@@ -160,6 +160,36 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
               padding: const EdgeInsets.fromLTRB(28, 0, 28, 36),
               child: Column(
                 children: [
+                  // Remove when production happens
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: widget.onGetStarted, // 👈 skips straight to next step
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Text(
+                          'Skip (debug)',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.4),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   const Spacer(flex: 2),
 
                   // element 0 — logo
