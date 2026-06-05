@@ -17,7 +17,7 @@ class SessionCard extends StatelessWidget {
   final Schedule schedule;
   final VoidCallback onTap;
   final VoidCallback onToggle;
-  final VoidCallback onPause; // 👈 new
+  final VoidCallback onPause;
   final bool isCurrentlyActive; // 👈 true when THIS schedule is blocking right now
   final bool isPaused; // 👈 true when paused
 

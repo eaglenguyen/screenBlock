@@ -85,7 +85,9 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.welcome:
         return _WelcomeScreen(
           key: const ValueKey('welcome'),
-          onGetStarted: _nextStep,
+            onGetStarted: _nextStep,
+            //remove debug
+            onSkip: _onComplete
         );
       case OnboardingSteps.username:
         return _UsernameScreen(
@@ -126,7 +128,9 @@ class _OnboardingWelcomeFlowState
 
 class _WelcomeScreen extends StatefulWidget {
   final VoidCallback onGetStarted;
-  const _WelcomeScreen({super.key, required this.onGetStarted});
+  // Debug button, remove this
+  final VoidCallback onSkip;
+  const _WelcomeScreen({super.key, required this.onGetStarted, required this.onSkip});
 
   @override
   State<_WelcomeScreen> createState() => _WelcomeScreenState();
@@ -164,7 +168,7 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
                   Align(
                     alignment: Alignment.topRight,
                     child: GestureDetector(
-                      onTap: widget.onGetStarted, // 👈 skips straight to next step
+                      onTap: widget.onSkip, // 👈 skips straight to next step
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,

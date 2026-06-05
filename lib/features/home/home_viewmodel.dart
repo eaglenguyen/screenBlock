@@ -79,7 +79,11 @@ class HomeViewModel extends _$HomeViewModel {
       state = state.copyWith(isScheduleActive: true);
     };
     ScheduleChecker.instance.onScheduleStopped = () {
-      state = state.copyWith(isScheduleActive: false);
+      state = state.copyWith(
+        isScheduleActive: false,
+        isSchedulePaused: false,
+        schedulePauseRemainingSeconds: 0,
+      );
     };
     ScheduleChecker.instance.onSchedulePaused = () {
       state = state.copyWith(

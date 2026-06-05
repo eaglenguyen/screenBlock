@@ -126,11 +126,6 @@ class HomeState {
     );
   }
 
-  bool get isBlocking =>
-      phase == BlockingPhase.active ||
-          phase == BlockingPhase.countdown ||
-          phase == BlockingPhase.onBreak;
-
 
   // formatted for display HH:MM:SS
   String get formattedBlockedTime {
@@ -143,15 +138,7 @@ class HomeState {
     return '$h:$m:$s';
   }
 
-  String get formattedTime {
-    final h = (remainingSeconds ~/ 3600)
-        .toString().padLeft(2, '0');
-    final m = ((remainingSeconds % 3600) ~/ 60)
-        .toString().padLeft(2, '0');
-    final s = (remainingSeconds % 60)
-        .toString().padLeft(2, '0');
-    return '$h:$m:$s';
-  }
+
 
   String get formattedPauseRemaining {
     final s = schedulePauseRemainingSeconds;

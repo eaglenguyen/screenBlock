@@ -118,7 +118,7 @@ class ScheduleScreen extends ConsumerWidget {
     );
   }
 
-  void _openCreateSession(BuildContext context) {
+  void  _openCreateSession(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

@@ -1,5 +1,0 @@
- extern const unsigned char Pods_DeviceActivityReportExtensionVersionString[];
- extern const double Pods_DeviceActivityReportExtensionVersionNumber;
-
- const unsigned char Pods_DeviceActivityReportExtensionVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:Pods_DeviceActivityReportExtension  PROJECT:Pods-1" "\n";
- const double Pods_DeviceActivityReportExtensionVersionNumber __attribute__ ((used)) = (double)1.;

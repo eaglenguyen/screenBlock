@@ -10,7 +10,7 @@ class ActiveBlockingCard extends StatelessWidget {
   final VoidCallback onTakeBreak;
   final VoidCallback onGiveUp;
   final VoidCallback onEndBreak;
-  final VoidCallback onBlockListTapped; // 👈 add
+  final VoidCallback onBlockListTapped;
 
 
   const ActiveBlockingCard({
@@ -18,8 +18,8 @@ class ActiveBlockingCard extends StatelessWidget {
     required this.state,
     required this.onTakeBreak,
     required this.onGiveUp,
-    required this.onEndBreak, // 👈 add
-    required this.onBlockListTapped, // 👈 add
+    required this.onEndBreak,
+    required this.onBlockListTapped,
 
 
   });
@@ -92,7 +92,7 @@ class ActiveBlockingCard extends StatelessWidget {
         : 'All Apps';
 
     return GestureDetector(
-      onTap: onBlockListTapped, // 👈 add
+      onTap: onBlockListTapped,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 14,
@@ -191,7 +191,7 @@ class ActiveBlockingCard extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Text(
-          '⚡ +10 XP',
+          '⚡ +${state.xpEarned} XP',
           style: AppTextStyles.bodySmall.copyWith(
             color: AppColors.gold,
             fontWeight: FontWeight.w600,

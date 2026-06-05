@@ -52,7 +52,20 @@ class Schedule extends HiveObject {
         createdAt = createdAt ?? DateTime.now();
 
   // display helpers
-  String get timeRange => '$startTime - $endTime';
+  String get timeRange {
+    if (startTime == '00:00' && endTime == '23:59') return 'All Day';
+    return '${_formatTime(startTime)} - ${_formatTime(endTime)}';
+  }
+
+  String _formatTime(String time) {
+    final parts = time.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    final displayMinute = minute.toString().padLeft(2, '0');
+    return '$displayHour:$displayMinute $period';
+  }
 
   String get daysDisplay {
     const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];

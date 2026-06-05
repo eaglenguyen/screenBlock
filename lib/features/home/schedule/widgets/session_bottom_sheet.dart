@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/schedule.dart';
 import '../../../../domain/platform/ios_blocking_service.dart';
 import '../../../../providers/blocking_service_provider.dart';
+import '../../../../services/schedule_checker.dart';
+import '../../home_viewmodel.dart';
 import '../../widgets/app_list_sheet.dart';
 import '../schedule_viewmodel.dart';
 
@@ -39,6 +40,7 @@ class _SessionBottomSheetState
 
 
   bool get isEditing => widget.existingSchedule != null;
+  bool _isAllDay = false;
 
   @override
   void initState() {
@@ -54,6 +56,7 @@ class _SessionBottomSheetState
         AppConstants.blockingTypeAllApps;
     _blockedApps = List.from(s?.blockedApps ?? []);
     _allowedApps = List.from(s?.allowedApps ?? []);
+    _isAllDay = _startTime == '00:00' && _endTime == '23:59';
   }
 
   @override
@@ -104,10 +107,15 @@ class _SessionBottomSheetState
             _buildNameRow(),
             const SizedBox(height: 8),
 
-            // time card
-            _buildTimeCard(),
+            // 👇 add all day toggle here
+            _buildAllDayToggle(),
             const SizedBox(height: 8),
 
+            // time card — hidden when all day is on
+            if (!_isAllDay) ...[
+              _buildTimeCard(),
+              const SizedBox(height: 8),
+            ],
             // blocking type
             _buildBlockingTypeRow(),
             const SizedBox(height: 8),
@@ -176,6 +184,79 @@ class _SessionBottomSheetState
     );
   }
 
+  Widget _buildAllDayToggle() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isAllDay = !_isAllDay;
+          if (_isAllDay) {
+            _startTime = '00:00';
+            _endTime = '23:59';
+          } else {
+            // restore defaults when turning off
+            _startTime = '09:00';
+            _endTime = '17:00';
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSubtle,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: _isAllDay
+                ? AppColors.gold.withValues(alpha: 0.4)
+                : AppColors.border,
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Text('☀️', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text('All Day', style: AppTextStyles.bodyLarge),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 44,
+              height: 24,
+              decoration: BoxDecoration(
+                color: _isAllDay
+                    ? AppColors.gold
+                    : AppColors.backgroundSubtle,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.border,
+                  width: 0.5,
+                ),
+              ),
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 200),
+                alignment: _isAllDay
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Container(
+                  margin: const EdgeInsets.all(2),
+                  width: 18,
+                  height: 18,
+                  decoration: const BoxDecoration(
+                    color: AppColors.textPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTimeCard() {
     return Container(
       decoration: BoxDecoration(
@@ -188,10 +269,8 @@ class _SessionBottomSheetState
       ),
       child: Column(
         children: [
-          _timeRow('Starts', _startTime, () async {
-            final t = await _pickTime(
-              context, _startTime,
-            );
+          _timeRow('Starts', _formatDisplayTime(_startTime), () async {
+            final t = await _pickTime(context, _startTime);
             if (t != null) setState(() => _startTime = t);
           }),
           const Divider(
@@ -201,10 +280,8 @@ class _SessionBottomSheetState
             indent: 16,
             endIndent: 16,
           ),
-          _timeRow('Ends', _endTime, () async {
-            final t = await _pickTime(
-              context, _endTime,
-            );
+          _timeRow('Ends', _formatDisplayTime(_endTime), () async {
+            final t = await _pickTime(context, _endTime);
             if (t != null) setState(() => _endTime = t);
           }),
         ],
@@ -655,10 +732,33 @@ class _SessionBottomSheetState
   Future<void> _onDelete() async {
     if (widget.existingSchedule == null) return;
 
+    // 👇 if this schedule is currently paused or active, stop it
+    final homeNotifier = ref.read(homeViewModelProvider.notifier);
+    final homeState = ref.read(homeViewModelProvider);
+
+    if (homeState.isScheduleActive || homeState.isSchedulePaused) {
+      homeNotifier.resumeSchedule(); // clears pause timer
+      // small delay then stop
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
     await ref
         .read(scheduleViewModelProvider.notifier)
         .deleteSchedule(widget.existingSchedule!.id);
 
+    // force schedule checker to re-evaluate
+    ScheduleChecker.instance.checkNow();
+
     if (mounted) Navigator.pop(context);
+  }
+
+  String _formatDisplayTime(String time) {
+    final parts = time.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    final displayMinute = minute.toString().padLeft(2, '0');
+    return '$displayHour:$displayMinute $period';
   }
 }

@@ -44,7 +44,6 @@ class ScheduleChecker {
   }
 
   void checkNow() {
-    debugPrint('📅 checkNow() called');
     _check();
   }
 
@@ -105,10 +104,8 @@ class ScheduleChecker {
     final box = Hive.box<Schedule>(HiveBoxNames.schedules);
     final schedules = box.values.toList();
 
-    debugPrint('📅 _check() fired — ${schedules.length} total schedules');
 
     final activeSchedules = schedules.where((s) => s.isActive).toList();
-    debugPrint('📅 ${activeSchedules.length} active schedules');
 
     final now = DateTime.now();
     final currentMinutes = now.hour * 60 + now.minute;
