@@ -13,33 +13,34 @@ class ScheduleChecker {
   static final instance = ScheduleChecker._();
 
   Timer? _timer;
+  Timer? _pauseTimer;
   BlockingService? _blockingService;
   bool _isScheduleBlocking = false;
+  bool _isPaused = false;
   String? _activeScheduleId;
+  Schedule? _activeSchedule;
+  DateTime? _pauseEndsAt;
+
   VoidCallback? onScheduleStarted;
   VoidCallback? onScheduleStopped;
-
+  VoidCallback? onSchedulePaused;
+  VoidCallback? onScheduleResumed;
+  // fires every second while paused with remaining seconds
+  void Function(int remainingSeconds)? onPauseTickChanged;
 
   void start(BlockingService blockingService) {
     _blockingService = blockingService;
     _timer?.cancel();
-
     debugPrint('📅 ScheduleChecker started');
-
-
-    // check every minute
-    _timer = Timer.periodic(
-      const Duration(minutes: 1),
-          (_) => _check(),
-    );
-
-    // check immediately on start
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) => _check());
     _check();
   }
 
   void stop() {
     _timer?.cancel();
     _timer = null;
+    _pauseTimer?.cancel();
+    _pauseTimer = null;
   }
 
   void checkNow() {
@@ -47,7 +48,60 @@ class ScheduleChecker {
     _check();
   }
 
+  // ── Pause for X minutes ───────────────────────────
+  void pauseFor(int minutes) {
+    if (!_isScheduleBlocking) return;
+    debugPrint('📅 Schedule paused for $minutes minutes');
+
+    _isPaused = true;
+    _pauseEndsAt = DateTime.now().add(Duration(minutes: minutes));
+
+    // stop blocking while paused
+    _blockingService?.stopAllMonitoring();
+    onSchedulePaused?.call();
+
+    // start pause countdown ticker (every second)
+    _pauseTimer?.cancel();
+    _pauseTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_pauseEndsAt == null) {
+        timer.cancel();
+        return;
+      }
+      final remaining = _pauseEndsAt!
+          .difference(DateTime.now())
+          .inSeconds;
+
+      if (remaining <= 0) {
+        timer.cancel();
+        _resumeFromPause();
+      } else {
+        onPauseTickChanged?.call(remaining);
+      }
+    });
+  }
+
+  void resumeNow() {
+    _pauseTimer?.cancel();
+    _resumeFromPause();
+  }
+
+  void _resumeFromPause() {
+    if (!_isPaused) return;
+    debugPrint('📅 Schedule resuming from pause');
+    _isPaused = false;
+    _pauseEndsAt = null;
+
+    // restart blocking with same schedule
+    if (_activeSchedule != null) {
+      _startScheduleBlocking(_activeSchedule!);
+    }
+    onScheduleResumed?.call();
+  }
+
   void _check() {
+    // don't check while paused — let pause timer handle resume
+    if (_isPaused) return;
+
     final box = Hive.box<Schedule>(HiveBoxNames.schedules);
     final schedules = box.values.toList();
 
@@ -58,11 +112,9 @@ class ScheduleChecker {
 
     final now = DateTime.now();
     final currentMinutes = now.hour * 60 + now.minute;
-    final currentDay = now.weekday - 1; // 0=Mon ... 6=Sun
-    // previous day for overnight check
+    final currentDay = now.weekday - 1;
     final previousDay = (currentDay - 1 + 7) % 7;
 
-    debugPrint('📅 Current time: ${now.hour}:${now.minute} day=$currentDay minutes=$currentMinutes');
 
     Schedule? matchingSchedule;
 
@@ -75,32 +127,25 @@ class ScheduleChecker {
           int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
 
       final isOvernight = endMinutes < startMinutes;
-
       bool matches = false;
 
+
+
+
+
       if (isOvernight) {
-        // overnight schedule: e.g. 22:00 - 05:00
-        // two cases:
-        // 1. current time is AFTER start (same day)
-        //    e.g. 23:00 >= 22:00 AND day matches start day
-        // 2. current time is BEFORE end (next day)
-        //    e.g. 02:00 < 05:00 AND previous day matches schedule days
         if (currentMinutes >= startMinutes &&
             schedule.days.contains(currentDay)) {
           matches = true;
-          debugPrint('📅 Overnight match (after start): ${schedule.name}');
         } else if (currentMinutes < endMinutes &&
             schedule.days.contains(previousDay)) {
           matches = true;
-          debugPrint('📅 Overnight match (before end next day): ${schedule.name}');
         }
       } else {
-        // normal schedule: e.g. 09:00 - 17:00
         if (currentMinutes >= startMinutes &&
             currentMinutes < endMinutes &&
             schedule.days.contains(currentDay)) {
           matches = true;
-          debugPrint('📅 Normal match: ${schedule.name}');
         }
       }
 
@@ -125,11 +170,9 @@ class ScheduleChecker {
   Future<void> _startScheduleBlocking(Schedule schedule) async {
     if (_blockingService == null) return;
     debugPrint('📅 Schedule starting: ${schedule.name}');
-    debugPrint('📅 _startScheduleBlocking: ${schedule.name}');
-    debugPrint('📅 blockingType: ${schedule.blockingType}');
-    debugPrint('📅 blockedApps: ${schedule.blockedApps}');
-    debugPrint('📅 allowedApps: ${schedule.allowedApps}');
+
     _blockingService!.setBlockingMode(schedule.blockingType);
+    _activeSchedule = schedule;
 
     if (Platform.isIOS) {
       _blockingService!.startMonitoring('ios_apps', 999);
@@ -138,9 +181,6 @@ class ScheduleChecker {
           AppConstants.blockingTypeSpecificApps
           ? schedule.blockedApps
           : schedule.allowedApps;
-
-      debugPrint('📅 apps to monitor: $apps');
-      debugPrint('📅 apps isEmpty: ${apps.isEmpty}');
 
       if (apps.isEmpty) {
         debugPrint('📅 Schedule has no apps — skipping');
@@ -151,7 +191,6 @@ class ScheduleChecker {
         await _blockingService!.startMonitoring(pkg, 999);
       }
 
-      // mark as schedule so _restoreSession ignores it
       if (_blockingService is AndroidBlockingService) {
         await (_blockingService as AndroidBlockingService)
             .persistBlockingState(
@@ -166,16 +205,18 @@ class ScheduleChecker {
     onScheduleStarted?.call();
   }
 
-
   void _stopScheduleBlocking() {
     if (_blockingService == null) return;
     debugPrint('📅 Schedule ending — stopping blocking');
-
     _blockingService!.stopAllMonitoring();
     _isScheduleBlocking = false;
     _activeScheduleId = null;
+    _activeSchedule = null;
+    onScheduleStopped?.call();
   }
 
   bool get isScheduleBlocking => _isScheduleBlocking;
+  bool get isPaused => _isPaused;
+  DateTime? get pauseEndsAt => _pauseEndsAt;
   String? get activeScheduleId => _activeScheduleId;
 }

@@ -74,14 +74,30 @@ class HomeViewModel extends _$HomeViewModel {
     // load saved XP
     final savedXp = _loadTotalXp();
     state = state.copyWith(totalXp: savedXp);
-
+// 👇 register ALL callbacks before start()
     ScheduleChecker.instance.onScheduleStarted = () {
       state = state.copyWith(isScheduleActive: true);
     };
     ScheduleChecker.instance.onScheduleStopped = () {
       state = state.copyWith(isScheduleActive: false);
     };
-    // start schedule checker
+    ScheduleChecker.instance.onSchedulePaused = () {
+      state = state.copyWith(
+        isScheduleActive: true,
+        isSchedulePaused: true,
+      );
+    };
+    ScheduleChecker.instance.onScheduleResumed = () {
+      state = state.copyWith(
+        isSchedulePaused: false,
+        schedulePauseRemainingSeconds: 0,
+      );
+    };
+    ScheduleChecker.instance.onPauseTickChanged = (remaining) {
+      state = state.copyWith(schedulePauseRemainingSeconds: remaining);
+    };
+
+    // 👇 start AFTER all callbacks registered
     ScheduleChecker.instance.start(_blockingService);
 
     _restoreSession();
@@ -114,6 +130,13 @@ class HomeViewModel extends _$HomeViewModel {
     state = state.copyWith(shouldAnimateBlockedTime: false);
   }
 
+  void pauseSchedule(int minutes) {
+    ScheduleChecker.instance.pauseFor(minutes);
+  }
+
+  void resumeSchedule() {
+    ScheduleChecker.instance.resumeNow();
+  }
 
 
   void loadTodayBlockedTime() {

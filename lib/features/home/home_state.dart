@@ -39,6 +39,8 @@ class HomeState {
   final int originalBreakSeconds;
   final bool shouldAnimateBlockedTime;
   final bool isScheduleActive;
+  final bool isSchedulePaused;
+  final int schedulePauseRemainingSeconds;
 
 
 
@@ -64,6 +66,8 @@ class HomeState {
     this.originalBreakSeconds = 0,
     this.shouldAnimateBlockedTime = false,
     this.isScheduleActive = false,
+    this.isSchedulePaused = false,
+    this.schedulePauseRemainingSeconds = 0,
 
   });
 
@@ -91,6 +95,8 @@ class HomeState {
     int? originalBreakSeconds,
     bool? shouldAnimateBlockedTime,
     bool? isScheduleActive,
+    bool? isSchedulePaused,
+    int? schedulePauseRemainingSeconds,
   }) {
     return HomeState(
       trackedApps: trackedApps ?? this.trackedApps,
@@ -115,7 +121,8 @@ class HomeState {
       originalBreakSeconds: originalBreakSeconds ?? this.originalBreakSeconds,
       shouldAnimateBlockedTime: shouldAnimateBlockedTime ?? this.shouldAnimateBlockedTime,
       isScheduleActive: isScheduleActive ?? this.isScheduleActive,
-
+      isSchedulePaused: isSchedulePaused ?? this.isSchedulePaused,
+      schedulePauseRemainingSeconds: schedulePauseRemainingSeconds ?? this.schedulePauseRemainingSeconds,
     );
   }
 
@@ -144,5 +151,12 @@ class HomeState {
     final s = (remainingSeconds % 60)
         .toString().padLeft(2, '0');
     return '$h:$m:$s';
+  }
+
+  String get formattedPauseRemaining {
+    final s = schedulePauseRemainingSeconds;
+    final minutes = s ~/ 60;
+    final seconds = s % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
 }

@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenblock/features/home/schedule/schedule_viewmodel.dart';
 import 'package:screenblock/features/home/schedule/widgets/blocked_apps_card.dart';
+import 'package:screenblock/features/home/schedule/widgets/pause_sheet.dart';
 import 'package:screenblock/features/home/schedule/widgets/session_bottom_sheet.dart';
 import 'package:screenblock/features/home/schedule/widgets/session_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/schedule.dart';
+import '../../../services/schedule_checker.dart';
+import '../home_viewmodel.dart';
 
 
 class ScheduleScreen extends ConsumerWidget {
@@ -34,18 +37,31 @@ class ScheduleScreen extends ConsumerWidget {
                   if (state.schedules.isNotEmpty) ...[
                     ...state.schedules.map(
                           (s) => Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: 10,
-                        ),
+                        padding: const EdgeInsets.only(bottom: 10,),
                         child: SessionCard(
                           schedule: s,
                           onTap: () => _openEditSession(
                             context, ref, s,
                           ),
                           onToggle: () => ref
-                              .read(scheduleViewModelProvider
-                              .notifier)
+                              .read(scheduleViewModelProvider.notifier)
                               .toggleSchedule(s.id),
+                          isCurrentlyActive: ref.watch(homeViewModelProvider).isScheduleActive &&
+                              ScheduleChecker.instance.activeScheduleId == s.id,
+                          isPaused: ref.watch(homeViewModelProvider).isSchedulePaused,
+                          onPause: () {
+                          final homeState = ref.read(homeViewModelProvider);
+                          PauseScheduleSheet.show(
+                            context,
+                            isPaused: homeState.isSchedulePaused,
+                            onResume: () => ref
+                                .read(homeViewModelProvider.notifier)
+                                .resumeSchedule(),
+                            onPause: (mins) => ref
+                                .read(homeViewModelProvider.notifier)
+                                .pauseSchedule(mins),
+                          );
+                        },
                         ),
                       ),
                     ),

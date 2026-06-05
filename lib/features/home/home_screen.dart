@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:screenblock/features/home/schedule/widgets/pause_sheet.dart';
 import 'package:screenblock/features/home/timer/break_sheet.dart';
 import 'package:screenblock/features/home/cards/countdown_card.dart';
 import 'package:screenblock/features/home/cards/active_blocking_card.dart';
@@ -29,14 +30,14 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObserver {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   bool _hasShownXpAnimation = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // trigger load after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeViewModelProvider.notifier).init();
     });
@@ -44,16 +45,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // 👈 add
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // app came back to foreground — sync timer
       ref.read(homeViewModelProvider.notifier).onAppResumed();
-      // 👇 reset overlay state on every resume
       ref.read(blockingServiceProvider).resetOverlayState();
     }
   }
@@ -70,18 +69,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
         debugPrint('✅ XP animation should trigger');
         debugPrint('✅ xpEarned: ${previous?.xpEarned}');
         _hasShownXpAnimation = true;
-        // 👇 capture overlay before async gap
         final overlay = Overlay.of(context);
-        // small delay to let home screen render first
         Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted) {
             debugPrint('✅ calling showXpGain');
             XpAnimation.instance.showXpGain(
-              overlay:overlay,
+              overlay: overlay,
               xpBadgeKey: _xpBadgeKey,
               xpAmount: previous?.xpEarned ?? 0,
             );
-            // reset flag after animation
             Future.delayed(const Duration(milliseconds: 1000), () {
               _hasShownXpAnimation = false;
             });
@@ -94,19 +90,83 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-
           HomeHeader(
-              state: state,
-              xpBadgeKey: _xpBadgeKey,
+            state: state,
+            xpBadgeKey: _xpBadgeKey,
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                14, 10, 14, 100,
-              ),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 100),
               child: Column(
                 children: [
-                  // swap card based on phases
+                  // ── Schedule banner ─────────────────────────
+                  if (state.isScheduleActive)
+                    GestureDetector(
+                      onTap: () => PauseScheduleSheet.show(
+                        context,
+                        isPaused: state.isSchedulePaused,
+                        onResume: () => ref
+                            .read(homeViewModelProvider.notifier)
+                            .resumeSchedule(),
+                        onPause: (mins) => ref
+                            .read(homeViewModelProvider.notifier)
+                            .pauseSchedule(mins),
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: state.isSchedulePaused
+                              ? Colors.orange.withValues(alpha: 0.1)
+                              : AppColors.gold.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: state.isSchedulePaused
+                                ? Colors.orange.withValues(alpha: 0.3)
+                                : AppColors.gold.withValues(alpha: 0.3),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              state.isSchedulePaused
+                                  ? Icons.pause_circle_outline_rounded
+                                  : Icons.calendar_today_rounded,
+                              color: state.isSchedulePaused
+                                  ? Colors.orange
+                                  : AppColors.gold,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                state.isSchedulePaused
+                                    ? 'Schedule paused — resumes in ${state.formattedPauseRemaining}'
+                                    : 'Scheduled blocking is active',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: state.isSchedulePaused
+                                      ? Colors.orange
+                                      : AppColors.gold,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: state.isSchedulePaused
+                                  ? Colors.orange.withValues(alpha: 0.5)
+                                  : AppColors.gold.withValues(alpha: 0.5),
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  // ── Phase cards ──────────────────────────────
                   switch (state.phase) {
                     BlockingPhase.idle => TimerCard(
                       onBlockNow: _onBlockNowTapped,
@@ -152,7 +212,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
                           .claimXp(),
                     ),
                   },
+
                   const SizedBox(height: 12),
+
+                  // ── Focus stats ──────────────────────────────
                   if (state.phase == BlockingPhase.idle ||
                       state.phase == BlockingPhase.countdown)
                     FocusStatsCard(state: state),
@@ -163,16 +226,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
         ],
       ),
     );
-
   }
 
-  // Empty Callbacks
   void _onBlockNowTapped() {
     final state = ref.read(homeViewModelProvider);
     final notifier = ref.read(homeViewModelProvider.notifier);
 
     if (state.phase == BlockingPhase.idle) {
-      // validate apps selected
       final hasApps = state.blockingType ==
           AppConstants.blockingTypeSpecificApps
           ? state.blockedApps.isNotEmpty
@@ -214,6 +274,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
       builder: (_) => const BlockModeSheet(),
     );
   }
+
   void _onTimerTapped() {
     showModalBottomSheet(
       context: context,
@@ -221,16 +282,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
       backgroundColor: Colors.transparent,
       useRootNavigator: true,
       builder: (_) => TimerPickerSheet(
-        selectedMinutes: ref
-            .read(homeViewModelProvider)
-            .selectedMinutes,
+        selectedMinutes:
+        ref.read(homeViewModelProvider).selectedMinutes,
         onSave: (minutes) => ref
             .read(homeViewModelProvider.notifier)
             .setSelectedMinutes(minutes),
       ),
     );
   }
-
 
   void _onCancelCountdown() {
     ref.read(homeViewModelProvider.notifier).cancelCountdown();
@@ -244,9 +303,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
       useRootNavigator: true,
       builder: (_) => BreakSheet(
         onStartBreak: (minutes) {
-          ref
-              .read(homeViewModelProvider.notifier)
-              .startBreak(minutes);
+          ref.read(homeViewModelProvider.notifier).startBreak(minutes);
         },
       ),
     );
@@ -277,16 +334,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                ref
-                    .read(homeViewModelProvider.notifier)
-                    .giveUp();
+                ref.read(homeViewModelProvider.notifier).giveUp();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: const StadiumBorder(),
               ),
               child: const Text('Yes, give up'),
@@ -299,13 +352,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
               onPressed: () => Navigator.pop(ctx),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: const StadiumBorder(),
-                side: const BorderSide(
-                  color: AppColors.border,
-                ),
+                side: const BorderSide(color: AppColors.border),
               ),
               child: const Text("Don't give up"),
             ),
@@ -327,12 +376,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
       useRootNavigator: true,
       builder: (_) => AppListSheet(
         isBlockList: !isAllApps,
-        initialApps: isAllApps
-            ? state.allowedApps
-            : state.blockedApps,
+        initialApps:
+        isAllApps ? state.allowedApps : state.blockedApps,
         onSave: (apps) {
-          final notifier =
-          ref.read(homeViewModelProvider.notifier);
+          final notifier = ref.read(homeViewModelProvider.notifier);
           if (isAllApps) {
             notifier.setAllowedApps(apps);
           } else {
@@ -343,4 +390,3 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
     );
   }
 }
-
