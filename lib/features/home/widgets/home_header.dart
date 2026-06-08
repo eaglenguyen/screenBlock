@@ -27,7 +27,7 @@ class HomeHeader extends StatelessWidget {
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFF1a1a3e), AppColors.background],
+        colors: [Color(0xFF252015), AppColors.background],
       ),
     ),
     child: Row(

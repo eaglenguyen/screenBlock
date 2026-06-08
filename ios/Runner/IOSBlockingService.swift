@@ -49,36 +49,50 @@ class IOSBlockingService: NSObject {
     func startBlocking(
         packageNames: [String],
         blockingMode: String,
-        limitMinutes: Int
+        limitMinutes: Int,
+        sessionType: String = "manual"
     ) {
-        sharedDefaults?.set(true, forKey: "isBlocking")
-        sharedDefaults?.set(blockingMode, forKey: "blockingMode")
-        sharedDefaults?.set(
-            Date().timeIntervalSince1970,
-            forKey: "sessionStartTime"
-        )
-        sharedDefaults?.set(limitMinutes, forKey: "sessionMinutes")
-        
-        // immediately shield apps
-        let appTokens = getStoredAppTokens(mode: blockingMode)
+        UserDefaults.standard.set(true, forKey: "isBlocking")
+           UserDefaults.standard.set(blockingMode, forKey: "blockingMode")
+           UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
+           UserDefaults.standard.set(limitMinutes, forKey: "sessionMinutes")
+           UserDefaults.standard.set(sessionType, forKey: "sessionType")
+           UserDefaults.standard.synchronize()
 
-        guard !appTokens.isEmpty else {
-            print("❌ no app tokens found")
-            return
-        }
-
-        // immediately shield apps — same as Android instant blocking
-        store.shield.applications = appTokens
+           // sharedDefaults still used for app tokens (FamilyControls needs it)
+           let appTokens = getStoredAppTokens(mode: blockingMode)
+           guard !appTokens.isEmpty else {
+               print("❌ no app tokens found")
+               return
+           }
+           store.shield.applications = appTokens
     }
     
     
     func stopBlocking() {
-        // clear session state
-        sharedDefaults?.set(false, forKey: "isBlocking")
-        sharedDefaults?.removeObject(forKey: "sessionStartTime")
-        store.clearAllSettings()
-        activityCenter.stopMonitoring([activityName])
+        UserDefaults.standard.set(false, forKey: "isBlocking")
+            UserDefaults.standard.removeObject(forKey: "sessionStartTime")
+            UserDefaults.standard.removeObject(forKey: "sessionType")
+            UserDefaults.standard.synchronize()
+            store.clearAllSettings()
+            activityCenter.stopMonitoring([activityName])
     }
+    
+    func getPersistedSession() -> [String: Any] {
+        let isBlocking = UserDefaults.standard.bool(forKey: "isBlocking")
+        let sessionType = UserDefaults.standard.string(forKey: "sessionType") ?? "manual"
+        let startTime = UserDefaults.standard.double(forKey: "sessionStartTime")
+        let minutes = UserDefaults.standard.integer(forKey: "sessionMinutes")
+        NSLog("🔄 getPersistedSession: isBlocking=\(isBlocking) sessionType=\(sessionType) minutes=\(minutes)")
+        return [
+            "isBlocking": isBlocking,
+            "sessionType": sessionType,
+            "startTime": startTime,
+            "minutes": minutes
+        ]
+    }
+    
+    
     
     // MARK: - App Selection
     

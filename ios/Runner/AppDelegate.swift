@@ -86,7 +86,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             guard let args = call.arguments as? [String: Any],
                   let packageNames = args["packageNames"] as? [String],
                   let blockingMode = args["blockingMode"] as? String,
-                  let limitMinutes = args["limitMinutes"] as? Int
+                  let limitMinutes = args["limitMinutes"] as? Int,
+                  let sessionType = args["sessionType"] as? String ?? "manual"
             else {
                 result(FlutterError(
                     code: "INVALID_ARGS",
@@ -98,31 +99,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             service.startBlocking(
                 packageNames: packageNames,
                 blockingMode: blockingMode,
-                limitMinutes: limitMinutes
+                limitMinutes: limitMinutes,
+                sessionType: sessionType
             )
             result(nil)
         case "stopBlocking":
             service.stopBlocking()
             result(nil)
+        case "persistSessionType":
+            if let args = call.arguments as? [String: Any],
+                 let type = args["type"] as? String {
+                  UserDefaults.standard.set(type, forKey: "sessionType")
+                  UserDefaults.standard.synchronize()
+                  NSLog("🔄 persistSessionType saved: \(type)")
+              }
+              result(nil)
         case "getPersistedSession":
-            let sharedDefaults = UserDefaults(
-                    suiteName: "group.com.eagle.screenblock"
-                )
-            let isBlocking = sharedDefaults?.bool(
-                forKey: "isBlocking"
-            ) ?? false
+            // use standard UserDefaults for session state
+            let isBlocking = UserDefaults.standard.bool(forKey: "isBlocking")
+            let sessionType = UserDefaults.standard.string(forKey: "sessionType") ?? "manual"
+            let startTime = UserDefaults.standard.double(forKey: "sessionStartTime")
+            let minutes = UserDefaults.standard.integer(forKey: "sessionMinutes")
+            
+            NSLog("🔄 getPersistedSession: isBlocking=\(isBlocking) sessionType=\(sessionType) minutes=\(minutes)")
             
             if isBlocking {
-                let startTime = sharedDefaults?.double(
-                    forKey: "sessionStartTime"
-                ) ?? 0
-                let minutes = sharedDefaults?.integer(
-                    forKey: "sessionMinutes"
-                ) ?? 0
                 result([
                     "isBlocking": true,
                     "startTime": startTime,
                     "minutes": minutes,
+                    "sessionType": sessionType,
                 ])
             } else {
                 result(["isBlocking": false])

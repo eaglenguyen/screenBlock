@@ -676,8 +676,17 @@ class HomeViewModel extends _$HomeViewModel {
             .timeout(const Duration(seconds: 3));
 
         if (result?['isBlocking'] == true) {
+          final sessionType = result!['sessionType'] as String? ?? 'manual';
+          debugPrint('🔄 iOS sessionType=$sessionType');
+
+
+          if (sessionType == 'schedule') {
+            debugPrint('🔄 iOS skipping schedule session restore');
+            return; // 👈 don't restore schedule sessions
+          }
+
           final startTime = DateTime.fromMillisecondsSinceEpoch(
-            ((result!['startTime'] as double) * 1000).round(),
+            ((result['startTime'] as double) * 1000).round(),
           );
           final minutes = result['minutes'] as int;
           final totalSeconds = minutes * 60;

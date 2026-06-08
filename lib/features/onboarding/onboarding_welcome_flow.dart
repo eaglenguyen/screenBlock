@@ -687,9 +687,9 @@ Widget _buildGradientBg() {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Color(0xFF1a0a3d),
-          Color(0xFF16162a),
-          Color(0xFF0a1a2a),
+          Color(0xFF2A2015), // 👈 warm dark gold tint at top
+          Color(0xFF1A1A1A), // 👈 charcoal mid
+          Color(0xFF111111),
         ],
         stops: [0.0, 0.5, 1.0],
       ),

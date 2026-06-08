@@ -89,6 +89,14 @@ class IOSBlockingService implements BlockingService {
   @override
   void setBlockingMode(String mode) {}
 
+  Future<void> persistSessionType(String type) async {
+    try {
+      await _channel.invokeMethod('persistSessionType', {'type': type});
+    } catch (e) {
+      debugPrint('❌ persistSessionType error: $e');
+    }
+  }
+
   // ── Permissions ──────────────────────────────────
   @override
   Future<bool> hasAccessibilityPermission() async {

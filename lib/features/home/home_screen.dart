@@ -62,17 +62,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final state = ref.watch(homeViewModelProvider);
 
     ref.listen(homeViewModelProvider, (previous, next) {
-      debugPrint('🟡 phase change: ${previous?.phase} → ${next.phase}');
       if (previous?.phase == BlockingPhase.claimXp &&
           next.phase == BlockingPhase.idle &&
           !_hasShownXpAnimation) {
-        debugPrint('✅ XP animation should trigger');
-        debugPrint('✅ xpEarned: ${previous?.xpEarned}');
+
         _hasShownXpAnimation = true;
         final overlay = Overlay.of(context);
         Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted) {
-            debugPrint('✅ calling showXpGain');
             XpAnimation.instance.showXpGain(
               overlay: overlay,
               xpBadgeKey: _xpBadgeKey,

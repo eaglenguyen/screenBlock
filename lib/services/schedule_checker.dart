@@ -7,6 +7,7 @@ import '../core/constants/hivebox_names.dart';
 import '../data/models/schedule.dart';
 import '../domain/platform/android_blocking_service.dart';
 import '../domain/platform/blocking_service.dart';
+import '../domain/platform/ios_blocking_service.dart';
 
 class ScheduleChecker {
   ScheduleChecker._();
@@ -166,12 +167,13 @@ class ScheduleChecker {
 
   Future<void> _startScheduleBlocking(Schedule schedule) async {
     if (_blockingService == null) return;
-    debugPrint('📅 Schedule starting: ${schedule.name}');
 
     _blockingService!.setBlockingMode(schedule.blockingType);
     _activeSchedule = schedule;
 
     if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService)
+          .persistSessionType('schedule');
       _blockingService!.startMonitoring('ios_apps', 999);
     } else {
       final apps = schedule.blockingType ==
@@ -180,7 +182,6 @@ class ScheduleChecker {
           : schedule.allowedApps;
 
       if (apps.isEmpty) {
-        debugPrint('📅 Schedule has no apps — skipping');
         return;
       }
 

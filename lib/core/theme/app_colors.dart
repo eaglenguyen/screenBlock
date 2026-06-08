@@ -4,10 +4,10 @@ class AppColors {
   AppColors._();
 
   // ── Backgrounds ────────────────────────────────
-  static const Color background       = Color(0xFF16162A);
-  static const Color backgroundCard   = Color(0xFF1E1E35);
-  static const Color backgroundDeep   = Color(0xFF0D0D1C);
-  static const Color backgroundSubtle = Color(0xFF252542);
+  static const background        = Color(0xFF1A1A1A); // 👈 warm dark charcoal (was 0xFF16162A)
+  static const backgroundCard    = Color(0xFF252525); // 👈 slightly lighter charcoal (was 0xFF1E1E35)
+  static const backgroundSubtle  = Color(0xFF2E2E2E); // 👈 warm subtle (was 0xFF252542)
+  static const backgroundOverlay = Color(0xFF333333); // 👈 warm overlay
 
   // ── Gold / Primary ─────────────────────────────
   static const Color gold             = Color(0xFFEDB82A);
@@ -16,11 +16,11 @@ class AppColors {
 
   // ── Text ───────────────────────────────────────
   static const Color textPrimary      = Color(0xFFFFFFFF);
-  static const Color textSecondary    = Color(0xFF7070A0);
+  static const textSecondary          = Color(0xFF9A9A9A);
   static const Color textHint         = Color(0xFF444466);
 
   // ── Borders / Dividers ─────────────────────────
-  static const Color border           = Color(0xFF2A2A48);
+  static const border                 = Color(0xFF333333);
   static const Color borderSubtle     = Color(0xFF23233D);
 
   // ── Semantic ───────────────────────────────────
