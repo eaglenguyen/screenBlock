@@ -17,8 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("🦅🦅🦅 APP LAUNCHED", log: .default, type: .fault)
 
         let flutterEngine = FlutterEngine(name: "main engine")
-        
-        // warm up the engine first
         flutterEngine.run()
         GeneratedPluginRegistrant.register(with: flutterEngine)
 
@@ -31,11 +29,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             nibName: nil,
             bundle: nil
         )
-        
 
         window = UIWindow(frame: UIScreen.main.bounds)
-              window?.rootViewController = flutterVC
-              window?.makeKeyAndVisible()
+        window?.rootViewController = flutterVC
+        window?.makeKeyAndVisible()
 
         return true
     }
@@ -59,22 +56,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         result: @escaping FlutterResult
     ) async {
         let service = IOSBlockingService.shared
+
         switch call.method {
-    
+
         case "requestAuthorization":
             result(await service.requestAuthorization())
+
         case "isAuthorized":
             result(service.isAuthorized())
+
         case "saveBlockingMode":
             if let args = call.arguments as? [String: Any],
                let mode = args["mode"] as? String {
-                let sharedDefaults = UserDefaults(
-                    suiteName: "group.com.eagle.screenblock"
-                )
-                sharedDefaults?.set(mode, forKey: "blockingMode")
+                let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+                defaults?.set(mode, forKey: "blockingMode")
                 print("✅ saved blockingMode: \(mode)")
             }
             result(nil)
+
         case "openScreenTime":
             if let url = URL(string: "App-prefs:") {
                 DispatchQueue.main.async {
@@ -82,20 +81,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
             result(nil)
+
         case "startBlocking":
             guard let args = call.arguments as? [String: Any],
                   let packageNames = args["packageNames"] as? [String],
                   let blockingMode = args["blockingMode"] as? String,
-                  let limitMinutes = args["limitMinutes"] as? Int,
-                  let sessionType = args["sessionType"] as? String ?? "manual"
+                  let limitMinutes = args["limitMinutes"] as? Int
             else {
-                result(FlutterError(
-                    code: "INVALID_ARGS",
-                    message: "Missing arguments",
-                    details: nil
-                ))
-                return
+                result(nil)
+                break
             }
+            let sessionType = args["sessionType"] as? String ?? "manual"
             service.startBlocking(
                 packageNames: packageNames,
                 blockingMode: blockingMode,
@@ -103,26 +99,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 sessionType: sessionType
             )
             result(nil)
+
         case "stopBlocking":
             service.stopBlocking()
             result(nil)
+
         case "persistSessionType":
             if let args = call.arguments as? [String: Any],
-                 let type = args["type"] as? String {
-                  UserDefaults.standard.set(type, forKey: "sessionType")
-                  UserDefaults.standard.synchronize()
-                  NSLog("🔄 persistSessionType saved: \(type)")
-              }
-              result(nil)
+               let type = args["type"] as? String {
+                let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+                defaults?.set(type, forKey: "sessionType")
+                defaults?.synchronize()
+                NSLog("🔄 persistSessionType saved: \(type)")
+            }
+            result(nil)
+
         case "getPersistedSession":
-            // use standard UserDefaults for session state
-            let isBlocking = UserDefaults.standard.bool(forKey: "isBlocking")
-            let sessionType = UserDefaults.standard.string(forKey: "sessionType") ?? "manual"
-            let startTime = UserDefaults.standard.double(forKey: "sessionStartTime")
-            let minutes = UserDefaults.standard.integer(forKey: "sessionMinutes")
-            
+            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            let isBlocking = defaults?.bool(forKey: "isBlocking") ?? false
+            let sessionType = defaults?.string(forKey: "sessionType") ?? "manual"
+            let startTime = defaults?.double(forKey: "sessionStartTime") ?? 0
+            let minutes = defaults?.integer(forKey: "sessionMinutes") ?? 0
+
             NSLog("🔄 getPersistedSession: isBlocking=\(isBlocking) sessionType=\(sessionType) minutes=\(minutes)")
-            
+
             if isBlocking {
                 result([
                     "isBlocking": true,
@@ -133,11 +133,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             } else {
                 result(["isBlocking": false])
             }
+
         case "showAppPicker":
             await showAppPicker(result: result)
+
         default:
             result(FlutterMethodNotImplemented)
-            
         }
     }
 
@@ -158,37 +159,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return
         }
 
-        // read blocking mode from shared defaults
-        let sharedDefaults = UserDefaults(
-            suiteName: "group.com.eagle.screenblock"
-        )
-        let blockingMode = sharedDefaults?.string(
-            forKey: "blockingMode"
-        ) ?? "specific_apps"
-
-        // save key depends on blocking mode
-        let saveKey = blockingMode == "specific_apps"
-            ? "blockedApps"
-            : "allowedApps"
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+        let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
+        let saveKey = blockingMode == "specific_apps" ? "blockedApps" : "allowedApps"
 
         let picker = FamilyActivityPickerViewController(
             service: IOSBlockingService.shared,
             onDismiss: {
-                       // return count of saved apps to Flutter
-                       if let data = sharedDefaults?.data(forKey: saveKey),
-                          let selection = try? JSONDecoder().decode(
-                              FamilyActivitySelection.self,
-                              from: data
-                          ) {
-                           let count = selection.applicationTokens.count
-                           print("✅ picker dismissed with \(count) apps saved")
-                           result(count)
-                       } else {
-                           print("❌ no selection saved after picker dismissed")
-                           result(0)
-                       }
-                   },
-            saveKey: saveKey // 👈 pass correct key
+                if let data = sharedDefaults?.data(forKey: saveKey),
+                   let selection = try? JSONDecoder().decode(
+                       FamilyActivitySelection.self,
+                       from: data
+                   ) {
+                    let count = selection.applicationTokens.count
+                    print("✅ picker dismissed with \(count) apps saved")
+                    result(count)
+                } else {
+                    print("❌ no selection saved after picker dismissed")
+                    result(0)
+                }
+            },
+            saveKey: saveKey
         )
         rootVC.present(picker, animated: true)
     }

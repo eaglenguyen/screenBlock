@@ -34,6 +34,7 @@ class ScheduleChecker {
     _timer?.cancel();
     debugPrint('📅 ScheduleChecker started');
     _timer = Timer.periodic(const Duration(minutes: 1), (_) => _check());
+
     _check();
   }
 
@@ -165,6 +166,8 @@ class ScheduleChecker {
     }
   }
 
+
+
   Future<void> _startScheduleBlocking(Schedule schedule) async {
     if (_blockingService == null) return;
 
@@ -172,18 +175,16 @@ class ScheduleChecker {
     _activeSchedule = schedule;
 
     if (Platform.isIOS) {
+      // 👇 pass sessionType directly instead of separate persistSessionType call
       await (_blockingService as IOSBlockingService)
-          .persistSessionType('schedule');
-      _blockingService!.startMonitoring('ios_apps', 999);
+          .startMonitoring('ios_apps', 999, 'schedule');
     } else {
       final apps = schedule.blockingType ==
           AppConstants.blockingTypeSpecificApps
           ? schedule.blockedApps
           : schedule.allowedApps;
 
-      if (apps.isEmpty) {
-        return;
-      }
+      if (apps.isEmpty) return;
 
       for (final pkg in apps) {
         await _blockingService!.startMonitoring(pkg, 999);

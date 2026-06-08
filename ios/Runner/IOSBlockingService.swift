@@ -19,14 +19,9 @@ class IOSBlockingService: NSObject {
     private let center = AuthorizationCenter.shared
     private let activityCenter = DeviceActivityCenter()
     private let store = ManagedSettingsStore()
-    private let sharedDefaults = UserDefaults(
-        suiteName: "group.com.eagle.screenblock"
-    )
+    private let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
     
-    // activity name for our blocking session
-    private let activityName = DeviceActivityName(
-        "com.eagle.screenblock.session"
-    )
+    private let activityName = DeviceActivityName("com.eagle.screenblock.session")
     
     // MARK: - Authorization
     
@@ -52,37 +47,37 @@ class IOSBlockingService: NSObject {
         limitMinutes: Int,
         sessionType: String = "manual"
     ) {
-        UserDefaults.standard.set(true, forKey: "isBlocking")
-           UserDefaults.standard.set(blockingMode, forKey: "blockingMode")
-           UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
-           UserDefaults.standard.set(limitMinutes, forKey: "sessionMinutes")
-           UserDefaults.standard.set(sessionType, forKey: "sessionType")
-           UserDefaults.standard.synchronize()
+        // 👇 use sharedDefaults? directly — not sharedDefaults.standard
+        sharedDefaults?.set(true, forKey: "isBlocking")
+        sharedDefaults?.set(blockingMode, forKey: "blockingMode")
+        sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
+        sharedDefaults?.set(limitMinutes, forKey: "sessionMinutes")
+        sharedDefaults?.set(sessionType, forKey: "sessionType")
+        sharedDefaults?.synchronize()
+        NSLog("🔄 startBlocking: sessionType=\(sessionType) minutes=\(limitMinutes)")
 
-           // sharedDefaults still used for app tokens (FamilyControls needs it)
-           let appTokens = getStoredAppTokens(mode: blockingMode)
-           guard !appTokens.isEmpty else {
-               print("❌ no app tokens found")
-               return
-           }
-           store.shield.applications = appTokens
+        let appTokens = getStoredAppTokens(mode: blockingMode)
+        guard !appTokens.isEmpty else {
+            print("❌ no app tokens found")
+            return
+        }
+        store.shield.applications = appTokens
     }
     
-    
     func stopBlocking() {
-        UserDefaults.standard.set(false, forKey: "isBlocking")
-            UserDefaults.standard.removeObject(forKey: "sessionStartTime")
-            UserDefaults.standard.removeObject(forKey: "sessionType")
-            UserDefaults.standard.synchronize()
-            store.clearAllSettings()
-            activityCenter.stopMonitoring([activityName])
+        sharedDefaults?.set(false, forKey: "isBlocking")
+        sharedDefaults?.removeObject(forKey: "sessionStartTime")
+        sharedDefaults?.removeObject(forKey: "sessionType")
+        sharedDefaults?.synchronize()
+        store.clearAllSettings()
+        activityCenter.stopMonitoring([activityName])
     }
     
     func getPersistedSession() -> [String: Any] {
-        let isBlocking = UserDefaults.standard.bool(forKey: "isBlocking")
-        let sessionType = UserDefaults.standard.string(forKey: "sessionType") ?? "manual"
-        let startTime = UserDefaults.standard.double(forKey: "sessionStartTime")
-        let minutes = UserDefaults.standard.integer(forKey: "sessionMinutes")
+        let isBlocking = sharedDefaults?.bool(forKey: "isBlocking") ?? false
+        let sessionType = sharedDefaults?.string(forKey: "sessionType") ?? "manual"
+        let startTime = sharedDefaults?.double(forKey: "sessionStartTime") ?? 0
+        let minutes = sharedDefaults?.integer(forKey: "sessionMinutes") ?? 0
         NSLog("🔄 getPersistedSession: isBlocking=\(isBlocking) sessionType=\(sessionType) minutes=\(minutes)")
         return [
             "isBlocking": isBlocking,
@@ -91,8 +86,6 @@ class IOSBlockingService: NSObject {
             "minutes": minutes
         ]
     }
-    
-    
     
     // MARK: - App Selection
     
@@ -107,7 +100,6 @@ class IOSBlockingService: NSObject {
 
         if selection.applicationTokens.isEmpty &&
            selection.categoryTokens.isEmpty {
-            // clear the saved selection
             defaults.removeObject(forKey: key)
             defaults.synchronize()
             print("🦅 cleared selection for key: \(key)")
@@ -124,12 +116,8 @@ class IOSBlockingService: NSObject {
         }
     }
     
-    func getStoredAppTokens(
-        mode: String
-    ) -> Set<ApplicationToken> {
-        let key = mode == "specific_apps"
-            ? "blockedApps"
-            : "allowedApps"
+    func getStoredAppTokens(mode: String) -> Set<ApplicationToken> {
+        let key = mode == "specific_apps" ? "blockedApps" : "allowedApps"
         
         guard let data = sharedDefaults?.data(forKey: key),
               let selection = try? JSONDecoder().decode(
@@ -144,23 +132,14 @@ class IOSBlockingService: NSObject {
     // MARK: - Usage Stats
     
     func fetchTodayUsage() async -> [[String: Any]] {
-        // DeviceActivityReport runs in the extension
-        // we trigger it and return results via shared defaults
         let center = DeviceActivityCenter()
-        
         let calendar = Calendar.current
         let now = Date()
         let startOfDay = calendar.startOfDay(for: now)
         
         let schedule = DeviceActivitySchedule(
-            intervalStart: calendar.dateComponents(
-                [.hour, .minute],
-                from: startOfDay
-            ),
-            intervalEnd: calendar.dateComponents(
-                [.hour, .minute],
-                from: now
-            ),
+            intervalStart: calendar.dateComponents([.hour, .minute], from: startOfDay),
+            intervalEnd: calendar.dateComponents([.hour, .minute], from: now),
             repeats: false
         )
         

@@ -48,12 +48,14 @@ class IOSBlockingService implements BlockingService {
   @override
   Future<void> startMonitoring(
       String packageName,
-      int limitMinutes,
-      ) async {
+      int limitMinutes, [
+      String sessionType = 'manual'
+      ]) async {
     await _channel.invokeMethod('startBlocking', {
       'packageNames': [packageName],
       'blockingMode': 'specific_apps',
       'limitMinutes': limitMinutes,
+      'sessionType': sessionType,
     });
   }
 
