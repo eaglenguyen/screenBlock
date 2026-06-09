@@ -278,6 +278,14 @@ class AndroidBlockingService implements BlockingService {
     }
   }
 
+  Future<void> checkCurrentForegroundApp() async {
+    try {
+      await _methodChannel.invokeMethod('checkCurrentForegroundApp');
+    } catch (e) {
+      debugPrint('❌ checkCurrentForegroundApp error: $e');
+    }
+  }
+
   void _handleSpecificAppsMode(String packageName) {
     if (_temporarilyExempted.contains(packageName)) return;
     if (!_monitoredApps.containsKey(packageName)) return;

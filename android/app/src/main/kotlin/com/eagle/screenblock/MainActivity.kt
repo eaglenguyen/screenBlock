@@ -56,7 +56,14 @@ class MainActivity : FlutterActivity() {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                     result.success(null)
                 }
-
+                "checkCurrentForegroundApp" -> {
+                    val pkg = AppBlockAccessibilityService.currentForegroundApp
+                    android.util.Log.d("ScreenBlock", "🔍 checkCurrentForegroundApp: $pkg")
+                    if (pkg != null) {
+                        AppBlockAccessibilityService.eventCallback?.invoke(pkg)
+                    }
+                    result.success(null)
+                }
                 "saveBlockingState" -> {
                     val apps = call.argument<List<String>>("apps") ?: emptyList()
                     val mode = call.argument<String>("mode") ?: "specific_apps"

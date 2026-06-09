@@ -90,6 +90,9 @@ class BlockActivity : FlutterActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
 
+        window.decorView.setBackgroundColor(android.graphics.Color.parseColor("#16162A"))
+
+
         registerReceiver(
             dismissReceiver,
             IntentFilter(ACTION_DISMISS),

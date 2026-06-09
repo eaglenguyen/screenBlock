@@ -37,7 +37,7 @@
         <activity
             android:name=".BlockActivity"
             android:exported="false"
-            android:theme="@style/LaunchTheme"
+            android:theme="@style/BlockActivityTheme"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:taskAffinity="com.eagle.screenblock.block"

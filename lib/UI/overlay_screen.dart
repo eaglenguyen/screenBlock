@@ -326,7 +326,7 @@ class _OverlayScreenState extends State<OverlayScreen>
             ),
             child: Text(
               _countdownComplete
-                  ? 'Open app'
+                  ? 'Open app (30s)'
                   : 'Open in ${_countdown}s',
             ),
           ),

@@ -581,14 +581,20 @@ class HomeViewModel extends _$HomeViewModel {
     await _blockingService.stopAllMonitoring();
 
     final breakSeconds = minutes * 60;
-    // 👇 save current remaining seconds before break
     final breakStartTime = DateTime.now();
+    final breakEndsAt = breakStartTime.add(Duration(minutes: minutes));
+
+    // 👇 save break end time to native so Kotlin knows break is active
+    if (Platform.isAndroid && _blockingService is AndroidBlockingService) {
+      await (_blockingService as AndroidBlockingService)
+          .savePauseEndTime(breakEndsAt.millisecondsSinceEpoch);
+    }
 
     state = state.copyWith(
       phase: BlockingPhase.onBreak,
       breakRemainingSeconds: breakSeconds,
       breakStartTime: breakStartTime,
-      originalBreakSeconds: breakSeconds
+      originalBreakSeconds: breakSeconds,
     );
 
     _breakTimer?.cancel();
@@ -604,9 +610,7 @@ class HomeViewModel extends _$HomeViewModel {
           timer.cancel();
           _resumeAfterBreak(state.remainingSeconds);
         } else {
-          state = state.copyWith(
-            breakRemainingSeconds: remaining,
-          );
+          state = state.copyWith(breakRemainingSeconds: remaining);
         }
       },
     );
@@ -614,6 +618,13 @@ class HomeViewModel extends _$HomeViewModel {
 
   Future<void> endBreak() async {
     _breakTimer?.cancel();
+
+    // 👇 clear break end time in native so Kotlin doesn't think pause is still active
+    if (Platform.isAndroid && _blockingService is AndroidBlockingService) {
+      await (_blockingService as AndroidBlockingService)
+          .savePauseEndTime(0);
+    }
+
     _resumeAfterBreak(state.remainingSeconds);
   }
 
@@ -626,20 +637,27 @@ class HomeViewModel extends _$HomeViewModel {
         : state.allowedApps;
 
     if (Platform.isIOS) {
-      await _blockingService.startMonitoring(
-        'ios_apps',
-        state.selectedMinutes,
-      );
+      await _blockingService.startMonitoring('ios_apps', state.selectedMinutes);
     } else {
       for (final pkg in apps) {
-        await _blockingService.startMonitoring(
-          pkg,
-          state.selectedMinutes,
+        await _blockingService.startMonitoring(pkg, state.selectedMinutes);
+      }
+      if (_blockingService is AndroidBlockingService) {
+        // clear break/pause end time
+        await (_blockingService as AndroidBlockingService)
+            .savePauseEndTime(0); // 👈 clear pause
+        // persist blocking state
+        await (_blockingService as AndroidBlockingService)
+            .persistBlockingState(
+          sessionMinutes: state.selectedMinutes,
+          sessionType: 'manual',
         );
+        // immediately check current foreground app
+        await (_blockingService as AndroidBlockingService)
+            .checkCurrentForegroundApp();
       }
     }
 
-    // 👇 resume from saved remaining seconds, not full duration
     state = state.copyWith(
       phase: BlockingPhase.active,
       remainingSeconds: remainingSeconds,

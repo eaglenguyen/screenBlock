@@ -15,4 +15,11 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <!-- 👇 add this -->
+    <style name="BlockActivityTheme" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowBackground">@color/block_bg</item>
+        <item name="android:statusBarColor">#16162A</item>
+        <item name="android:navigationBarColor">#16162A</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>
