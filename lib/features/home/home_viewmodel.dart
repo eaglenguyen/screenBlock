@@ -174,10 +174,14 @@ class HomeViewModel extends _$HomeViewModel {
             error: 'app_blocked:${event.packageName}',
           );
           break;
+
         case AppEventType.timerWarning:
           state = state.copyWith(
             error: 'timer_warning:${event.packageName}',
           );
+        case AppEventType.scheduleResumed: // 👈 add this case
+          debugPrint('📅 Schedule resume event received from Kotlin');
+          ScheduleChecker.instance.resumeNow();
           break;
         default:
           break;
@@ -394,6 +398,15 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   void onAppResumed() {
+    // 👇 check if schedule pause has expired
+    if (state.isSchedulePaused) {
+      final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
+      if (pauseEndTime != null &&
+          DateTime.now().isAfter(pauseEndTime)) {
+        debugPrint('📅 Pause expired while backgrounded — resuming');
+        ScheduleChecker.instance.resumeNow();
+      }
+    }
     switch (state.phase) {
       case BlockingPhase.active:
         if (state.sessionStartTime == null) return;

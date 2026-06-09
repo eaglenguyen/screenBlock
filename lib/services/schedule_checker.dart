@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants/app_constants.dart';
 import '../core/constants/hivebox_names.dart';
 import '../data/models/schedule.dart';
@@ -49,19 +50,21 @@ class ScheduleChecker {
     _check();
   }
 
-  // ── Pause for X minutes ───────────────────────────
-  void pauseFor(int minutes) {
-    if (!_isScheduleBlocking) return;
+  Future<void> pauseFor(int minutes) async {
+    // 👇 remove the _isScheduleBlocking guard — use state instead
+    // if (!_isScheduleBlocking) return;  ← remove this line
+
     debugPrint('📅 Schedule paused for $minutes minutes');
 
     _isPaused = true;
+    _isScheduleBlocking = true; // 👈 ensure it's set
     _pauseEndsAt = DateTime.now().add(Duration(minutes: minutes));
 
-    // stop blocking while paused
     _blockingService?.stopAllMonitoring();
     onSchedulePaused?.call();
 
-    // start pause countdown ticker (every second)
+    await _savePauseEndTimeNative(_pauseEndsAt!);
+
     _pauseTimer?.cancel();
     _pauseTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_pauseEndsAt == null) {
@@ -79,6 +82,28 @@ class ScheduleChecker {
         onPauseTickChanged?.call(remaining);
       }
     });
+  }
+
+  Future<void> _savePauseEndTimeNative(DateTime pauseEndsAt) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(
+        'schedulePauseEndTime',
+        pauseEndsAt.millisecondsSinceEpoch,
+      );
+
+      if (Platform.isAndroid && _blockingService is AndroidBlockingService) {
+        await (_blockingService as AndroidBlockingService)
+            .savePauseEndTime(pauseEndsAt.millisecondsSinceEpoch);
+      }
+
+      if (Platform.isIOS && _blockingService is IOSBlockingService) {
+        await (_blockingService as IOSBlockingService)
+            .savePauseEndTime(pauseEndsAt.millisecondsSinceEpoch);
+      }
+    } catch (e) {
+      debugPrint('❌ save pause end time error: $e');
+    }
   }
 
   void resumeNow() {

@@ -228,6 +228,16 @@ class AndroidBlockingService implements BlockingService {
         .listen(
           (dynamic data) {
         if (data is String) {
+          // 👇 add this check before _onForegroundAppChanged
+          if (data == '__scheduleResumed__') {
+            _eventController.add(AppUsageEvent(
+              type: AppEventType.scheduleResumed,
+              packageName: '',
+              usedMinutes: 0,
+              limitMinutes: 0,
+            ));
+            return;
+          }
           _onForegroundAppChanged(data);
         }
       },
@@ -308,4 +318,16 @@ class AndroidBlockingService implements BlockingService {
       debugPrint('❌ block screen failed: $e');
     }
   }
+
+  Future<void> savePauseEndTime(int endTimeMs) async {
+    try {
+      debugPrint('💾 savePauseEndTime called: $endTimeMs');
+      await _blockChannel.invokeMethod('savePauseEndTime', {
+        'endTimeMs': endTimeMs,
+      });
+      debugPrint('💾 savePauseEndTime success');
+    } catch (e) {
+      debugPrint('❌ savePauseEndTime error: $e');
+    }
+}
 }

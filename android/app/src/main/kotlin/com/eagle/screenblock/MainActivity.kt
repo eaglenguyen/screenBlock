@@ -27,6 +27,8 @@ class MainActivity : FlutterActivity() {
     private val blockDismissedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d("MainActivity", "BLOCK_DISMISSED received")
+            AppBlockAccessibilityService.isOverlayShowing = false // 👈 add
+
             blockMethodChannel?.invokeMethod("onBlockDismissed", null)
         }
     }
@@ -54,6 +56,7 @@ class MainActivity : FlutterActivity() {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                     result.success(null)
                 }
+
                 "saveBlockingState" -> {
                     val apps = call.argument<List<String>>("apps") ?: emptyList()
                     val mode = call.argument<String>("mode") ?: "specific_apps"
@@ -139,6 +142,14 @@ class MainActivity : FlutterActivity() {
                         sendBroadcast(
                             Intent("com.eagle.screenblock.BLOCK_DISMISSED")
                         )
+                        result.success(null)
+                    }
+                    "savePauseEndTime" -> {
+                        val args = call.arguments as? Map<*, *>
+                        val endTimeMs = (args?.get("endTimeMs") as? Long) ?: 0L
+                        val prefs = getSharedPreferences("screenblock_native", Context.MODE_PRIVATE)
+                        prefs.edit().putLong("schedulePauseEndTime", endTimeMs).apply()
+                        android.util.Log.d("ScreenBlock", "💾 pauseEndTime saved: $endTimeMs")
                         result.success(null)
                     }
                     else -> result.notImplemented()

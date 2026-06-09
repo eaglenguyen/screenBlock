@@ -7,6 +7,7 @@ enum AppEventType {
   timerExpired,   // limit reached
   appBlocked,     // app blocked for the day
   appOpened,      // tracked app was opened
+  scheduleResumed,
 }
 
 class AppUsageEvent {

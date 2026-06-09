@@ -1,12 +1,14 @@
 import UIKit
 import FamilyControls
 import Flutter
+import UserNotifications
 import os
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
+    private var flutterEngine: FlutterEngine?
 
     func application(
         _ application: UIApplication,
@@ -16,16 +18,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         os_log("🦅🦅🦅 APP LAUNCHED", log: .default, type: .fault)
 
-        let flutterEngine = FlutterEngine(name: "main engine")
-        flutterEngine.run()
-        GeneratedPluginRegistrant.register(with: flutterEngine)
+        // setup notification delegate
+        UNUserNotificationCenter.current().delegate = self
+
+        let engine = FlutterEngine(name: "main engine")
+        engine.run()
+        GeneratedPluginRegistrant.register(with: engine)
+        flutterEngine = engine
 
         if #available(iOS 16.0, *) {
-            setupChannel(engine: flutterEngine)
+            setupChannel(engine: engine)
         }
 
         let flutterVC = FlutterViewController(
-            engine: flutterEngine,
+            engine: engine,
             nibName: nil,
             bundle: nil
         )
@@ -35,6 +41,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
 
         return true
+    }
+
+    // ── Notification delegate ─────────────────────────
+
+    // called when notification received while app is in foreground
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler:
+            @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        if notification.request.identifier == "scheduleResume" {
+            handleScheduleResume()
+        }
+        completionHandler([])
+    }
+
+    // called when user taps notification
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        if response.notification.request.identifier == "scheduleResume" {
+            handleScheduleResume()
+        }
+        completionHandler()
+    }
+
+    private func handleScheduleResume() {
+        NSLog("⏰ scheduleResume notification received — resuming blocking")
+        if #available(iOS 16.0, *) {
+            IOSBlockingService.shared.resumeBlocking()
+        }
     }
 
     @available(iOS 16.0, *)
@@ -70,7 +110,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                let mode = args["mode"] as? String {
                 let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
                 defaults?.set(mode, forKey: "blockingMode")
-                print("✅ saved blockingMode: \(mode)")
             }
             result(nil)
 
@@ -102,6 +141,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         case "stopBlocking":
             service.stopBlocking()
+            // cancel any pending resume notification
+            UNUserNotificationCenter.current()
+                .removePendingNotificationRequests(withIdentifiers: ["scheduleResume"])
             result(nil)
 
         case "persistSessionType":
@@ -110,8 +152,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
                 defaults?.set(type, forKey: "sessionType")
                 defaults?.synchronize()
-                NSLog("🔄 persistSessionType saved: \(type)")
             }
+            result(nil)
+
+        case "savePauseEndTime":
+            if let args = call.arguments as? [String: Any],
+               let endTimeMs = args["endTimeMs"] as? Int {
+                let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+                defaults?.set(endTimeMs, forKey: "schedulePauseEndTime")
+                defaults?.synchronize()
+                NSLog("⏰ savePauseEndTime: \(endTimeMs)")
+
+                // schedule local notification for when pause expires
+                let delaySeconds = Double(endTimeMs) / 1000.0 - Date().timeIntervalSince1970
+                if delaySeconds > 0 {
+                    scheduleResumeNotification(inSeconds: delaySeconds)
+                }
+            }
+            result(nil)
+
+        case "cancelPause":
+            // cancel notification when user manually resumes
+            UNUserNotificationCenter.current()
+                .removePendingNotificationRequests(withIdentifiers: ["scheduleResume"])
+            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            defaults?.set(0, forKey: "schedulePauseEndTime")
+            defaults?.synchronize()
             result(nil)
 
         case "getPersistedSession":
@@ -139,6 +205,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         default:
             result(FlutterMethodNotImplemented)
+        }
+    }
+
+    // ── Schedule resume notification ──────────────────
+
+    private func scheduleResumeNotification(inSeconds delay: Double) {
+        // request permission first
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: [.alert, .sound]
+        ) { granted, _ in
+            guard granted else {
+                NSLog("⚠️ Notification permission denied — resume will trigger on app open")
+                return
+            }
+
+            // remove any existing resume notification
+            UNUserNotificationCenter.current()
+                .removePendingNotificationRequests(withIdentifiers: ["scheduleResume"])
+
+            let content = UNMutableNotificationContent()
+            content.title = "Blocking Resumed"
+            content.body = "Your pause is over. Apps are being blocked again."
+            content.sound = .default
+
+            let trigger = UNTimeIntervalNotificationTrigger(
+                timeInterval: delay,
+                repeats: false
+            )
+
+            let request = UNNotificationRequest(
+                identifier: "scheduleResume",
+                content: content,
+                trigger: trigger
+            )
+
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error = error {
+                    NSLog("❌ schedule notification error: \(error)")
+                } else {
+                    NSLog("⏰ resume notification scheduled in \(delay)s")
+                }
+            }
         }
     }
 

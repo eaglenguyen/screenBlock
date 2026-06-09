@@ -48,6 +48,7 @@ class BlockActivity : FlutterActivity() {
             when (call.method) {
                 "dismissBlockScreen" -> {
                     val blockedPackage = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
+                    AppBlockAccessibilityService.isOverlayShowing = false // 👈 add
 
                     // set exemption directly on AccessibilityService BEFORE finishing
                     // this is synchronous — no broadcast delay
@@ -64,6 +65,8 @@ class BlockActivity : FlutterActivity() {
                 }
                 "goHome" -> {
                     Log.d("BlockActivity", "goHome called — sending BLOCK_DISMISSED broadcast")
+                    AppBlockAccessibilityService.isOverlayShowing = false // 👈 add
+
                     AppBlockAccessibilityService.overlayDismissedCallback?.invoke()
 
                     // reset block flag in main isolate

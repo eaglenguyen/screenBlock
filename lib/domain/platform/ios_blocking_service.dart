@@ -135,6 +135,14 @@ class IOSBlockingService implements BlockingService {
     return 0;
   }
 
+  Future<void> savePauseEndTime(int endTimeMs) async {
+    try {
+      await _channel.invokeMethod('savePauseEndTime', {'endTimeMs': endTimeMs});
+    } catch (e) {
+      debugPrint('❌ savePauseEndTime iOS error: $e');
+    }
+  }
+
   @override
   Stream<AppUsageEvent> get usageEvents =>
       _eventController.stream;

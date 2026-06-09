@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'data/onboarding_stats.dart';
 import 'onboarding_animations.dart';
 import 'onboarding_chat_screen.dart';
 import 'onboarding_demo_screens.dart';
+import 'onboarding_personal_flow.dart';
 import 'onboarding_viewmodel.dart';
 
 
@@ -15,6 +18,12 @@ class OnboardingSteps {
   static const int referral = 2;
   static const int chat = 3;
   static const int demo = 4;
+  static const int ageQuestion   = 5;
+  static const int hoursQuestion = 6;
+  static const int badNewsStats  = 7;
+  static const int lifeGrid      = 8;
+  static const int goodNews      = 9;
+  static const int pricing       = 10;
 }
 
 class OnboardingWelcomeFlow extends ConsumerStatefulWidget {
@@ -29,6 +38,15 @@ class _OnboardingWelcomeFlowState
     extends ConsumerState<OnboardingWelcomeFlow> {
 
   int _currentStep = OnboardingSteps.welcome;
+  // add to _OnboardingWelcomeFlowState
+  int _userAge = 21;
+  double _userHours = 3.5;
+
+  OnboardingStatsData get _statsData => OnboardingStatsData(
+    age: _userAge,
+    hoursPerDay: _userHours,
+  );
+
   String _userName = '';
   String _referral = '';
 
@@ -114,6 +132,45 @@ class _OnboardingWelcomeFlowState
           child: OnboardingDemoFlow(
             onComplete: _nextStep,
           ),
+        );
+      case OnboardingSteps.ageQuestion:
+        return OnboardingAgeScreen(
+          key: const ValueKey('age'),
+          onBack: _previousStep,
+          onSelected: (age) {
+            _userAge = age;
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.hoursQuestion:
+        return OnboardingHoursScreen(
+          key: const ValueKey('hours'),
+          onBack: _previousStep,
+          onSelected: (hours) {
+            _userHours = hours;
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.badNewsStats:
+        return OnboardingBadNewsScreen(
+          key: const ValueKey('badnews'),
+          onBack: _previousStep,
+          onNext: _nextStep,
+          data: _statsData,
+        );
+      case OnboardingSteps.lifeGrid:
+        return OnboardingLifeGridScreen(
+          key: const ValueKey('lifegrid'),
+          onBack: _previousStep,
+          onNext: _nextStep,
+          data: _statsData,
+        );
+      case OnboardingSteps.goodNews:
+        return OnboardingGoodNewsScreen(
+          key: const ValueKey('goodnews'),
+          onBack: _previousStep,
+          onNext: _nextStep,
+          data: _statsData,
         );
       default:
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -625,7 +682,15 @@ class _ReferralScreenState extends State<_ReferralScreen>
                                   ),
                                   child: Center(
                                     child: opt['icon'] != null
-                                        ? Text('') // replace with SvgPicture.asset
+                                        ? SvgPicture.asset(
+                                      opt['icon'] as String,
+                                      width: 20,
+                                      height: 20,
+                                      colorFilter: ColorFilter.mode(
+                                        opt['bgColor'] as Color,
+                                        BlendMode.srcIn,
+                                      ),
+                                    )
                                         : Text(
                                       opt['emoji'] as String,
                                       style: const TextStyle(
