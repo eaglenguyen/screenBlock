@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:screenblock/features/home/schedule/widgets/pause_sheet.dart';
 import 'package:screenblock/features/home/timer/break_sheet.dart';
 import 'package:screenblock/features/home/cards/countdown_card.dart';
@@ -219,6 +220,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ],
               ),
             ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              const channel = MethodChannel('com.eagle.screenblock/ios_blocking');
+              try {
+                final result = await channel.invokeMethod('checkExtensionRan');
+                debugPrint('🔍 EXTENSION CHECK: $result');
+
+                final lastRan = (result['lastRan'] as num?)?.toDouble() ?? 0;
+                final lastActivity = result['lastActivity'] as String? ?? 'none';
+                final lastEvent = result['lastEvent'] as String? ?? 'none';
+
+                String message;
+                if (lastRan == 0) {
+                  message = '❌ Extension NEVER ran';
+                } else {
+                  final ranAt = DateTime.fromMillisecondsSinceEpoch(
+                    (lastRan * 1000).toInt(),
+                  );
+                  message = '✅ Extension ran at $ranAt\n'
+                      'Activity: $lastActivity\n'
+                      'Event: $lastEvent';
+                }
+
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Extension Status'),
+                      content: Text(message),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              } catch (e) {
+                debugPrint('❌ checkExtensionRan error: $e');
+              }
+            },
+            child: const Text('🔍 Check Extension Ran'),
           ),
         ],
       ),

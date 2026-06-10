@@ -142,6 +142,34 @@ class IOSBlockingService implements BlockingService {
       debugPrint('❌ savePauseEndTime iOS error: $e');
     }
   }
+// IOS logic
+
+  Future<void> pauseBlocking(int minutes) async {
+    try {
+      await _channel.invokeMethod('pauseBlocking', {'minutes': minutes});
+      debugPrint('⏸ iOS pauseBlocking: $minutes mins');
+    } catch (e) {
+      debugPrint('❌ pauseBlocking error: $e');
+    }
+  }
+
+  Future<void> resumeBlocking() async {
+    try {
+      await _channel.invokeMethod('resumeBlocking');
+      debugPrint('▶️ iOS resumeBlocking called');
+    } catch (e) {
+      debugPrint('❌ resumeBlocking error: $e');
+    }
+  }
+
+  Future<void> stopBlockingCompletely() async {
+    try {
+      await _channel.invokeMethod('stopBlockingCompletely');
+      debugPrint('🛑 iOS stopBlockingCompletely called');
+    } catch (e) {
+      debugPrint('❌ stopBlockingCompletely error: $e');
+    }
+  }
 
   @override
   Stream<AppUsageEvent> get usageEvents =>

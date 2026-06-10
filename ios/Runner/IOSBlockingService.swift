@@ -20,7 +20,7 @@ class IOSBlockingService: NSObject {
     private let activityCenter = DeviceActivityCenter()
     private let store = ManagedSettingsStore()
     private let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
-    
+    private var pauseTimer: Timer?
     private let activityName = DeviceActivityName("com.eagle.screenblock.session")
     
     // MARK: - Authorization
@@ -72,6 +72,127 @@ class IOSBlockingService: NSObject {
         store.clearAllSettings()
         activityCenter.stopMonitoring([activityName])
     }
+    
+    func stopBlockingCompletely() {
+        sharedDefaults?.set(false, forKey: "isBlocking")
+        sharedDefaults?.removeObject(forKey: "sessionStartTime")
+        sharedDefaults?.removeObject(forKey: "sessionType")
+        sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
+        sharedDefaults?.synchronize()
+        store.clearAllSettings()
+        activityCenter.stopMonitoring([activityName])
+        pauseTimer?.invalidate()
+        pauseTimer = nil
+        cancelPauseNotification()
+    }
+    
+    // MARK: - Pause / Break
+
+    func pauseBlocking(forMinutes minutes: Int) {
+        NSLog("⏸ iOS pauseBlocking for \(minutes) minutes")
+        
+        let now = Date()
+        let pauseEndsAt = now.addingTimeInterval(TimeInterval(minutes * 60))
+        
+        sharedDefaults?.set(pauseEndsAt.timeIntervalSince1970, forKey: "schedulePauseEndTime")
+        sharedDefaults?.synchronize()
+        
+        // unshield immediately
+        store.clearAllSettings()
+        
+        // stop any existing pause activity first
+        activityCenter.stopMonitoring([DeviceActivityName("com.eagle.screenblock.pause")])
+        
+        let calendar = Calendar.current
+        let startComponents = calendar.dateComponents([.hour, .minute], from: now)
+        let endComponents = calendar.dateComponents([.hour, .minute], from: pauseEndsAt)
+        
+        let schedule = DeviceActivitySchedule(
+            intervalStart: startComponents,
+            intervalEnd: endComponents,
+            repeats: false
+        )
+        
+        do {
+            try activityCenter.startMonitoring(
+                DeviceActivityName("com.eagle.screenblock.pause"),
+                during: schedule
+            )
+            NSLog("✅ DeviceActivity pause scheduled until \(pauseEndsAt)")
+        } catch {
+            NSLog("❌ DeviceActivity pause error: \(error.localizedDescription)")
+        }
+        
+        // Swift Timer fallback — only fires if app is foregrounded
+        pauseTimer?.invalidate()
+        pauseTimer = Timer.scheduledTimer(
+            withTimeInterval: TimeInterval(minutes * 60),
+            repeats: false
+        ) { [weak self] _ in
+            self?.resumeBlocking()
+        }
+        
+        // notification — works even when app is backgrounded
+        cancelPauseNotification()
+        let content = UNMutableNotificationContent()
+        content.title = "Break Over 🔒"
+        content.body = "Blocking has resumed. Please close any blocked apps."
+        content.sound = .default
+        content.interruptionLevel = .timeSensitive
+        
+        let trigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: TimeInterval(minutes * 60),
+            repeats: false
+        )
+        let request = UNNotificationRequest(
+            identifier: "com.eagle.screenblock.pauseResume",
+            content: content,
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                NSLog("❌ notification error: \(error)")
+            } else {
+                NSLog("🔔 resume notification scheduled")
+            }
+        }
+        
+        NSLog("⏸ pauseBlocking: will resume at \(pauseEndsAt)")
+    }
+
+    private func cancelPauseNotification() {
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(
+                withIdentifiers: ["com.eagle.screenblock.pauseResume"]
+            )
+    }
+
+    func resumeBlocking() {
+        NSLog("▶️ iOS resumeBlocking called")
+        
+        sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
+        sharedDefaults?.synchronize()
+        
+        // stop the pause activity monitor
+        activityCenter.stopMonitoring([DeviceActivityName("com.eagle.screenblock.pause")])
+        
+        // cancel timer fallback if running
+        pauseTimer?.invalidate()
+        pauseTimer = nil
+        cancelPauseNotification()
+        
+        // re-shield apps
+        let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
+        let appTokens = getStoredAppTokens(mode: blockingMode)
+        guard !appTokens.isEmpty else {
+            NSLog("❌ resumeBlocking: no app tokens found")
+            return
+        }
+        store.shield.applications = appTokens
+        NSLog("▶️ resumeBlocking: re-shielded \(appTokens.count) apps")
+    }
+    
+
     
     func getPersistedSession() -> [String: Any] {
         let isBlocking = sharedDefaults?.bool(forKey: "isBlocking") ?? false

@@ -17,6 +17,7 @@ import '../../data/models/timer_config.dart';
 import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
+import '../../domain/platform/ios_blocking_service.dart';
 import '../../services/schedule_checker.dart';
 import 'home_state.dart';
 
@@ -462,32 +463,31 @@ class HomeViewModel extends _$HomeViewModel {
 
 
   void _onSessionComplete() async {
-    _blockingService.stopAllMonitoring();
+    if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).stopBlockingCompletely();
+    } else {
+      _blockingService.stopAllMonitoring();
+    }
 
-    // end session in Hive as completed
     if (state.activeSessionKey != null) {
       await _sessionRepo.endSession(
         key: state.activeSessionKey!,
-        completed: true, // timer expired naturally
+        completed: true,
       );
     }
 
     await Future.delayed(const Duration(milliseconds: 100));
-    // refresh today's total
     loadTodayBlockedTime();
 
-    // calculate XP — 1 XP per minute blocked
     final xpEarned = state.selectedMinutes * 10;
-
 
     state = state.copyWith(
       phase: BlockingPhase.completed,
       remainingSeconds: 0,
       activeSessionKey: null,
-      xpEarned : xpEarned,
+      xpEarned: xpEarned,
     );
   }
-
 
 
   // Block Modes
@@ -552,19 +552,21 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> giveUp() async {
     _sessionTimer?.cancel();
     _breakTimer?.cancel();
-    await _blockingService.stopAllMonitoring();
 
-    // end session in Hive
+    if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).stopBlockingCompletely();
+    } else {
+      await _blockingService.stopAllMonitoring();
+    }
+
     if (state.activeSessionKey != null) {
       await _sessionRepo.endSession(
         key: state.activeSessionKey!,
-        completed: false, // gave up
+        completed: false,
       );
     }
 
-    // 👇 small delay to ensure Hive write is complete
     await Future.delayed(const Duration(milliseconds: 100));
-    // refresh today's total
     loadTodayBlockedTime();
 
     state = state.copyWith(
@@ -578,17 +580,19 @@ class HomeViewModel extends _$HomeViewModel {
   // ── Take a break ─────────────────────────────────
   Future<void> startBreak(int minutes) async {
     _sessionTimer?.cancel();
-    await _blockingService.stopAllMonitoring();
 
-    final breakSeconds = minutes * 60;
-    final breakStartTime = DateTime.now();
-    final breakEndsAt = breakStartTime.add(Duration(minutes: minutes));
-
-    // 👇 save break end time to native so Kotlin knows break is active
-    if (Platform.isAndroid && _blockingService is AndroidBlockingService) {
+    if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).pauseBlocking(minutes);
+      // don't call stopAllMonitoring on iOS — it cancels the pause timer
+    } else {
+      await _blockingService.stopAllMonitoring();
+      final breakEndsAt = DateTime.now().add(Duration(minutes: minutes));
       await (_blockingService as AndroidBlockingService)
           .savePauseEndTime(breakEndsAt.millisecondsSinceEpoch);
     }
+
+    final breakSeconds = minutes * 60;
+    final breakStartTime = DateTime.now();
 
     state = state.copyWith(
       phase: BlockingPhase.onBreak,
@@ -598,63 +602,49 @@ class HomeViewModel extends _$HomeViewModel {
     );
 
     _breakTimer?.cancel();
-    _breakTimer = Timer.periodic(
-      const Duration(seconds: 1),
-          (timer) {
-        final elapsed = DateTime.now()
-            .difference(state.breakStartTime!)
-            .inSeconds;
-        final remaining = breakSeconds - elapsed;
-
-        if (remaining <= 0) {
-          timer.cancel();
-          _resumeAfterBreak(state.remainingSeconds);
-        } else {
-          state = state.copyWith(breakRemainingSeconds: remaining);
-        }
-      },
-    );
+    _breakTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final elapsed = DateTime.now().difference(state.breakStartTime!).inSeconds;
+      final remaining = breakSeconds - elapsed;
+      if (remaining <= 0) {
+        timer.cancel();
+        _resumeAfterBreak(state.remainingSeconds);
+      } else {
+        state = state.copyWith(breakRemainingSeconds: remaining);
+      }
+    });
   }
 
   Future<void> endBreak() async {
     _breakTimer?.cancel();
 
-    // 👇 clear break end time in native so Kotlin doesn't think pause is still active
     if (Platform.isAndroid && _blockingService is AndroidBlockingService) {
-      await (_blockingService as AndroidBlockingService)
-          .savePauseEndTime(0);
+      await (_blockingService as AndroidBlockingService).savePauseEndTime(0);
     }
 
     _resumeAfterBreak(state.remainingSeconds);
   }
 
+
   Future<void> _resumeAfterBreak(int remainingSeconds) async {
     _blockingService.setBlockingMode(state.blockingType);
 
-    final apps = state.blockingType ==
-        AppConstants.blockingTypeSpecificApps
-        ? state.blockedApps
-        : state.allowedApps;
-
     if (Platform.isIOS) {
-      await _blockingService.startMonitoring('ios_apps', state.selectedMinutes);
+      await (_blockingService as IOSBlockingService).resumeBlocking();
+      // Swift already reshielded — don't call startMonitoring again
     } else {
+      final apps = state.blockingType == AppConstants.blockingTypeSpecificApps
+          ? state.blockedApps
+          : state.allowedApps;
       for (final pkg in apps) {
         await _blockingService.startMonitoring(pkg, state.selectedMinutes);
       }
       if (_blockingService is AndroidBlockingService) {
-        // clear break/pause end time
-        await (_blockingService as AndroidBlockingService)
-            .savePauseEndTime(0); // 👈 clear pause
-        // persist blocking state
-        await (_blockingService as AndroidBlockingService)
-            .persistBlockingState(
+        await (_blockingService as AndroidBlockingService).savePauseEndTime(0);
+        await (_blockingService as AndroidBlockingService).persistBlockingState(
           sessionMinutes: state.selectedMinutes,
           sessionType: 'manual',
         );
-        // immediately check current foreground app
-        await (_blockingService as AndroidBlockingService)
-            .checkCurrentForegroundApp();
+        await (_blockingService as AndroidBlockingService).checkCurrentForegroundApp();
       }
     }
 
@@ -664,19 +654,21 @@ class HomeViewModel extends _$HomeViewModel {
     );
 
     _sessionTimer?.cancel();
-    _sessionTimer = Timer.periodic(
-      const Duration(seconds: 1),
-          (timer) {
-        final remaining = state.remainingSeconds - 1;
-        if (remaining <= 0) {
-          timer.cancel();
-          _onSessionComplete();
-        } else {
-          state = state.copyWith(remainingSeconds: remaining);
-        }
-      },
-    );
+    _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final totalSeconds = state.selectedMinutes * 60;
+      final elapsed = DateTime.now()
+          .difference(state.sessionStartTime!)
+          .inSeconds;
+      final remaining = totalSeconds - elapsed;
+      if (remaining <= 0) {
+        timer.cancel();
+        _onSessionComplete();
+      } else {
+        state = state.copyWith(remainingSeconds: remaining);
+      }
+    });
   }
+
 
   void _startSessionTimer(int totalSeconds, DateTime startTime) {
     _sessionTimer?.cancel();

@@ -51,19 +51,23 @@ class ScheduleChecker {
   }
 
   Future<void> pauseFor(int minutes) async {
-    // 👇 remove the _isScheduleBlocking guard — use state instead
-    // if (!_isScheduleBlocking) return;  ← remove this line
-
     debugPrint('📅 Schedule paused for $minutes minutes');
 
     _isPaused = true;
-    _isScheduleBlocking = true; // 👈 ensure it's set
+    _isScheduleBlocking = true;
     _pauseEndsAt = DateTime.now().add(Duration(minutes: minutes));
 
-    _blockingService?.stopAllMonitoring();
-    onSchedulePaused?.call();
+    if (Platform.isIOS) {
+      // iOS: pauseBlocking handles unshielding + native timer
+      // do NOT call stopAllMonitoring after this
+      await (_blockingService as IOSBlockingService).pauseBlocking(minutes);
+    } else {
+      // Android: stop monitoring then save pause time
+      _blockingService?.stopAllMonitoring();
+      await _savePauseEndTimeNative(_pauseEndsAt!);
+    }
 
-    await _savePauseEndTimeNative(_pauseEndsAt!);
+    onSchedulePaused?.call();
 
     _pauseTimer?.cancel();
     _pauseTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -71,10 +75,7 @@ class ScheduleChecker {
         timer.cancel();
         return;
       }
-      final remaining = _pauseEndsAt!
-          .difference(DateTime.now())
-          .inSeconds;
-
+      final remaining = _pauseEndsAt!.difference(DateTime.now()).inSeconds;
       if (remaining <= 0) {
         timer.cancel();
         _resumeFromPause();
@@ -106,8 +107,13 @@ class ScheduleChecker {
     }
   }
 
-  void resumeNow() {
+  Future<void> resumeNow() async {
     _pauseTimer?.cancel();
+
+    if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).resumeBlocking();
+    }
+
     _resumeFromPause();
   }
 
@@ -117,10 +123,14 @@ class ScheduleChecker {
     _isPaused = false;
     _pauseEndsAt = null;
 
-    // restart blocking with same schedule
-    if (_activeSchedule != null) {
+    if (Platform.isIOS) {
+      // re-shield directly via resumeBlocking
+      // in case Swift Timer or DeviceActivity didn't fire
+      (_blockingService as IOSBlockingService).resumeBlocking();
+    } else if (_activeSchedule != null) {
       _startScheduleBlocking(_activeSchedule!);
     }
+
     onScheduleResumed?.call();
   }
 

@@ -98,6 +98,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+            
+        case "checkExtensionRan":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            let lastRan = defaults?.double(forKey: "extensionLastRan") ?? 0
+            let lastActivity = defaults?.string(forKey: "extensionLastActivity") ?? "none"
+            let lastEvent = defaults?.string(forKey: "extensionLastEvent") ?? "none"
+            NSLog("🔍 Extension last ran: \(lastRan), activity: \(lastActivity), event: \(lastEvent)")
+            result([
+                "lastRan": lastRan,
+                "lastActivity": lastActivity,
+                "lastEvent": lastEvent,
+            ])
 
         case "requestAuthorization":
             result(await service.requestAuthorization())
@@ -145,7 +157,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             UNUserNotificationCenter.current()
                 .removePendingNotificationRequests(withIdentifiers: ["scheduleResume"])
             result(nil)
+            
+        case "pauseBlocking":
+            if let args = call.arguments as? [String: Any],
+               let minutes = args["minutes"] as? Int {
+                service.pauseBlocking(forMinutes: minutes)
+            }
+            result(nil)
 
+        case "resumeBlocking":
+            service.resumeBlocking()
+            result(nil)
+
+        case "stopBlockingCompletely":
+            service.stopBlockingCompletely()
+            result(nil)
+            
         case "persistSessionType":
             if let args = call.arguments as? [String: Any],
                let type = args["type"] as? String {
@@ -170,7 +197,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 }
             }
             result(nil)
-
+            
         case "cancelPause":
             // cancel notification when user manually resumes
             UNUserNotificationCenter.current()

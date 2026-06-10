@@ -36,7 +36,7 @@ target 'Runner' do
   end
 end
 
-target 'DeviceActivityMonitorExtension' do
+target 'ScreenBlockMonitor' do
   use_frameworks!
   use_modular_headers!
 end
