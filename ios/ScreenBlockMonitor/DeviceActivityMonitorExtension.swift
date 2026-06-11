@@ -35,6 +35,18 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         }
     }
     
+    override func intervalWillEndWarning(for activity: DeviceActivityName) {
+        super.intervalWillEndWarning(for: activity)
+        
+        if activity.rawValue == "com.eagle.screenblock.pause" {
+            NSLog("⏰ pause warning fired — re-shielding now")
+            sharedDefaults?.set("intervalWillEndWarning", forKey: "extensionLastEvent")
+            sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")
+            sharedDefaults?.synchronize()
+            reshieldApps()
+        }
+    }
+    
     private func reshieldApps() {
         let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
         let key = blockingMode == "specific_apps" ? "blockedApps" : "allowedApps"

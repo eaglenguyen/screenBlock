@@ -14,8 +14,8 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		3C7DCF4A26E9C06C6FAABF49 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6973F102EF9484B3064CBAF /* Pods_Runner.framework */; };
 		74365F022FD9F0D8008C1DEC /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74E130AB2FC0E84E00D45757 /* DeviceActivity.framework */; };
-		74365F0A2FD9F0D8008C1DEC /* ScreenBlockMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 74365F012FD9F0D8008C1DEC /* ScreenBlockMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		74BFE2BA2FDA037A0028C86B /* ScreenBlockMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 74365F012FD9F0D8008C1DEC /* ScreenBlockMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74E130A42FC0E7BA00D45757 /* FamilyActivityPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E130A22FC0E7BA00D45757 /* FamilyActivityPickerViewController.swift */; };
 		74E130A52FC0E7BA00D45757 /* IOSBlockingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E130A32FC0E7BA00D45757 /* IOSBlockingService.swift */; };
 		74E130DF2FC0EA1D00D45757 /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74E130DE2FC0EA1D00D45757 /* ManagedSettings.framework */; };
@@ -39,21 +39,7 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
-		7419655E2FD9022F0070CE90 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 74365F002FD9F0D8008C1DEC;
-			remoteInfo = ScreenBlockMonitor;
-		};
-		741965602FD902450070CE90 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 74365F002FD9F0D8008C1DEC;
-			remoteInfo = ScreenBlockMonitor;
-		};
-		74365F082FD9F0D8008C1DEC /* PBXContainerItemProxy */ = {
+		74BFE2B82FDA03080028C86B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
 			proxyType = 1;
@@ -86,16 +72,16 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		74E130B52FC0E84E00D45757 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
+			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				74BFE2BA2FDA037A0028C86B /* ScreenBlockMonitor.appex in Embed Foundation Extensions */,
 				74E130E72FC0EA1D00D45757 /* ShieldConfigurationExtension.appex in Embed Foundation Extensions */,
 				74E1311E2FC0EADB00D45757 /* ShieldActionExtension.appex in Embed Foundation Extensions */,
-				74365F0A2FD9F0D8008C1DEC /* ScreenBlockMonitor.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		74E1319C2FC0EC3E00D45757 /* Embed ExtensionKit Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -530,20 +516,18 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
-				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				74E130B52FC0E84E00D45757 /* Embed Foundation Extensions */,
 				74E1319C2FC0EC3E00D45757 /* Embed ExtensionKit Extensions */,
+				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				5E6A10B2A9BB2AF3A56108CB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				74BFE2B92FDA03080028C86B /* PBXTargetDependency */,
 				74E130E62FC0EA1D00D45757 /* PBXTargetDependency */,
 				74E1311D2FC0EADB00D45757 /* PBXTargetDependency */,
 				74E1319A2FC0EC3E00D45757 /* PBXTargetDependency */,
-				7419655F2FD9022F0070CE90 /* PBXTargetDependency */,
-				741965612FD902450070CE90 /* PBXTargetDependency */,
-				74365F092FD9F0D8008C1DEC /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -692,7 +676,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin\n";
 		};
 		5E6A10B2A9BB2AF3A56108CB /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -894,20 +878,10 @@
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
 		};
-		7419655F2FD9022F0070CE90 /* PBXTargetDependency */ = {
+		74BFE2B92FDA03080028C86B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 74365F002FD9F0D8008C1DEC /* ScreenBlockMonitor */;
-			targetProxy = 7419655E2FD9022F0070CE90 /* PBXContainerItemProxy */;
-		};
-		741965612FD902450070CE90 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 74365F002FD9F0D8008C1DEC /* ScreenBlockMonitor */;
-			targetProxy = 741965602FD902450070CE90 /* PBXContainerItemProxy */;
-		};
-		74365F092FD9F0D8008C1DEC /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 74365F002FD9F0D8008C1DEC /* ScreenBlockMonitor */;
-			targetProxy = 74365F082FD9F0D8008C1DEC /* PBXContainerItemProxy */;
+			targetProxy = 74BFE2B82FDA03080028C86B /* PBXContainerItemProxy */;
 		};
 		74E130E62FC0EA1D00D45757 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

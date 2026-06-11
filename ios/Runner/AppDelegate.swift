@@ -99,6 +99,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         switch call.method {
             
+        case "checkMonitoringStatus":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            let status = defaults?.string(forKey: "monitoringStatus") ?? "never called"
+            let activities = defaults?.array(forKey: "monitoringActivities") as? [String] ?? []
+            result([
+                "status": status,
+                "activities": activities,
+            ])
+            
         case "checkExtensionRan":
             let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
             let lastRan = defaults?.double(forKey: "extensionLastRan") ?? 0

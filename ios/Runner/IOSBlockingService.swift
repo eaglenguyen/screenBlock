@@ -10,6 +10,7 @@ import FamilyControls
 import DeviceActivity
 import ManagedSettings
 import Combine
+import UserNotifications
 
 @available(iOS 16.0, *)
 class IOSBlockingService: NSObject {
@@ -89,7 +90,7 @@ class IOSBlockingService: NSObject {
     // MARK: - Pause / Break
 
     func pauseBlocking(forMinutes minutes: Int) {
-        NSLog("⏸ iOS pauseBlocking for \(minutes) minutes")
+        NSLog("⏸ pauseBlocking for \(minutes) minutes")
         
         let now = Date()
         let pauseEndsAt = now.addingTimeInterval(TimeInterval(minutes * 60))
@@ -97,33 +98,58 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.set(pauseEndsAt.timeIntervalSince1970, forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
         
-        // unshield immediately
         store.clearAllSettings()
-        
-        // stop any existing pause activity first
         activityCenter.stopMonitoring([DeviceActivityName("com.eagle.screenblock.pause")])
         
         let calendar = Calendar.current
-        let startComponents = calendar.dateComponents([.hour, .minute], from: now)
-        let endComponents = calendar.dateComponents([.hour, .minute], from: pauseEndsAt)
+        // round start up to next minute to account for dropped seconds
+        let roundedStart = calendar.date(
+            bySetting: .second,
+            value: 0,
+            of: now.addingTimeInterval(60)
+        ) ?? now
+        let startComponents = calendar.dateComponents([.hour, .minute], from: roundedStart)
         
-        let schedule = DeviceActivitySchedule(
-            intervalStart: startComponents,
-            intervalEnd: endComponents,
-            repeats: false
-        )
+        let schedule: DeviceActivitySchedule
+        
+        if minutes < 15 {
+            // use warningTime trick — schedule 15 mins, warning fires at actual pause end
+            let endDate = now.addingTimeInterval(15 * 60)
+            let endComponents = calendar.dateComponents([.hour, .minute], from: endDate)
+            let warningMinutes = 15 - minutes
+            schedule = DeviceActivitySchedule(
+                intervalStart: startComponents,
+                intervalEnd: endComponents,
+                repeats: false,
+                warningTime: DateComponents(minute: warningMinutes)
+            )
+            NSLog("⏸ using warningTime trick: warning in \(minutes) mins")
+        } else {
+            // schedule exact duration
+            let endComponents = calendar.dateComponents([.hour, .minute], from: pauseEndsAt)
+            schedule = DeviceActivitySchedule(
+                intervalStart: startComponents,
+                intervalEnd: endComponents,
+                repeats: false
+            )
+            NSLog("⏸ using exact schedule: ends in \(minutes) mins")
+        }
         
         do {
             try activityCenter.startMonitoring(
                 DeviceActivityName("com.eagle.screenblock.pause"),
                 during: schedule
             )
-            NSLog("✅ DeviceActivity pause scheduled until \(pauseEndsAt)")
+            NSLog("✅ pause scheduled")
+            sharedDefaults?.set("success", forKey: "monitoringStatus")
         } catch {
-            NSLog("❌ DeviceActivity pause error: \(error.localizedDescription)")
+            NSLog("❌ startMonitoring error: \(error)")
+            sharedDefaults?.set("failed:\(error.localizedDescription)", forKey: "monitoringStatus")
         }
         
-        // Swift Timer fallback — only fires if app is foregrounded
+        cancelPauseNotification()
+        scheduleResumeNotification(afterSeconds: minutes * 60)
+        
         pauseTimer?.invalidate()
         pauseTimer = Timer.scheduledTimer(
             withTimeInterval: TimeInterval(minutes * 60),
@@ -131,9 +157,9 @@ class IOSBlockingService: NSObject {
         ) { [weak self] _ in
             self?.resumeBlocking()
         }
-        
-        // notification — works even when app is backgrounded
-        cancelPauseNotification()
+    }
+    
+    private func scheduleResumeNotification(afterSeconds seconds: Int) {
         let content = UNMutableNotificationContent()
         content.title = "Break Over 🔒"
         content.body = "Blocking has resumed. Please close any blocked apps."
@@ -141,23 +167,21 @@ class IOSBlockingService: NSObject {
         content.interruptionLevel = .timeSensitive
         
         let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: TimeInterval(minutes * 60),
+            timeInterval: TimeInterval(seconds),
             repeats: false
         )
+        
         let request = UNNotificationRequest(
             identifier: "com.eagle.screenblock.pauseResume",
             content: content,
             trigger: trigger
         )
+        
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
                 NSLog("❌ notification error: \(error)")
-            } else {
-                NSLog("🔔 resume notification scheduled")
             }
         }
-        
-        NSLog("⏸ pauseBlocking: will resume at \(pauseEndsAt)")
     }
 
     private func cancelPauseNotification() {

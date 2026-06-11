@@ -224,46 +224,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ElevatedButton(
             onPressed: () async {
               const channel = MethodChannel('com.eagle.screenblock/ios_blocking');
-              try {
-                final result = await channel.invokeMethod('checkExtensionRan');
-                debugPrint('🔍 EXTENSION CHECK: $result');
-
-                final lastRan = (result['lastRan'] as num?)?.toDouble() ?? 0;
-                final lastActivity = result['lastActivity'] as String? ?? 'none';
-                final lastEvent = result['lastEvent'] as String? ?? 'none';
-
-                String message;
-                if (lastRan == 0) {
-                  message = '❌ Extension NEVER ran';
-                } else {
-                  final ranAt = DateTime.fromMillisecondsSinceEpoch(
-                    (lastRan * 1000).toInt(),
-                  );
-                  message = '✅ Extension ran at $ranAt\n'
-                      'Activity: $lastActivity\n'
-                      'Event: $lastEvent';
-                }
-
-                if (context.mounted) {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Extension Status'),
-                      content: Text(message),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              } catch (e) {
-                debugPrint('❌ checkExtensionRan error: $e');
+              final result = await channel.invokeMethod('checkMonitoringStatus');
+              final status = result['status'] as String;
+              final activities = (result['activities'] as List).cast<String>();
+              if (context.mounted) {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Monitoring Status'),
+                    content: Text('Status: $status\n\nActivities: $activities'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
-            child: const Text('🔍 Check Extension Ran'),
+            child: const Text('🔍 Check Monitoring'),
           ),
         ],
       ),
