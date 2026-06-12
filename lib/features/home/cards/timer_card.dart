@@ -108,7 +108,7 @@ class _TimerCardState extends State<TimerCard>
     final seconds = parts[2];
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.backgroundCard,
         borderRadius: BorderRadius.circular(20),
@@ -214,7 +214,7 @@ class _TimerCardState extends State<TimerCard>
 
   Widget _timerColon() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 16, left: 6, right: 6),
       child: Text(
         ':',
         style: AppTextStyles.displayMedium.copyWith(

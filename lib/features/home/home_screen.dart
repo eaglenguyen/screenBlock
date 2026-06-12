@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:screenblock/features/home/schedule/widgets/pause_sheet.dart';
 import 'package:screenblock/features/home/timer/break_sheet.dart';
 import 'package:screenblock/features/home/cards/countdown_card.dart';
 import 'package:screenblock/features/home/cards/active_blocking_card.dart';
 import 'package:screenblock/features/home/widgets/app_list_sheet.dart';
 import 'package:screenblock/features/home/widgets/block_mode_sheet.dart';
-import 'package:screenblock/features/home/widgets/focus_stats.dart';
 import 'package:screenblock/features/home/widgets/home_header.dart';
 import 'package:screenblock/features/home/cards/timer_card.dart';
 import 'package:screenblock/features/home/timer/timer_picker_sheet.dart';
@@ -212,38 +210,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   },
 
                   const SizedBox(height: 12),
-
-                  // ── Focus stats ──────────────────────────────
-                  if (state.phase == BlockingPhase.idle ||
-                      state.phase == BlockingPhase.countdown)
-                    FocusStatsCard(state: state),
                 ],
               ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              const channel = MethodChannel('com.eagle.screenblock/ios_blocking');
-              final result = await channel.invokeMethod('checkMonitoringStatus');
-              final status = result['status'] as String;
-              final activities = (result['activities'] as List).cast<String>();
-              if (context.mounted) {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Monitoring Status'),
-                    content: Text('Status: $status\n\nActivities: $activities'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-            },
-            child: const Text('🔍 Check Monitoring'),
           ),
         ],
       ),

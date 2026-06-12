@@ -71,6 +71,8 @@ class AppBlockAccessibilityService : AccessibilityService() {
                             putExtra("blocked_package", pkg)
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                            addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                         }
                         startActivity(intent)
                     }
@@ -105,6 +107,8 @@ class AppBlockAccessibilityService : AccessibilityService() {
                             putExtra("blocked_package", pkg)
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                            addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                         }
                         startActivity(intent)
                     }
@@ -211,6 +215,8 @@ class AppBlockAccessibilityService : AccessibilityService() {
                 putExtra("blocked_package", packageName)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
             }
             startActivity(intent)
         }
