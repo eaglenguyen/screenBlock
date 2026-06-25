@@ -90,9 +90,9 @@ class _BreakSheetState extends State<BreakSheet> {
       ),
       child: Slider(
         value: _selectedMinutes.toDouble(),
-        min: 1,
+        min: 3,
         max: 30,
-        divisions: 29,
+        divisions: 27,
         onChanged: (value) {
           HapticFeedback.selectionClick();
           setState(() => _selectedMinutes = value.round());

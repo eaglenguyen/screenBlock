@@ -84,12 +84,25 @@ class IOSBlockingService: NSObject {
     }
     
     // MARK: - Pause / Break
+    var onPauseEnded: (() -> Void)?
+
 
     func pauseBlocking(forMinutes minutes: Int) {
         NSLog("⏸ pauseBlocking for \(minutes) minutes")
         
         let now = Date()
         let pauseEndsAt = now.addingTimeInterval(TimeInterval(minutes * 60))
+        
+        // 👇 start timer FIRST before any other setup
+         pauseTimer?.invalidate()
+         pauseTimer = Timer.scheduledTimer(
+             withTimeInterval: TimeInterval(minutes * 60),
+             repeats: false
+         ) { [weak self] _ in
+             NSLog("⏱ native pause timer fired — resuming blocking")
+             self?.resumeBlocking()
+             self?.onPauseEnded?() // 👈 notify Flutter
+         }
         
         sharedDefaults?.set(pauseEndsAt.timeIntervalSince1970, forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
@@ -149,13 +162,6 @@ class IOSBlockingService: NSObject {
         cancelPauseNotification()
         scheduleResumeNotification(afterSeconds: minutes * 60)
         
-        pauseTimer?.invalidate()
-        pauseTimer = Timer.scheduledTimer(
-            withTimeInterval: TimeInterval(minutes * 60),
-            repeats: false
-        ) { [weak self] _ in
-            self?.resumeBlocking()
-        }
     }
     
     private func scheduleResumeNotification(afterSeconds seconds: Int) {
@@ -189,26 +195,25 @@ class IOSBlockingService: NSObject {
                 withIdentifiers: ["com.eagle.pausenow.pauseResume"]
             )
     }
-
     func resumeBlocking() {
-        NSLog("▶️ iOS resumeBlocking called")
+        
+        let currentSessionType = sharedDefaults?.string(forKey: "sessionType") ?? "manual"
         
         sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
         
-        // stop the pause activity monitor
         activityCenter.stopMonitoring([DeviceActivityName("com.eagle.pausenow.pause")])
-        
-        // cancel timer fallback if running
         pauseTimer?.invalidate()
         pauseTimer = nil
         cancelPauseNotification()
         
-        // re-shield apps
         let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
         applyShield(mode: blockingMode)
-
         
+        // 👇 only notify Flutter for manual sessions
+        if currentSessionType == "manual" {
+            onPauseEnded?()
+        }
     }
     
 

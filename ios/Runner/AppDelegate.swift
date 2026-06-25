@@ -85,6 +85,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             name: "com.eagle.pausenow/ios_blocking",
             binaryMessenger: engine.binaryMessenger
         )
+        
+        // 👇 notify Flutter when native pause timer fires
+         IOSBlockingService.shared.onPauseEnded = {
+             DispatchQueue.main.async {
+                 channel.invokeMethod("onPauseEnded", arguments: nil)
+             }
+         }
+        
+        
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self = self else { return }
             Task { await self.handleMethodCall(call, result: result) }

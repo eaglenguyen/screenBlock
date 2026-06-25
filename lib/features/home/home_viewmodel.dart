@@ -59,6 +59,22 @@ class HomeViewModel extends _$HomeViewModel {
     if (_initialized) return;
     _initialized = true;
 
+    // listen for native pause ended event — iOS only
+    if (Platform.isIOS) {
+      IOSBlockingService.listenForNativeEvents(
+        onPauseEnded: () {
+          debugPrint('📱 native pause ended — checking phase');
+          // only resume if we are actually on a manual break
+          if (state.phase == BlockingPhase.onBreak) {
+            debugPrint('📱 resuming manual break after native timer');
+            _resumeAfterBreak(state.remainingSeconds);
+          } else {
+            debugPrint('📱 ignoring onPauseEnded — phase is ${state.phase}');
+          }
+        },
+      );
+    } // 👈 correctly closed here — everything below runs on all platforms
+
     _setupStreams();
     loadTrackedApps();
     loadTodayBlockedTime();
@@ -128,19 +144,15 @@ class HomeViewModel extends _$HomeViewModel {
   void _onPremiumLost() {
     debugPrint('💎 Premium lost — enforcing free tier');
 
-    // if schedule is active, check if it should stop
     if (state.isScheduleActive) {
       final isPremium = ref.read(isPremiumProvider);
       ScheduleChecker.instance.isPremium = () => isPremium;
-
-      // re-check — ScheduleChecker will apply 3 app cap for free tier
       ScheduleChecker.instance.checkNow();
     }
 
-    // if manual blocking is active with all apps mode — stop it
     if (state.phase == BlockingPhase.active &&
         state.blockingType == AppConstants.blockingTypeAllApps) {
-      giveUp(); // ends the session gracefully
+      giveUp();
     }
   }
 
@@ -422,6 +434,9 @@ class HomeViewModel extends _$HomeViewModel {
       activeSessionKey: null,
       xpEarned: state.selectedMinutes * 5,
     );
+
+    // check if a schedule should now be active
+    ScheduleChecker.instance.checkNow();
   }
 
   void finishAndUnblock() {
@@ -461,6 +476,9 @@ class HomeViewModel extends _$HomeViewModel {
       breakRemainingSeconds: 0,
       activeSessionKey: null,
     );
+
+    // check if a schedule should now be active
+    ScheduleChecker.instance.checkNow();
   }
 
   // ── Break ─────────────────────────────────────────
@@ -511,7 +529,11 @@ class HomeViewModel extends _$HomeViewModel {
     _blockingService.setBlockingMode(state.blockingType);
 
     if (Platform.isIOS) {
-      await (_blockingService as IOSBlockingService).resumeBlocking();
+      // only resume from Flutter side for manual sessions
+      // schedule sessions are handled natively by IOSBlockingService
+      if (state.phase == BlockingPhase.onBreak) {
+        await (_blockingService as IOSBlockingService).resumeBlocking();
+      }
     } else {
       final apps = state.blockingType == AppConstants.blockingTypeSpecificApps
           ? state.blockedApps
@@ -551,6 +573,8 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── App resumed ───────────────────────────────────
   void onAppResumed() {
+    debugPrint('🔄 onAppResumed — phase: ${state.phase} isScheduleActive: ${state.isScheduleActive}');
+
     if (state.isSchedulePaused) {
       final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
       if (pauseEndTime != null && DateTime.now().isAfter(pauseEndTime)) {

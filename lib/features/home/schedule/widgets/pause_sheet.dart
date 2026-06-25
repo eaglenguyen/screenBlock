@@ -125,9 +125,9 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
               ),
               child: Slider(
                 value: _selectedMinutes,
-                min: 1,
+                min: 3,
                 max: 30,
-                divisions: 29,
+                divisions: 27,
                 onChanged: (val) {
                   HapticFeedback.selectionClick();
                   setState(() => _selectedMinutes = val);
@@ -141,7 +141,7 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('1m',
+                  Text('3m',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.3),
                         fontSize: 12,

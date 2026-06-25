@@ -8,6 +8,15 @@ class IOSBlockingService implements BlockingService {
   static const _channel = MethodChannel(
     'com.eagle.pausenow/ios_blocking',
   );
+  static void listenForNativeEvents({required VoidCallback onPauseEnded}) {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onPauseEnded') {
+        onPauseEnded();
+      }
+    });
+  }
+
+
 
   final _eventController =
   StreamController<AppUsageEvent>.broadcast();
