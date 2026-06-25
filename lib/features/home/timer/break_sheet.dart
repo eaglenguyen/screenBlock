@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-
+import '../schedule/widgets/hold_to_confirm.dart';
+// ,
 class BreakSheet extends StatefulWidget {
   const BreakSheet({
     super.key,
@@ -16,16 +17,16 @@ class BreakSheet extends StatefulWidget {
 }
 
 class _BreakSheetState extends State<BreakSheet> {
-
+  // 👇 no animation controller needed anymore
   int _selectedMinutes = 5;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundCard,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundCard(context),
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),
       ),
@@ -51,7 +52,7 @@ class _BreakSheetState extends State<BreakSheet> {
       width: 40,
       height: 4,
       decoration: BoxDecoration(
-        color: AppColors.border,
+        color: AppColors.border(context),
         borderRadius: BorderRadius.circular(2),
       ),
     );
@@ -69,7 +70,7 @@ class _BreakSheetState extends State<BreakSheet> {
     return Text(
       '$_selectedMinutes min break',
       style: AppTextStyles.headlineMedium.copyWith(
-        color: AppColors.gold,
+        color: Colors.orange,
       ),
       textAlign: TextAlign.center,
     );
@@ -78,10 +79,10 @@ class _BreakSheetState extends State<BreakSheet> {
   Widget _buildSlider() {
     return SliderTheme(
       data: SliderThemeData(
-        activeTrackColor: AppColors.gold,
-        inactiveTrackColor: AppColors.backgroundSubtle,
-        thumbColor: AppColors.gold,
-        overlayColor: AppColors.gold.withOpacity(0.2),
+        activeTrackColor: Colors.orange,
+        inactiveTrackColor: AppColors.backgroundSubtle(context),
+        thumbColor: Colors.orange,
+        overlayColor: Colors.orange.withValues(alpha: 0.2),
         thumbShape: const RoundSliderThumbShape(
           enabledThumbRadius: 12,
         ),
@@ -90,8 +91,8 @@ class _BreakSheetState extends State<BreakSheet> {
       child: Slider(
         value: _selectedMinutes.toDouble(),
         min: 1,
-        max: 10,
-        divisions: 9,
+        max: 30,
+        divisions: 29,
         onChanged: (value) {
           HapticFeedback.selectionClick();
           setState(() => _selectedMinutes = value.round());
@@ -103,23 +104,11 @@ class _BreakSheetState extends State<BreakSheet> {
   Widget _buildStartButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () {
+      child: HoldToConfirmButton(
+        onConfirmed: () {
           widget.onStartBreak(_selectedMinutes);
           Navigator.pop(context);
         },
-        icon: const Icon(
-          Icons.pause_rounded,
-          color: AppColors.goldText,
-        ),
-        label: Text('Start $_selectedMinutes min Break'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold,
-          foregroundColor: AppColors.goldText,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: const StadiumBorder(),
-          textStyle: AppTextStyles.labelLarge,
-        ),
       ),
     );
   }
