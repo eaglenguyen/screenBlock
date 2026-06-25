@@ -131,7 +131,7 @@ class SettingsScreen extends ConsumerWidget {
                           } else {
                             // fallback — open App Store page directly
                             inAppReview.openStoreListing(
-                              appStoreId: 'YOUR_APP_STORE_ID', // 👈 add once app is live
+                              appStoreId: '6781065557', // 👈 add once app is live
                             );
                           }
                         },                      ),

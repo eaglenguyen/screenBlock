@@ -76,7 +76,7 @@ dependencies:
   in_app_review: ^2.0.9
   android_intent_plus: ^5.0.0
   rive: ^0.14.8
-
+  timezone: ^0.11.0
 
 
 

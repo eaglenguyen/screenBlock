@@ -39,6 +39,9 @@
 
     <key>NSCameraUsageDescription</key>
     <string>pause now does not use the camera.</string>
+    
+    <key>ITSAppUsesNonExemptEncryption</key><false/>
+
 
     <key>NSPhotoLibraryUsageDescription</key>
     <string>pause now does not access your photo library.</string>

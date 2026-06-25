@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pausenow/providers/blocking_service_provider.dart';
 import 'package:pausenow/providers/premium_provider.dart';
+import 'package:pausenow/services/notification_service.dart';
 import 'package:pausenow/services/revenuecat_service.dart';
 import 'package:pausenow/services/schedule_checker.dart';
 import 'package:pausenow/services/xp_animation.dart';
@@ -21,10 +22,14 @@ import 'data/models/streak.dart';
 import 'data/models/timer_config.dart';
 import 'data/models/usage_log.dart';
 
+import 'package:timezone/data/latest.dart' as tz_data;
+
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz_data.initializeTimeZones(); // 👈
+  await NotificationService.instance.initialize(); // 👈
   await RiveNative.init(); // 👈 required for 0.14.x
 
 
