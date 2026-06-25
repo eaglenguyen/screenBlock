@@ -14,11 +14,15 @@ class StatsHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 52, 20, 16),
-      decoration: const BoxDecoration(
+      decoration:  BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF1e1e40), AppColors.background],
+          colors: [
+            Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF252015)
+                : AppColors.backgroundCard(context),
+            AppColors.background(context),          ],
         ),
       ),
       child: Row(
@@ -33,22 +37,18 @@ class StatsHeader extends ConsumerWidget {
               icon: Icons.access_time_rounded,
               onTap: () async {
                 await const MethodChannel(
-                  'com.eagle.screenblock/ios_blocking',
+                  'com.eagle.pausenow/ios_blocking',
                 ).invokeMethod('openScreenTime');
               },
+                context: context
+
             ),
             const SizedBox(width: 8),
           ],
           _iconButton(
-            icon: Icons.refresh_rounded,
-            onTap: () => ref
-                .read(statsViewModelProvider.notifier)
-                .loadStats(),
-          ),
-          const SizedBox(width: 8),
-          _iconButton(
-            icon: Icons.punch_clock,
+            icon: Icons.timelapse,
             onTap: () => GoalSettingsSheet.show(context, ref),
+              context: context
           ),
         ],
       ),
@@ -58,6 +58,7 @@ class StatsHeader extends ConsumerWidget {
   Widget _iconButton({
     required IconData icon,
     required VoidCallback onTap,
+    required BuildContext context
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -65,11 +66,11 @@ class StatsHeader extends ConsumerWidget {
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: AppColors.backgroundCard,
+          color: AppColors.backgroundCard(context),
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.border, width: 0.5),
+          border: Border.all(color: AppColors.border(context), width: 0.5),
         ),
-        child: Icon(icon, color: AppColors.textSecondary, size: 16),
+        child: Icon(icon, color: AppColors.textSecondary(context), size: 16),
       ),
     );
   }

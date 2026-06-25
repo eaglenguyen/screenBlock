@@ -51,10 +51,10 @@ class _SessionCompletedCardState
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: AppColors.border,
+          color: AppColors.border(context),
           width: 0.5,
         ),
       ),
@@ -66,7 +66,7 @@ class _SessionCompletedCardState
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 32, 20, 24),
             decoration: BoxDecoration(
-              color: AppColors.backgroundSubtle,
+              color: AppColors.backgroundSubtle(context),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
@@ -80,13 +80,13 @@ class _SessionCompletedCardState
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.gold
+                      color: AppColors.gold(context)
                           .withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.star_rounded,
-                      color: AppColors.gold,
+                      color: AppColors.gold(context),
                       size: 40,
                     ),
                   ),
@@ -104,7 +104,7 @@ class _SessionCompletedCardState
                   style: AppTextStyles.displayLarge
                       .copyWith(
                     fontSize: 48,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textSecondary(context),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -112,7 +112,7 @@ class _SessionCompletedCardState
                 Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    color: AppColors.backgroundSubtle,
+                    color: AppColors.backgroundSubtle(context),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: ClipRRect(
@@ -121,8 +121,8 @@ class _SessionCompletedCardState
                       value: 1.0,
                       backgroundColor: Colors.transparent,
                       valueColor:
-                      const AlwaysStoppedAnimation(
-                        AppColors.gold,
+                       AlwaysStoppedAnimation(
+                        AppColors.gold(context),
                       ),
                     ),
                   ),
@@ -132,16 +132,11 @@ class _SessionCompletedCardState
                   mainAxisAlignment:
                   MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.bolt_rounded,
-                      color: AppColors.gold,
-                      size: 16,
-                    ),
                     Text(
-                      '+ ${widget.xpEarned} XP earned',
+                      '+ ${widget.xpEarned} ⭐️ earned',
                       style: AppTextStyles.bodySmall
                           .copyWith(
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSecondary(context),
                       ),
                     ),
                   ],
@@ -158,8 +153,8 @@ class _SessionCompletedCardState
               child: ElevatedButton(
                 onPressed: widget.onFinish,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.gold,
-                  foregroundColor: AppColors.goldText,
+                  backgroundColor: AppColors.gold(context),
+                  foregroundColor: AppColors.goldText(context),
                   padding: const EdgeInsets.symmetric(
                     vertical: 16,
                   ),

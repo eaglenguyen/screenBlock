@@ -1,0 +1,46 @@
+{
+  "" : {
+    "const-values" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PurchasesHybridCommonUI-primary.swiftconstvalues",
+    "dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PurchasesHybridCommonUI-primary.d",
+    "diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PurchasesHybridCommonUI-primary.dia",
+    "emit-module-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PurchasesHybridCommonUI-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PurchasesHybridCommonUI-primary-emit-module.dia",
+    "pch" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PurchasesHybridCommonUI-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PurchasesHybridCommonUI-primary.swiftdeps"
+  },
+  "/Users/egor/screenblock/ios/Pods/PurchasesHybridCommonUI/ios/PurchasesHybridCommon/PurchasesHybridCommonUI/CustomerCenter/CustomerCenterProxy.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterProxy.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterProxy.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterProxy.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/PurchasesHybridCommonUI/ios/PurchasesHybridCommon/PurchasesHybridCommonUI/CustomerCenter/CustomerCenterUIViewController.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterUIViewController.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterUIViewController.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterUIViewController.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/PurchasesHybridCommonUI/ios/PurchasesHybridCommon/PurchasesHybridCommonUI/CustomerCenter/CustomerCenterViewControllerDelegateWrapper.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterViewControllerDelegateWrapper.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterViewControllerDelegateWrapper.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/CustomerCenterViewControllerDelegateWrapper.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/PurchasesHybridCommonUI/ios/PurchasesHybridCommon/PurchasesHybridCommonUI/Paywalls/HybridPurchaseLogicBridge.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/HybridPurchaseLogicBridge.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/HybridPurchaseLogicBridge.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/HybridPurchaseLogicBridge.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/PurchasesHybridCommonUI/ios/PurchasesHybridCommon/PurchasesHybridCommonUI/Paywalls/PaywallProxy.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallProxy.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallProxy.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallProxy.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/PurchasesHybridCommonUI/ios/PurchasesHybridCommon/PurchasesHybridCommonUI/Paywalls/PaywallResult.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallResult.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallResult.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallResult.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/PurchasesHybridCommonUI/ios/PurchasesHybridCommon/PurchasesHybridCommonUI/Paywalls/PaywallViewControllerDelegateWrapper.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallViewControllerDelegateWrapper.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallViewControllerDelegateWrapper.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/Objects-normal/arm64/PaywallViewControllerDelegateWrapper.o"
+  }
+}

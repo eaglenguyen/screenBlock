@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_usage/app_usage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/constants/hivebox_names.dart';
@@ -23,15 +25,40 @@ class StatsViewModel extends _$StatsViewModel {
     final blockGoalHours = StatsState.loadBlockGoalHours();
 
     if (Platform.isIOS) {
-      // iOS doesn't support AppUsage
+      final blockedDuration = ref
+          .read(blockSessionRepositoryProvider)
+          .getTodayTotalDuration();
+
+      double totalScreenTimeSeconds = 0;
+      try {
+        final result = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+            .invokeMethod<Map>('getScreenTimeTotal'); // 👈 Map not double
+
+        final total = (result?['total'] as num?)?.toDouble() ?? 0.0;
+        final date = result?['date'] as String? ?? '';
+        final today = DateTime.now().toIso8601String().substring(0, 10);
+
+        if (date == today) {
+          totalScreenTimeSeconds = total;
+          debugPrint('📊 screen time: $totalScreenTimeSeconds seconds');
+        } else {
+          debugPrint('📊 stale data — date: $date today: $today');
+        }
+      } catch (e) {
+        debugPrint('❌ getScreenTimeTotal error: $e');
+      }
+
       state = state.copyWith(
         isLoading: false,
         appStats: [],
-        totalUsage: Duration.zero,
-        dailyGoalHours: goalHours
+        totalUsage: Duration(seconds: totalScreenTimeSeconds.round()),
+        blockedToday: blockedDuration,
+        dailyGoalHours: goalHours,
+        blockGoalHours: blockGoalHours,
       );
       return;
     }
+
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -103,6 +130,15 @@ class StatsViewModel extends _$StatsViewModel {
         isLoading: false,
         error: isPermission ? 'permission denied' : e.toString(),
       );
+    }
+  }
+
+  Future<void> requestUsagePermission() async {
+    if (Platform.isAndroid) {
+      const intent = AndroidIntent(
+        action: 'android.settings.USAGE_ACCESS_SETTINGS',
+      );
+      await intent.launch();
     }
   }
 

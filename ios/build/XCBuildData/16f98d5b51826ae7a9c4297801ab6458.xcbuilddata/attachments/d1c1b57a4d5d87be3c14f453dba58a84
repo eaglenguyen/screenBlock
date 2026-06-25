@@ -1,0 +1,23 @@
+{
+  "version": 0,
+  "use-external-names": false,
+  "case-sensitive": false,
+  "roots": [{
+    "type": "directory",
+    "name": "/Users/egor/screenblock/ios/build/Release-iphoneos/haptic_feedback/haptic_feedback.framework/Modules",
+    "contents": [{
+      "type": "file",
+      "name": "module.modulemap",
+      "external-contents": "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/haptic_feedback.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    "type": "directory",
+    "name": "/Users/egor/screenblock/ios/build/Release-iphoneos/haptic_feedback/haptic_feedback.framework/Headers",
+    "contents": [{
+      "type": "file",
+      "name": "haptic_feedback-Swift.h",
+      "external-contents": "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/haptic_feedback.build/unextended-interface-header.h",
+    }]
+  }]
+}

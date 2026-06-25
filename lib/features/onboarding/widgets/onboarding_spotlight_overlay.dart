@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class OnboardingSpotlightOverlay extends StatefulWidget {
   final VoidCallback onNameSubmitted;
@@ -82,127 +83,7 @@ class _OnboardingSpotlightOverlayState
     if (_dialogShown) return;
     _dialogShown = true;
     HapticFeedback.lightImpact();
-    _showNameDialog();
-  }
-
-  void _showNameDialog() {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.3),
-      builder: (ctx) => Dialog(
-        backgroundColor: const Color(0xFF1E1E35),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(
-            color: const Color(0xFFEDB82A).withValues(alpha: 0.3),
-            width: 0.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // icon
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Text('👋', style: TextStyle(fontSize: 24)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'What is your name?',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              // text field
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF252542),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: const Color(0xFF2A2A48),
-                    width: 0.5,
-                  ),
-                ),
-                child: TextField(
-                  controller: controller,
-                  autofocus: true,
-                  textCapitalization: TextCapitalization.words,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your name...',
-                    hintStyle: TextStyle(
-                      color: Color(0xFF7070A0),
-                      fontSize: 15,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                  ),
-                  onSubmitted: (_) => _submitName(controller.text, ctx),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // submit button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => _submitName(controller.text, ctx),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEDB82A),
-                    foregroundColor: const Color(0xFF1A1208),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  child: const Text("Let's go →"),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _submitName(String name, BuildContext dialogContext) {
-    final trimmed = name.trim();
-    if (trimmed.isEmpty) return;
-
-    HapticFeedback.mediumImpact();
-    Navigator.of(dialogContext).pop();
-
-    // tell parent the name
-    widget.onNameSet(trimmed);
-
-    // fade out overlay then start chat
+    widget.onNameSet(''); // 👈 pass empty name, chat will ask
     _fadeController.reverse().then((_) {
       if (mounted) {
         setState(() => _dismissed = true);
@@ -217,9 +98,9 @@ class _OnboardingSpotlightOverlayState
 
     final size = MediaQuery.of(context).size;
 
-    // spotlight center — profile icon position
-    final spotlightX = size.width - _iconRight - (_iconSize / 2);
-    final spotlightY = _iconTop + (_iconSize / 2);
+    // spotlight center — "Start Chat" Text
+    final spotlightX = size.width - 60.0;  // right side
+    final spotlightY = 80.0;               // top area below status bar
 
     return FadeTransition(
       opacity: _fadeAnim,
@@ -231,7 +112,7 @@ class _OnboardingSpotlightOverlayState
             painter: _SpotlightPainter(
               spotlightX: spotlightX,
               spotlightY: spotlightY,
-              spotlightRadius: 36,
+              spotlightRadius: 52,
             ),
           ),
 
@@ -252,29 +133,20 @@ class _OnboardingSpotlightOverlayState
 
           // tap hint text
           Positioned(
-            right: 70,
-            top: _iconTop + 60,
+            right: 80,
+            top: 130,
             child: AnimatedBuilder(
               animation: _arrowAnim,
               builder: (_, __) => Opacity(
                 opacity: 0.6 + (_arrowAnim.value * 0.4),
-                child: const Text(
-                  'tap here!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
               ),
             ),
           ),
 
           // tappable profile icon in spotlight
           Positioned(
-            right: _iconRight,
-            top: _iconTop,
+            top: 56,
+            right: 16,
             child: GestureDetector(
               onTap: _onIconTapped,
               child: AnimatedBuilder(
@@ -284,14 +156,13 @@ class _OnboardingSpotlightOverlayState
                   child: child,
                 ),
                 child: Container(
-                  width: _iconSize,
-                  height: _iconSize,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEDB82A).withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
+                    color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: const Color(0xFFEDB82A),
-                      width: 2,
+                      width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -301,10 +172,13 @@ class _OnboardingSpotlightOverlayState
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.person_outline_rounded,
-                    color: Color(0xFFEDB82A),
-                    size: 22,
+                  child: Text(
+                    'Start Chat',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFFEDB82A),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -317,7 +191,6 @@ class _OnboardingSpotlightOverlayState
 }
 
 // ── Spotlight painter ─────────────────────────────────
-
 class _SpotlightPainter extends CustomPainter {
   final double spotlightX;
   final double spotlightY;
@@ -332,32 +205,15 @@ class _SpotlightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black.withValues(alpha: 0.75);
-
-    // draw full dark overlay
-    final fullRect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-    // punch out spotlight circle using saveLayer + BlendMode
-    canvas.saveLayer(fullRect, Paint());
-    canvas.drawRect(fullRect, paint);
-
-    // clear spotlight area
-    final clearPaint = Paint()
-      ..color = Colors.white
-      ..blendMode = BlendMode.dstOut;
-
-    canvas.drawCircle(
-      Offset(spotlightX, spotlightY),
-      spotlightRadius,
-      clearPaint,
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      paint,
     );
-
-    canvas.restore();
+    // 👈 no cutout — just plain dark overlay
   }
 
   @override
-  bool shouldRepaint(_SpotlightPainter old) =>
-      old.spotlightX != spotlightX ||
-          old.spotlightY != spotlightY;
+  bool shouldRepaint(_SpotlightPainter old) => false;
 }
 
 // ── Arrow painter ─────────────────────────────────────

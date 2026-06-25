@@ -49,7 +49,7 @@ class HomeState {
     this.streak,
     this.isLoading = false,
     this.error,
-    this.blockingType = AppConstants.blockingTypeAllApps, // keep const default
+    this.blockingType = AppConstants.blockingTypeSpecificApps, // keep const default
     this.blockedApps = const [],
     this.allowedApps = const [],
     this.selectedMinutes = 30,

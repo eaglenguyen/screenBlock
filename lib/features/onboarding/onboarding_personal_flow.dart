@@ -1,17 +1,580 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/theme/theme.notifier.dart';
+import 'data/onboarding_graph.dart';
 import 'data/onboarding_stats.dart';
-import 'onboarding_animations.dart';
-import 'onboarding_chat_screen.dart';
-import 'onboarding_demo_screens.dart';
-import 'onboarding_viewmodel.dart';
 
 
 
+// Theme Picker
 
+
+class OnboardingThemeScreen extends ConsumerStatefulWidget {
+  final VoidCallback onNext;
+
+  const OnboardingThemeScreen({
+    super.key,
+    required this.onNext,
+  });
+
+  @override
+  ConsumerState<OnboardingThemeScreen> createState() =>
+      _OnboardingThemeScreenState();
+}
+
+class _OnboardingThemeScreenState
+    extends ConsumerState<OnboardingThemeScreen> {
+  bool _selectedDark = true;
+
+  void _select(bool isDark) {
+    HapticFeedback.lightImpact();
+    setState(() => _selectedDark = isDark);
+    if (isDark) {
+      ref.read(themeProvider.notifier).setDark();
+    } else {
+      ref.read(themeProvider.notifier).setLight();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeMode = ref.watch(themeProvider); // 👈 watch
+    final isDarkTheme = themeMode == ThemeMode.dark;
+    const gold = Color(0xFFEDB82A);
+
+
+    // 👇 background adapts to selected theme
+    final bgColor = isDarkTheme ? const Color(0xFF16162A) : const Color(0xFFF5F5F0);
+    final gradientColors = isDarkTheme
+        ? const [Color(0xFF1a0a3d), Color(0xFF16162a), Color(0xFF0a1a2a)]
+        : const [Color(0xFFF0EFE8), Color(0xFFF5F5F0), Color(0xFFEEEDE8)];
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // gradient bg
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors,
+                stops: const [0.0, 0.5, 1.0],
+              ),
+            ),
+          ),
+          // decorative circle
+          Positioned(
+            top: -40,
+            right: -40,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: gold.withValues(alpha: 0.04),
+                border: Border.all(
+                  color: gold.withValues(alpha: 0.07),
+                  width: 0.5,
+                ),
+              ),
+            ),
+          ),
+          // main content
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+
+                // headline
+                Text(
+                  'Choose your look',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    color: isDarkTheme ? Colors.white : const Color(0xFF1A1A1A),
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'You can always change this in settings\n',
+                        style: GoogleFonts.poppins(
+                          color: isDarkTheme
+                              ? Colors.white.withValues(alpha: 0.45)
+                              : const Color(0xFF666666),
+                          fontSize: 14,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Theme will show later in app',
+                        style: GoogleFonts.poppins(
+                          color: isDarkTheme
+                              ? Colors.white.withValues(alpha: 0.35)
+                              : const Color(0xFF888888),
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // mockup cards row — fixed height
+                Expanded(
+                  child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _ThemeOption(
+                          isDark: true,
+                          isSelected: _selectedDark,
+                          onTap: () => _select(true),
+                          label: 'Dark',
+                          badge: 'recommended',
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: _ThemeOption(
+                          isDark: false,
+                          isSelected: !_selectedDark,
+                          onTap: () => _select(false),
+                          label: 'Light',
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                ),
+
+                const Spacer(),
+
+                // confirm button
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 36),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: widget.onNext,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: gold,
+                        foregroundColor: const Color(0xFF1A1208),
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        shape: const StadiumBorder(),
+                        textStyle: GoogleFonts.poppins(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text('Confirm →'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Theme option ──────────────────────────────────────
+class _ThemeOption extends StatelessWidget {
+  final bool isDark;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final String label;
+  final String? badge;
+
+  const _ThemeOption({
+    required this.isDark,
+    required this.isSelected,
+    required this.onTap,
+    required this.label,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const gold = Color(0xFFEDB82A);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          // phone mockup with fixed height
+          Expanded(
+              child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected ? gold : Colors.transparent,
+                width: 2.5,
+              ),
+              boxShadow: isSelected
+                  ? [
+                BoxShadow(
+                  color: gold.withValues(alpha: 0.25),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                ),
+              ]
+                  : [],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: _PhoneMockupContent(isDark: isDark),
+            ),
+          )
+          ),
+          const SizedBox(height: 14),
+
+          // radio + label
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected
+                        ? gold
+                        : Colors.white.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                  color: isSelected ? gold : Colors.transparent,
+                ),
+                child: isSelected
+                    ? const Icon(
+                  Icons.check_rounded,
+                  color: Color(0xFF1A1208),
+                  size: 11,
+                )
+                    : null,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  color: isSelected
+                      ? gold
+                      : Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withValues(alpha: 0.6)
+                      : const Color(0xFF666666),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          if (badge != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              badge!,
+              style: GoogleFonts.poppins(
+                color: gold.withValues(alpha: 0.7),
+                fontSize: 10,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Phone mockup content ──────────────────────────────
+class _PhoneMockupContent extends StatelessWidget {
+  final bool isDark;
+
+  const _PhoneMockupContent({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F0);
+    final cardBg = isDark ? const Color(0xFF252525) : const Color(0xFFFFFFFF);
+    final subtle = isDark ? const Color(0xFF2E2E2E) : const Color(0xFFEEEDE8);
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1A1A);
+    final subColor = isDark
+        ? Colors.white.withValues(alpha: 0.4)
+        : const Color(0xFF888888);
+    final borderColor =
+    isDark ? const Color(0xFF333333) : const Color(0xFFDDDDD8);
+    const gold = Color(0xFFEDB82A);
+
+    return Container(
+      color: bg,
+      padding: const EdgeInsets.fromLTRB(10, 16, 10, 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // mock header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: subtle,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: gold.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '49 ⭐️',
+                  style: TextStyle(
+                    color: gold,
+                    fontSize: 6,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // timer card
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: borderColor, width: 0.5),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Time Blocked Today',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 6,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: ['00', '04', '59'].expand((t) sync* {
+                    yield Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: subtle,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: borderColor, width: 0.5),
+                      ),
+                      child: Text(
+                        t,
+                        style: TextStyle(
+                          color: subColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    );
+                    if (t != '59') {
+                      yield Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: Text(':',
+                            style:
+                            TextStyle(color: borderColor, fontSize: 8)),
+                      );
+                    }
+                  }).toList(),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    color: gold,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '▶  Block Now',
+                      style: TextStyle(
+                        color: Color(0xFF1A1208),
+                        fontSize: 6,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+
+          // second card
+          Container(
+            padding:
+            const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: borderColor, width: 0.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: gold.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 4,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: textColor.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Container(
+                        height: 3,
+                        width: 30,
+                        decoration: BoxDecoration(
+                          color: subColor.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+
+          // third card
+          Container(
+            padding:
+            const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: borderColor, width: 0.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: gold.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 4,
+                        width: 55,
+                        decoration: BoxDecoration(
+                          color: textColor.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Container(
+                        height: 3,
+                        width: 35,
+                        decoration: BoxDecoration(
+                          color: subColor.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // bottom nav
+          Container(
+            padding:
+            const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor, width: 0.5),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Icons.home_rounded,
+                Icons.calendar_today_rounded,
+                Icons.bar_chart_rounded,
+                Icons.settings_rounded,
+              ].asMap().entries.map((e) {
+                final active = e.key == 0;
+                return Container(
+                  width: 20,
+                  height: 20,
+                  decoration: active
+                      ? const BoxDecoration(
+                    color: Color(0xFFEDB82A),
+                    shape: BoxShape.circle,
+                  )
+                      : null,
+                  child: Icon(
+                    e.value,
+                    color: active ? const Color(0xFF1A1208) : subColor,
+                    size: 11,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 // ── Screen 1 — Age Range ──────────────────────────────
 
@@ -26,23 +589,34 @@ class OnboardingAgeScreen extends StatefulWidget {
   });
 
   @override
-  State<OnboardingAgeScreen> createState() =>
-      _OnboardingAgeScreenState();
+  State<OnboardingAgeScreen> createState() => _OnboardingAgeScreenState();
 }
 
-class _OnboardingAgeScreenState extends State<OnboardingAgeScreen>
-    with SingleTickerProviderStateMixin {
+class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
+  final TextEditingController _ctrl = TextEditingController();
+  int? _parsedAge;
 
-  String? _selected;
+  @override
+  void initState() {
+    super.initState();
+    _ctrl.addListener(() {
+      final val = int.tryParse(_ctrl.text.trim());
+      setState(() {
+        _parsedAge = (val != null && val >= 16 && val <= 80) ? val : null;
+      });
+    });
+  }
 
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
-  final List<Map<String, dynamic>> _options = [
-    {'label': 'Under 18', 'age': 16},
-    {'label': '18 – 24', 'age': 21},
-    {'label': '25 – 34', 'age': 29},
-    {'label': '35 – 44', 'age': 39},
-    {'label': '45+', 'age': 50},
-  ];
+  // years remaining based on 80 year lifespan
+  int get _yearsRemaining => _parsedAge != null
+      ? (80 - _parsedAge!).clamp(0, 80)
+      : 0;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +625,7 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 48),
+          const SizedBox(height: 24),
           Text(
             'How old are you?',
             textAlign: TextAlign.center,
@@ -63,7 +637,7 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen>
               height: 1.15,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
             "We'll use this to personalize\nyour results",
             textAlign: TextAlign.center,
@@ -73,66 +647,304 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen>
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 40),
-          ..._options.map((opt) {
-            final isSelected = _selected == opt['label'];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  setState(() => _selected = opt['label'] as String);
-                  Future.delayed(const Duration(milliseconds: 250), () {
-                    widget.onSelected(opt['age'] as int);
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFFEDB82A).withValues(alpha: 0.12)
-                        : const Color(0xFF1E1E35),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFFEDB82A).withValues(alpha: 0.6)
-                          : const Color(0xFF2A2A48),
-                      width: isSelected ? 1.5 : 0.5,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        opt['label'] as String,
-                        style: GoogleFonts.poppins(
-                          color: isSelected
-                              ? const Color(0xFFEDB82A)
-                              : Colors.white,
-                          fontSize: 17,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (isSelected)
-                        _AnimatedCheck(),
-                    ],
-                  ),
+          const SizedBox(height: 24),
+
+          // age input
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: const Color(0xFF252542),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: _parsedAge != null
+                    ? const Color(0xFFEDB82A).withValues(alpha: 0.5)
+                    : const Color(0xFF2A2A48),
+                width: _parsedAge != null ? 1.5 : 0.5,
+              ),
+              boxShadow: _parsedAge != null
+                  ? [
+                BoxShadow(
+                  color: const Color(0xFFEDB82A).withValues(alpha: 0.12),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ]
+                  : null,
+            ),
+            child: TextField(
+              controller: _ctrl,
+              autofocus: true,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              maxLength: 2,
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Enter your age (16-80)',
+                hintStyle: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                ),
+                border: InputBorder.none,
+                counterText: '', // hides maxLength counter
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
                 ),
               ),
-            );
-          }),
-          const Spacer(),
+              onSubmitted: (_) {
+                if (_parsedAge != null) widget.onSelected(_parsedAge!);
+              },
+            ),
+          ),
+
+          // personalized preview — shows after valid age entered
+
+          const SizedBox(height: 24),
+
+
+          // continue button
+          AnimatedOpacity(
+            opacity: _parsedAge != null ? 1.0 : 0.35,
+            duration: const Duration(milliseconds: 200),
+            child: _GoldButton(
+              label: 'Continue →',
+              onTap: _parsedAge != null
+                  ? () {
+                HapticFeedback.lightImpact();
+                FocusScope.of(context).unfocus(); // 👈 dismiss keyboard first
+                widget.onSelected(_parsedAge!);
+              }
+                  : () {},
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
+// ── Screen Time Goal Screen ───────────────────────────
+
+
+class OnboardingScreenTimeGoalScreen extends StatefulWidget {
+  final Function(int hours) onSelected;
+
+  const OnboardingScreenTimeGoalScreen({
+    super.key,
+    required this.onSelected,
+  });
+
+  @override
+  State<OnboardingScreenTimeGoalScreen> createState() =>
+      _OnboardingScreenTimeGoalScreenState();
+}
+
+class _OnboardingScreenTimeGoalScreenState
+    extends State<OnboardingScreenTimeGoalScreen> {
+  int? _selectedHours;
+
+  final List<Map<String, dynamic>> _options = [
+    {'hours': 1, 'label': 'Under 1 hour', 'sub': 'Highly disciplined', 'emoji': '🏆'},
+    {'hours': 2, 'label': 'Under 2 hours', 'sub': 'Focused and intentional', 'emoji': '⚡'},
+    {'hours': 3, 'label': 'Under 3 hours', 'sub': 'Balanced lifestyle', 'emoji': '🎯'},
+    {'hours': 4, 'label': 'Under 4 hours', 'sub': 'Making progress', 'emoji': '📈'},
+    {'hours': 5, 'label': 'Under 5 hours', 'sub': 'Starting the journey', 'emoji': '🌱'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF16162A),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1a0a3d),
+                  Color(0xFF16162a),
+                  Color(0xFF0a1a2a),
+                ],
+                stops: [0.0, 0.5, 1.0],
+              ),
+            ),
+          ),
+          Positioned(
+            top: -40, right: -40,
+            child: Container(
+              width: 200, height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFEDB82A).withValues(alpha: 0.04),
+                border: Border.all(
+                  color: const Color(0xFFEDB82A).withValues(alpha: 0.07),
+                  width: 0.5,
+                ),
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // headline
+                  Text(
+                    'Set your daily\nscreen time goal',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 34,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.poppins(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'You can change this later in settings',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white.withValues(alpha: 0.45),
+                            fontSize: 14,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // options
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: _options.length,
+                      separatorBuilder: (_, __) =>
+                      const SizedBox(height: 10),
+                      itemBuilder: (context, i) {
+                        final opt = _options[i];
+                        final isSelected =
+                            _selectedHours == opt['hours'];
+
+                        return GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            setState(
+                                    () => _selectedHours = opt['hours']);
+                            Future.delayed(
+                              const Duration(milliseconds: 300),
+                                  () => widget.onSelected(opt['hours']),
+                            );
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFFEDB82A)
+                                  .withValues(alpha: 0.1)
+                                  : const Color(0xFF1E1E35),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFFEDB82A)
+                                    .withValues(alpha: 0.6)
+                                    : const Color(0xFF2A2A48),
+                                width: isSelected ? 1.5 : 0.5,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(opt['emoji'],
+                                    style:
+                                    const TextStyle(fontSize: 24)),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        opt['label'],
+                                        style: GoogleFonts.poppins(
+                                          color: isSelected
+                                              ? const Color(0xFFEDB82A)
+                                              : Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        opt['sub'],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.4),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Container(
+                                    width: 22,
+                                    height: 22,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFEDB82A),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.check_rounded,
+                                      color: Color(0xFF1A1208),
+                                      size: 13,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+                  // skip option
+                  GestureDetector(
+                    onTap: () => widget.onSelected(3), // default 3h
+                    child: Text(
+                      'Skip for now',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 // ── Screen 2 — Hours Question ─────────────────────────
 
 class OnboardingHoursScreen extends StatefulWidget {
@@ -169,7 +981,7 @@ class _OnboardingHoursScreenState extends State<OnboardingHoursScreen> {
         children: [
           const SizedBox(height: 48),
           Text(
-            'How many hours do you\nspend on your phone\ndaily?',
+            'How many hours do you spend on your phone daily?',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -240,7 +1052,6 @@ class _OnboardingHoursScreenState extends State<OnboardingHoursScreen> {
               ),
             );
           }),
-          const Spacer(),
         ],
       ),
     );
@@ -253,12 +1064,14 @@ class OnboardingBadNewsScreen extends StatefulWidget {
   final VoidCallback onBack;
   final VoidCallback onNext;
   final OnboardingStatsData data;
+  final String userName;
 
   const OnboardingBadNewsScreen({
     super.key,
     required this.onBack,
     required this.onNext,
     required this.data,
+    this.userName = '',
   });
 
   @override
@@ -268,36 +1081,87 @@ class OnboardingBadNewsScreen extends StatefulWidget {
 
 class _OnboardingBadNewsScreenState
     extends State<OnboardingBadNewsScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
 
-  late AnimationController _ctrl;
+  // ── Loading phase ─────────────────────────────────
+  bool _isLoading = true;
+  double _loadingProgress = 0.0;
+  String _loadingLabel = 'Gathering your data...';
+
+  late AnimationController _loadingCtrl;
+
+  static const _loadingSteps = [
+    (0.0,  'Gathering your data...'),
+    (0.50, 'Calculating screen time...'),
+    (0.90, 'Results ready'),
+  ];
+
+  // ── Stats phase ───────────────────────────────────
+  late AnimationController _statsCtrl;
   late List<Animation<double>> _fades;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
+
+    // loading controller
+    _loadingCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 5500),
     );
 
-    _fades = List.generate(5, (i) {
-      final start = i * 0.15;
-      final end = (start + 0.3).clamp(0.0, 1.0);
+    _loadingCtrl.addListener(() {
+      final curve = Curves.easeInOut;
+      final curved = curve.transform(_loadingCtrl.value);
+      setState(() {
+        _loadingProgress = curved;
+        for (int i = _loadingSteps.length - 1; i >= 0; i--) {
+          if (curved >= _loadingSteps[i].$1) {
+            _loadingLabel = _loadingSteps[i].$2;
+            break;
+          }
+        }
+      });
+    });
+
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) _loadingCtrl.forward();
+    });
+
+    _loadingCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (!mounted) return;
+          setState(() => _isLoading = false);
+          _statsCtrl.forward();
+        });
+      }
+    });
+
+    // stats controller
+    _statsCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4500),
+    );
+
+    _fades = List.generate(6, (i) {
+      final start = i * 0.18;  //
+      final end = (start + 0.25).clamp(0.0, 1.0);
       return Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
-          parent: _ctrl,
+          parent: _statsCtrl,
           curve: Interval(start, end, curve: Curves.easeOut),
         ),
       );
     });
 
-    _ctrl.forward();
+    _loadingCtrl.forward();
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _loadingCtrl.dispose();
+    _statsCtrl.dispose();
     super.dispose();
   }
 
@@ -307,118 +1171,237 @@ class _OnboardingBadNewsScreenState
     final yearsLost = d.yearsLostTotal.round();
 
     return _StatsShell(
-      onBack: widget.onBack,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 40),
+      child: _isLoading
+          ? _buildLoadingPhase()
+          : _buildStatsPhase(d, yearsLost),
+    );
+  }
 
-          // headline
-          FadeTransition(
-            opacity: _fades[0],
+  // ── Loading UI ────────────────────────────────────
+  Widget _buildLoadingPhase() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 60),
+
+        // icon
+        Center(
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEDB82A).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: const Color(0xFFEDB82A).withValues(alpha: 0.2),
+                width: 0.5,
+              ),
+            ),
+            child: const Center(
+              child: Text('📊', style: TextStyle(fontSize: 36)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // headline
+        Text(
+          'Analyzing your\nhabits...',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 30,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1,
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Based on ${widget.data.hoursPerDay.toStringAsFixed(1)} hrs/day · age ${widget.data.age}',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            color: Colors.white.withValues(alpha: 0.4),
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 48),
+
+        // progress bar track
+        Container(
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: _loadingProgress,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFEDB82A), Color(0xFFFFD700)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFEDB82A).withValues(alpha: 0.4),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // label + percentage
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Text(
+                _loadingLabel,
+                key: ValueKey(_loadingLabel),
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            Text(
+              '${(_loadingProgress * 100).round()}%',
+              style: GoogleFonts.poppins(
+                color: const Color(0xFFEDB82A),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 40),
+
+        // shimmer placeholders
+
+      ],
+    );
+  }
+
+  // ── Stats UI ──────────────────────────────────────
+  Widget _buildStatsPhase(OnboardingStatsData d, int yearsLost) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 40),
+
+        FadeTransition(
+          opacity: _fades[0],
+          child: Text(
+            "That's a lot of time ${widget.userName}...",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        FadeTransition(
+          opacity: _fades[1],
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${d.hoursPerDay.toStringAsFixed(1)}',
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFFEDB82A),
+                    fontSize: 64,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -2,
+                  ),
+                ),
+                TextSpan(
+                  text: ' hrs/day',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        FadeTransition(
+          opacity: _fades[2],
+          child: _statRow(
+            label: 'Hours per year',
+            value: '${(d.hoursPerDay * 365).round()} hrs',
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FadeTransition(
+          opacity: _fades[3],
+          child: _statRow(
+            label: 'Days per year',
+            value: '${(d.hoursPerDay * 365 / 24).toStringAsFixed(1)} days',
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FadeTransition(
+          opacity: _fades[4],
+          child: _statRow(
+            label: 'Years lost by age 80',
+            value: '$yearsLost years',
+            color: const Color(0xFFE74C3C),
+            large: true,
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        FadeTransition(
+          opacity: _fades[4],
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE74C3C).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFFE74C3C).withValues(alpha: 0.25),
+                width: 0.5,
+              ),
+            ),
             child: Text(
-              "That's a lot of time...",
+              'Based on an average lifespan of 80 years, '
+                  'you will spend $yearsLost years of your life '
+                  'staring at a screen.',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 14,
+                height: 1.5,
               ),
             ),
           ),
-          const SizedBox(height: 16),
+        ),
 
-          // big number
-          FadeTransition(
-            opacity: _fades[1],
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: '${d.hoursPerDay.toStringAsFixed(1)}',
-                    style: GoogleFonts.poppins(
-                      color: const Color(0xFFEDB82A),
-                      fontSize: 64,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -2,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' hrs/day',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-
-          // stat rows
-          FadeTransition(
-            opacity: _fades[2],
-            child: _statRow(
-              label: 'Hours per year',
-              value: '${(d.hoursPerDay * 365).round().toString()} hrs',
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 12),
-          FadeTransition(
-            opacity: _fades[3],
-            child: _statRow(
-              label: 'Days per year',
-              value: '${(d.hoursPerDay * 365 / 24).toStringAsFixed(1)} days',
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 12),
-          FadeTransition(
-            opacity: _fades[4],
-            child: _statRow(
-              label: 'Years lost by age 80',
-              value: '$yearsLost years',
-              color: const Color(0xFFE74C3C),
-              large: true,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          FadeTransition(
-            opacity: _fades[4],
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE74C3C).withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: const Color(0xFFE74C3C).withValues(alpha: 0.25),
-                  width: 0.5,
-                ),
-              ),
-              child: Text(
-                'Based on an average lifespan of 80 years, '
-                    'you will spend $yearsLost years of your life '
-                    'staring at a screen.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          ),
-
-          const Spacer(),
-
-          _GoldButton(label: 'Show me', onTap: widget.onNext),
-        ],
-      ),
+        const SizedBox(height: 24),
+        FadeTransition(
+          opacity: _fades[5], // 👈 button is last
+          child: _GoldButton(label: 'Show me', onTap: widget.onNext),
+        ),      ],
     );
   }
 
@@ -497,17 +1480,17 @@ class _OnboardingLifeGridScreenState
 
     // phase 1 — fill blue icons (years lived) one by one
     for (int i = 0; i < age && i < 80; i++) {
-      await Future.delayed(const Duration(milliseconds: 30));
+      await Future.delayed(const Duration(milliseconds: 80));
       if (!mounted) return;
       setState(() => _iconStates[i] = 1);
       HapticFeedback.lightImpact();
     }
 
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future.delayed(const Duration(milliseconds: 600));
 
     // phase 2 — fill red icons from end (years lost) one by one
     for (int i = 0; i < yearsLost; i++) {
-      await Future.delayed(const Duration(milliseconds: 60));
+      await Future.delayed(const Duration(milliseconds: 120));
       if (!mounted) return;
       final index = 79 - i;
       setState(() => _iconStates[index] = 2);
@@ -530,7 +1513,7 @@ class _OnboardingLifeGridScreenState
           const SizedBox(height: 24),
 
           Text(
-            'Your life in years',
+            'Your life is important',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -539,15 +1522,7 @@ class _OnboardingLifeGridScreenState
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Each icon = 1 year of your life',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.4),
-              fontSize: 13,
-            ),
-          ),
+
           const SizedBox(height: 24),
 
           // 8×10 grid
@@ -572,19 +1547,6 @@ class _OnboardingLifeGridScreenState
             ),
           ),
 
-          const SizedBox(height: 20),
-
-          // legend
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _legendItem(const Color(0xFF3B82F6), 'Years lived'),
-              const SizedBox(width: 20),
-              _legendItem(Colors.white.withValues(alpha: 0.3), 'Remaining'),
-              const SizedBox(width: 20),
-              _legendItem(const Color(0xFFE74C3C), 'Lost to phone'),
-            ],
-          ),
 
           const SizedBox(height: 16),
 
@@ -593,7 +1555,7 @@ class _OnboardingLifeGridScreenState
             opacity: _animationDone ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 600),
             child: Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: const Color(0xFFE74C3C).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
@@ -620,7 +1582,7 @@ class _OnboardingLifeGridScreenState
             opacity: _animationDone ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 600),
             child: _GoldButton(
-              label: 'But there\'s good news →',
+              label: 'Show me the good news →',
               onTap: widget.onNext,
             ),
           ),
@@ -630,28 +1592,6 @@ class _OnboardingLifeGridScreenState
     );
   }
 
-  Widget _legendItem(Color color, String label) {
-    return Row(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            color: Colors.white.withValues(alpha: 0.5),
-            fontSize: 11,
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 // ── Person icon widget ────────────────────────────────
@@ -676,25 +1616,25 @@ class _PersonIcon extends StatelessWidget {
       child: Icon(
         Icons.person_rounded, // 👈 built-in Flutter icon
         color: color,
-        size: 28,
+        size: 20,
       ),
     );
   }
 }
 
 
-// ── Screen 5 — Good News ──────────────────────────────
-
 class OnboardingGoodNewsScreen extends StatefulWidget {
   final VoidCallback onBack;
   final VoidCallback onNext;
   final OnboardingStatsData data;
+  final String userName;
 
   const OnboardingGoodNewsScreen({
     super.key,
     required this.onBack,
     required this.onNext,
     required this.data,
+    this.userName = '',
   });
 
   @override
@@ -714,10 +1654,11 @@ class _OnboardingGoodNewsScreenState
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 7000),
     );
-    _fades = List.generate(4, (i) {
-      final start = i * 0.18;
+
+    _fades = List.generate(5, (i) {
+      final start = i * 0.22;
       final end = (start + 0.35).clamp(0.0, 1.0);
       return Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
@@ -739,20 +1680,19 @@ class _OnboardingGoodNewsScreenState
   Widget build(BuildContext context) {
     final d = widget.data;
     final yearsSaved = d.yearsSavedIfHalved;
-    final reducedHours = d.hoursPerDay / 2;
 
     return _StatsShell(
       onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 150),
 
+          // "but here's the good news"
           FadeTransition(
             opacity: _fades[0],
             child: Text(
-              'But here\'s the\ngood news 🌱',
-              textAlign: TextAlign.center,
+              '...but here\'s\nthe good news ${widget.userName}',
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontSize: 34,
@@ -762,115 +1702,70 @@ class _OnboardingGoodNewsScreenState
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
+          // one session at a time message
           FadeTransition(
             opacity: _fades[1],
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
-                  width: 0.5,
-                ),
+            child: Text(
+              'With one blocked session at a time,\nwe can help you get back',
+              style: GoogleFonts.poppins(
+                color: Colors.white.withValues(alpha: 0.55),
+                fontSize: 16,
+                height: 1.55,
               ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // big years back stat
+          FadeTransition(
+            opacity: _fades[2],
+            child: Container(
+              padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  Text(
-                    'Cut down to just',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
                   RichText(
+                    textAlign: TextAlign.center,
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text:
-                          '${reducedHours.toStringAsFixed(1)}',
+                          text: d.formatYears(yearsSaved),
                           style: GoogleFonts.poppins(
-                            color: const Color(0xFF4CAF50),
-                            fontSize: 52,
+                            color: const Color(0xFFEDB82A),
+                            fontSize: 56,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -2,
-                          ),
-                        ),
-                        TextSpan(
-                          text: ' hrs/day',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
+                            height: 1,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          FadeTransition(
-            opacity: _fades[2],
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20, vertical: 16,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E35),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: const Color(0xFF2A2A48), width: 0.5,
-                ),
-              ),
-              child: Row(
-                children: [
+                  const SizedBox(height: 8),
                   Text(
-                    'You get back',
+                    'of your life back',
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      fontSize: 15,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    d.formatYears(yearsSaved),
-                    style: GoogleFonts.poppins(
-                      color: const Color(0xFF4CAF50),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 20),
 
-          FadeTransition(
-            opacity: _fades[3],
-            child: Text(
-              'ScreenBlock helps you get there —\none blocked session at a time.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.55),
-                fontSize: 15,
-                height: 1.55,
-              ),
-            ),
-          ),
 
           const Spacer(),
 
-          _GoldButton(
-            label: "Let's get started →",
-            onTap: widget.onNext,
+          FadeTransition(
+            opacity: _fades[3], // 👈 last to appear
+            child: _GoldButton(
+              label: "Let's do it →",
+              onTap: widget.onNext,
+            ),
           ),
         ],
       ),
@@ -878,13 +1773,66 @@ class _OnboardingGoodNewsScreenState
   }
 }
 
+// Screen 6 - Graph
+
+class OnboardingProductivityScreen extends StatelessWidget {
+  final VoidCallback onBack;
+  final VoidCallback onNext;
+
+  const OnboardingProductivityScreen({
+    super.key,
+    required this.onBack,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _StatsShell(
+      onBack: onBack,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 60),
+          Text(
+            'Your Plan is Ready',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'based on all of your answers,\nyou will start to see improvement within \n2 months',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.45),
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 32),
+          const ProductivityGraph(),
+          const SizedBox(height: 40),
+          _GoldButton(
+            label: "Let's get started →",
+            onTap: onNext,
+          ),
+        ],
+      ),
+    );
+  }
+}
 // ── Shared shell ──────────────────────────────────────
 
 class _StatsShell extends StatelessWidget {
   final Widget child;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
 
-  const _StatsShell({required this.child, required this.onBack});
+  const _StatsShell({required this.child, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -913,32 +1861,33 @@ class _StatsShell extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // back button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        onBack();
-                      },
-                      child: Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            width: 0.5,
+                  if (onBack != null)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          onBack!();
+                        },
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 0.5,
+                            ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
-                          size: 16,
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   Expanded(child: child),
                 ],
               ),

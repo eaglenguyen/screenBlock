@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/schedule.dart';
@@ -12,14 +13,27 @@ class SessionCard extends StatelessWidget {
     required this.onPause,
     this.isCurrentlyActive = false,
     this.isPaused = false,
+    this.pauseRemainingSeconds = 0,
+
   });
 
   final Schedule schedule;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final VoidCallback onToggle;
   final VoidCallback onPause;
   final bool isCurrentlyActive; // 👈 true when THIS schedule is blocking right now
   final bool isPaused; // 👈 true when paused
+  final int pauseRemainingSeconds;
+
+  String _formatRemaining(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    if (m > 0) {
+      return '${m}m ${s.toString().padLeft(2, '0')}s';
+    }
+    return '${s}s';
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +45,7 @@ class SessionCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.backgroundCard,
+              color: AppColors.backgroundCard(context),
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
@@ -40,10 +54,10 @@ class SessionCard extends StatelessWidget {
               ),
               border: Border.all(
                 color: isCurrentlyActive
-                    ? AppColors.gold.withValues(alpha: 0.4)
+                    ? AppColors.gold(context).withValues(alpha: 0.4)
                     : schedule.isActive
-                    ? AppColors.gold.withValues(alpha: 0.2)
-                    : AppColors.border,
+                    ? AppColors.gold(context).withValues(alpha: 0.2)
+                    : AppColors.border(context),
                 width: 0.5,
               ),
             ),
@@ -55,10 +69,10 @@ class SessionCard extends StatelessWidget {
                   height: 8,
                   decoration: BoxDecoration(
                     color: isCurrentlyActive
-                        ? AppColors.gold
+                        ? AppColors.gold(context)
                         : schedule.isActive
-                        ? AppColors.gold.withValues(alpha: 0.4)
-                        : AppColors.textSecondary,
+                        ? AppColors.gold(context).withValues(alpha: 0.4)
+                        : AppColors.textSecondary(context),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -73,7 +87,7 @@ class SessionCard extends StatelessWidget {
                             schedule.name,
                             style: AppTextStyles.labelMedium,
                           ),
-                          if (isCurrentlyActive) ...[
+                          if (schedule.isActive) ...[
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -81,22 +95,31 @@ class SessionCard extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: isPaused
+                                color: isCurrentlyActive
+                                    ? isPaused
                                     ? Colors.orange.withValues(alpha: 0.15)
-                                    : AppColors.gold.withValues(alpha: 0.15),
+                                    : AppColors.gold(context).withValues(alpha: 0.15)
+                                    : Colors.white.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                isPaused ? 'Paused' : 'Active',
+                                isCurrentlyActive
+                                    ? isPaused
+                                    ? 'Paused'
+                                    : 'Active'
+                                    : 'Inactive',
                                 style: TextStyle(
-                                  color: isPaused
+                                  color: isCurrentlyActive
+                                      ? isPaused
                                       ? Colors.orange
-                                      : AppColors.gold,
+                                      : AppColors.gold(context)
+                                      : Colors.white.withValues(alpha: 0.3),
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
+
                           ],
                         ],
                       ),
@@ -117,11 +140,11 @@ class SessionCard extends StatelessWidget {
                     height: 24,
                     decoration: BoxDecoration(
                       color: schedule.isActive
-                          ? AppColors.gold
-                          : AppColors.backgroundSubtle,
+                          ? AppColors.gold(context)
+                          : AppColors.backgroundSubtle(context),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppColors.border,
+                        color: AppColors.border(context),
                         width: 0.5,
                       ),
                     ),
@@ -134,8 +157,8 @@ class SessionCard extends StatelessWidget {
                         margin: const EdgeInsets.all(2),
                         width: 18,
                         height: 18,
-                        decoration: const BoxDecoration(
-                          color: AppColors.textPrimary,
+                        decoration:  BoxDecoration(
+                          color: AppColors.textPrimary(context),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -154,11 +177,11 @@ class SessionCard extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 18), // 👈 bigger from 12
               decoration: BoxDecoration(
                 color: isPaused
                     ? Colors.orange.withValues(alpha: 0.1)
-                    : AppColors.backgroundSubtle,
+                    : AppColors.backgroundSubtle(context),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
@@ -167,46 +190,63 @@ class SessionCard extends StatelessWidget {
                   left: BorderSide(
                     color: isPaused
                         ? Colors.orange.withValues(alpha: 0.4)
-                        : AppColors.border,
+                        : AppColors.border(context),
                     width: 0.5,
                   ),
                   right: BorderSide(
                     color: isPaused
                         ? Colors.orange.withValues(alpha: 0.4)
-                        : AppColors.border,
+                        : AppColors.border(context),
                     width: 0.5,
                   ),
                   bottom: BorderSide(
                     color: isPaused
                         ? Colors.orange.withValues(alpha: 0.4)
-                        : AppColors.border,
+                        : AppColors.border(context),
                     width: 0.5,
                   ),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    isPaused
-                        ? Icons.play_arrow_rounded
-                        : Icons.pause_rounded,
-                    color: isPaused
-                        ? Colors.orange
-                        : AppColors.textSecondary,
-                    size: 16,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isPaused
+                            ? Icons.play_arrow_rounded
+                            : Icons.pause_rounded,
+                        color: isPaused
+                            ? Colors.orange
+                            : AppColors.textSecondary(context),
+                        size: 20, // 👈 bigger from 16
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isPaused ? 'Pause Time Remaining...' : 'Pause blocking',
+                        style: TextStyle(
+                          color: isPaused
+                              ? Colors.orange
+                              : AppColors.textSecondary(context),
+                          fontSize: 15, // 👈 bigger from 13
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    isPaused ? 'Resume blocking' : 'Pause blocking',
-                    style: TextStyle(
-                      color: isPaused
-                          ? Colors.orange
-                          : AppColors.textSecondary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                  // 👇 countdown when paused
+                  if (isPaused && pauseRemainingSeconds > 0) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _formatRemaining(pauseRemainingSeconds),
+                      style: TextStyle(
+                        color: Colors.orange.withValues(alpha: 0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

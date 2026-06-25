@@ -19,10 +19,12 @@ class ChatMessage {
 class ChatStep {
   final List<ChatMessage> botMessages;
   final List<String> userResponses;
+  final bool isNameInput;
 
   const ChatStep({
     required this.botMessages,
     required this.userResponses,
+    this.isNameInput = false,
   });
 }
 

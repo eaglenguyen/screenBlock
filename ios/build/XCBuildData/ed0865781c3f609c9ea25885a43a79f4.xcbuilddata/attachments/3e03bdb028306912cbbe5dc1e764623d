@@ -1,0 +1,5 @@
+ extern const unsigned char PurchasesHybridCommonUIVersionString[];
+ extern const double PurchasesHybridCommonUIVersionNumber;
+
+ const unsigned char PurchasesHybridCommonUIVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:PurchasesHybridCommonUI  PROJECT:Pods-1" "\n";
+ const double PurchasesHybridCommonUIVersionNumber __attribute__ ((used)) = (double)1.;

@@ -20,9 +20,9 @@ class IOSBlockingService: NSObject {
     private let center = AuthorizationCenter.shared
     private let activityCenter = DeviceActivityCenter()
     private let store = ManagedSettingsStore()
-    private let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+    private let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
     private var pauseTimer: Timer?
-    private let activityName = DeviceActivityName("com.eagle.screenblock.session")
+    private let activityName = DeviceActivityName("com.eagle.pausenow.session")
     
     // MARK: - Authorization
     
@@ -57,12 +57,8 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.synchronize()
         NSLog("🔄 startBlocking: sessionType=\(sessionType) minutes=\(limitMinutes)")
 
-        let appTokens = getStoredAppTokens(mode: blockingMode)
-        guard !appTokens.isEmpty else {
-            print("❌ no app tokens found")
-            return
-        }
-        store.shield.applications = appTokens
+        applyShield(mode: blockingMode)
+
     }
     
     func stopBlocking() {
@@ -99,9 +95,10 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.synchronize()
         
         store.clearAllSettings()
-        activityCenter.stopMonitoring([DeviceActivityName("com.eagle.screenblock.pause")])
+        activityCenter.stopMonitoring([DeviceActivityName("com.eagle.pausenow.pause")])
         
         let calendar = Calendar.current
+        
         // round start up to next minute to account for dropped seconds
         let roundedStart = calendar.date(
             bySetting: .second,
@@ -113,31 +110,33 @@ class IOSBlockingService: NSObject {
         let schedule: DeviceActivitySchedule
         
         if minutes < 15 {
-            // use warningTime trick — schedule 15 mins, warning fires at actual pause end
-            let endDate = now.addingTimeInterval(15 * 60)
+            // always use 30 min window — plenty of buffer
+            let endDate = now.addingTimeInterval(30 * 60)
             let endComponents = calendar.dateComponents([.hour, .minute], from: endDate)
-            let warningMinutes = 15 - minutes
+            // warning fires at pause end: 30 - minutes mins before end
+            let warningMinutes = 30 - minutes
             schedule = DeviceActivitySchedule(
                 intervalStart: startComponents,
                 intervalEnd: endComponents,
                 repeats: false,
                 warningTime: DateComponents(minute: warningMinutes)
             )
-            NSLog("⏸ using warningTime trick: warning in \(minutes) mins")
-        } else {
-            // schedule exact duration
-            let endComponents = calendar.dateComponents([.hour, .minute], from: pauseEndsAt)
+            NSLog("⏸ warningTime trick: 30min window, warning at \(minutes) mins (warningMinutes=\(warningMinutes))")
+        }else {
+            // add 1 extra min to end to compensate for 1 min rounding on start
+            let adjustedEnd = pauseEndsAt.addingTimeInterval(60) // 👈 add 1 min
+            let endComponents = calendar.dateComponents([.hour, .minute], from: adjustedEnd)
             schedule = DeviceActivitySchedule(
                 intervalStart: startComponents,
                 intervalEnd: endComponents,
                 repeats: false
             )
-            NSLog("⏸ using exact schedule: ends in \(minutes) mins")
+            NSLog("⏸ exact schedule: ends in \(minutes) mins + 1 min buffer")
         }
         
         do {
             try activityCenter.startMonitoring(
-                DeviceActivityName("com.eagle.screenblock.pause"),
+                DeviceActivityName("com.eagle.pausenow.pause"),
                 during: schedule
             )
             NSLog("✅ pause scheduled")
@@ -172,7 +171,7 @@ class IOSBlockingService: NSObject {
         )
         
         let request = UNNotificationRequest(
-            identifier: "com.eagle.screenblock.pauseResume",
+            identifier: "com.eagle.pausenow.pauseResume",
             content: content,
             trigger: trigger
         )
@@ -187,7 +186,7 @@ class IOSBlockingService: NSObject {
     private func cancelPauseNotification() {
         UNUserNotificationCenter.current()
             .removePendingNotificationRequests(
-                withIdentifiers: ["com.eagle.screenblock.pauseResume"]
+                withIdentifiers: ["com.eagle.pausenow.pauseResume"]
             )
     }
 
@@ -198,7 +197,7 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.synchronize()
         
         // stop the pause activity monitor
-        activityCenter.stopMonitoring([DeviceActivityName("com.eagle.screenblock.pause")])
+        activityCenter.stopMonitoring([DeviceActivityName("com.eagle.pausenow.pause")])
         
         // cancel timer fallback if running
         pauseTimer?.invalidate()
@@ -207,13 +206,9 @@ class IOSBlockingService: NSObject {
         
         // re-shield apps
         let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
-        let appTokens = getStoredAppTokens(mode: blockingMode)
-        guard !appTokens.isEmpty else {
-            NSLog("❌ resumeBlocking: no app tokens found")
-            return
-        }
-        store.shield.applications = appTokens
-        NSLog("▶️ resumeBlocking: re-shielded \(appTokens.count) apps")
+        applyShield(mode: blockingMode)
+
+        
     }
     
 
@@ -240,14 +235,6 @@ class IOSBlockingService: NSObject {
     ) {
         guard let defaults = sharedDefaults else {
             print("🦅 sharedDefaults nil")
-            return
-        }
-
-        if selection.applicationTokens.isEmpty &&
-           selection.categoryTokens.isEmpty {
-            defaults.removeObject(forKey: key)
-            defaults.synchronize()
-            print("🦅 cleared selection for key: \(key)")
             return
         }
 
@@ -290,7 +277,7 @@ class IOSBlockingService: NSObject {
         
         do {
             try center.startMonitoring(
-                DeviceActivityName("com.eagle.screenblock.stats"),
+                DeviceActivityName("com.eagle.pausenow.stats"),
                 during: schedule
             )
         } catch {
@@ -314,6 +301,37 @@ class IOSBlockingService: NSObject {
             NSLog("🦅 approved WITH data access ✅ — stats should work")
         @unknown default:
             NSLog("🦅 unknown status")
+        }
+    }
+    
+        // MARK - Shield
+    private func applyShield(mode: String) {
+        store.clearAllSettings()
+
+        switch mode {
+
+        case "specific_apps":
+            let tokens = getStoredAppTokens(mode: "specific_apps")
+            guard !tokens.isEmpty else {
+                NSLog("❌ applyShield: no blocked app tokens found")
+                return
+            }
+            store.shield.applications = tokens
+            NSLog("🛡 shielding \(tokens.count) specific apps")
+
+        case "all_apps":
+            let allowedTokens = getStoredAppTokens(mode: "all_apps_except")
+            if allowedTokens.isEmpty {
+                // no allowed app picked — shield everything
+                store.shield.applicationCategories = .all()
+                NSLog("🛡 shielding ALL categories (no exemptions)")
+            } else {
+                store.shield.applicationCategories = .all(except: allowedTokens)
+                NSLog("🛡 shielding ALL categories except \(allowedTokens.count) apps")
+            }
+
+        default:
+            NSLog("⚠️ applyShield: unknown mode '\(mode)'")
         }
     }
 }

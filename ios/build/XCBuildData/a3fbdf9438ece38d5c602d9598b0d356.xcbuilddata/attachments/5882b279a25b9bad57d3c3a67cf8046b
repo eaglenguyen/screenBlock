@@ -1,0 +1,4 @@
+
+module PurchasesHybridCommonUI.__Swift {
+  exclude header "PurchasesHybridCommonUI-Swift.h"
+}

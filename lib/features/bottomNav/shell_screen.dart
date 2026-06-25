@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({
@@ -47,10 +46,10 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.background(context),
       body: Stack(
         children: [
-          widget.child, // current tab screen renders here
+          widget.child,
           _buildBottomNav(),
         ],
       ),
@@ -69,10 +68,10 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
             vertical: 8,
           ),
           decoration: BoxDecoration(
-            color: AppColors.backgroundCard,
+            color: AppColors.backgroundCard(context),
             borderRadius: BorderRadius.circular(50),
             border: Border.all(
-              color: AppColors.border,
+              color: AppColors.border(context),
               width: 0.5,
             ),
             boxShadow: [
@@ -109,16 +108,16 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
           height: 54,
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.gold
-                : AppColors.backgroundSubtle,
+                ? AppColors.gold(context)
+                : AppColors.backgroundSubtle(context),
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
             size: 28,
             color: isActive
-                ? AppColors.goldText
-                : AppColors.textSecondary,
+                ? AppColors.goldText(context)
+                : AppColors.textSecondary(context),
           ),
         ),
       ),

@@ -1,0 +1,4 @@
+
+module PurchasesHybridCommonUI.Swift {
+  header "PurchasesHybridCommonUI-Swift.h"
+}

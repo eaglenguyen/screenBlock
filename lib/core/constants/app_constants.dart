@@ -6,7 +6,7 @@ class AppConstants {
 
 
   // ── Free tier limits ──────────────────────────
-  static const int freeTrackedAppsLimit = 1;
+  static const int freeTrackedAppsLimit = 3;
 
   // ── Foreground poll interval ──────────────────
   static const int pollIntervalMs = 1000;

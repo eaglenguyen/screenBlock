@@ -1,0 +1,4 @@
+
+module purchases_ui_flutter.Swift {
+  header "purchases_ui_flutter-Swift.h"
+}

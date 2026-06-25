@@ -11,8 +11,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
+
+
     <application
-        android:label="screenblock"
+        android:label="pause now"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
@@ -39,7 +41,7 @@
             android:exported="false"
             android:theme="@style/BlockActivityTheme"
             android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:taskAffinity=""
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -51,7 +53,7 @@
         <service
             android:name=".AppBlockAccessibilityService"
             android:exported="true"
-            android:label="ScreenBlock"
+            android:label="pausenow"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>

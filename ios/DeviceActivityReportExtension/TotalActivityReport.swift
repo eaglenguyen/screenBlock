@@ -2,7 +2,7 @@ import DeviceActivity
 import _DeviceActivity_SwiftUI
 import ExtensionKit
 import Foundation
-internal import ManagedSettings
+import ManagedSettings
 
 extension DeviceActivityReport.Context {
     static let totalActivity = Self("Total Activity")
@@ -12,6 +12,7 @@ struct AppUsageData: Identifiable {
     let id = UUID()
     let name: String
     let duration: TimeInterval
+    let token: ApplicationToken? // 👈 add token for real icon
 
     var formattedDuration: String {
         let hours = Int(duration) / 3600
@@ -38,6 +39,10 @@ struct TotalActivityReport: DeviceActivityReportScene {
     let context: DeviceActivityReport.Context = .totalActivity
     let content: (ActivityConfiguration) -> TotalActivityView
 
+    func body(for configuration: ActivityConfiguration) -> TotalActivityView {
+        TotalActivityView(configuration: configuration)
+    }
+
     func makeConfiguration(
         representing data: DeviceActivityResults<DeviceActivityData>
     ) async -> ActivityConfiguration {
@@ -52,9 +57,9 @@ struct TotalActivityReport: DeviceActivityReportScene {
                         guard duration > 0 else { continue }
                         totalDuration += duration
                         appUsages.append(AppUsageData(
-                            name: app.application.localizedDisplayName
-                                ?? "Unknown",
-                            duration: duration
+                            name: app.application.localizedDisplayName ?? "Unknown",
+                            duration: duration,
+                            token: app.application.token // 👈 pass token
                         ))
                     }
                 }
@@ -62,6 +67,14 @@ struct TotalActivityReport: DeviceActivityReportScene {
         }
 
         appUsages.sort { $0.duration > $1.duration }
+
+        // 👇 write total to app group for Flutter to read
+        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        sharedDefaults?.set(String(today), forKey: "screenTimeTotalDate")
+        sharedDefaults?.set(totalDuration, forKey: "totalScreenTimeToday")
+        NSLog("📊 wrote totalScreenTimeToday: \(totalDuration)") // 👈
+        sharedDefaults?.synchronize()
 
         return ActivityConfiguration(
             appUsages: appUsages,

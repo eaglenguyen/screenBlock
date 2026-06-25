@@ -3,27 +3,49 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
+import '../../core/constants/hivebox_names.dart';
+import '../paywall/onboarding_outlook_screen.dart';
 import 'data/onboarding_stats.dart';
-import 'onboarding_animations.dart';
+import 'onboarding_permission_screen.dart';
+import 'onboarding_question_bank.dart';
+import 'widgets/onboarding_animations.dart';
 import 'onboarding_chat_screen.dart';
 import 'onboarding_demo_screens.dart';
 import 'onboarding_personal_flow.dart';
 import 'onboarding_viewmodel.dart';
 
 
-
 class OnboardingSteps {
   static const int welcome = 0;
-  static const int username = 1;
-  static const int referral = 2;
-  static const int chat = 3;
-  static const int demo = 4;
-  static const int ageQuestion   = 5;
-  static const int hoursQuestion = 6;
-  static const int badNewsStats  = 7;
-  static const int lifeGrid      = 8;
-  static const int goodNews      = 9;
-  static const int pricing       = 10;
+  static const int chatIntro = 1;
+  static const int chat = 2;
+  static const int ageQuestion = 3;
+  static const int hoursQuestion = 4;
+  static const int badNewsStats = 5;
+  static const int lifeGrid = 6;
+  static const int goodNews = 7;
+  static const int qbGoals = 8;
+  static const int qbFutureVision = 9;
+  static const int qbGoalsConfirm = 10;
+  static const int qbPhoneUsage = 11;
+  static const int qbSocialMedia = 12;
+  static const int qbBlockers = 13;
+  static const int qbStruggles = 14;
+  static const int qbSympathy = 15;
+  static const int permissions = 16;
+  static const int demo = 17;
+  static const int commitment = 18;
+  static const int commitmentResult = 19;
+  static const int reviewPopup = 20;
+  static const int themePicker = 21;
+  static const int screenTimeGoal = 22;
+  static const int loadingPlan = 23;
+  static const int reflection = 24;
+  static const int outlook = 25;
+  static const int trialReminder = 26;
+  static const int paywall = 27;
 }
 
 class OnboardingWelcomeFlow extends ConsumerStatefulWidget {
@@ -37,22 +59,33 @@ class OnboardingWelcomeFlow extends ConsumerStatefulWidget {
 class _OnboardingWelcomeFlowState
     extends ConsumerState<OnboardingWelcomeFlow> {
 
+  String get _userName => ref.read(onboardingViewModelProvider).userName ?? '';
   int _currentStep = OnboardingSteps.welcome;
   // add to _OnboardingWelcomeFlowState
   int _userAge = 21;
   double _userHours = 3.5;
+  List<String> _selectedGoals = [];
+  String _selectedFuture = '';
+  String _commitmentLevel = '';
+  bool _isHighCommitment = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
 
   OnboardingStatsData get _statsData => OnboardingStatsData(
     age: _userAge,
     hoursPerDay: _userHours,
   );
 
-  String _userName = '';
-  String _referral = '';
 
   void _nextStep() {
     HapticFeedback.lightImpact();
-    setState(() => _currentStep++);
+    final nextStep = _currentStep + 1;
+    setState(() => _currentStep = nextStep);
+    _saveProgress(nextStep);
   }
 
   void _previousStep() {
@@ -60,22 +93,50 @@ class _OnboardingWelcomeFlowState
     setState(() => _currentStep--);
   }
 
-  void _onUsernameSubmitted(String name) {
-    if (name.trim().isEmpty) return;
-    _userName = name.trim();
-    _nextStep();
+  void _saveProgress(int step) {
+    final box = Hive.box(HiveBoxNames.settings);
+    box.put('onboardingStep', step);
+    box.put('onboardingAge', _userAge);
+    box.put('onboardingHours', _userHours);
+    box.put('onboardingGoals', _selectedGoals);
+    box.put('onboardingFuture', _selectedFuture);
+    box.put('onboardingCommitment', _commitmentLevel);
+    box.put('onboardingHighCommitment', _isHighCommitment);
   }
 
-  void _onReferralSelected(String source) {
-    _referral = source;
-    _nextStep();
+  void _loadProgress() {
+    final box = Hive.box(HiveBoxNames.settings);
+    int savedStep = box.get('onboardingStep', defaultValue: 0) as int;
+
+    const autoAdvanceSteps = [
+      OnboardingSteps.reviewPopup,
+      OnboardingSteps.paywall,
+    ];
+    if (autoAdvanceSteps.contains(savedStep)) {
+      savedStep = savedStep - 1;
+    }
+
+    // 👇 set directly, no setState — widget isn't mounted yet
+    _currentStep = savedStep;
+    _userAge = box.get('onboardingAge', defaultValue: 21) as int;
+    _userHours = box.get('onboardingHours', defaultValue: 3.5) as double;
+    _selectedGoals = List<String>.from(
+        box.get('onboardingGoals', defaultValue: <String>[]));
+    _selectedFuture = box.get('onboardingFuture', defaultValue: '') as String;
+    _commitmentLevel = box.get('onboardingCommitment', defaultValue: '') as String;
+    _isHighCommitment = box.get('onboardingHighCommitment', defaultValue: false) as bool;
   }
+
+
 
   Future<void> _onComplete() async {
+    final box = Hive.box(HiveBoxNames.settings);
+    await box.put('onboardingComplete', true);
+    await box.delete('onboardingStep'); // 👈 clean up saved step
     await ref
         .read(onboardingViewModelProvider.notifier)
         .completeOnboarding();
-    if (mounted) context.go('/home');
+    if (mounted) context.go('/paywall');
   }
 
   @override
@@ -98,39 +159,26 @@ class _OnboardingWelcomeFlowState
     );
   }
 
+
+
   Widget _buildStep() {
     switch (_currentStep) {
       case OnboardingSteps.welcome:
         return _WelcomeScreen(
           key: const ValueKey('welcome'),
-            onGetStarted: _nextStep,
-            //remove debug
-            onSkip: _onComplete
+          onGetStarted: _nextStep,
+          onSkip: _onComplete,
         );
-      case OnboardingSteps.username:
-        return _UsernameScreen(
-          key: const ValueKey('username'),
-          onContinue: _onUsernameSubmitted,
-          onBack: _previousStep,
-        );
-      case OnboardingSteps.referral:
-        return _ReferralScreen(
-          key: const ValueKey('referral'),
-          onSelected: _onReferralSelected,
-          onBack: _previousStep,
+      case OnboardingSteps.chatIntro:
+        return OnboardingChatIntroScreen(
+          key: const ValueKey('chatIntro'),
+          onStart: _nextStep,
         );
       case OnboardingSteps.chat:
         return KeyedSubtree(
           key: const ValueKey('chat'),
           child: OnboardingChatScreen(
             onChatComplete: _nextStep,
-          ),
-        );
-      case OnboardingSteps.demo:
-        return KeyedSubtree(
-          key: const ValueKey('demo'),
-          child: OnboardingDemoFlow(
-            onComplete: _nextStep,
           ),
         );
       case OnboardingSteps.ageQuestion:
@@ -157,6 +205,7 @@ class _OnboardingWelcomeFlowState
           onBack: _previousStep,
           onNext: _nextStep,
           data: _statsData,
+          userName: _userName,
         );
       case OnboardingSteps.lifeGrid:
         return OnboardingLifeGridScreen(
@@ -171,11 +220,137 @@ class _OnboardingWelcomeFlowState
           onBack: _previousStep,
           onNext: _nextStep,
           data: _statsData,
+          userName: _userName,
+
         );
+      case OnboardingSteps.qbGoals:
+        return QBGoalsScreen(
+          key: const ValueKey('qbGoals'),
+          onNext: (goals) {
+            setState(() => _selectedGoals = goals);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.qbFutureVision:
+        return QBFutureVisionScreen(
+          key: const ValueKey('qbFuture'),
+          onNext: (answer) {
+            setState(() => _selectedFuture = answer);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.qbGoalsConfirm:
+        return OnboardingGoalsConfirmScreen(
+          key: const ValueKey('qbGoalsConfirm'),
+          selectedGoals: _selectedGoals,
+          futureVision: _selectedFuture,
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.qbPhoneUsage:
+        return QBPhoneUsageScreen(
+          key: const ValueKey('qbPhone'),
+          onNext: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbSocialMedia:
+        return QBSocialMediaRelationshipScreen(
+          key: const ValueKey('qbSocial'),
+          onNext: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbBlockers:
+        return QBBlockersScreen(
+          key: const ValueKey('qbBlockers'),
+          onNext: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbStruggles:
+        return QBStrugglesScreen(
+          key: const ValueKey('qbStruggles'),
+          onNext: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbSympathy: // 👈 new
+        return QBSympathyScreen(
+          key: const ValueKey('qbSympathy'),
+          userName: _userName,
+          onNext: _nextStep,
+        );
+
+      case OnboardingSteps.permissions:
+        return OnboardingPermissionsScreen(
+          key: const ValueKey('permissions'),
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.demo:
+        return KeyedSubtree(
+          key: const ValueKey('demo'),
+          child: OnboardingDemoFlow(
+            onComplete: _nextStep,
+          ),
+        );
+      case OnboardingSteps.commitment:
+        return QBCommitmentScreen(
+          key: const ValueKey('commitment'),
+          onNext: (level, isHigh) {
+            setState(() {
+              _commitmentLevel = level;
+              _isHighCommitment = isHigh;
+            });
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.commitmentResult:
+        return _isHighCommitment
+            ? QBCommitmentHighScreen(
+          key: const ValueKey('commitHigh'),
+          level: _commitmentLevel,
+          onNext: _nextStep,
+        )
+            : QBCommitmentLowScreen(
+          key: const ValueKey('commitLow'),
+          level: _commitmentLevel,
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.reviewPopup:
+        WidgetsBinding.instance.addPostFrameCallback((_) => _nextStep());
+        return const SizedBox.shrink();
+      case OnboardingSteps.themePicker:
+        return OnboardingThemeScreen(
+          key: const ValueKey('theme'),
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.screenTimeGoal:
+        return OnboardingScreenTimeGoalScreen(
+          key: const ValueKey('screenTimeGoal'),
+          onSelected: (hours) {
+            final box = Hive.box(HiveBoxNames.settings);
+            box.put('dailyScreenTimeGoal', hours.toDouble());
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.loadingPlan:
+        return OnboardingLoadingPlanScreen(
+          key: const ValueKey('loadingPlan'),
+          onComplete: _nextStep,
+        );
+      case OnboardingSteps.reflection:
+        return OnboardingProductivityScreen(
+          key: const ValueKey('productivity'),
+          onBack: _previousStep,
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.outlook:
+        return OnboardingOutlookScreen(
+          key: const ValueKey('outlook'),
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.trialReminder:
+        return OnboardingTrialReminderScreen(
+          key: const ValueKey('trialReminder'),
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.paywall:
+        WidgetsBinding.instance.addPostFrameCallback((_) => _onComplete());
+        return const SizedBox.shrink();
       default:
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _onComplete();
-        });
+        WidgetsBinding.instance.addPostFrameCallback((_) => _onComplete());
         return const SizedBox.shrink();
     }
   }
@@ -185,154 +360,272 @@ class _OnboardingWelcomeFlowState
 
 class _WelcomeScreen extends StatefulWidget {
   final VoidCallback onGetStarted;
-  // Debug button, remove this
   final VoidCallback onSkip;
-  const _WelcomeScreen({super.key, required this.onGetStarted, required this.onSkip});
+
+  const _WelcomeScreen({
+    super.key,
+    required this.onGetStarted,
+    required this.onSkip,
+  });
 
   @override
   State<_WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<_WelcomeScreen>
-    with SingleTickerProviderStateMixin, OnboardingEntranceMixin {
+class _WelcomeScreenState extends State<_WelcomeScreen> {
+  int _slide = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    initEntrance(elementCount: 4);
+  void _advance() {
+    if (_slide < 2) {
+      setState(() => _slide++);
+    } else {
+      widget.onGetStarted();
+    }
   }
 
-  @override
-  void dispose() {
-    disposeEntrance();
-    super.dispose();
+  Widget _buildStatement() {
+    switch (_slide) {
+      case 0:
+        return RichText(
+          key: const ValueKey(0),
+          text: TextSpan(
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              height: 1.2,
+            ),
+            children: const [
+              TextSpan(
+                text: '66 days.',
+                style: TextStyle(color: Color(0xFFEDB82A)),
+              ),
+              TextSpan(
+                text: " That's how long it takes to build a new habit.",
+              ),
+            ],
+          ),
+        );
+      case 1:
+        return Text(
+          'The secret? Pausing and being present in the moment.',
+          key: const ValueKey(1),
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            height: 1.2,
+          ),
+        );
+      case 2:
+        return Text(
+          'Pause Now turns that discipline into a lifestyle. Starting today.',
+          key: const ValueKey(2),
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            height: 1.2,
+          ),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF16162A),
-      body: Stack(
-        children: [
-          _buildGradientBg(),
-          _buildCircles(),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(28, 0, 28, 36),
-              child: Column(
-                children: [
-                  // Remove when production happens
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: GestureDetector(
-                      onTap: widget.onSkip, // 👈 skips straight to next step
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            width: 0.5,
-                          ),
-                        ),
-                        child: Text(
-                          'Skip (debug)',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+    final isLast = _slide == 2;
 
-                  const Spacer(flex: 2),
-
-                  // element 0 — logo
-                  staggered(
-                    0,
-                    Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEDB82A)
-                            .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: const Color(0xFFEDB82A)
-                              .withValues(alpha: 0.4),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text('🛡️',
-                            style: TextStyle(fontSize: 42)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-
-                  // element 1 — title with gold word
-                  staggered(
-                    1,
-                    const GoldText(
-                      text: 'Screen\nBlock',
-                      goldWord: 'Block',
-                      fontSize: 44,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // element 2 — subtitle
-                  staggered(
-                    2,
-                    Text(
-                      'Break free from endless scrolling\nand reclaim your time',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        fontSize: 17,
-                        height: 1.55,
-                      ),
-                    ),
-                  ),
-
-                  const Spacer(flex: 3),
-
-                  // element 3 — button + note
-                  staggered(
-                    3,
-                    SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                        ShimmerButton(
-                          label: 'Get Started →',
-                          onTap: widget.onGetStarted,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Free 3-day trial · No credit card required',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.28),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ),
-                ],
+    return GestureDetector(
+      onTap: _advance,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0E0E1A),
+        body: Stack(
+          children: [
+            // subtle gradient bg
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF0E0E1A),
+                    Color(0xFF0A1628),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(28, 24, 28, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // debug skip button — remove before release
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        onTap: widget.onSkip,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Text(
+                            'Skip (debug)',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(flex: 2),
+
+                    // app name
+                    Text(
+                      'pause now',
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFFEDB82A),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // progress dots
+                    Row(
+                      children: List.generate(3, (i) {
+                        final isActive = i <= _slide;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.only(right: 6),
+                          width: isActive ? 28 : 20,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? const Color(0xFFEDB82A)
+                                : Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        );
+                      }),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // bold statement
+                    // bold statement
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 700),
+                      transitionBuilder: (child, animation) {
+                        final isEntering = animation.status == AnimationStatus.forward ||
+                            animation.status == AnimationStatus.completed;
+
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: isEntering
+                                ? const Offset(-1, 0)   // 👈 entering slides in from right
+                                : const Offset(1, 0), // 👈 exiting slides out to left
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          )),
+                          child: FadeTransition(opacity: animation, child: child),
+                        );
+                      },
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            ...previousChildren,
+                            if (currentChild != null) currentChild,
+                          ],
+                        );
+                      },
+                      child: _buildStatement(),
+                    ),
+
+                    const Spacer(flex: 3),
+
+                    // bottom CTA
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: isLast
+                          ? SizedBox(
+                        key: const ValueKey('btn'),
+                        width: double.infinity,
+                        child: Column(
+                          children: [
+                            ElevatedButton(
+                              onPressed: widget.onGetStarted,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                const Color(0xFFEDB82A),
+                                foregroundColor:
+                                const Color(0xFF1A1208),
+                                minimumSize:
+                                const Size(double.infinity, 58),
+                                shape: const StadiumBorder(),
+                                elevation: 0,
+                                textStyle: GoogleFonts.poppins(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              child: const Text('Get Started →'),
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              'Free 7-day trial · No signup required',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white
+                                    .withValues(alpha: 0.28),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                          : Padding(
+                        key: const ValueKey('tap'),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Center(
+                          child: Text(
+                            'Tap to continue',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white
+                                  .withValues(alpha: 0.3),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -344,7 +637,6 @@ class _UsernameScreen extends StatefulWidget {
   final Function(String name) onContinue;
   final VoidCallback onBack;
   const _UsernameScreen({
-    super.key,
     required this.onContinue,
     required this.onBack,
   });

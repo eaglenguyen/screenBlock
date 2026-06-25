@@ -1,0 +1,4 @@
+
+module haptic_feedback.__Swift {
+  exclude header "haptic_feedback-Swift.h"
+}

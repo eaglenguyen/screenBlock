@@ -9,13 +9,13 @@ import 'blocking_service.dart';
 class AndroidBlockingService implements BlockingService {
 
   static const _methodChannel = MethodChannel(
-    'com.eagle.screenblock/accessibility',
+    'com.eagle.pausenow/accessibility',
   );
   static const _eventChannel = EventChannel(
-    'com.eagle.screenblock/foreground_app',
+    'com.eagle.pausenow/foreground_app',
   );
   static const _blockChannel = MethodChannel(
-    'com.eagle.screenblock/block',
+    'com.eagle.pausenow/block',
   );
 
   final _eventController = StreamController<AppUsageEvent>.broadcast();
@@ -25,6 +25,8 @@ class AndroidBlockingService implements BlockingService {
   String _blockingMode = 'specific_apps';
   final Set<String> _temporarilyExempted = {};
   bool _methodHandlerRegistered = false;
+  DateTime? _blockScreenLaunchTime;
+
 
   @override
   Stream<AppUsageEvent> get usageEvents => _eventController.stream;
@@ -270,6 +272,15 @@ class AndroidBlockingService implements BlockingService {
 
   void _onForegroundAppChanged(String packageName) {
     if (_overlayShowing) return;
+    if (packageName == 'com.eagle.pausenow') return;
+
+    // 👇 add — ignore if we just launched a block screen (give it time to load)
+    if (_blockScreenLaunchTime != null &&
+        DateTime.now().difference(_blockScreenLaunchTime!).inSeconds < 1) {
+      debugPrint('⏳ ignoring foreground change — block screen loading');
+      return;
+    }
+
 
     if (_blockingMode == 'specific_apps') {
       _handleSpecificAppsMode(packageName);
@@ -305,6 +316,9 @@ class AndroidBlockingService implements BlockingService {
     if (_temporarilyExempted.contains(packageName)) return;
     if (_monitoredApps.containsKey(packageName)) return;
 
+    // 👇 never block our own app
+    if (packageName == 'com.eagle.pausenow') return;
+
     debugPrint('🟢 blocking non-allowed app: $packageName');
     _overlayShowing = true;
     _eventController.add(AppUsageEvent(
@@ -318,6 +332,7 @@ class AndroidBlockingService implements BlockingService {
 
   Future<void> _showBlockScreen(String packageName) async {
     try {
+      _blockScreenLaunchTime = DateTime.now(); // 👈 record launch time
       await _blockChannel.invokeMethod('showBlockScreen', {
         'packageName': packageName,
       });

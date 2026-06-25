@@ -23,95 +23,139 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
   return Container(
     padding: const EdgeInsets.fromLTRB(20, 52, 20, 24),
-    decoration: const BoxDecoration(
+    decoration:  BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFF252015), AppColors.background],
+        colors: [
+          Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF252015)
+              : AppColors.backgroundCard(context),
+          AppColors.background(context),
+        ],
       ),
     ),
     child: Row(
       children: [
-        _buildAvatar(),
         const Spacer(),
-        _buildStreakBadge(state),
-        const SizedBox(width: 8),
-        _buildXpBadge(state),
+        _buildXpBadge(state, context),
       ],
     ),
   );
 }
 
-Widget _buildAvatar() {
-  return Container(
-    width: 40,
-    height: 40,
-    decoration: BoxDecoration(
-      color: AppColors.backgroundSubtle,
-      shape: BoxShape.circle,
-      border: Border.all(color: AppColors.border),
-    ),
-    child: const Icon(
-      Icons.person_outline_rounded,
-      color: AppColors.textSecondary,
-      size: 22,
-    ),
-  );
-}
 
-Widget _buildStreakBadge(HomeState state) {
-  return Container(
-    padding: const EdgeInsets.symmetric(
-      horizontal: 12, vertical: 6,
-    ),
-    decoration: BoxDecoration(
-      color: AppColors.backgroundCard,
-      borderRadius: BorderRadius.circular(50),
-      border: Border.all(color: AppColors.border),
-    ),
-    child: Row(
-      children: [
-        const Text('🔥', style: TextStyle(fontSize: 14)),
-        const SizedBox(width: 4),
-        Text(
-          '${state.streak?.currentStreak ?? 0}',
-          style: AppTextStyles.labelMedium,
-        ),
-      ],
-    ),
-  );
-}
 
-Widget _buildXpBadge(HomeState state) {
-  return _badge(
-    key: xpBadgeKey,
-    child: Row(
-      children: [
-        const Text('⚡',
-          style: TextStyle(
-            fontSize: 13,
-            color: AppColors.gold,
+
+  Widget _buildXpBadge(HomeState state, BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: AppColors.backgroundCard(context),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  'XP Stats',
+                  style: TextStyle(
+                    color: AppColors.textPrimary(context),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Coming soon',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.textSecondary(context),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.gold(context).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(
+                      color: AppColors.gold(context).withValues(alpha: 0.2),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '1 minute = 5 ⭐️',
+                        style: TextStyle(
+                          color: AppColors.gold(context),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.gold(context),
+                    foregroundColor: AppColors.goldText(context),
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text('👌🏾',
+                      style: TextStyle(fontWeight: FontWeight.w700,
+                      fontSize: 25)
+                  ),
+                ),
+              ),
+            ],
           ),
+        );
+      },
+      child: _badge(
+        key: xpBadgeKey,
+        context: context,
+        child: Row(
+          children: [
+            Text('',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.gold(context),
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text('${state.totalXp} ⭐️', style: AppTextStyles.labelMedium),
+          ],
         ),
-        const SizedBox(width: 5),
-        Text('${state.totalXp} XP', style: AppTextStyles.labelMedium),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 
-
-}
-
-  Widget _badge({required Widget child, Key? key}) {
+  Widget _badge({required Widget child, Key? key, required BuildContext context}) {
     return Container(
       key: key,
       padding: const EdgeInsets.symmetric(
         horizontal: 14, vertical: 7,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(50),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border(context)),
       ),
       child: child,
     );

@@ -1,0 +1,1356 @@
+{
+  "" : {
+    "const-values" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RevenueCatUI-primary.swiftconstvalues",
+    "dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RevenueCatUI-primary.d",
+    "diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RevenueCatUI-primary.dia",
+    "emit-module-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RevenueCatUI-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RevenueCatUI-primary-emit-module.dia",
+    "pch" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RevenueCatUI-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RevenueCatUI-primary.swiftdeps"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Binding+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Binding+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Binding+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Binding+Extensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CrossPlatform/PlatformBezierPath.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformBezierPath.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformBezierPath.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformBezierPath.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CrossPlatform/PlatformColor.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformColor.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformColor.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformColor.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CrossPlatform/PlatformFont.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformFont.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformFont.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformFont.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CrossPlatform/PlatformImage.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformImage.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformImage.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PlatformImage.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Abstractions/CustomerCenterPurchasesType.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterPurchasesType.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterPurchasesType.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterPurchasesType.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Actions/CustomerCenterConfigData.HelpPath+PurchaseInformation.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigData.HelpPath+PurchaseInformation.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigData.HelpPath+PurchaseInformation.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigData.HelpPath+PurchaseInformation.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Actions/CustomerCenterView+Actions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterView+Actions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterView+Actions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterView+Actions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ButtonStyles.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonStyles.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonStyles.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonStyles.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ColorFromAppearance.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorFromAppearance.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorFromAppearance.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorFromAppearance.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ContactSupportUtilities.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ContactSupportUtilities.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ContactSupportUtilities.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ContactSupportUtilities.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/CustomerInfo+CurrentEntitlement.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfo+CurrentEntitlement.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfo+CurrentEntitlement.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfo+CurrentEntitlement.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomActionData.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomActionData.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomActionData.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomActionData.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterAction.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterAction.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterAction.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterAction.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterActionViewModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterActionViewModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterActionViewModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterActionViewModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterActionWrapper.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterActionWrapper.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterActionWrapper.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterActionWrapper.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterConfigData+Mock.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigData+Mock.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigData+Mock.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigData+Mock.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterEnvironment.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterEnvironment.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterEnvironment.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterEnvironment.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterError.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterError.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterError.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterError.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterManagementOption.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterManagementOption.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterManagementOption.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterManagementOption.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/CustomerCenterPurchases.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterPurchases.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterPurchases.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterPurchases.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/DiscountsHandler.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DiscountsHandler.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DiscountsHandler.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DiscountsHandler.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/EntitlementInfo+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EntitlementInfo+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EntitlementInfo+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EntitlementInfo+Extensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/FeedbackSurveyData.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyData.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyData.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyData.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/LoadPromotionalOfferUseCase.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LoadPromotionalOfferUseCase.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LoadPromotionalOfferUseCase.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LoadPromotionalOfferUseCase.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/PromotionalOfferData.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferData.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferData.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferData.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/PurchaseInformation+Mock.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+Mock.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+Mock.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+Mock.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/PurchaseInformation.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/SemanticVersion.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SemanticVersion.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SemanticVersion.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SemanticVersion.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/StoreProductDiscount+CustomerCenter.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StoreProductDiscount+CustomerCenter.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StoreProductDiscount+CustomerCenter.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StoreProductDiscount+CustomerCenter.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Data/Transaction.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Transaction.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Transaction.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Transaction.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Extensions/CustomerCenterConfigDataAppearance+Tint.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigDataAppearance+Tint.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigDataAppearance+Tint.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigDataAppearance+Tint.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Extensions/CustomerCenterConfigDataSupport+URL.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigDataSupport+URL.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigDataSupport+URL.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterConfigDataSupport+URL.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Extensions/CustomerInfo+SeeAllPurchases.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfo+SeeAllPurchases.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfo+SeeAllPurchases.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfo+SeeAllPurchases.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Extensions/PurchaseInformation+Creation.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+Creation.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+Creation.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+Creation.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Mocks/MockCustomerCenterPurchases.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockCustomerCenterPurchases.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockCustomerCenterPurchases.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockCustomerCenterPurchases.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Mocks/MockCustomerCenterStoreKitUtilities.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockCustomerCenterStoreKitUtilities.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockCustomerCenterStoreKitUtilities.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockCustomerCenterStoreKitUtilities.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Mocks/MockLoadPromotionalOfferUseCase.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockLoadPromotionalOfferUseCase.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockLoadPromotionalOfferUseCase.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockLoadPromotionalOfferUseCase.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Mocks/PurchaseInformationFixtures.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformationFixtures.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformationFixtures.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformationFixtures.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/URLUtilities.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/URLUtilities.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/URLUtilities.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/URLUtilities.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Utilities/CustomerCenterLocalizationStrings.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterLocalizationStrings.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterLocalizationStrings.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterLocalizationStrings.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Utilities/CustomerCenterStoreKitUtilities.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStoreKitUtilities.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStoreKitUtilities.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStoreKitUtilities.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Utilities/CustomerCenterStoreKitUtilitiesType.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStoreKitUtilitiesType.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStoreKitUtilitiesType.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStoreKitUtilitiesType.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Utilities/CustomerCenterStylingUtilities.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStylingUtilities.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStylingUtilities.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterStylingUtilities.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Utilities/EmailValidator.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EmailValidator.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EmailValidator.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EmailValidator.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Utilities/IdentifiableURL.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IdentifiableURL.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IdentifiableURL.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IdentifiableURL.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/View+PresentCustomerCenter.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentCustomerCenter.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentCustomerCenter.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentCustomerCenter.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/BaseManageSubscriptionViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BaseManageSubscriptionViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BaseManageSubscriptionViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BaseManageSubscriptionViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/CustomerCenterViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/CustomerCenterViewState.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewState.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewState.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewState.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/FeedbackSurveyViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/NoSubscriptionsCardViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NoSubscriptionsCardViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NoSubscriptionsCardViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NoSubscriptionsCardViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/PromotionalOfferViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/PurchaseHistory/PurchaseDetailItem.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailItem.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailItem.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailItem.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/PurchaseHistory/PurchaseDetailViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/PurchaseHistory/PurchaseHistoryViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHistoryViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHistoryViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHistoryViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/PurchaseHistory/PurchaseInformation+History.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+History.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+History.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseInformation+History.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/RelevantPurchasesListViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RelevantPurchasesListViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RelevantPurchasesListViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RelevantPurchasesListViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/RestorePurchasesAlertViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RestorePurchasesAlertViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RestorePurchasesAlertViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RestorePurchasesAlertViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/SubscriptionDetailViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SubscriptionDetailViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SubscriptionDetailViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SubscriptionDetailViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/ViewModels/VirtualCurrencyBalancesScreenViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalancesScreenViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalancesScreenViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalancesScreenViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/ActiveSubscriptionButtonsView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ActiveSubscriptionButtonsView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ActiveSubscriptionButtonsView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ActiveSubscriptionButtonsView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/AppUpdateWarningView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppUpdateWarningView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppUpdateWarningView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppUpdateWarningView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/CompatibilityLabeledContent.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityLabeledContent.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityLabeledContent.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityLabeledContent.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/CompatibilityNavigationStack.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityNavigationStack.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityNavigationStack.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityNavigationStack.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/CompatibilityTopBarTrailing.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityTopBarTrailing.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityTopBarTrailing.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityTopBarTrailing.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/CreateTicketView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CreateTicketView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CreateTicketView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CreateTicketView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/CustomerCenterNavigationLink.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterNavigationLink.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterNavigationLink.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterNavigationLink.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/CustomerCenterNavigationOptions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterNavigationOptions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterNavigationOptions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterNavigationOptions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/CustomerCenterView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/FallbackNoSubscriptionsView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FallbackNoSubscriptionsView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FallbackNoSubscriptionsView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FallbackNoSubscriptionsView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/FeedbackSurveyView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FeedbackSurveyView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/ManageSubscriptionsButtonsView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ManageSubscriptionsButtonsView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ManageSubscriptionsButtonsView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ManageSubscriptionsButtonsView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/NoSubscriptionsCardView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NoSubscriptionsCardView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NoSubscriptionsCardView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NoSubscriptionsCardView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/PromotionalOfferView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PromotionalOfferView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/PurchaseCardView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseCardView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseCardView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseCardView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/PurchaseHistory/PurchaseDetailView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseDetailView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/PurchaseHistory/PurchaseHistoryView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHistoryView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHistoryView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHistoryView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/RelevantPurchasesListView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RelevantPurchasesListView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RelevantPurchasesListView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RelevantPurchasesListView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/RestorePurchasesAlert.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RestorePurchasesAlert.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RestorePurchasesAlert.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RestorePurchasesAlert.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/ScrollViewSection.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewSection.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewSection.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewSection.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/ScrollViewWithOSBackground.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewWithOSBackground.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewWithOSBackground.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewWithOSBackground.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/SubscriptionDetailView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SubscriptionDetailView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SubscriptionDetailView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SubscriptionDetailView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/TintedProgressView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TintedProgressView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TintedProgressView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TintedProgressView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/UIKit Compatibility/CustomerCenterViewController.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewController.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewController.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewController.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/UIKit Compatibility/CustomerCenterViewControllerDelegate.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewControllerDelegate.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewControllerDelegate.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerCenterViewControllerDelegate.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/Virtual Currencies/VirtualCurrenciesScrollViewWithOSBackgroundSection.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrenciesScrollViewWithOSBackgroundSection.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrenciesScrollViewWithOSBackgroundSection.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrenciesScrollViewWithOSBackgroundSection.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/Virtual Currencies/VirtualCurrencyBalanceListRow.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalanceListRow.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalanceListRow.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalanceListRow.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/CustomerCenter/Views/Virtual Currencies/VirtualCurrencyBalancesScreen.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalancesScreen.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalancesScreen.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrencyBalancesScreen.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/Constants.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Constants.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Constants.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Constants.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/CustomPaywallVariables.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomPaywallVariables.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomPaywallVariables.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomPaywallVariables.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/CustomerInfoFixtures.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfoFixtures.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfoFixtures.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CustomerInfoFixtures.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/Errors/PaywallError.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallError.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallError.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallError.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/Errors/TemplateError.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateError.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateError.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateError.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/IntroEligibility/IntroEligibilityViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroEligibilityViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroEligibilityViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroEligibilityViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/IntroEligibility/TrialOrIntroEligibilityChecker+TestData.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TrialOrIntroEligibilityChecker+TestData.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TrialOrIntroEligibilityChecker+TestData.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TrialOrIntroEligibilityChecker+TestData.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/IntroEligibility/TrialOrIntroEligibilityChecker.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TrialOrIntroEligibilityChecker.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TrialOrIntroEligibilityChecker.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TrialOrIntroEligibilityChecker.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/Localization.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Localization.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Localization.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Localization.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/LocalizedAlertError.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizedAlertError.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizedAlertError.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizedAlertError.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/PaywallData+Validation.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallData+Validation.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallData+Validation.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallData+Validation.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/PaywallSourceEnvironment.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallSourceEnvironment.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallSourceEnvironment.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallSourceEnvironment.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/PaywallTemplate.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallTemplate.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallTemplate.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallTemplate.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/PaywallViewConfiguration.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewConfiguration.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewConfiguration.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewConfiguration.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/PaywallViewMode+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewMode+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewMode+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewMode+Extensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/ProcessedLocalizedConfiguration.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProcessedLocalizedConfiguration.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProcessedLocalizedConfiguration.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProcessedLocalizedConfiguration.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/Strings.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Strings.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Strings.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Strings.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/TemplateViewConfiguration+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration+Extensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/TemplateViewConfiguration+Images.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration+Images.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration+Images.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration+Images.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/TemplateViewConfiguration.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewConfiguration.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/TestData.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TestData.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TestData.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TestData.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/UserInterfaceIdiom.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/UserInterfaceIdiom.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/UserInterfaceIdiom.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/UserInterfaceIdiom.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/Variables.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Variables.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Variables.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Variables.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Data/VirtualCurrenciesFixtures.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrenciesFixtures.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrenciesFixtures.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VirtualCurrenciesFixtures.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/AppStyleExtractor.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppStyleExtractor.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppStyleExtractor.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppStyleExtractor.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/Bundle+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Bundle+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Bundle+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Bundle+Extensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/ColorComputationHelpers.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorComputationHelpers.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorComputationHelpers.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorComputationHelpers.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/ColorInformation+MultiScheme.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorInformation+MultiScheme.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorInformation+MultiScheme.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ColorInformation+MultiScheme.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/DualColorImageGenerator.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DualColorImageGenerator.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DualColorImageGenerator.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DualColorImageGenerator.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/EmergeRenderingMode.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EmergeRenderingMode.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EmergeRenderingMode.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/EmergeRenderingMode.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/ExitOfferHelper.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ExitOfferHelper.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ExitOfferHelper.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ExitOfferHelper.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/FileImageLoader.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FileImageLoader.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FileImageLoader.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FileImageLoader.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/ImageLoader.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageLoader.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageLoader.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageLoader.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/Logger.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Logger.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Logger.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Logger.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/Optional+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Optional+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Optional+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Optional+Extensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/Package+VariableDataProvider.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Package+VariableDataProvider.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Package+VariableDataProvider.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Package+VariableDataProvider.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/PaywallData+Default.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallData+Default.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallData+Default.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallData+Default.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/PaywallWarning.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallWarning.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallWarning.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallWarning.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/PreviewHelpers.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PreviewHelpers.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PreviewHelpers.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PreviewHelpers.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/PriceFormatterExtensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PriceFormatterExtensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PriceFormatterExtensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PriceFormatterExtensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/PurchaseResultComparator.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseResultComparator.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseResultComparator.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseResultComparator.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/ResumeAction.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ResumeAction.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ResumeAction.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ResumeAction.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/RuntimeUtils.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RuntimeUtils.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RuntimeUtils.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RuntimeUtils.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/StoreProduct+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StoreProduct+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StoreProduct+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StoreProduct+Extensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/TemplateView+MultiTier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateView+MultiTier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateView+MultiTier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateView+MultiTier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Helpers/VersionDetector.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VersionDetector.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VersionDetector.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VersionDetector.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Modifiers/ConsistentPackageContentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConsistentPackageContentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConsistentPackageContentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConsistentPackageContentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Modifiers/ConsistentTierContentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConsistentTierContentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConsistentTierContentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConsistentTierContentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Modifiers/FitToAspectRatio.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FitToAspectRatio.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FitToAspectRatio.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FitToAspectRatio.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Modifiers/FooterHidingModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FooterHidingModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FooterHidingModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FooterHidingModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Modifiers/ViewExtensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ViewExtensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ViewExtensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ViewExtensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/PaywallFontProvider.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallFontProvider.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallFontProvider.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallFontProvider.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/PaywallView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Purchasing/MockPurchases.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockPurchases.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockPurchases.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MockPurchases.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Purchasing/PaywallPurchasesType.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallPurchasesType.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallPurchasesType.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallPurchasesType.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Purchasing/PurchaseHandler+TestData.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHandler+TestData.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHandler+TestData.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHandler+TestData.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Purchasing/PurchaseHandler.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHandler.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHandler.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseHandler.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/Other platforms/WatchTemplateView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/WatchTemplateView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/WatchTemplateView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/WatchTemplateView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/Template1View.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template1View.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template1View.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template1View.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/Template2View.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template2View.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template2View.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template2View.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/Template3View.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template3View.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template3View.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template3View.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/Template4View.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template4View.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template4View.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template4View.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/Template5View.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template5View.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template5View.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template5View.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/Template7View.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template7View.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template7View.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template7View.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/TemplateViewType.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewType.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewType.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateViewType.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Button/BottomSheetView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BottomSheetView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BottomSheetView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BottomSheetView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Button/ButtonComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Button/ButtonComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Carousel/CarouselComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Carousel/CarouselComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Carousel/ScrollViewGestureCoordinator.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewGestureCoordinator.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewGestureCoordinator.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScrollViewGestureCoordinator.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/ComponentsView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ComponentsView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ComponentsView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ComponentsView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Countdown/CountdownComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CountdownComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CountdownComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CountdownComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Countdown/CountdownComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CountdownComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CountdownComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CountdownComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Icon/IconComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Icon/IconComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Image/ImageComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Image/ImageComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ImageComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Packages/Package/ComponentViewState.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ComponentViewState.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ComponentViewState.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ComponentViewState.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Packages/Package/PackageComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Packages/Package/PackageComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Packages/PurchaseButton/PurchaseButtonComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Packages/PurchaseButton/PurchaseButtonComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Root/RootView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RootView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RootView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RootView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Root/RootViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RootViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RootViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RootViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Stack/FlexHStack.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexHStack.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexHStack.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexHStack.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Stack/FlexSpacer.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexSpacer.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexSpacer.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexSpacer.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Stack/FlexVStack.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexVStack.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexVStack.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FlexVStack.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Stack/JustifyContent.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/JustifyContent.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/JustifyContent.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/JustifyContent.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Stack/StackComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StackComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StackComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StackComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Stack/StackComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StackComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StackComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StackComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/StickyFooter/StickyFooterComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StickyFooterComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StickyFooterComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StickyFooterComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/StickyFooter/StickyFooterComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StickyFooterComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StickyFooterComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/StickyFooterComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabControlButtonComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlButtonComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlButtonComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlButtonComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabControlButtonComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlButtonComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlButtonComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlButtonComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabControlComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabControlComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabControlToggleComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlToggleComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlToggleComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlToggleComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabControlToggleComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlToggleComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlToggleComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabControlToggleComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabsComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabsComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Tabs/TabsPackageSelectionResolver.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsPackageSelectionResolver.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsPackageSelectionResolver.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TabsPackageSelectionResolver.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Text/TextComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TextComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TextComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TextComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Text/TextComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TextComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TextComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TextComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Timeline/TimelineComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TimelineComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TimelineComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TimelineComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Timeline/TimelineComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TimelineComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TimelineComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TimelineComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Video/VideoAutoplayHandler.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoAutoplayHandler.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoAutoplayHandler.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoAutoplayHandler.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Video/VideoComponentView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoComponentView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoComponentView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoComponentView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Video/VideoComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Video/VideoPlayerView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Video/VideoPlayerViewNSView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerViewNSView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerViewNSView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerViewNSView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Components/Video/VideoPlayerViewUIView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerViewUIView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerViewUIView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VideoPlayerViewUIView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/EnvironmentObjects/CarouselState.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselState.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselState.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CarouselState.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/EnvironmentObjects/IntroOfferEligibilityContext.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroOfferEligibilityContext.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroOfferEligibilityContext.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroOfferEligibilityContext.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/EnvironmentObjects/OpenSheet.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/OpenSheet.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/OpenSheet.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/OpenSheet.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/EnvironmentObjects/PackageContext.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageContext.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageContext.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageContext.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/EnvironmentObjects/PaywallPromoOfferCache.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallPromoOfferCache.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallPromoOfferCache.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallPromoOfferCache.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/EnvironmentObjects/ScreenCondition.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScreenCondition.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScreenCondition.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ScreenCondition.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/EnvironmentObjects/SelectedPackageId.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SelectedPackageId.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SelectedPackageId.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SelectedPackageId.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Localizations/LocaleFinder.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocaleFinder.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocaleFinder.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocaleFinder.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Localizations/LocalizationDictionaryExtensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizationDictionaryExtensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizationDictionaryExtensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizationDictionaryExtensions.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/PaywallsV2View.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallsV2View.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallsV2View.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallsV2View.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/PreviewMock.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PreviewMock.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PreviewMock.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PreviewMock.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/TemplateComponentsViewPreviews/ButtonWithFooterPreview.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonWithFooterPreview.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonWithFooterPreview.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ButtonWithFooterPreview.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/TemplateComponentsViewPreviews/ConditionalConfigurabilityPreview.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConditionalConfigurabilityPreview.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConditionalConfigurabilityPreview.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ConditionalConfigurabilityPreview.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/TemplateComponentsViewPreviews/FallbackComponentPreview.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FallbackComponentPreview.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FallbackComponentPreview.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FallbackComponentPreview.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/TemplateComponentsViewPreviews/FamilySharingTogglePreview.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FamilySharingTogglePreview.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FamilySharingTogglePreview.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FamilySharingTogglePreview.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/TemplateComponentsViewPreviews/MultiTierPreview.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MultiTierPreview.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MultiTierPreview.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/MultiTierPreview.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/TemplateComponentsViewPreviews/PurchaseButtonInPackagePreview.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonInPackagePreview.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonInPackagePreview.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButtonInPackagePreview.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Previews/TemplateComponentsViewPreviews/Template1Preview.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template1Preview.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template1Preview.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Template1Preview.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/Variables/VariableHandlerV2.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VariableHandlerV2.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VariableHandlerV2.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/VariableHandlerV2.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/ApplySizing.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ApplySizing.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ApplySizing.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ApplySizing.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/BackgroundStyle.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BackgroundStyle.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BackgroundStyle.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BackgroundStyle.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/BadgeModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BadgeModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BadgeModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/BadgeModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/DisplayableColor.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DisplayableColor.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DisplayableColor.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DisplayableColor.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/Fill.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Fill.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Fill.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Fill.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/FixMacButtonsModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FixMacButtonsModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FixMacButtonsModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FixMacButtonsModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/ForegroundColorScheme.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ForegroundColorScheme.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ForegroundColorScheme.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ForegroundColorScheme.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/NavigatetoURL.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NavigatetoURL.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NavigatetoURL.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/NavigatetoURL.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/ProgressViewModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProgressViewModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProgressViewModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProgressViewModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/ShadowModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ShadowModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ShadowModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ShadowModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/Shape.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Shape.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Shape.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/Shape.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/SizeModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SizeModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SizeModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SizeModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewHelpers/TransitionModifier.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TransitionModifier.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TransitionModifier.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TransitionModifier.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewModelHelpers/LocalizationProvider.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizationProvider.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizationProvider.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LocalizationProvider.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewModelHelpers/PackageValidator.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageValidator.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageValidator.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageValidator.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewModelHelpers/PaywallComponentTypeTransformers.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallComponentTypeTransformers.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallComponentTypeTransformers.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallComponentTypeTransformers.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewModelHelpers/PaywallComponentViewModel.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallComponentViewModel.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallComponentViewModel.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallComponentViewModel.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewModelHelpers/PresentedPartials.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PresentedPartials.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PresentedPartials.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PresentedPartials.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewModelHelpers/UIConfigProvider.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/UIConfigProvider.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/UIConfigProvider.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/UIConfigProvider.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Templates/V2/ViewModelHelpers/ViewModelFactory.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ViewModelFactory.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ViewModelFactory.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ViewModelFactory.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/UIKit/PaywallFooterViewController.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallFooterViewController.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallFooterViewController.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallFooterViewController.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/UIKit/PaywallViewController.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewController.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewController.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PaywallViewController.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/View+OnRedeemWebPurchaseAttempt.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+OnRedeemWebPurchaseAttempt.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+OnRedeemWebPurchaseAttempt.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+OnRedeemWebPurchaseAttempt.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/View+PresentPaywall.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentPaywall.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentPaywall.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentPaywall.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/View+PresentPaywallFooter.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentPaywallFooter.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentPaywallFooter.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PresentPaywallFooter.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/View+PurchaseRestoreCompleted.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PurchaseRestoreCompleted.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PurchaseRestoreCompleted.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/View+PurchaseRestoreCompleted.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/AsyncButton.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AsyncButton.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AsyncButton.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AsyncButton.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/CompatibilityContentUnavailableView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityContentUnavailableView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityContentUnavailableView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/CompatibilityContentUnavailableView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/DebugErrorView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DebugErrorView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DebugErrorView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DebugErrorView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/DefaultPaywall/AppIconDetailProvider.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppIconDetailProvider.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppIconDetailProvider.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/AppIconDetailProvider.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/DefaultPaywall/DefaultPaywallPreviews.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallPreviews.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallPreviews.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallPreviews.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/DefaultPaywall/DefaultPaywallView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/DefaultPaywall/DefaultPaywallWarning.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallWarning.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallWarning.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultPaywallWarning.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/DefaultPaywall/DefaultProductCell.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultProductCell.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultProductCell.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/DefaultProductCell.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/ErrorDisplay.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ErrorDisplay.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ErrorDisplay.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ErrorDisplay.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/ErrorView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ErrorView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ErrorView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ErrorView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/FooterView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FooterView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FooterView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/FooterView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/GradientView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/GradientView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/GradientView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/GradientView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/IconView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IconView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/IntroEligibilityStateView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroEligibilityStateView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroEligibilityStateView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/IntroEligibilityStateView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/LoadingPaywallView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LoadingPaywallView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LoadingPaywallView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/LoadingPaywallView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/PackageButtonStyle.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageButtonStyle.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageButtonStyle.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PackageButtonStyle.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/ProgressView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProgressView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProgressView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/ProgressView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/PurchaseButton.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButton.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButton.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/PurchaseButton.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/RemoteImage.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RemoteImage.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RemoteImage.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/RemoteImage.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/SafariView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SafariView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SafariView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/SafariView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/TemplateBackgroundImageView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateBackgroundImageView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateBackgroundImageView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplateBackgroundImageView.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/TemplatePackageSetting.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplatePackageSetting.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplatePackageSetting.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TemplatePackageSetting.o"
+  },
+  "/Users/egor/screenblock/ios/Pods/RevenueCatUI/RevenueCatUI/Views/TierSelectorView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TierSelectorView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TierSelectorView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/RevenueCatUI.build/Objects-normal/arm64/TierSelectorView.o"
+  }
+}

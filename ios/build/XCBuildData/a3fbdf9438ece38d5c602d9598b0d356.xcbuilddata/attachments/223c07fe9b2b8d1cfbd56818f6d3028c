@@ -1,0 +1,4 @@
+
+module RevenueCatUI.Swift {
+  header "RevenueCatUI-Swift.h"
+}

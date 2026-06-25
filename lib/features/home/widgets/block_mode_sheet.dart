@@ -2,11 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/platform/ios_blocking_service.dart';
 import '../../../providers/blocking_service_provider.dart';
+import '../../../providers/premium_provider.dart';
+import '../../paywall/feature_paywall_screen.dart';
 import '../home_viewmodel.dart';
 import 'app_list_sheet.dart';
 
@@ -42,8 +45,8 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundCard,
+      decoration:  BoxDecoration(
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
         ),
@@ -74,7 +77,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       width: 40,
       height: 4,
       decoration: BoxDecoration(
-        color: AppColors.border,
+        color: AppColors.border(context),
         borderRadius: BorderRadius.circular(2),
       ),
     );
@@ -93,10 +96,10 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle,
+        color: AppColors.backgroundSubtle(context),
         borderRadius: BorderRadius.circular(50),
         border: Border.all(
-          color: AppColors.border,
+          color: AppColors.border(context),
           width: 0.5,
         ),
       ),
@@ -104,9 +107,24 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
         children: [
           _segmentButton(
             label: 'All Apps',
+            badge: "Pro",
             isActive: _isAllApps,
-            onTap: () => setState(() =>
-            _selectedMode = AppConstants.blockingTypeAllApps),
+            onTap: () {
+              // 👇 gate — all apps is premium only
+              final isPremium = ref.read(isPremiumProvider);
+              if (!isPremium) {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  useRootNavigator: true,
+                  builder: (_) => const FeaturePaywallScreen(),
+                );
+                return;
+              }
+              setState(() => _selectedMode = AppConstants.blockingTypeAllApps);
+            },
           ),
           _segmentButton(
             label: 'Specific Apps',
@@ -124,6 +142,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
     required String label,
     required bool isActive,
     required VoidCallback onTap,
+    String? badge,
   }) {
     return Expanded(
       child: GestureDetector(
@@ -133,19 +152,49 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
           padding: const EdgeInsets.symmetric(vertical: 11),
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.gold
+                ? AppColors.gold(context)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(50),
           ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.labelMedium.copyWith(
-              color: isActive
-                  ? AppColors.goldText
-                  : AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: isActive
+                      ? AppColors.goldText(context)
+                      : AppColors.textSecondary(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (badge != null) ...[
+                const SizedBox(width: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? AppColors.goldText(context).withValues(alpha: 0.15)
+                        : AppColors.gold(context).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    badge,
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: isActive
+                          ? AppColors.goldText(context)
+                          : AppColors.gold(context),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -168,10 +217,10 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle,
+          color: AppColors.backgroundSubtle(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.border,
+            color: AppColors.border(context),
             width: 0.5,
           ),
         ),
@@ -197,7 +246,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.gold
+                            color: AppColors.gold(context)
                                 .withOpacity(0.15),
                             borderRadius:
                             BorderRadius.circular(50),
@@ -206,7 +255,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                             '$count',
                             style: AppTextStyles.bodySmall
                                 .copyWith(
-                              color: AppColors.gold,
+                              color: AppColors.gold(context),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -222,9 +271,9 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                 ],
               ),
             ),
-            const Icon(
+             Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondary(context),
               size: 20,
             ),
           ],
@@ -269,35 +318,28 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       final service = ref.read(blockingServiceProvider)
       as IOSBlockingService;
 
-      // save mode first
       final count = await service.showAppPicker(
         blockingMode: isAllApps
             ? AppConstants.blockingTypeAllApps
             : AppConstants.blockingTypeSpecificApps,
       );
 
-      if (mounted && (count ?? 0) > 0) {
-        setState(() {
-          final placeholders = List.generate(
-            count!,
-                (i) => 'ios_app_$i',
-          );
-          if (isAllApps) {
-            _allowedApps = placeholders;
-          } else {
-            _blockedApps = placeholders;
-          }
-        });
+      if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${count} app${count == 1 ? '' : 's'} selected',
-            ),
-            backgroundColor: AppColors.backgroundCard,
-          ),
+      // 👇 always update state regardless of count
+      setState(() {
+        final placeholders = List.generate(
+          count ?? 0,
+              (i) => 'ios_app_$i',
         );
-      }
+        if (isAllApps) {
+          _allowedApps = placeholders;
+        } else {
+          _blockedApps = placeholders;
+        }
+      });
+
+
     } catch (e) {
       debugPrint('❌ iOS app picker error: $e');
     }
@@ -310,8 +352,8 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       child: ElevatedButton(
         onPressed: _onSetMode,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold,
-          foregroundColor: AppColors.goldText,
+          backgroundColor: AppColors.gold(context),
+          foregroundColor: AppColors.goldText(context),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: const StadiumBorder(),
           textStyle: AppTextStyles.labelLarge,

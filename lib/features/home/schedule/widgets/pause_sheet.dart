@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import 'hold_to_confirm.dart';
 
 class PauseScheduleSheet extends StatefulWidget {
   final VoidCallback onResume; // resume immediately
@@ -158,26 +159,11 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
             // pause button
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
+              child: HoldToConfirmButton(
+                onConfirmed: () {
                   Navigator.pop(context);
                   widget.onPause(_selectedMinutes.round());
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: const StadiumBorder(),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                child: Text('Pause',
-                  style: TextStyle(
-                  color: Colors.black,
-                    fontSize: 17
-                ),),
               ),
             ),
           ] else ...[

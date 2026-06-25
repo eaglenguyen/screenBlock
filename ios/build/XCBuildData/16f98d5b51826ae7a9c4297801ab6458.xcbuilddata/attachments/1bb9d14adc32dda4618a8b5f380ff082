@@ -1,0 +1,51 @@
+{
+  "" : {
+    "const-values" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/purchases_ui_flutter-primary.swiftconstvalues",
+    "dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/purchases_ui_flutter-primary.d",
+    "diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/purchases_ui_flutter-primary.dia",
+    "emit-module-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/purchases_ui_flutter-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/purchases_ui_flutter-primary-emit-module.dia",
+    "pch" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/purchases_ui_flutter-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/purchases_ui_flutter-primary.swiftdeps"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/Helpers/PresentedOfferingContext+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PresentedOfferingContext+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PresentedOfferingContext+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PresentedOfferingContext+Extensions.o"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/Helpers/UIView+Extensions.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/UIView+Extensions.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/UIView+Extensions.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/UIView+Extensions.o"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/Helpers/ViewControllerWrapper.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/ViewControllerWrapper.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/ViewControllerWrapper.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/ViewControllerWrapper.o"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/PurchasesUiCustomerCenterView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiCustomerCenterView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiCustomerCenterView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiCustomerCenterView.o"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/PurchasesUiFlutterPlugin.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiFlutterPlugin.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiFlutterPlugin.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiFlutterPlugin.o"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/PurchasesUiPaywallFooterView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiPaywallFooterView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiPaywallFooterView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiPaywallFooterView.o"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/PurchasesUiPaywallView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiPaywallView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiPaywallView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/PurchasesUiPaywallView.o"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/purchases_ui_flutter-9.16.1/ios/purchases_ui_flutter/Sources/purchases_ui_flutter/UnsupportedPlatformView.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/UnsupportedPlatformView.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/UnsupportedPlatformView.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/purchases_ui_flutter.build/Objects-normal/arm64/UnsupportedPlatformView.o"
+  }
+}

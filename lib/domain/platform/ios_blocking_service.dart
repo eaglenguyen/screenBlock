@@ -6,7 +6,7 @@ import 'blocking_service.dart';
 class IOSBlockingService implements BlockingService {
 
   static const _channel = MethodChannel(
-    'com.eagle.screenblock/ios_blocking',
+    'com.eagle.pausenow/ios_blocking',
   );
 
   final _eventController =
@@ -49,11 +49,12 @@ class IOSBlockingService implements BlockingService {
   Future<void> startMonitoring(
       String packageName,
       int limitMinutes, [
-      String sessionType = 'manual'
+      String sessionType = 'manual',
+      String blockingMode = 'specific_apps',
       ]) async {
     await _channel.invokeMethod('startBlocking', {
       'packageNames': [packageName],
-      'blockingMode': 'specific_apps',
+      'blockingMode': blockingMode,
       'limitMinutes': limitMinutes,
       'sessionType': sessionType,
     });

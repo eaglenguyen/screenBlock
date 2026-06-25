@@ -23,19 +23,43 @@ class ScheduleViewModel extends _$ScheduleViewModel {
 
   void loadSchedules() {
     try {
-      final schedules = _box.values.toList();
-      state = state.copyWith(
-        schedules: schedules,
-        isLoading: false,
-      );
-      ScheduleChecker.instance.checkNow(); // 👈 move here
+      final allSchedules = _box.values.toList();
+      final order = _getOrder();
 
-    } catch (e) {
+      List<Schedule> ordered;
+
+      if (order.isEmpty) {
+        ordered = allSchedules;
+      } else {
+        // 👇 safely sort — skip any IDs that no longer exist in Hive
+        final orderedById = {for (final s in allSchedules) s.id: s};
+        ordered = [
+          // first: schedules that exist in saved order
+          ...order
+              .where((id) => orderedById.containsKey(id))
+              .map((id) => orderedById[id]!),
+          // then: any new schedules not in saved order yet
+          ...allSchedules.where((s) => !order.contains(s.id)),
+        ];
+      }
+
+      // 👇 clean up order — remove deleted IDs
+      _saveOrderFromList(ordered);
+
       state = state.copyWith(
+        schedules: ordered,
         isLoading: false,
-        error: e.toString(),
       );
+      ScheduleChecker.instance.checkNow();
+    } catch (e) {
+      debugPrint('❌ loadSchedules error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  void _saveOrderFromList(List<Schedule> schedules) {
+    final box = Hive.box(HiveBoxNames.settings);
+    box.put('scheduleOrder', schedules.map((s) => s.id).toList());
   }
 
   Future<void> saveSchedule({
@@ -62,12 +86,12 @@ class ScheduleViewModel extends _$ScheduleViewModel {
 
       await _box.put(schedule.id, schedule);
 
-      debugPrint('📅 Saved schedule: ${schedule.name} id=${schedule.id}');
-      debugPrint('📅 Box now has ${_box.length} schedules');
 
-      // trigger checker immediately after save
-      // ScheduleChecker.instance.checkNow();
-
+      if (ScheduleChecker.instance.activeScheduleId == schedule.id) {
+        debugPrint('📅 Active schedule updated — restarting blocking');
+        await ScheduleChecker.instance.restartActiveSchedule(schedule);
+      }
+      _saveOrder();
       loadSchedules();
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -88,4 +112,27 @@ class ScheduleViewModel extends _$ScheduleViewModel {
 
     loadSchedules();
   }
+
+  // Reordering list
+
+
+  List<String> _getOrder() {
+    final box = Hive.box(HiveBoxNames.settings);
+    return List<String>.from(box.get('scheduleOrder', defaultValue: <String>[]));
+  }
+
+  void _saveOrder() {
+    _saveOrderFromList(state.schedules);
+  }
+
+  void reorderSchedules(int oldIndex, int newIndex) {
+    final schedules = List<Schedule>.from(state.schedules);
+    if (newIndex > oldIndex) newIndex--;
+    final item = schedules.removeAt(oldIndex);
+    schedules.insert(newIndex, item);
+    state = state.copyWith(schedules: schedules);
+    final box = Hive.box(HiveBoxNames.settings);
+    box.put('scheduleOrder', schedules.map((s) => s.id).toList());
+  }
+
 }

@@ -27,7 +27,7 @@ class CountdownCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: AppColors.border,
+          color: AppColors.border(context),
           width: 0.5,
         ),
       ),

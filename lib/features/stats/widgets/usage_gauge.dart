@@ -1,8 +1,8 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../stats_state.dart';
 
 class UsageGauge extends StatefulWidget {
@@ -97,9 +97,9 @@ class _UsageGaugeState extends State<UsageGauge>
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border, width: 0.5),
+        border: Border.all(color: AppColors.border(context), width: 0.5),
       ),
       child: Row(
         children: [
@@ -131,17 +131,100 @@ class _UsageGaugeState extends State<UsageGauge>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // screen time stat
-                _statRow(
-                  label: 'Screen Time',
-                  value: widget.state.formattedTotal,
-                  goal: widget.state.formattedGoal,
-                  color: _outerColor,
-                  suffix: widget.state.isOverGoal
-                      ? '+${_formatOverage()} over'
-                      : '${widget.state.percentLeft}% left',
-                  isOverGoal: widget.state.isOverGoal,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: _statRow(
+                        label: 'Screen Time',
+                        value: widget.state.totalUsage > Duration.zero
+                            ? widget.state.formattedTotal
+                            : '--',
+                        goal: widget.state.formattedGoal,
+                        color: _outerColor,
+                        suffix: widget.state.totalUsage > Duration.zero
+                            ? widget.state.isOverGoal
+                            ? '+${_formatOverage()} over'
+                            : '${widget.state.percentLeft}% left'
+                            : '0% of goal',
+                        isOverGoal: widget.state.isOverGoal,
+                      ),
+                    ),
+                    if (Platform.isIOS) // 👈 only show on iOS
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              backgroundColor: AppColors.backgroundCard(context),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('❤️', style: TextStyle(fontSize: 36)),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Screen Time Ring',
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary(context),
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Coming soon to iOS!',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary(context),
+                                      fontSize: 13,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.gold(context),
+                                      foregroundColor: AppColors.goldText(context),
+                                      shape: const StadiumBorder(),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                    ),
+                                    child: const Text('Got it',
+                                        style: TextStyle(fontWeight: FontWeight.w700)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          margin: const EdgeInsets.only(left: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundSubtle(context),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.border(context),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.question_mark_rounded,
+                            color: AppColors.textSecondary(context),
+                            size: 12,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-
                 const SizedBox(height: 6),
                 Container(
                   height: 0.5,

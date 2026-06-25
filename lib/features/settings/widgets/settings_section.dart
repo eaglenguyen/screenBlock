@@ -42,7 +42,7 @@ class SettingsSection extends StatelessWidget {
           child: Text(
             label.toUpperCase(),
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondary(context),
               letterSpacing: 0.1,
               fontSize: 14
             ),
@@ -50,10 +50,10 @@ class SettingsSection extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.backgroundCard,
+            color: AppColors.backgroundCard(context),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.border,
+              color: AppColors.border(context),
               width: 0.5,
             ),
           ),
@@ -63,12 +63,12 @@ class SettingsSection extends StatelessWidget {
               final isLast = index == rows.length - 1;
               return Column(
                 children: [
-                  _buildRow(row),
+                  _buildRow(row,context),
                   if (!isLast)
                     Divider(
                       height: 0.5,
                       thickness: 0.5,
-                      color: AppColors.border,
+                      color: AppColors.border(context),
                       indent: 16,
                       endIndent: 16,
                     ),
@@ -81,7 +81,7 @@ class SettingsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(SettingsRow row) {
+  Widget _buildRow(SettingsRow row, BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -103,15 +103,15 @@ class SettingsSection extends StatelessWidget {
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: row.isDanger
-                        ? AppColors.error
-                        : AppColors.textPrimary,
+                        ? AppColors.error(context)
+                        : AppColors.textPrimary(context),
                   ),
                 ),
               ),
               row.trailing ??
-                  const Icon(
+                   Icon(
                     Icons.chevron_right_rounded,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textSecondary(context),
                     size: 20,
                   ),
             ],

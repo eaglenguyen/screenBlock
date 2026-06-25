@@ -110,10 +110,10 @@ class _TimerCardState extends State<TimerCard>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.border,
+          color: AppColors.border(context),
           width: 0.5,
         ),
       ),
@@ -140,7 +140,7 @@ class _TimerCardState extends State<TimerCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle,
+        color: AppColors.backgroundSubtle(context),
         borderRadius: BorderRadius.circular(50),
       ),
       child: Text(
@@ -176,10 +176,10 @@ class _TimerCardState extends State<TimerCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle,
+        color: AppColors.backgroundSubtle(context),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: AppColors.border,
+          color: AppColors.border(context),
           width: 0.5,
         ),
       ),
@@ -200,7 +200,7 @@ class _TimerCardState extends State<TimerCard>
                 key: ValueKey(value),
                 style: AppTextStyles.displayMedium.copyWith(
                   fontSize: 48,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondary(context),
                 ),
               ),
             ),
@@ -219,7 +219,7 @@ class _TimerCardState extends State<TimerCard>
         ':',
         style: AppTextStyles.displayMedium.copyWith(
           fontSize: 28,
-          color: AppColors.border,
+          color: AppColors.border(context),
         ),
       ),
     );
@@ -245,7 +245,7 @@ class _TimerCardState extends State<TimerCard>
             label: widget.selectedMinutes < 60
                 ? '${widget.selectedMinutes}m'
                 : '${widget.selectedMinutes ~/ 60}h',
-            iconColor: AppColors.gold,
+            iconColor: AppColors.gold(context),
             onTap: widget.onTimerTapped,
           ),
         ),
@@ -264,9 +264,9 @@ class _TimerCardState extends State<TimerCard>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle,
+          color: AppColors.backgroundSubtle(context),
           borderRadius: BorderRadius.circular(50),
-          border: Border.all(color: AppColors.border, width: 0.5),
+          border: Border.all(color: AppColors.border(context), width: 0.5),
         ),
         child: Row(
           children: [
@@ -275,9 +275,9 @@ class _TimerCardState extends State<TimerCard>
             Expanded(
               child: Text(label, style: AppTextStyles.labelMedium),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondary(context),
               size: 16,
             ),
           ],
@@ -291,15 +291,15 @@ class _TimerCardState extends State<TimerCard>
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: widget.onBlockNow,
-        icon: const Icon(
+        icon: Icon(
           Icons.play_arrow_rounded,
-          color: AppColors.goldText,
+          color: AppColors.goldText(context),
           size: 30,
         ),
         label: const Text('Block Now'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold,
-          foregroundColor: AppColors.goldText,
+          backgroundColor: AppColors.gold(context),
+          foregroundColor: AppColors.goldText(context),
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: const StadiumBorder(),
           textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 25),

@@ -16,225 +16,151 @@ const ChatMessage namePrompt2 = ChatMessage(
   text: 'what should we call you?',
 );
 
-// main chat steps — name injected at runtime
 List<ChatStep> getOnboardingSteps(String name) => [
-  // Screen 1 — The Hook (uses name)
+  // Step 0 — Ask for name
   ChatStep(
     botMessages: [
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'Hey there $name ! 👋 real quick...',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'does this sound familiar?',
-      ),
-      ChatMessage(type: MessageType.bot, text: 'you wake up'),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'and your phone is already in your hand',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'before you even think',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'before you even breathe',
-      ),
+      ChatMessage(type: MessageType.bot, text: 'hey welcome!'),
+      ChatMessage(type: MessageType.bot, text: 'before we dive in...'),
+      ChatMessage(type: MessageType.bot, text: 'what\'s your name?'),
+    ],
+    userResponses: [], // 👈 empty — triggers text input instead of choices
+    isNameInput: true, // 👈 flag to show text field
+  ),
+  // Screen 1 — The Observation
+  ChatStep(
+    botMessages: [
+      ChatMessage(type: MessageType.bot, text: 'hey $name 👋'),
+      ChatMessage(type: MessageType.bot, text: 'quick question'),
+      ChatMessage(type: MessageType.bot, text: 'when was the last time'),
+      ChatMessage(type: MessageType.bot, text: 'you sat down'),
+      ChatMessage(type: MessageType.bot, text: 'and did absolutely nothing'),
+      ChatMessage(type: MessageType.bot, text: 'no phone. no music.'),
     ],
     userResponses: [
-      'ok yes 💀',
-      'caught me',
-      'every single morning',
+      'honestly can\'t remember 😅',
+      'that sounds uncomfortable',
+      'does sleeping count?',
     ],
   ),
 
-  // Screen 2 — Twist the Knife
+  // Screen 2 — The Reality
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'and at night'),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'you open TikTok for "just a second"',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'next thing you know',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'it\'s been 2 hours',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'you finally put it down',
-      ),
-      ChatMessage(type: MessageType.bot, text: 'you feel drained'),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'like your brain just ran a marathon',
-      ),
+      ChatMessage(type: MessageType.bot, text: 'that discomfort you just felt'),
+      ChatMessage(type: MessageType.bot, text: 'reading that question'),
+      ChatMessage(type: MessageType.bot, text: 'that\'s the problem'),
+      ChatMessage(type: MessageType.bot, text: 'we\'ve been trained to fill every second'),
+      ChatMessage(type: MessageType.bot, text: 'waiting in line → phone out'),
+      ChatMessage(type: MessageType.bot, text: 'ad break → phone out'),
+      ChatMessage(type: MessageType.bot, text: 'waking up → phone out'),
+      ChatMessage(type: MessageType.bot, text: 'silence feels wrong now'),
     ],
     userResponses: [
-      'why does this hit 😭',
-      'that emptiness is real',
-      'ok stop',
+      'ok that\'s too real 😬',
+      'i never noticed that',
+      'yep that\'s me',
     ],
   ),
 
-  // Screen 3 — Name It
+  // Screen 3 — The Reframe
   ChatStep(
     botMessages: [
+      ChatMessage(type: MessageType.bot, text: 'but here\'s what nobody talks about'),
+      ChatMessage(type: MessageType.bot, text: 'the most focused people alive'),
+      ChatMessage(type: MessageType.bot, text: 'don\'t have more willpower than you'),
+      ChatMessage(type: MessageType.bot, text: 'they just built a different relationship'),
+      ChatMessage(type: MessageType.bot, text: 'with their attention'),
       ChatMessage(
         type: MessageType.bot,
-        text: 'that feeling has a name',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'living on autopilot',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'every time you pick up your phone without thinking',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'your brain learns something...',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'a habit, a routine',
-        textColor: Color(0xFFEF5350),
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'that your actions don\'t matter',
-        textColor: Color(0xFFEF5350),
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'that\'s why it feels bad',
-      ),
-    ],
-    userResponses: [
-      'that\'s deep 😳',
-      'ok that hurt',
-    ],
-  ),
-
-  // Screen 4 — Absolve Them
-  ChatStep(
-    botMessages: [
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'but here\'s the thing',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'it\'s not a willpower problem',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'screentime limits → you ignore them',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'app blockers → you delete them',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'none of those fix the real problem',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'you never broke the habit and built a healthy ritual',
-        textColor: Color(0xFF4CAF50),
-      ),
-    ],
-    userResponses: [
-      'wait what',
-      'a ritual? 👀',
-      'i\'m listening',
-    ],
-  ),
-
-  // Screen 5 — The Reframe
-  ChatStep(
-    botMessages: [
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'the most intentional people in the world',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'athletes. CEOs. monks.',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'they all have one thing in common',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'they protect their morning',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'they reflect on their night',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'they decide who they are every single day',
+        text: 'they choose when to engage.',
         textColor: Color(0xFF4CAF50),
       ),
       ChatMessage(
         type: MessageType.bot,
-        text: 'your phone should help you do that',
+        text: 'instead of reacting automatically.',
+        textColor: Color(0xFF4CAF50),
       ),
     ],
     userResponses: [
-      'ok I want that 🙏',
+      'i want that',
+      'how do i get there?',
       'that makes sense',
+    ],
+  ),
+
+  // Screen 4 — The Science
+  ChatStep(
+    botMessages: [
+      ChatMessage(type: MessageType.bot, text: 'your brain is incredibly adaptable'),
+      ChatMessage(type: MessageType.bot, text: 'every time you pause before opening an app'),
+      ChatMessage(type: MessageType.bot, text: 'you\'re rewiring something'),
+      ChatMessage(type: MessageType.bot, text: 'a tiny signal that says'),
+      ChatMessage(
+        type: MessageType.bot,
+        text: 'I am in control here.',
+        textColor: Color(0xFFEDB82A),
+      ),
+      ChatMessage(type: MessageType.bot, text: 'do that enough times'),
+      ChatMessage(type: MessageType.bot, text: 'and it becomes who you are'),
+    ],
+    userResponses: [
+      'ok I\'m convinced 🧠',
+      'that actually makes sense',
+      'so how does pause now help?',
+    ],
+  ),
+
+  // Screen 5 — The Solution
+  ChatStep(
+    botMessages: [
+      ChatMessage(type: MessageType.bot, text: 'that\'s exactly what Pause Now is for'),
+      ChatMessage(type: MessageType.bot, text: 'not to punish you'),
+      ChatMessage(type: MessageType.bot, text: 'not to restrict you forever'),
+      ChatMessage(type: MessageType.bot, text: 'but to create space'),
+      ChatMessage(type: MessageType.bot, text: 'between the urge'),
+      ChatMessage(type: MessageType.bot, text: 'and the action'),
+      ChatMessage(
+        type: MessageType.bot,
+        text: 'that space is where discipline lives.',
+        textColor: Color(0xFFEDB82A),
+      ),
+    ],
+    userResponses: [
+      'that\'s actually beautiful 🙏',
+      'ok I get it now',
     ],
   ),
 
   // Screen 6 — Social Proof
   ChatStep(
     botMessages: [
+      ChatMessage(type: MessageType.bot, text: 'people are already feeling the difference'),
       ChatMessage(
-        type: MessageType.bot,
-        text: 'some people are already doing it',
+        type: MessageType.review,
+        text: '★★★★★\n"I finally feel like I\'m living with intention"\n— Alex, 26',
       ),
       ChatMessage(
         type: MessageType.review,
-        text:
-        '★★★★★\n"I actually look forward to my morning now"\n— Maya, 24',
+        text: '★★★★★\n"Two weeks in and my mornings are completely different"\n— Priya, 23',
       ),
       ChatMessage(
         type: MessageType.review,
-        text:
-        '★★★★★\n"First thing I do isn\'t Instagram anymore. It\'s me."\n— Jordan, 27',
+        text: '★★★★★\n"It\'s not about blocking apps, it\'s about reclaiming yourself"\n— Marcus, 29',
       ),
-      ChatMessage(
-        type: MessageType.review,
-        text:
-        '★★★★★\n"Didn\'t know I needed this until I tried it"\n— Chris, 22',
-      ),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'want to see how it works?',
-      ),
+      ChatMessage(type: MessageType.bot, text: 'ready to take control of your life?'),
     ],
-    userResponses: ['show me 🙌'],
+    userResponses: ['Yes!'],
   ),
+
   // Screen 7 — Demo intro
   ChatStep(
     botMessages: [
       ChatMessage(
         type: MessageType.bot,
-        text: 'Sure, here is a 3 step demo of how the app works!',
+        text: 'let\'s get to know you a bit more!',
       ),
     ],
-    userResponses: ['Nice!'],
+    userResponses: ['Sure'],
   ),
 ];

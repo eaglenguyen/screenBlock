@@ -13,7 +13,7 @@ class _OverlayScreenState extends State<OverlayScreen>
     with TickerProviderStateMixin {
 
   static const _blockChannel = MethodChannel(
-    'com.eagle.screenblock/block',
+    'com.eagle.pausenow/block',
   );
 
   // ── Animation controllers ────────────────────────
@@ -45,6 +45,13 @@ class _OverlayScreenState extends State<OverlayScreen>
     _startCountdown();
     _startBreatheTimer();
     HapticFeedback.mediumImpact();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('🟡 OverlayScreen first frame rendered');
+      _blockChannel.invokeMethod('blockScreenReady');
+    });
+
+
   }
 
   @override

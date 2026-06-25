@@ -1,7 +1,7 @@
 // Hive Implementation
 
 import 'package:hive/hive.dart';
-import 'package:screenblock/data/repositories/BlockingRepo.dart';
+import 'package:pausenow/data/repositories/BlockingRepo.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../models/timer_config.dart';

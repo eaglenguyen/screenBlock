@@ -1,0 +1,23 @@
+{
+  "version": 0,
+  "use-external-names": false,
+  "case-sensitive": false,
+  "roots": [{
+    "type": "directory",
+    "name": "/Users/egor/screenblock/ios/build/Release-iphoneos/PurchasesHybridCommonUI/PurchasesHybridCommonUI.framework/Modules",
+    "contents": [{
+      "type": "file",
+      "name": "module.modulemap",
+      "external-contents": "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    "type": "directory",
+    "name": "/Users/egor/screenblock/ios/build/Release-iphoneos/PurchasesHybridCommonUI/PurchasesHybridCommonUI.framework/Headers",
+    "contents": [{
+      "type": "file",
+      "name": "PurchasesHybridCommonUI-Swift.h",
+      "external-contents": "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/PurchasesHybridCommonUI.build/unextended-interface-header.h",
+    }]
+  }]
+}

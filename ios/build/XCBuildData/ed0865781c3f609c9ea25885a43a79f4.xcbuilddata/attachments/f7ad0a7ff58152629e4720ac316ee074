@@ -1,0 +1,5 @@
+ extern const unsigned char haptic_feedbackVersionString[];
+ extern const double haptic_feedbackVersionNumber;
+
+ const unsigned char haptic_feedbackVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:haptic_feedback  PROJECT:Pods-1" "\n";
+ const double haptic_feedbackVersionNumber __attribute__ ((used)) = (double)1.;

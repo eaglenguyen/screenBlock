@@ -21,7 +21,7 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
 
   late int _selected;
 
-  final List<int> _presets = [1, 10, 15, 30, 45, 60];
+  final List<int> _presets = [5, 15, 30, 60, 90, 120];
 
   @override
   void initState() {
@@ -33,8 +33,8 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundCard,
+      decoration:  BoxDecoration(
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
         ),
@@ -60,7 +60,7 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
       width: 40,
       height: 4,
       decoration: BoxDecoration(
-        color: AppColors.border,
+        color: AppColors.border(context),
         borderRadius: BorderRadius.circular(2),
       ),
     );
@@ -107,13 +107,13 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.gold
-                  : AppColors.backgroundSubtle,
+                  ? AppColors.gold(context)
+                  : AppColors.backgroundSubtle(context),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isSelected
-                    ? AppColors.gold
-                    : AppColors.border,
+                    ? AppColors.gold(context)
+                    : AppColors.border(context),
                 width: isSelected ? 0 : 0.5,
               ),
             ),
@@ -123,8 +123,8 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
                 style: AppTextStyles.headlineSmall.copyWith(
                   fontSize: 16,
                   color: isSelected
-                      ? AppColors.goldText
-                      : AppColors.textPrimary,
+                      ? AppColors.goldText(context)
+                      : AppColors.textPrimary(context),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -150,8 +150,8 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
           Navigator.pop(context);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold,
-          foregroundColor: AppColors.goldText,
+          backgroundColor: AppColors.gold(context),
+          foregroundColor: AppColors.goldText(context),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: const StadiumBorder(),
           textStyle: AppTextStyles.labelLarge,

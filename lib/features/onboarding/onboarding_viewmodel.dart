@@ -12,9 +12,10 @@ class OnboardingViewModel extends _$OnboardingViewModel {
 
   @override
   OnboardingState build() {
-    return const OnboardingState();
+    final box = Hive.box(HiveBoxNames.settings);
+    final savedName = box.get('userName', defaultValue: '') as String;
+    return OnboardingState(userName: savedName.isEmpty ? null : savedName);
   }
-
   BlockingService get _service => ref.read(blockingServiceProvider);
 
   // ── Navigation ───────────────────────────────────
@@ -25,6 +26,9 @@ class OnboardingViewModel extends _$OnboardingViewModel {
   // ── Personalization setters ───────────────────────
   void setUserName(String name) {
     state = state.copyWith(userName: name.trim());
+    // 👇 persist immediately
+    final box = Hive.box(HiveBoxNames.settings);
+    box.put('userName', name.trim());
   }
 
   void setDailyScreenTime(String range) {

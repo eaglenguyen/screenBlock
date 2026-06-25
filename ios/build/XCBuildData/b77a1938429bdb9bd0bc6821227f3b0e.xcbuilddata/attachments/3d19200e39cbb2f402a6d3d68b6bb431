@@ -1,0 +1,4 @@
+
+module haptic_feedback.Swift {
+  header "haptic_feedback-Swift.h"
+}

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:screenblock/data/repositoryImpl/BlockingRepoImpl.dart';
-import 'package:screenblock/data/repositoryImpl/UsageStreakRepo.dart';
+import 'package:pausenow/data/repositoryImpl/BlockingRepoImpl.dart';
+import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
 
 import '../data/repositories/BlockingRepo.dart';
 import '../data/repositoryImpl/block_session_repository.dart';

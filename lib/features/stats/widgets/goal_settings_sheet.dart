@@ -157,6 +157,130 @@ class _GoalSliderSheetState extends State<_GoalSliderSheet> {
     _selectedHours = widget.initialHours;
   }
 
+  void _showSaveConfirmation(BuildContext context) {
+    final confirmController = TextEditingController();
+    const confirmWord = 'CONFIRM';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E1E35),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Change ${widget.title}?',
+            style: AppTextStyles.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'New limit: $_formattedLabel per day',
+                style: TextStyle(
+                  color: widget.accentColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Type CONFIRM to save this change:',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 13,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: confirmController,
+                style: const TextStyle(color: Colors.white),
+                autofocus: true,
+                textCapitalization: TextCapitalization.characters,
+                decoration: InputDecoration(
+                  hintText: 'Type CONFIRM',
+                  hintStyle: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.3),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: widget.accentColor),
+                  ),
+                ),
+                onChanged: (_) => setDialogState(() {}),
+              ),
+            ],
+          ),
+          actions: [
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: confirmController.text.trim() == confirmWord
+                        ? () async {
+                      Navigator.pop(ctx);
+                      final box = Hive.box(HiveBoxNames.settings);
+                      await box.put(widget.hiveKey, _selectedHours);
+                      if (context.mounted) Navigator.pop(context);
+                      widget.ref
+                          .read(statsViewModelProvider.notifier)
+                          .loadStats();
+                    }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: widget.accentColor,
+                      disabledBackgroundColor:
+                      widget.accentColor.withValues(alpha: 0.3),
+                      foregroundColor: widget.textColor,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: const StadiumBorder(),
+                    ),
+                    child: const Text('Confirm'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: const StadiumBorder(),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String get _formattedLabel {
     final totalMinutes = (_selectedHours * 60).round();
     final hours = totalMinutes ~/ 60;
@@ -279,13 +403,13 @@ class _GoalSliderSheetState extends State<_GoalSliderSheet> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () async {
-                final box = Hive.box(HiveBoxNames.settings);
-                await box.put(widget.hiveKey, _selectedHours);
-                if (context.mounted) Navigator.pop(context);
-                widget.ref
-                    .read(statsViewModelProvider.notifier)
-                    .loadStats();
+              onPressed: () {
+                // skip confirmation if value hasn't changed
+                if (_selectedHours == widget.initialHours) {
+                  Navigator.pop(context);
+                  return;
+                }
+                _showSaveConfirmation(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: widget.accentColor,
@@ -305,6 +429,8 @@ class _GoalSliderSheetState extends State<_GoalSliderSheet> {
     );
   }
 }
+
+
 
 // ── Goal tile ─────────────────────────────────────────
 

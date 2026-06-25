@@ -1,12 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
-import 'package:screenblock/features/onboarding/onboarding_welcome_flow.dart';
-
 import 'core/constants/hivebox_names.dart';
 import 'features/bottomNav/shell_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/home/schedule/schedule_screen.dart';
-import 'features/onboarding/onboarding_chat_screen.dart';
+import 'features/onboarding/onboarding_welcome_flow.dart';
 import 'features/paywall/paywall_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/stats/stats_screen.dart';
@@ -18,12 +17,13 @@ class AppRouter {
     initialLocation: '/home',
     redirect: (context, state) {
       final box = Hive.box(HiveBoxNames.settings);
+
       final onboardingComplete = box.get(
         'onboardingComplete',
         defaultValue: false,
       ) as bool;
 
-      // only redirect to onboarding if not already there
+      // redirect to onboarding if not complete
       if (!onboardingComplete &&
           !state.matchedLocation.startsWith('/onboarding')) {
         return '/onboarding';
@@ -45,27 +45,51 @@ class AppRouter {
           GoRoute(
             path: '/home',
             name: 'home',
-            builder: (context, state) => const HomeScreen(),
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: const HomeScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, _, child) =>
+                  FadeTransition(opacity: animation, child: child),
+            ),
           ),
           GoRoute(
             path: '/schedule',
             name: 'schedule',
-            builder: (context, state) => const ScheduleScreen(),
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: const ScheduleScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, _, child) =>
+                  FadeTransition(opacity: animation, child: child),
+            ),
           ),
           GoRoute(
             path: '/stats',
             name: 'stats',
-            builder: (context, state) => const StatsScreen(),
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: const StatsScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, _, child) =>
+                  FadeTransition(opacity: animation, child: child),
+            ),
           ),
           GoRoute(
             path: '/settings',
             name: 'settings',
-            builder: (context, state) => const SettingsScreen(),
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: const SettingsScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, _, child) =>
+                  FadeTransition(opacity: animation, child: child),
+            ),
           ),
         ],
       ),
 
-      // outside shell
+      // paywall outside shell — hard gate after onboarding
       GoRoute(
         path: '/paywall',
         name: 'paywall',

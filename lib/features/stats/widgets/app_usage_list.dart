@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:installed_apps/app_info.dart';
@@ -16,31 +18,32 @@ class AppUsageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (stats.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundCard,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.border,
-            width: 0.5,
+      // 👇 only show Android empty state now
+      if (Platform.isAndroid) {
+        return Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundCard(context),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border(context), width: 0.5),
           ),
-        ),
-        child: Center(
-          child: Text(
-            'No usage data for today yet',
-            style: AppTextStyles.bodyMedium,
+          child: Center(
+            child: Text(
+              'No usage data for today yet',
+              style: AppTextStyles.bodyMedium,
+            ),
           ),
-        ),
-      );
+        );
+      }
+      return const SizedBox.shrink(); // 👈 iOS returns nothing
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.border,
+          color: AppColors.border(context),
           width: 0.5,
         ),
       ),
@@ -52,10 +55,10 @@ class AppUsageList extends StatelessWidget {
             children: [
               _AppUsageRow(stat: stat),
               if (!isLast)
-                const Divider(
+                 Divider(
                   height: 0.5,
                   thickness: 0.5,
-                  color: AppColors.border,
+                  color: AppColors.border(context),
                   indent: 60,
                 ),
             ],
@@ -142,7 +145,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
                 widget.stat.formattedTime,
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimary(context),
                 ),
               ),
             ],
@@ -159,7 +162,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
                         height: 4,
                         width: constraints.maxWidth,
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundSubtle,
+                          color: AppColors.backgroundSubtle(context),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -168,7 +171,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
                         width: constraints.maxWidth *
                             _widthAnimation.value,
                         decoration: BoxDecoration(
-                          color: AppColors.gold,
+                          color: AppColors.gold(context),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -199,12 +202,12 @@ class _AppUsageRowState extends State<_AppUsageRow>
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle,
+        color: AppColors.backgroundSubtle(context),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const Icon(
+      child:  Icon(
         Icons.apps_rounded,
-        color: AppColors.textSecondary,
+        color: AppColors.textSecondary(context),
         size: 18,
       ),
     );

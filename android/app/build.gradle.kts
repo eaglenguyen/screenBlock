@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.eagle.screenblock"
+    namespace = "com.eagle.pausenow"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -22,11 +22,13 @@ android {
 
     dependencies {
         coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+        implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+        implementation("androidx.appcompat:appcompat:1.6.1")
     }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.eagle.screenblock"
+        applicationId = "com.eagle.pausenow"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 26

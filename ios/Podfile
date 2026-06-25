@@ -36,7 +36,7 @@ target 'Runner' do
   end
 end
 
-target 'ScreenBlockMonitor' do
+target 'pausenowMonitor' do
   use_frameworks!
   use_modular_headers!
 end

@@ -22,6 +22,10 @@ class ScheduleChecker {
   String? _activeScheduleId;
   Schedule? _activeSchedule;
   DateTime? _pauseEndsAt;
+  bool Function()? isPremium;
+  bool Function()? isManualBlocking;
+
+
 
   VoidCallback? onScheduleStarted;
   VoidCallback? onScheduleStopped;
@@ -34,7 +38,7 @@ class ScheduleChecker {
     _blockingService = blockingService;
     _timer?.cancel();
     debugPrint('📅 ScheduleChecker started');
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) => _check());
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _check());
 
     _check();
   }
@@ -135,8 +139,23 @@ class ScheduleChecker {
   }
 
   void _check() {
+
+    if (isManualBlocking != null && isManualBlocking!()) {
+      debugPrint('⏭️ schedule check skipped — manual blocking active');
+      return;
+    }
     // don't check while paused — let pause timer handle resume
-    if (_isPaused) return;
+    // 👇 even if paused, check if active schedule was disabled
+    if (_isPaused) {
+      final box = Hive.box<Schedule>(HiveBoxNames.schedules);
+      final activeSchedule = box.get(_activeScheduleId ?? '');
+      if (activeSchedule == null || !activeSchedule.isActive) {
+        // schedule was disabled while paused — stop everything
+        debugPrint('📅 Active schedule disabled while paused — stopping');
+        _stopScheduleBlocking();
+      }
+      return;
+    }
 
     final box = Hive.box<Schedule>(HiveBoxNames.schedules);
     final schedules = box.values.toList();
@@ -150,9 +169,18 @@ class ScheduleChecker {
     final previousDay = (currentDay - 1 + 7) % 7;
 
 
+
+
     Schedule? matchingSchedule;
 
-    for (final schedule in activeSchedules) {
+    // 👇 free tier — only allow first active schedule
+    final premium = isPremium?.call() ?? false;
+    final allowedSchedules = premium
+        ? activeSchedules
+        : activeSchedules.take(1).toList(); // 👈 hard lock to 1
+
+
+    for (final schedule in allowedSchedules) {
       final startParts = schedule.startTime.split(':');
       final endParts = schedule.endTime.split(':');
       final startMinutes =
@@ -212,12 +240,16 @@ class ScheduleChecker {
     if (Platform.isIOS) {
       // 👇 pass sessionType directly instead of separate persistSessionType call
       await (_blockingService as IOSBlockingService)
-          .startMonitoring('ios_apps', 999, 'schedule');
+          .startMonitoring('ios_apps', 999, 'schedule', schedule.blockingType);
     } else {
-      final apps = schedule.blockingType ==
+      final allApps = schedule.blockingType ==
           AppConstants.blockingTypeSpecificApps
           ? schedule.blockedApps
           : schedule.allowedApps;
+
+      // 👇 free tier hard cap at 3 apps
+      final premium = isPremium?.call() ?? false;
+      final apps = premium ? allApps : allApps.take(3).toList();
 
       if (apps.isEmpty) return;
 
@@ -242,11 +274,39 @@ class ScheduleChecker {
   void _stopScheduleBlocking() {
     if (_blockingService == null) return;
     debugPrint('📅 Schedule ending — stopping blocking');
+
+    // Pause timer
+    _pauseTimer?.cancel();
+    _pauseTimer = null;
+    _isPaused = false;
+    _pauseEndsAt = null;
+    onPauseTickChanged?.call(0); // 👈 reset the countdown UI
+
+    // 👇 clear persisted pause time
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.remove('schedulePauseEndTime');
+    });
+
     _blockingService!.stopAllMonitoring();
     _isScheduleBlocking = false;
     _activeScheduleId = null;
     _activeSchedule = null;
     onScheduleStopped?.call();
+    onScheduleResumed?.call(); // 👈 tell UI pause is gone
+  }
+
+  Future<void> restartActiveSchedule(Schedule schedule) async {
+    if (_blockingService == null) return;
+    debugPrint('📅 Restarting blocking with updated app list');
+
+    // stop current blocking
+    _blockingService!.stopAllMonitoring();
+
+    // small delay to let it settle
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // restart with updated schedule
+    await _startScheduleBlocking(schedule);
   }
 
   bool get isScheduleBlocking => _isScheduleBlocking;

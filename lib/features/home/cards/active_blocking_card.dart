@@ -31,10 +31,10 @@ class ActiveBlockingCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
+        color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: AppColors.gold.withOpacity(0.3),
+          color: AppColors.gold(context).withOpacity(0.3),
           width: 0.5,
         ),
       ),
@@ -44,15 +44,15 @@ class ActiveBlockingCard extends StatelessWidget {
           const SizedBox(height: 10),
           _buildSessionName(),
           const SizedBox(height: 12),
-          _buildBlockListPill(),
+          _buildBlockListPill(context),
           const SizedBox(height: 20),
-          _buildTimer(),
+          _buildTimer(context),
           const SizedBox(height: 12),
-          _buildXpBar(),
+          _buildXpBar(context),
           const SizedBox(height: 16),
-          _buildTakeBreakButton(),
+          _buildTakeBreakButton(context),
           const SizedBox(height: 10),
-          _buildGiveUpButton(),
+          _buildGiveUpButton(context),
         ],
       ),
     );
@@ -80,60 +80,38 @@ class ActiveBlockingCard extends StatelessWidget {
 
   Widget _buildSessionName() {
     return Text(
-      'Focus Session',
+      'Manual Session',
       style: AppTextStyles.headlineSmall,
     );
   }
 
-  Widget _buildBlockListPill() {
-    final label = state.blockingType ==
-        'specific_apps'
+  Widget _buildBlockListPill(BuildContext context) {
+    final label = state.blockingType == 'specific_apps'
         ? 'Specific Apps'
         : 'All Apps';
 
-    return GestureDetector(
-      onTap: onBlockListTapped,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle,
-          borderRadius: BorderRadius.circular(50),
-          border: Border.all(
-            color: AppColors.border,
-            width: 0.5,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSubtle(context),
+        borderRadius: BorderRadius.circular(50),
+        border: Border.all(color: AppColors.border(context), width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textPrimary(context),
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.apps_rounded,
-              color: AppColors.textSecondary,
-              size: 14,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary,
-              size: 16,
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildTimer() {
+  Widget _buildTimer(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
     final seconds = isOnBreak
         ? state.breakRemainingSeconds
@@ -150,7 +128,7 @@ class ActiveBlockingCard extends StatelessWidget {
           Text(
             'Break',
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.gold,
+              color: AppColors.gold(context),
             ),
           ),
         Text(
@@ -167,12 +145,15 @@ class ActiveBlockingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildXpBar() {
+  Widget _buildXpBar(BuildContext context) {
     final totalSeconds = state.selectedMinutes * 60;
     final elapsed = totalSeconds - state.remainingSeconds;
     final progress = totalSeconds > 0
         ? (elapsed / totalSeconds).clamp(0.0, 1.0)
         : 0.0;
+
+    // 👇 calculate XP earned so far (5 XP per minute elapsed)
+    final xpSoFar = (elapsed / 60).floor() * 5;
 
     return Row(
       children: [
@@ -181,27 +162,24 @@ class ActiveBlockingCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(3),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: AppColors.backgroundSubtle,
-              valueColor: const AlwaysStoppedAnimation(
-                AppColors.gold,
-              ),
+              backgroundColor: AppColors.backgroundSubtle(context),
+              valueColor: AlwaysStoppedAnimation(AppColors.gold(context)),
               minHeight: 6,
             ),
           ),
         ),
         const SizedBox(width: 10),
         Text(
-          '⚡ +${state.xpEarned} XP',
+          '+$xpSoFar ⭐️',
           style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.gold,
+            color: AppColors.gold(context),
             fontWeight: FontWeight.w600,
           ),
         ),
       ],
     );
   }
-
-  Widget _buildTakeBreakButton() {
+  Widget _buildTakeBreakButton(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
 
     return SizedBox(
@@ -213,21 +191,21 @@ class ActiveBlockingCard extends StatelessWidget {
               ? null
               : Icons.pause_rounded,
           color: isOnBreak
-              ? AppColors.gold
-              : AppColors.textPrimary,
+              ? AppColors.gold(context)
+              : AppColors.textPrimary(context),
           size: 20,
         ),
         label: Text(
           isOnBreak ? 'End Break Now' : 'Take A Break',
           style: AppTextStyles.labelMedium.copyWith(
             color: isOnBreak
-                ? AppColors.gold
-                : AppColors.textPrimary,
+                ? AppColors.gold(context)
+                : AppColors.textPrimary(context),
             fontSize: 15,
           ),
         ),
         style: TextButton.styleFrom(
-          backgroundColor: AppColors.backgroundSubtle,
+          backgroundColor: AppColors.backgroundSubtle(context),
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: const StadiumBorder(),
         ),
@@ -235,7 +213,7 @@ class ActiveBlockingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildGiveUpButton() {
+  Widget _buildGiveUpButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -247,7 +225,7 @@ class ActiveBlockingCard extends StatelessWidget {
         ),
         label: const Text('Give Up'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.error,
+          backgroundColor: AppColors.error(context),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: const StadiumBorder(),

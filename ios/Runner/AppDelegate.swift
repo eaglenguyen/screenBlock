@@ -1,6 +1,7 @@
 import UIKit
 import FamilyControls
 import Flutter
+import SwiftUI
 import UserNotifications
 import os
 
@@ -81,7 +82,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     private func setupChannel(engine: FlutterEngine) {
         IOSBlockingService.shared.checkAuthorizationStatus()
         let channel = FlutterMethodChannel(
-            name: "com.eagle.screenblock/ios_blocking",
+            name: "com.eagle.pausenow/ios_blocking",
             binaryMessenger: engine.binaryMessenger
         )
         channel.setMethodCallHandler { [weak self] call, result in
@@ -89,7 +90,71 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             Task { await self.handleMethodCall(call, result: result) }
         }
     }
+    
+    // ── Sheet dismiss delegate ────────────────────────
+    class SheetDismissDelegate: NSObject, UIAdaptivePresentationControllerDelegate {
+        let onDismiss: () -> Void
 
+        init(onDismiss: @escaping () -> Void) {
+            self.onDismiss = onDismiss
+        }
+
+        func presentationControllerDidDismiss(
+            _ presentationController: UIPresentationController
+        ) {
+            onDismiss()
+        }
+    }
+    
+    // ── Updated showScreenTimeReport ──────────────────
+    @available(iOS 16.0, *)
+    @MainActor
+    private func showScreenTimeReport(result: @escaping FlutterResult) async {
+        guard let windowScene = UIApplication.shared
+            .connectedScenes
+            .first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?.rootViewController
+        else {
+            result(FlutterError(
+                code: "NO_VIEW",
+                message: "No view controller",
+                details: nil
+            ))
+            return
+        }
+
+        // 👇 if a sheet is already presented, dismiss it first
+        if let presented = rootVC.presentedViewController {
+            presented.dismiss(animated: false)
+            // wait for dismiss to complete
+            try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+        }
+
+        let reportView = ScreenTimeReportView(id: UUID())
+        let reportVC = UIHostingController(rootView: reportView)
+        reportVC.modalPresentationStyle = .pageSheet
+
+        if let sheet = reportVC.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.preferredCornerRadius = 24
+        }
+
+        let delegate = SheetDismissDelegate {
+            result(nil)
+        }
+        reportVC.presentationController?.delegate = delegate
+        objc_setAssociatedObject(
+            reportVC,
+            "dismissDelegate",
+            delegate,
+            .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+        )
+
+        rootVC.present(reportVC, animated: true)
+    }
+    
+    
     @available(iOS 16.0, *)
     private func handleMethodCall(
         _ call: FlutterMethodCall,
@@ -99,8 +164,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         switch call.method {
             
+        case "getScreenTimeTotal":
+            let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            let total = sharedDefaults?.double(forKey: "totalScreenTimeToday") ?? 0
+            NSLog("📊 getScreenTimeTotal called — value: \(total)") 
+            let date = sharedDefaults?.string(forKey: "screenTimeTotalDate") ?? ""
+            result(["total": total, "date": date])
+        case "showScreenTimeReport":
+            await showScreenTimeReport(result: result)
+        case "checkNotificationPermission":
+                UNUserNotificationCenter.current().getNotificationSettings { settings in
+                    DispatchQueue.main.async {
+                        result(settings.authorizationStatus == .authorized)
+                    }
+                }
+
+            case "requestNotificationPermission":
+                UNUserNotificationCenter.current().requestAuthorization(
+                    options: [.alert, .sound, .badge]
+                ) { granted, error in
+                    DispatchQueue.main.async {
+                        result(granted)
+                    }
+                }
+            
         case "checkMonitoringStatus":
-            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let status = defaults?.string(forKey: "monitoringStatus") ?? "never called"
             let activities = defaults?.array(forKey: "monitoringActivities") as? [String] ?? []
             result([
@@ -109,7 +198,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             ])
             
         case "checkExtensionRan":
-            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let lastRan = defaults?.double(forKey: "extensionLastRan") ?? 0
             let lastActivity = defaults?.string(forKey: "extensionLastActivity") ?? "none"
             let lastEvent = defaults?.string(forKey: "extensionLastEvent") ?? "none"
@@ -129,11 +218,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         case "saveBlockingMode":
             if let args = call.arguments as? [String: Any],
                let mode = args["mode"] as? String {
-                let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+                let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
                 defaults?.set(mode, forKey: "blockingMode")
             }
             result(nil)
-
+        case "setPremiumStatus":
+            if let args = call.arguments as? [String: Any],
+               let isPremium = args["isPremium"] as? Bool {
+                let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+                defaults?.set(isPremium, forKey: "isPremium")
+                defaults?.synchronize()
+                NSLog("💎 isPremium synced to native: \(isPremium)")
+            }
+            result(nil)
         case "openScreenTime":
             if let url = URL(string: "App-prefs:") {
                 DispatchQueue.main.async {
@@ -185,7 +282,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         case "persistSessionType":
             if let args = call.arguments as? [String: Any],
                let type = args["type"] as? String {
-                let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+                let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
                 defaults?.set(type, forKey: "sessionType")
                 defaults?.synchronize()
             }
@@ -194,7 +291,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         case "savePauseEndTime":
             if let args = call.arguments as? [String: Any],
                let endTimeMs = args["endTimeMs"] as? Int {
-                let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+                let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
                 defaults?.set(endTimeMs, forKey: "schedulePauseEndTime")
                 defaults?.synchronize()
                 NSLog("⏰ savePauseEndTime: \(endTimeMs)")
@@ -211,13 +308,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // cancel notification when user manually resumes
             UNUserNotificationCenter.current()
                 .removePendingNotificationRequests(withIdentifiers: ["scheduleResume"])
-            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             defaults?.set(0, forKey: "schedulePauseEndTime")
             defaults?.synchronize()
             result(nil)
 
         case "getPersistedSession":
-            let defaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let isBlocking = defaults?.bool(forKey: "isBlocking") ?? false
             let sessionType = defaults?.string(forKey: "sessionType") ?? "manual"
             let startTime = defaults?.double(forKey: "sessionStartTime") ?? 0
@@ -303,9 +400,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             return
         }
 
-        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.screenblock")
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
         let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
         let saveKey = blockingMode == "specific_apps" ? "blockedApps" : "allowedApps"
+        let backupKey = "\(saveKey)_backup"
+
+        // snapshot current selection before picker opens
+        if let existing = sharedDefaults?.data(forKey: saveKey) {
+            sharedDefaults?.set(existing, forKey: backupKey)
+        } else {
+            sharedDefaults?.removeObject(forKey: backupKey)
+        }
+        sharedDefaults?.synchronize()
 
         let picker = FamilyActivityPickerViewController(
             service: IOSBlockingService.shared,
@@ -316,10 +422,49 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                        from: data
                    ) {
                     let count = selection.applicationTokens.count
-                    print("✅ picker dismissed with \(count) apps saved")
+
+                    // 👇 user intentionally cleared the list — allow it
+                    if count == 0 {
+                        sharedDefaults?.removeObject(forKey: saveKey)
+                        sharedDefaults?.removeObject(forKey: backupKey)
+                        sharedDefaults?.synchronize()
+                        NSLog("✅ picker dismissed with 0 apps — list cleared")
+                        result(0)
+                        return
+                    }
+
+                    let isPremium = sharedDefaults?.bool(forKey: "isPremium") ?? false
+                    let freeLimit = 3
+
+                    if !isPremium && blockingMode == "specific_apps" && count > freeLimit {
+                        // restore previous selection
+                        if let backup = sharedDefaults?.data(forKey: backupKey) {
+                            sharedDefaults?.set(backup, forKey: saveKey)
+                            NSLog("🔄 restored previous selection from backup")
+                        } else {
+                            sharedDefaults?.removeObject(forKey: saveKey)
+                            NSLog("🧹 no backup found — cleared selection")
+                        }
+                        sharedDefaults?.removeObject(forKey: backupKey)
+                        sharedDefaults?.synchronize()
+                        NSLog("🚫 free limit exceeded — count=\(count)")
+                        result(freeLimit + 1)
+                        return
+                    }
+
+                    // success — clear backup
+                    sharedDefaults?.removeObject(forKey: backupKey)
+                    sharedDefaults?.synchronize()
+                    NSLog("✅ picker dismissed with \(count) apps saved")
                     result(count)
+
                 } else {
-                    print("❌ no selection saved after picker dismissed")
+                    // decode failed — picker dismissed without saving, restore backup
+                    if let backup = sharedDefaults?.data(forKey: backupKey) {
+                        sharedDefaults?.set(backup, forKey: saveKey)
+                    }
+                    sharedDefaults?.removeObject(forKey: backupKey)
+                    sharedDefaults?.synchronize()
                     result(0)
                 }
             },

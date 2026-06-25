@@ -1,0 +1,4 @@
+
+module in_app_review.__Swift {
+  exclude header "in_app_review-Swift.h"
+}

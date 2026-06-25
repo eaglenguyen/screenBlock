@@ -51,9 +51,9 @@ class _AppPickerScreenState
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.92,
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundCard,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundCard(context),
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),
       ),
@@ -63,9 +63,9 @@ class _AppPickerScreenState
           _buildSearchBar(state),
           Expanded(
             child: state.isLoading
-                ? const Center(
+                ? Center(
               child: CircularProgressIndicator(
-                color: AppColors.gold,
+                color: AppColors.gold(context),
               ),
             )
                 : state.isSearching
@@ -85,7 +85,7 @@ class _AppPickerScreenState
         width: 40,
         height: 4,
         decoration: BoxDecoration(
-          color: AppColors.border,
+          color: AppColors.border(context),
           borderRadius: BorderRadius.circular(2),
         ),
       ),
@@ -97,10 +97,10 @@ class _AppPickerScreenState
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle,
+          color: AppColors.backgroundSubtle(context),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: AppColors.border,
+            color: AppColors.border(context),
             width: 0.5,
           ),
         ),
@@ -113,9 +113,9 @@ class _AppPickerScreenState
           decoration: InputDecoration(
             hintText: 'Search apps...',
             hintStyle: AppTextStyles.bodyMedium,
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.search_rounded,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondary(context),
               size: 20,
             ),
             suffixIcon: state.isSearching
@@ -127,9 +127,9 @@ class _AppPickerScreenState
                     .notifier)
                     .clearSearch();
               },
-              child: const Icon(
+              child:  Icon(
                 Icons.close_rounded,
-                color: AppColors.textSecondary,
+                color: AppColors.textSecondary(context),
                 size: 18,
               ),
             )
@@ -196,17 +196,17 @@ class _AppPickerScreenState
           child: Text(
             label.toUpperCase(),
             style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondary(context),
               letterSpacing: 0.12,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.backgroundSubtle,
+            color: AppColors.backgroundSubtle(context),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: AppColors.border,
+              color: AppColors.border(context),
               width: 0.5,
             ),
           ),
@@ -218,10 +218,10 @@ class _AppPickerScreenState
                 children: [
                   _appTile(app, state),
                   if (!isLast)
-                    const Divider(
+                     Divider(
                       height: 0.5,
                       thickness: 0.5,
-                      color: AppColors.border,
+                      color: AppColors.border(context),
                       indent: 56,
                     ),
                 ],
@@ -262,10 +262,10 @@ class _AppPickerScreenState
                   : Container(
                 width: 36,
                 height: 36,
-                color: AppColors.backgroundCard,
-                child: const Icon(
+                color: AppColors.backgroundCard(context),
+                child: Icon(
                   Icons.apps_rounded,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondary(context),
                   size: 18,
                 ),
               ),
@@ -286,20 +286,20 @@ class _AppPickerScreenState
               height: 22,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.gold
+                    ? AppColors.gold(context)
                     : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.gold
-                      : AppColors.border,
+                      ? AppColors.gold(context)
+                      : AppColors.border(context),
                   width: 1.5,
                 ),
               ),
               child: isSelected
-                  ? const Icon(
+                  ?  Icon(
                 Icons.check_rounded,
-                color: AppColors.goldText,
+                color: AppColors.goldText(context),
                 size: 14,
               )
                   : null,
@@ -315,10 +315,10 @@ class _AppPickerScreenState
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
+        color: AppColors.backgroundCard(context),
         border: Border(
           top: BorderSide(
-            color: AppColors.border,
+            color: AppColors.border(context),
             width: 0.5,
           ),
         ),
@@ -331,7 +331,7 @@ class _AppPickerScreenState
               child: Text(
                 '${state.selectedCount} APP${state.selectedCount == 1 ? '' : 'S'} SELECTED',
                 style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.gold,
+                  color: AppColors.gold(context),
                   letterSpacing: 0.1,
                 ),
               ),
@@ -347,8 +347,8 @@ class _AppPickerScreenState
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold,
-                    foregroundColor: AppColors.goldText,
+                    backgroundColor: AppColors.gold(context),
+                    foregroundColor: AppColors.goldText(context),
                     padding: const EdgeInsets.symmetric(
                       vertical: 15,
                     ),
@@ -363,13 +363,13 @@ class _AppPickerScreenState
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.textPrimary,
+                    foregroundColor: AppColors.textPrimary(context),
                     padding: const EdgeInsets.symmetric(
                       vertical: 15,
                     ),
                     shape: const StadiumBorder(),
-                    side: const BorderSide(
-                      color: AppColors.border,
+                    side:  BorderSide(
+                      color: AppColors.border(context),
                     ),
                     textStyle: AppTextStyles.labelLarge,
                   ),

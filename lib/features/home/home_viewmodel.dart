@@ -1,32 +1,32 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:screenblock/data/repositoryImpl/UsageStreakRepo.dart';
+import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../domain/platform/blocking_service.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/hivebox_names.dart';
-import '../../data/models/timer_config.dart';
 import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
+import '../../providers/premium_provider.dart';
 import '../../services/schedule_checker.dart';
+import '../appPicker/app_picker_viewmodel.dart';
 import 'home_state.dart';
 
 part 'home_viewmodel.g.dart';
 
-
 @riverpod
 class HomeViewModel extends _$HomeViewModel {
 
+  // ── Private fields ───────────────────────────────
   StreamSubscription? _usageSubscription;
   StreamSubscription? _overlaySubscription;
   bool _streamsInitialized = false;
@@ -35,15 +35,10 @@ class HomeViewModel extends _$HomeViewModel {
   Timer? _breakTimer;
   bool _initialized = false;
 
-  static String _defaultBlockingType() =>
-      Platform.isIOS
-          ? AppConstants.blockingTypeSpecificApps
-          : AppConstants.blockingTypeAllApps;
-
+  // ── Build ────────────────────────────────────────
   @override
   HomeState build() {
     ref.keepAlive();
-    // only cleanup logic lives here
     ref.onDispose(() {
       _initialized = false;
       _usageSubscription?.cancel();
@@ -52,17 +47,14 @@ class HomeViewModel extends _$HomeViewModel {
       _sessionTimer?.cancel();
       _breakTimer?.cancel();
       _streamsInitialized = false;
-
     });
     return HomeState(
       isLoading: true,
-      blockingType: Platform.isIOS
-          ? AppConstants.blockingTypeSpecificApps
-          : AppConstants.blockingTypeAllApps,
+      blockingType: AppConstants.blockingTypeSpecificApps,
     );
   }
 
-  // ── Called once from HomeScreen.initState ────────
+  // ── Init ─────────────────────────────────────────
   void init() {
     if (_initialized) return;
     _initialized = true;
@@ -72,42 +64,87 @@ class HomeViewModel extends _$HomeViewModel {
     loadTodayBlockedTime();
     _loadBlockingConfig();
 
-    // load saved XP
     final savedXp = _loadTotalXp();
     state = state.copyWith(totalXp: savedXp);
-// 👇 register ALL callbacks before start()
-    ScheduleChecker.instance.onScheduleStarted = () {
+
+    // pre-load Android app list in background
+    if (Platform.isAndroid) {
+      Future.microtask(() {
+        ref.read(appPickerViewModelProvider.notifier).loadApps();
+      });
+    }
+
+    _setupScheduleChecker();
+    _setupPremiumListener();
+
+    ScheduleChecker.instance.start(_blockingService);
+    _restoreSession();
+  }
+
+  void _setupScheduleChecker() {
+    final checker = ScheduleChecker.instance;
+
+    checker.onScheduleStarted = () {
       state = state.copyWith(isScheduleActive: true);
     };
-    ScheduleChecker.instance.onScheduleStopped = () {
+    checker.onScheduleStopped = () {
       state = state.copyWith(
         isScheduleActive: false,
         isSchedulePaused: false,
         schedulePauseRemainingSeconds: 0,
       );
     };
-    ScheduleChecker.instance.onSchedulePaused = () {
+    checker.onSchedulePaused = () {
       state = state.copyWith(
         isScheduleActive: true,
         isSchedulePaused: true,
       );
     };
-    ScheduleChecker.instance.onScheduleResumed = () {
+    checker.onScheduleResumed = () {
       state = state.copyWith(
         isSchedulePaused: false,
         schedulePauseRemainingSeconds: 0,
       );
     };
-    ScheduleChecker.instance.onPauseTickChanged = (remaining) {
+    checker.onPauseTickChanged = (remaining) {
       state = state.copyWith(schedulePauseRemainingSeconds: remaining);
     };
-
-    // 👇 start AFTER all callbacks registered
-    ScheduleChecker.instance.start(_blockingService);
-
-    _restoreSession();
+    checker.isPremium = () => ref.read(isPremiumProvider);
+    checker.isManualBlocking = () =>
+    state.phase == BlockingPhase.active ||
+        state.phase == BlockingPhase.onBreak ||
+        state.phase == BlockingPhase.countdown;
   }
 
+  void _setupPremiumListener() {
+    ref.listen(isPremiumProvider, (previous, next) {
+      if (previous == true && next == false) {
+        _onPremiumLost();
+      }
+    });
+  }
+
+  // ── Premium ───────────────────────────────────────
+  void _onPremiumLost() {
+    debugPrint('💎 Premium lost — enforcing free tier');
+
+    // if schedule is active, check if it should stop
+    if (state.isScheduleActive) {
+      final isPremium = ref.read(isPremiumProvider);
+      ScheduleChecker.instance.isPremium = () => isPremium;
+
+      // re-check — ScheduleChecker will apply 3 app cap for free tier
+      ScheduleChecker.instance.checkNow();
+    }
+
+    // if manual blocking is active with all apps mode — stop it
+    if (state.phase == BlockingPhase.active &&
+        state.blockingType == AppConstants.blockingTypeAllApps) {
+      giveUp(); // ends the session gracefully
+    }
+  }
+
+  // ── XP ───────────────────────────────────────────
   int _loadTotalXp() {
     final box = Hive.box(HiveBoxNames.settings);
     return box.get('totalXp', defaultValue: 0) as int;
@@ -121,7 +158,6 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> claimXp() async {
     final newTotal = state.totalXp + state.xpEarned;
     await _saveTotalXp(newTotal);
-
     state = state.copyWith(
       phase: BlockingPhase.idle,
       totalXp: newTotal,
@@ -135,6 +171,7 @@ class HomeViewModel extends _$HomeViewModel {
     state = state.copyWith(shouldAnimateBlockedTime: false);
   }
 
+  // ── Schedule ──────────────────────────────────────
   void pauseSchedule(int minutes) {
     ScheduleChecker.instance.pauseFor(minutes);
   }
@@ -143,44 +180,34 @@ class HomeViewModel extends _$HomeViewModel {
     ScheduleChecker.instance.resumeNow();
   }
 
-
+  // ── Today blocked time ────────────────────────────
   void loadTodayBlockedTime() {
     final duration = _sessionRepo.getTodayTotalDuration();
     state = state.copyWith(todayBlockedTime: duration);
   }
-  // ── Stream setup ─────────────────────────────────
+
+  // ── Streams ───────────────────────────────────────
   void _setupStreams() {
     if (_streamsInitialized) return;
     _streamsInitialized = true;
 
-    // cancel any existing before creating new
     _usageSubscription?.cancel();
     _overlaySubscription?.cancel();
 
-    _usageSubscription = _blockingService.usageEvents.listen(
-            (event) {
+    _usageSubscription = _blockingService.usageEvents.listen((event) {
       switch (event.type) {
         case AppEventType.timerExpired:
-          state = state.copyWith(
-            error: 'timer_expired:${event.packageName}',
-          );
-          // show overlay from main isolate
+          state = state.copyWith(error: 'timer_expired:${event.packageName}');
           _blockingService.blockApp(event.packageName);
           break;
         case AppEventType.appBlocked:
-        // write to Hive so app stays blocked all day
-          ref.read(blockingRepositoryProvider)
-              .blockApp(event.packageName);
-          state = state.copyWith(
-            error: 'app_blocked:${event.packageName}',
-          );
+          ref.read(blockingRepositoryProvider).blockApp(event.packageName);
+          state = state.copyWith(error: 'app_blocked:${event.packageName}');
           break;
-
         case AppEventType.timerWarning:
-          state = state.copyWith(
-            error: 'timer_warning:${event.packageName}',
-          );
-        case AppEventType.scheduleResumed: // 👈 add this case
+          state = state.copyWith(error: 'timer_warning:${event.packageName}');
+          break;
+        case AppEventType.scheduleResumed:
           debugPrint('📅 Schedule resume event received from Kotlin');
           ScheduleChecker.instance.resumeNow();
           break;
@@ -188,8 +215,7 @@ class HomeViewModel extends _$HomeViewModel {
           break;
       }
     });
-    // overlay listener is a single-subscription stream
-    // only subscribe if not already subscribed
+
     if (_overlaySubscription == null) {
       try {
         _overlaySubscription =
@@ -202,6 +228,7 @@ class HomeViewModel extends _$HomeViewModel {
         debugPrint('❌ overlay listener already subscribed: $e');
       }
     }
+
     _methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'onBlockDismissed':
@@ -211,7 +238,7 @@ class HomeViewModel extends _$HomeViewModel {
     });
   }
 
-  // ── Load ─────────────────────────────────────────
+  // ── Load ──────────────────────────────────────────
   void loadTrackedApps() {
     try {
       final timers = _blockingRepo.getAllTimers();
@@ -223,81 +250,64 @@ class HomeViewModel extends _$HomeViewModel {
         error: null,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
-  // ── Add / remove ─────────────────────────────────
-  Future<void> addTrackedApp(TimerConfig config) async {
-    try {
-      if (_blockingRepo.hasReachedFreeLimit()) {
-        state = state.copyWith(error: 'free_limit_reached');
-        return;
-      }
-      await _blockingRepo.saveTimer(config);
-      await _blockingService.startMonitoring(
-        config.packageName,
-        config.limitMinutes,
-      );
-      loadTrackedApps();
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
+  // ── Blocking config ───────────────────────────────
+  void _saveBlockingConfig() {
+    final box = Hive.box(HiveBoxNames.settings);
+    box.put('blockingType', state.blockingType);
+    box.put('blockedApps', state.blockedApps);
+    box.put('allowedApps', state.allowedApps);
   }
 
-  Future<void> removeTrackedApp(String packageName) async {
-    try {
-      await _blockingRepo.deleteTimer(packageName);
-      await _blockingService.stopMonitoring(packageName);
-      loadTrackedApps();
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
+  void _loadBlockingConfig() {
+    final box = Hive.box(HiveBoxNames.settings);
+    state = state.copyWith(
+      blockingType: box.get('blockingType',
+          defaultValue: AppConstants.blockingTypeSpecificApps),
+      blockedApps: List<String>.from(
+          box.get('blockedApps', defaultValue: <String>[])),
+      allowedApps: List<String>.from(
+          box.get('allowedApps', defaultValue: <String>[])),
+    );
   }
 
-  // ── Block / unblock ──────────────────────────────
-  Future<void> blockAppForDay(String packageName) async {
-    try {
-      await _blockingRepo.blockApp(packageName);
-      await _blockingService.blockApp(packageName);
-      loadTrackedApps();
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
+  void setBlockingType(String type) {
+    state = state.copyWith(blockingType: type);
+    _saveBlockingConfig();
   }
 
-  Future<void> unblockApp(String packageName) async {
-    try {
-      await _blockingRepo.unblockApp(packageName);
-      await _blockingService.unblockApp(packageName);
-      loadTrackedApps();
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
+  void setBlockedApps(List<String> apps) {
+    state = state.copyWith(blockedApps: apps);
+    _saveBlockingConfig();
   }
 
-  // ── Start blocking ───────────────────────────────
+  void setAllowedApps(List<String> apps) {
+    state = state.copyWith(allowedApps: apps);
+    _saveBlockingConfig();
+  }
+
+  void setSelectedMinutes(int minutes) {
+    state = state.copyWith(selectedMinutes: minutes);
+  }
+
+  // ── Start blocking ────────────────────────────────
   Future<void> startBlocking() async {
-    final hasAccessibility =
-    await _blockingService.hasAccessibilityPermission();
+    final hasAccessibility = await _blockingService.hasAccessibilityPermission();
     if (!hasAccessibility) {
       await _blockingService.requestAccessibilityPermission();
       return;
     }
 
-    final hasOverlay =
-    await _blockingService.hasOverlayPermission();
+    final hasOverlay = await _blockingService.hasOverlayPermission();
     if (!hasOverlay) {
       await _blockingService.requestOverlayPermission();
       return;
     }
 
     final countdownStart = DateTime.now();
-
-    // start 3 second countdown
     state = state.copyWith(
       phase: BlockingPhase.countdown,
       remainingSeconds: 3,
@@ -305,59 +315,56 @@ class HomeViewModel extends _$HomeViewModel {
     );
 
     _countdownTimer?.cancel();
-    int count = 3;
-
-    _countdownTimer = Timer.periodic(
-      const Duration(seconds: 1),
-          (timer) async {
-        final elapsed = DateTime.now()
-            .difference(state.countdownStartTime!)
-            .inSeconds;
-        final remaining = 3 - elapsed;
-
-        if (remaining <= 0) {
-          timer.cancel();
-          await _beginActiveBlocking();
-        } else {
-          state = state.copyWith(remainingSeconds: remaining);
-        }
-      },
-    );
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      final elapsed = DateTime.now()
+          .difference(state.countdownStartTime!)
+          .inSeconds;
+      final remaining = 3 - elapsed;
+      if (remaining <= 0) {
+        timer.cancel();
+        await _beginActiveBlocking();
+      } else {
+        state = state.copyWith(remainingSeconds: remaining);
+      }
+    });
   }
 
   Future<void> _beginActiveBlocking() async {
     _blockingService.setBlockingMode(state.blockingType);
 
     if (Platform.isIOS) {
-      await _blockingService.startMonitoring(
+      final hasApps = state.blockingType == AppConstants.blockingTypeSpecificApps
+          ? state.blockedApps.isNotEmpty
+          : state.allowedApps.isNotEmpty;
+
+      if (!hasApps) {
+        state = state.copyWith(phase: BlockingPhase.idle, error: 'no_apps_selected');
+        return;
+      }
+
+      final iosService = _blockingService as IOSBlockingService;
+      await iosService.startMonitoring(
         'ios_apps',
         state.selectedMinutes,
+        'manual',
+        state.blockingType,
       );
     } else {
-      final apps = state.blockingType ==
-          AppConstants.blockingTypeSpecificApps
+      final apps = state.blockingType == AppConstants.blockingTypeSpecificApps
           ? state.blockedApps
           : state.allowedApps;
 
       if (apps.isEmpty) {
-        state = state.copyWith(
-          phase: BlockingPhase.idle,
-          error: 'no_apps_selected',
-        );
+        state = state.copyWith(phase: BlockingPhase.idle, error: 'no_apps_selected');
         return;
       }
 
       for (final pkg in apps) {
-        await _blockingService.startMonitoring(
-          pkg,
-          state.selectedMinutes,
-        );
+        await _blockingService.startMonitoring(pkg, state.selectedMinutes);
       }
 
-      // 👇 persist blocking state with session minutes
       if (_blockingService is AndroidBlockingService) {
-        await (_blockingService as AndroidBlockingService)
-            .persistBlockingState(
+        await (_blockingService as AndroidBlockingService).persistBlockingState(
           sessionMinutes: state.selectedMinutes,
         );
       }
@@ -368,100 +375,30 @@ class HomeViewModel extends _$HomeViewModel {
       selectedMinutes: state.selectedMinutes,
     );
 
-    final totalSeconds = state.selectedMinutes * 60; // math that converts int into seconds
-    final startTime = DateTime.now(); // 👈 wall clock start
+    final totalSeconds = state.selectedMinutes * 60;
+    final startTime = DateTime.now();
 
     state = state.copyWith(
       phase: BlockingPhase.active,
       remainingSeconds: totalSeconds,
       activeSessionKey: sessionKey,
-      sessionStartTime: startTime, // 👈 save start time
+      sessionStartTime: startTime,
     );
 
     _sessionTimer?.cancel();
-    _sessionTimer = Timer.periodic(
-      const Duration(seconds: 1),
-          (timer) {
-        // calculate remaining from wall clock not tick count
-        final elapsed = DateTime.now()
-            .difference(state.sessionStartTime!)
-            .inSeconds;
-        final remaining = totalSeconds - elapsed;
-
-        if (remaining <= 0) {
-          timer.cancel();
-          _onSessionComplete();
-        } else {
-          state = state.copyWith(remainingSeconds: remaining);
-        }
-      },
-    );
-  }
-
-  void onAppResumed() {
-    // 👇 check if schedule pause has expired
-    if (state.isSchedulePaused) {
-      final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
-      if (pauseEndTime != null &&
-          DateTime.now().isAfter(pauseEndTime)) {
-        debugPrint('📅 Pause expired while backgrounded — resuming');
-        ScheduleChecker.instance.resumeNow();
+    _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
+      final remaining = totalSeconds - elapsed;
+      if (remaining <= 0) {
+        timer.cancel();
+        _onSessionComplete();
+      } else {
+        state = state.copyWith(remainingSeconds: remaining);
       }
-    }
-    switch (state.phase) {
-      case BlockingPhase.active:
-        if (state.sessionStartTime == null) return;
-        final totalSeconds = state.selectedMinutes * 60;
-        final elapsed = DateTime.now()
-            .difference(state.sessionStartTime!)
-            .inSeconds;
-        final remaining = totalSeconds - elapsed;
-        if (remaining <= 0) {
-          _sessionTimer?.cancel();
-          _onSessionComplete();
-        } else {
-          state = state.copyWith(remainingSeconds: remaining);
-        }
-
-      case BlockingPhase.onBreak:
-        if (state.breakStartTime == null) return;
-        final breakElapsed = DateTime.now()
-            .difference(state.breakStartTime!)
-            .inSeconds;
-        final breakRemaining = state.originalBreakSeconds - breakElapsed;
-        if (breakRemaining <= 0) {
-          _breakTimer?.cancel();
-          _resumeAfterBreak(state.remainingSeconds);
-        } else {
-          state = state.copyWith(breakRemainingSeconds: breakRemaining);
-        }
-
-      case BlockingPhase.countdown:
-        if (state.countdownStartTime == null) return;
-        final countdownElapsed = DateTime.now()
-            .difference(state.countdownStartTime!)
-            .inSeconds;
-        final countdownRemaining = 3 - countdownElapsed;
-        if (countdownRemaining <= 0) {
-          _countdownTimer?.cancel();
-          _beginActiveBlocking();
-        } else {
-          state = state.copyWith(remainingSeconds: countdownRemaining);
-        }
-
-      default:
-        break;
-    }
+    });
   }
 
-  void finishAndUnblock() {
-    state = state.copyWith(
-      phase: BlockingPhase.claimXp,
-    );
-  }
-
-
-
+  // ── Session complete ──────────────────────────────
   void _onSessionComplete() async {
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).stopBlockingCompletely();
@@ -479,76 +416,25 @@ class HomeViewModel extends _$HomeViewModel {
     await Future.delayed(const Duration(milliseconds: 100));
     loadTodayBlockedTime();
 
-    final xpEarned = state.selectedMinutes * 10;
-
     state = state.copyWith(
       phase: BlockingPhase.completed,
       remainingSeconds: 0,
       activeSessionKey: null,
-      xpEarned: xpEarned,
+      xpEarned: state.selectedMinutes * 5,
     );
   }
 
-
-  // Block Modes
-  void _saveBlockingConfig() {
-    final box = Hive.box(HiveBoxNames.settings);
-    box.put('blockingType', state.blockingType);
-    box.put('blockedApps', state.blockedApps);
-    box.put('allowedApps', state.allowedApps);
+  void finishAndUnblock() {
+    state = state.copyWith(phase: BlockingPhase.claimXp);
   }
 
-  void setBlockingType(String type) {
-    state = state.copyWith(blockingType: type);
-    _saveBlockingConfig();
-
-  }
-
-  void setBlockedApps(List<String> apps) {
-    state = state.copyWith(blockedApps: apps);
-    // persist to Hive
-    _saveBlockingConfig();
-  }
-
-  void setAllowedApps(List<String> apps) {
-    state = state.copyWith(allowedApps: apps);
-    _saveBlockingConfig();
-
-  }
-
-  void setSelectedMinutes(int minutes) {
-    state = state.copyWith(selectedMinutes: minutes);
-  }
-
-  void _loadBlockingConfig() {
-    final box = Hive.box(HiveBoxNames.settings);
-    final blockingType = box.get('blockingType',
-        defaultValue: Platform.isIOS
-            ? AppConstants.blockingTypeSpecificApps
-            : AppConstants.blockingTypeAllApps);
-    final blockedApps = box.get('blockedApps',
-        defaultValue: <String>[]);
-    final allowedApps = box.get('allowedApps',
-        defaultValue: <String>[]);
-
-    state = state.copyWith(
-      blockingType: blockingType,
-      blockedApps: List<String>.from(blockedApps),
-      allowedApps: List<String>.from(allowedApps),
-    );
-  }
-
-
-  // ── Cancel countdown ─────────────────────────────
+  // ── Cancel countdown ──────────────────────────────
   void cancelCountdown() {
     _countdownTimer?.cancel();
-    state = state.copyWith(
-      phase: BlockingPhase.idle,
-      remainingSeconds: 0,
-    );
+    state = state.copyWith(phase: BlockingPhase.idle, remainingSeconds: 0);
   }
 
-  // ── Give up ──────────────────────────────────────
+  // ── Give up ───────────────────────────────────────
   Future<void> giveUp() async {
     _sessionTimer?.cancel();
     _breakTimer?.cancel();
@@ -577,13 +463,12 @@ class HomeViewModel extends _$HomeViewModel {
     );
   }
 
-  // ── Take a break ─────────────────────────────────
+  // ── Break ─────────────────────────────────────────
   Future<void> startBreak(int minutes) async {
     _sessionTimer?.cancel();
 
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).pauseBlocking(minutes);
-      // don't call stopAllMonitoring on iOS — it cancels the pause timer
     } else {
       await _blockingService.stopAllMonitoring();
       final breakEndsAt = DateTime.now().add(Duration(minutes: minutes));
@@ -616,21 +501,17 @@ class HomeViewModel extends _$HomeViewModel {
 
   Future<void> endBreak() async {
     _breakTimer?.cancel();
-
     if (Platform.isAndroid && _blockingService is AndroidBlockingService) {
       await (_blockingService as AndroidBlockingService).savePauseEndTime(0);
     }
-
     _resumeAfterBreak(state.remainingSeconds);
   }
-
 
   Future<void> _resumeAfterBreak(int remainingSeconds) async {
     _blockingService.setBlockingMode(state.blockingType);
 
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).resumeBlocking();
-      // Swift already reshielded — don't call startMonitoring again
     } else {
       final apps = state.blockingType == AppConstants.blockingTypeSpecificApps
           ? state.blockedApps
@@ -639,12 +520,13 @@ class HomeViewModel extends _$HomeViewModel {
         await _blockingService.startMonitoring(pkg, state.selectedMinutes);
       }
       if (_blockingService is AndroidBlockingService) {
-        await (_blockingService as AndroidBlockingService).savePauseEndTime(0);
-        await (_blockingService as AndroidBlockingService).persistBlockingState(
+        final svc = _blockingService as AndroidBlockingService;
+        await svc.savePauseEndTime(0);
+        await svc.persistBlockingState(
           sessionMinutes: state.selectedMinutes,
           sessionType: 'manual',
         );
-        await (_blockingService as AndroidBlockingService).checkCurrentForegroundApp();
+        await svc.checkCurrentForegroundApp();
       }
     }
 
@@ -656,9 +538,7 @@ class HomeViewModel extends _$HomeViewModel {
     _sessionTimer?.cancel();
     _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final totalSeconds = state.selectedMinutes * 60;
-      final elapsed = DateTime.now()
-          .difference(state.sessionStartTime!)
-          .inSeconds;
+      final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
       final remaining = totalSeconds - elapsed;
       if (remaining <= 0) {
         timer.cancel();
@@ -669,43 +549,73 @@ class HomeViewModel extends _$HomeViewModel {
     });
   }
 
+  // ── App resumed ───────────────────────────────────
+  void onAppResumed() {
+    if (state.isSchedulePaused) {
+      final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
+      if (pauseEndTime != null && DateTime.now().isAfter(pauseEndTime)) {
+        debugPrint('📅 Pause expired while backgrounded — resuming');
+        ScheduleChecker.instance.resumeNow();
+      }
+    }
 
-  void _startSessionTimer(int totalSeconds, DateTime startTime) {
-    _sessionTimer?.cancel();
-    _sessionTimer = Timer.periodic(
-      const Duration(seconds: 1),
-          (timer) {
-        final elapsed = DateTime.now()
-            .difference(startTime)
-            .inSeconds;
+    switch (state.phase) {
+      case BlockingPhase.active:
+        if (state.sessionStartTime == null) return;
+        final totalSeconds = state.selectedMinutes * 60;
+        final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
         final remaining = totalSeconds - elapsed;
-
         if (remaining <= 0) {
-          timer.cancel();
+          _sessionTimer?.cancel();
           _onSessionComplete();
         } else {
           state = state.copyWith(remainingSeconds: remaining);
         }
-      },
-    );
+
+      case BlockingPhase.onBreak:
+        if (state.breakStartTime == null) return;
+        final breakElapsed = DateTime.now().difference(state.breakStartTime!).inSeconds;
+        final breakRemaining = state.originalBreakSeconds - breakElapsed;
+        if (breakRemaining <= 0) {
+          _breakTimer?.cancel();
+          _resumeAfterBreak(state.remainingSeconds);
+        } else {
+          state = state.copyWith(breakRemainingSeconds: breakRemaining);
+        }
+
+      case BlockingPhase.countdown:
+        if (state.countdownStartTime == null) return;
+        final countdownElapsed = DateTime.now()
+            .difference(state.countdownStartTime!)
+            .inSeconds;
+        final countdownRemaining = 3 - countdownElapsed;
+        if (countdownRemaining <= 0) {
+          _countdownTimer?.cancel();
+          _beginActiveBlocking();
+        } else {
+          state = state.copyWith(remainingSeconds: countdownRemaining);
+        }
+
+      default:
+        break;
+    }
   }
 
+  // ── Restore session ───────────────────────────────
   Future<void> _restoreSession() async {
     try {
       if (Platform.isIOS) {
-        final result = await const MethodChannel(
-          'com.eagle.screenblock/ios_blocking',
-        ).invokeMethod<Map>('getPersistedSession')
+        final result = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+            .invokeMethod<Map>('getPersistedSession')
             .timeout(const Duration(seconds: 3));
 
         if (result?['isBlocking'] == true) {
           final sessionType = result!['sessionType'] as String? ?? 'manual';
           debugPrint('🔄 iOS sessionType=$sessionType');
 
-
           if (sessionType == 'schedule') {
             debugPrint('🔄 iOS skipping schedule session restore');
-            return; // 👈 don't restore schedule sessions
+            return;
           }
 
           final startTime = DateTime.fromMillisecondsSinceEpoch(
@@ -713,10 +623,8 @@ class HomeViewModel extends _$HomeViewModel {
           );
           final minutes = result['minutes'] as int;
           final totalSeconds = minutes * 60;
-          final elapsed = DateTime.now()
-              .difference(startTime)
-              .inSeconds;
-          final remaining = totalSeconds - elapsed;
+          final remaining = totalSeconds -
+              DateTime.now().difference(startTime).inSeconds;
 
           if (remaining > 0) {
             state = state.copyWith(
@@ -739,7 +647,6 @@ class HomeViewModel extends _$HomeViewModel {
 
         debugPrint('🔄 isBlocking=$isBlocking sessionType=$sessionType');
 
-        // only restore manual sessions — not schedule sessions
         if (isBlocking && sessionType == 'manual') {
           final startTimeMs = prefs.getInt('sessionStartTime') ?? 0;
           final minutes = prefs.getInt('sessionMinutes') ?? 30;
@@ -751,10 +658,8 @@ class HomeViewModel extends _$HomeViewModel {
 
           final startTime = DateTime.fromMillisecondsSinceEpoch(startTimeMs);
           final totalSeconds = minutes * 60;
-          final elapsed = DateTime.now()
-              .difference(startTime)
-              .inSeconds;
-          final remaining = totalSeconds - elapsed;
+          final remaining = totalSeconds -
+              DateTime.now().difference(startTime).inSeconds;
 
           if (remaining > 0) {
             debugPrint('🔄 Restoring manual session — ${remaining}s remaining');
@@ -782,27 +687,29 @@ class HomeViewModel extends _$HomeViewModel {
     }
   }
 
+  void _startSessionTimer(int totalSeconds, DateTime startTime) {
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final elapsed = DateTime.now().difference(startTime).inSeconds;
+      final remaining = totalSeconds - elapsed;
+      if (remaining <= 0) {
+        timer.cancel();
+        _onSessionComplete();
+      } else {
+        state = state.copyWith(remainingSeconds: remaining);
+      }
+    });
+  }
 
+  // ── Getters ───────────────────────────────────────
+  BlockingRepository get _blockingRepo => ref.read(blockingRepositoryProvider);
+  BlockSessionRepository get _sessionRepo => ref.read(blockSessionRepositoryProvider);
+  UsageStreakRepo get _usageRepo => ref.read(usageRepositoryProvider);
+  BlockingService get _blockingService => ref.read(blockingServiceProvider);
 
-  // ── Getters ──────────────────────────────────────
-  BlockingRepository get _blockingRepo =>
-      ref.read(blockingRepositoryProvider);
-
-  BlockSessionRepository get _sessionRepo =>
-      ref.read(blockSessionRepositoryProvider);
-
-  UsageStreakRepo get _usageRepo =>
-      ref.read(usageRepositoryProvider);
-
-  BlockingService get _blockingService =>
-      ref.read(blockingServiceProvider);
-
-  static const _methodChannel = MethodChannel(
-    'com.eagle.screenblock/block',
-  );
+  static const _methodChannel = MethodChannel('com.eagle.pausenow/block');
 
   void clearError() {
     state = state.copyWith(error: null);
   }
 }
-

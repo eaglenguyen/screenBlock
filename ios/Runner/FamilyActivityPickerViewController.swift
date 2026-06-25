@@ -106,7 +106,7 @@ struct FamilyActivityPickerView: View {
 
     private func loadSavedSelection() {
         guard let defaults = UserDefaults(
-            suiteName: "group.com.eagle.screenblock"
+            suiteName: "group.com.eagle.pausenow"
         ) else {
             print("🦅 no shared defaults available")
             return

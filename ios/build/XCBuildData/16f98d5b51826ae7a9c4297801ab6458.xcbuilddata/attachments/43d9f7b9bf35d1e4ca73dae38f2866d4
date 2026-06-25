@@ -1,0 +1,5 @@
+ extern const unsigned char RevenueCatUIVersionString[];
+ extern const double RevenueCatUIVersionNumber;
+
+ const unsigned char RevenueCatUIVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:RevenueCatUI  PROJECT:Pods-1" "\n";
+ const double RevenueCatUIVersionNumber __attribute__ ((used)) = (double)1.;

@@ -1,0 +1,16 @@
+{
+  "" : {
+    "const-values" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/in_app_review-primary.swiftconstvalues",
+    "dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/in_app_review-primary.d",
+    "diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/in_app_review-primary.dia",
+    "emit-module-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/in_app_review-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/in_app_review-primary-emit-module.dia",
+    "pch" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/in_app_review-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/in_app_review-primary.swiftdeps"
+  },
+  "/Users/egor/.pub-cache/hosted/pub.dev/in_app_review-2.0.12/ios/in_app_review/Sources/in_app_review/InAppReviewPlugin.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/InAppReviewPlugin.o",
+    "llvm-bc" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/InAppReviewPlugin.bc",
+    "object" : "/Users/egor/screenblock/ios/build/Pods.build/Release-iphoneos/in_app_review.build/Objects-normal/arm64/InAppReviewPlugin.o"
+  }
+}

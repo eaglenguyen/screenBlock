@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:just_audio/just_audio.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -32,6 +33,8 @@ class _ClaimXpCardState extends State<ClaimXpCard>
   late ConfettiController _confettiController;
   late AnimationController _controller;
   late Animation<double> _bounceAnim;
+  late AudioPlayer _successPlayer;
+  late AudioPlayer _tickPlayer;
 
   bool _claiming = false;
   int _displayXp = 0;
@@ -39,6 +42,14 @@ class _ClaimXpCardState extends State<ClaimXpCard>
   @override
   void initState() {
     super.initState();
+
+    _successPlayer = AudioPlayer();
+    _tickPlayer = AudioPlayer();
+
+    _tickPlayer.setAsset('assets/sounds/powerup1.mp3').then((_) {
+      _tickPlayer.setVolume(0.5);
+    });
+
 
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 2),
@@ -57,8 +68,8 @@ class _ClaimXpCardState extends State<ClaimXpCard>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _confettiController.play();
       _controller.forward();
+      _playSuccessSound();
 
-      // haptic burst
       HapticFeedback.heavyImpact();
       Future.delayed(const Duration(milliseconds: 100), () {
         HapticFeedback.mediumImpact();
@@ -67,11 +78,23 @@ class _ClaimXpCardState extends State<ClaimXpCard>
         HapticFeedback.lightImpact();
       });
     });
-
   }
+
+  Future<void> _playSuccessSound() async {
+    try {
+      await _successPlayer.setAsset('assets/sounds/confetti.mp3');
+      await _successPlayer.setVolume(0.8);
+      await _successPlayer.play();
+    } catch (e) {
+      debugPrint('❌ success sound error: $e');
+    }
+  }
+
 
   @override
   void dispose() {
+    _successPlayer.dispose();
+    _tickPlayer.dispose();
     _confettiController.dispose();
     _controller.dispose();
     super.dispose();
@@ -81,9 +104,14 @@ class _ClaimXpCardState extends State<ClaimXpCard>
     if (_claiming) return;
     setState(() => _claiming = true);
 
-    // haptic + count up animation
+    // play tick once at start
+    try {
+      await _tickPlayer.seek(Duration.zero);
+      _tickPlayer.play();
+    } catch (_) {}
+
     final total = widget.xpEarned;
-    final steps = total.clamp(1, 30); // max 30 ticks
+    final steps = total.clamp(1, 30);
     final interval = Duration(
       milliseconds: (1200 / steps).round(),
     );
@@ -94,17 +122,18 @@ class _ClaimXpCardState extends State<ClaimXpCard>
       setState(() {
         _displayXp = ((total * i) / steps).round();
       });
-      // haptic tick
       HapticFeedback.lightImpact();
+      // no sound per tick
     }
 
-    // final heavy haptic
     await Future.delayed(const Duration(milliseconds: 100));
     HapticFeedback.heavyImpact();
     await Future.delayed(const Duration(milliseconds: 200));
 
     widget.onClaim();
   }
+// ... rest of build method unchanged
+
 
   @override
   Widget build(BuildContext context) {
@@ -119,8 +148,8 @@ class _ClaimXpCardState extends State<ClaimXpCard>
           gravity: 0.3,
           emissionFrequency: 0.05,
           blastDirection: pi / 2,
-          colors: const [
-            AppColors.gold,
+          colors:  [
+            AppColors.gold(context),
             Color(0xFFFF6B6B),
             Color(0xFF4ECDC4),
             Color(0xFF45B7D1),
@@ -142,13 +171,13 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                 child: Container(
                   width: 88,
                   height: 88,
-                  decoration: const BoxDecoration(
-                    color: AppColors.gold,
+                  decoration:  BoxDecoration(
+                    color: AppColors.gold(context),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child:  Icon(
                     Icons.bolt_rounded,
-                    color: AppColors.goldText,
+                    color: AppColors.goldText(context),
                     size: 48,
                   ),
                 ),
@@ -165,7 +194,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
               Text(
                 'Great job staying present',
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondary(context),
                 ),
               ),
 
@@ -175,24 +204,24 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                 children: [
                   Expanded(
                     child: _statCard(
-                      label: 'XP this session',
+                      label: '⭐️ this session',
                       value: _claiming
                           ? '$_displayXp'
                           : '${widget.xpEarned}',
-                      icon: Icons.bolt_rounded,
-                      iconColor: AppColors.gold,
+                      icon: Icons.star,
+                      iconColor: AppColors.gold(context),
                       highlight: _claiming,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _statCard(
-                      label: 'Total XP',
+                      label: 'Total ⭐️',
                       value: _claiming
                           ? '${widget.totalXp + _displayXp}'
                           : '${widget.totalXp + widget.xpEarned}',
                       icon: Icons.stars_rounded,
-                      iconColor: AppColors.gold,
+                      iconColor: AppColors.gold(context),
                       highlight: _claiming,
                     ),
                   ),
@@ -206,7 +235,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: 'Time blocked',
                       value: '${widget.sessionMinutes}m',
                       icon: Icons.timer_rounded,
-                      iconColor: AppColors.gold,
+                      iconColor: AppColors.gold(context),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -215,7 +244,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: "Today's total",
                       value: widget.todayBlocked,
                       icon: Icons.lock_clock_rounded,
-                      iconColor: AppColors.gold,
+                      iconColor: AppColors.gold(context),
                     ),
                   ),
                 ],
@@ -229,11 +258,11 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                   onPressed: _claiming ? null : _onClaimTapped,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _claiming
-                        ? AppColors.backgroundSubtle
-                        : AppColors.gold,
-                    foregroundColor: AppColors.goldText,
+                        ? AppColors.backgroundSubtle(context)
+                        : AppColors.gold(context),
+                    foregroundColor: AppColors.goldText(context),
                     disabledBackgroundColor:
-                    AppColors.backgroundSubtle,
+                    AppColors.backgroundSubtle(context),
                     padding: const EdgeInsets.symmetric(
                       vertical: 16,
                     ),
@@ -245,12 +274,10 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.bolt_rounded, size: 20),
-                      const SizedBox(width: 8),
                       Text(
                         _claiming
                             ? 'Claiming...'
-                            : 'Claim ${widget.xpEarned} XP',
+                            : 'Claim ${widget.xpEarned} ⭐️',
                       ),
                     ],
                   ),
@@ -277,13 +304,13 @@ class _ClaimXpCardState extends State<ClaimXpCard>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: highlight
-            ? AppColors.gold.withValues(alpha: 0.1)
-            : AppColors.backgroundCard,
+            ? AppColors.gold(context).withValues(alpha: 0.1)
+            : AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: highlight
-              ? AppColors.gold.withValues(alpha: 0.3)
-              : AppColors.border,
+              ? AppColors.gold(context).withValues(alpha: 0.3)
+              : AppColors.border(context),
           width: highlight ? 1 : 0.5,
         ),
       ),
@@ -293,7 +320,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
           Text(
             label,
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondary(context),
               fontSize: 11,
             ),
           ),
@@ -306,7 +333,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                 value,
                 style: AppTextStyles.headlineSmall.copyWith(
                   fontSize: 18,
-                  color: highlight ? AppColors.gold : null,
+                  color: highlight ? AppColors.gold(context) : null,
                 ),
               ),
             ],

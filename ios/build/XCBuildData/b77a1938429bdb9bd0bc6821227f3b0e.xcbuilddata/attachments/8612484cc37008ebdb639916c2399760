@@ -1,0 +1,4 @@
+
+module RevenueCatUI.__Swift {
+  exclude header "RevenueCatUI-Swift.h"
+}
