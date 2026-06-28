@@ -12,6 +12,7 @@ import '../../../providers/repository_providers.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/hivebox_names.dart';
+import '../../data/models/schedule.dart';
 import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
@@ -140,9 +141,33 @@ class HomeViewModel extends _$HomeViewModel {
     });
   }
 
-  // ── Premium ───────────────────────────────────────
+  // ── Premium Logic───────────────────────────────────────
+
   void _onPremiumLost() {
     debugPrint('💎 Premium lost — enforcing free tier');
+
+    // 👇 capture before state changes
+    final wasAllApps = state.blockingType == AppConstants.blockingTypeAllApps;
+
+    // reset blocking type
+    if (wasAllApps) {
+      setBlockingType(AppConstants.blockingTypeSpecificApps);
+      debugPrint('💎 blocking type reset to specific apps');
+    }
+
+    // 👇 update any saved schedules that use all_apps blocking type
+    final scheduleBox = Hive.box<Schedule>(HiveBoxNames.schedules);
+    for (final key in scheduleBox.keys) {
+      final schedule = scheduleBox.get(key);
+      if (schedule != null &&
+          schedule.blockingType == AppConstants.blockingTypeAllApps) {
+        final updated = schedule.copyWith(
+          blockingType: AppConstants.blockingTypeSpecificApps,
+        );
+        scheduleBox.put(key, updated);
+        debugPrint('💎 schedule ${schedule.name} reset to specific apps');
+      }
+    }
 
     if (state.isScheduleActive) {
       final isPremium = ref.read(isPremiumProvider);
@@ -150,8 +175,8 @@ class HomeViewModel extends _$HomeViewModel {
       ScheduleChecker.instance.checkNow();
     }
 
-    if (state.phase == BlockingPhase.active &&
-        state.blockingType == AppConstants.blockingTypeAllApps) {
+    // end session if was blocking all apps
+    if (state.phase == BlockingPhase.active && wasAllApps) {
       giveUp();
     }
   }
@@ -307,17 +332,6 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── Start blocking ────────────────────────────────
   Future<void> startBlocking() async {
-    final hasAccessibility = await _blockingService.hasAccessibilityPermission();
-    if (!hasAccessibility) {
-      await _blockingService.requestAccessibilityPermission();
-      return;
-    }
-
-    final hasOverlay = await _blockingService.hasOverlayPermission();
-    if (!hasOverlay) {
-      await _blockingService.requestOverlayPermission();
-      return;
-    }
 
     final countdownStart = DateTime.now();
     state = state.copyWith(

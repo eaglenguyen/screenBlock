@@ -21,20 +21,20 @@ Future<void> _scheduleExpiryNotificationIfNeeded(CustomerInfo info) async {
   final now = DateTime.now();
   final daysUntilExpiry = expiryDate.difference(now).inDays;
 
-  if (daysUntilExpiry > 2) return;
+  if (daysUntilExpiry > 400) return;
 
   // cancel existing
   await NotificationService.instance.cancelNotification(99);
 
   final notifyAt = expiryDate.subtract(const Duration(days: 2));
-  final scheduledTime = notifyAt.isBefore(now)
-      ? now.add(const Duration(seconds: 5))
-      : notifyAt;
+
+  final scheduledTime = now.add(const Duration(seconds: 10)); // always fires in 10s
+
 
   await NotificationService.instance.scheduleNotification(
     id: 99,
-    title: '⏰ Your Pro subscription is expiring soon',
-    body: 'Your Pause Now Pro access expires in 2 days. Renew to keep blocking distractions.',
+    title: 'Pro subscription expires in 2 days',
+    body: 'Renew to keep blocking distractions.',
     scheduledTime: scheduledTime,
   );
 }

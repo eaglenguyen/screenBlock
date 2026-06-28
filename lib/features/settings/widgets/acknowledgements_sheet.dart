@@ -18,10 +18,10 @@ class _AcknowledgmentsSheet extends StatelessWidget {
   const _AcknowledgmentsSheet();
 
   // ── Edit these with your actual asset details ──────
-  static const String _assetName = '[Asset Name]';
-  static const String _creatorName = '[Creator Name]';
-  static const String _assetUrl = '[https://rive.app/...]';
-  static const bool _wasModified = false; // set false if unmodified
+  static const String _assetName = 'Mr Square';
+  static const String _creatorName = 'Sirojiddin Makhammatov';
+  static const String _assetUrl = 'https://rive.app/marketplace/28069-53020-mr-square/';
+  static const bool _wasModified = true; // arms, legs, and backgrounds removed
 
   static const String _licenseUrl =
       'https://creativecommons.org/licenses/by/4.0/';
@@ -69,7 +69,7 @@ class _AcknowledgmentsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Pause Now is built with the help of these creators.',
+            'pause now is built with the help of these creators.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary(context),
             ),

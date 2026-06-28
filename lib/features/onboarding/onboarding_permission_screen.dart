@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pausenow/features/onboarding/widgets/onboarding_animations.dart';
@@ -83,9 +84,11 @@ class _OnboardingPermissionsScreenState
 
   Future<bool> _checkNotificationPermission() async {
     try {
-      const channel = MethodChannel('com.eagle.pausenow/ios_blocking');
-      final result = await channel.invokeMethod<bool>('checkNotificationPermission');
-      return result ?? false;
+      final plugin = FlutterLocalNotificationsPlugin();
+      final iosPlugin = plugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+      final result = await iosPlugin?.checkPermissions();
+      return result?.isEnabled ?? false;
     } catch (_) {
       return false;
     }
@@ -93,8 +96,14 @@ class _OnboardingPermissionsScreenState
 
   Future<void> _requestNotificationPermission() async {
     try {
-      const channel = MethodChannel('com.eagle.pausenow/ios_blocking');
-      await channel.invokeMethod('requestNotificationPermission');
+      final plugin = FlutterLocalNotificationsPlugin();
+      final iosPlugin = plugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+      await iosPlugin?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
       await Future.delayed(const Duration(seconds: 1));
       final granted = await _checkNotificationPermission();
       setState(() => _hasNotifications = granted);
@@ -131,7 +140,7 @@ class _OnboardingPermissionsScreenState
         _PermissionItem(
           emoji: '🔔',
           title: 'Notifications',
-          description: 'Get notified when your break ends or schedule resumes',
+          description: 'Get notified when your FREE TRIAL ends!',
           isGranted: _hasNotifications,
           isRequired: false,
           onRequest: _requestNotificationPermission,

@@ -25,8 +25,8 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   final List<_FeatureItem> _features = [
     _FeatureItem(label: 'Manual blocking', free: true, pro: true),
     _FeatureItem(label: '1 schedule', free: true, pro: true),
+    _FeatureItem(label: '3 apps per block session', free: true, pro: true),
     _FeatureItem(label: 'Unlimited schedules', free: false, pro: true),
-    _FeatureItem(label: '4+ apps per block session', free: false, pro: true),
     _FeatureItem(label: 'Unlimited apps per session', free: false, pro: true),
     _FeatureItem(label: '\'Block All Apps\' Mode', free: false, pro: true),
    // _FeatureItem(label: 'XP Weekly Stats', free: false, pro: true),
@@ -101,8 +101,8 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     if (_selectedPackage == null) return '';
     final type = _selectedPackage!.packageType;
     final price = _selectedPackage!.storeProduct.priceString;
-    if (type == PackageType.annual) return '7 days free, then $price/year. Cancel anytime.';
-    if (type == PackageType.monthly) return '7 days free, then $price/month. Cancel anytime.';
+    if (type == PackageType.annual) return '7 days free, then $price/year. Cancel 24 hours before in the app store.';
+    if (type == PackageType.monthly) return '7 days free, then $price/month. Cancel 24 hours before in the app store.';
     return 'One-time payment of $price. No subscription.';
   }
 
@@ -173,7 +173,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                                       ),
                                     ),
                                     TextSpan(
-                                      text: 'Pause Now ',
+                                      text: 'pause now ',
                                       style: const TextStyle(color: Color(0xFFEDB82A)),
                                     ),
                                     WidgetSpan(
@@ -324,7 +324,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                       'Maybe Later',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.white,
                           fontSize: 16),
                     ),
                   ),

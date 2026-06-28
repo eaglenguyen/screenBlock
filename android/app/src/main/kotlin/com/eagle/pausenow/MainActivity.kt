@@ -59,6 +59,10 @@ class MainActivity : FlutterActivity() {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                     result.success(null)
                 }
+                "openUsageAccessSettings" -> {
+                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    result.success(null)
+                }
                 "isBatteryOptimizationIgnored" -> {
                     val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
                     result.success(pm.isIgnoringBatteryOptimizations(context.packageName))

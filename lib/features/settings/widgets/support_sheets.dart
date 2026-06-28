@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../onboarding/widgets/mascot_character.dart';
 
 // ── Get Help Sheet ────────────────────────────────────
 
@@ -38,9 +39,9 @@ class _GetHelpSheetState extends State<GetHelpSheet> {
       'On iOS, go to Settings → Apple ID → Subscriptions → Pause Now → Cancel. Cancellation takes effect at the end of your current billing period.',
     },
     {
-      'q': 'What is XP and how do I earn it?',
+      'q': 'What are ⭐️ and how do I earn it?',
       'a':
-      'XP (Experience Points) is earned by completing blocking sessions. You earn 1 XP per minute blocked. Claim your XP at the end of each session from the home screen.',
+      '⭐️\'s are earned by completing blocking sessions. You earn 5 ⭐️ per minute blocked. Claim your ⭐️ at the end of each session from the home screen.',
     },
     {
       'q': 'Can I block all apps at once?',
@@ -60,7 +61,7 @@ class _GetHelpSheetState extends State<GetHelpSheet> {
     {
       'q': 'Why does the block screen keep appearing?',
       'a':
-      'This is intentional — the block screen reappears if you try to open a blocked app. Tap "Don\'t Open" to go home, or wait for the countdown to use "Open Anyway" for a 30-second exemption.',
+      'This is intentional — the block screen reappears if you try to open a blocked app.',
     },
     {
       'q': 'Why does blocking stop working after a while?',
@@ -97,22 +98,17 @@ class _GetHelpSheetState extends State<GetHelpSheet> {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
             child: Row(
               children: [
-                Container(
+                SizedBox(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySubtle(context),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.help_outline_rounded,
-                    color: AppColors.gold(context),
-                    size: 18,
+                  child: MascotCharacter(
+                    size: 36,
+                    rivFile: 'assets/rive/mr_square_hii.riv',
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Get Help',
+                  'FAQS',
                   style: AppTextStyles.headlineSmall.copyWith(
                     color: AppColors.textPrimary(context),
                   ),

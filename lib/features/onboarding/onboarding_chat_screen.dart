@@ -953,12 +953,15 @@ class OnboardingGoalsConfirmScreen extends StatefulWidget {
   final List<String> selectedGoals;
   final String futureVision;
   final VoidCallback onNext;
+  final double progress;         // 👈 add
+
 
   const OnboardingGoalsConfirmScreen({
     super.key,
     required this.selectedGoals,
     required this.futureVision, // 👈 add
     required this.onNext,
+    required this.progress,
   });
 
   @override
@@ -1049,6 +1052,20 @@ class _OnboardingGoalsConfirmScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // 👇 progress bar only, no back button
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: LinearProgressIndicator(
+                      value: widget.progress,
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFFEDB82A),
+                      ),
+                      minHeight: 4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   // selected goal cards
                   Expanded(
                     child: Center(

@@ -47,7 +47,7 @@ class StatsState {
   static double loadBlockGoalHours() {
     try {
       final box = Hive.box(HiveBoxNames.settings);
-      return (box.get('dailyBlockGoal', defaultValue: 1.0) as num)
+      return (box.get(HiveBoxNames.blockingGoalHours, defaultValue: 1.0) as num)
           .toDouble();
     } catch (_) {
       return 1.0;

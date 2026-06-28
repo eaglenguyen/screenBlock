@@ -4,6 +4,7 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../domain/platform/blocking_service.dart';
@@ -39,32 +40,76 @@ class SettingsViewModel extends _$SettingsViewModel {
   Future<void> _checkPermissions() async {
     final hasUsage = await _service.hasUsageStatsPermission();
     final hasOverlay = await _service.hasOverlayPermission();
-    final hasScreenTime = await _service.hasAccessibilityPermission(); // 👈 add
+    final hasScreenTime = await _service.hasAccessibilityPermission();
 
     bool hasAccessibility = false;
     if (Platform.isAndroid) {
       hasAccessibility = await _service.hasAccessibilityPermission();
     }
-    bool hasBattery = true; // iOS always true
+
+    bool hasBattery = true;
     if (Platform.isAndroid) {
-      // check via method channel since there's no Flutter API for this
       try {
         const channel = MethodChannel('com.eagle.pausenow/accessibility');
         hasBattery = await channel.invokeMethod<bool>(
-            'isBatteryOptimizationIgnored',
-        ) ?? false;
+          'isBatteryOptimizationIgnored',
+        ) ??
+            false;
       } catch (_) {
         hasBattery = false;
       }
     }
 
+    // 👇 check notification permission
+    bool hasNotification = false;
+
+    try {
+      final plugin = FlutterLocalNotificationsPlugin();
+      if (Platform.isIOS) {
+        final iosPlugin = plugin
+            .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+        final result = await iosPlugin?.checkPermissions();
+        hasNotification = result?.isEnabled ?? false;
+      } else {
+        final androidPlugin = plugin
+            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        hasNotification = await androidPlugin?.areNotificationsEnabled() ?? false;
+      }
+    } catch (_) {
+      hasNotification = false;
+    }
+
     state = state.copyWith(
-      hasScreenTimePermission: hasScreenTime, // 👈 add
-      hasAccessibilityPermission: hasAccessibility, // 👈 add
+      hasScreenTimePermission: hasScreenTime,
+      hasAccessibilityPermission: hasAccessibility,
       hasUsagePermission: hasUsage,
       hasOverlayPermission: hasOverlay,
       hasBatteryOptimization: hasBattery,
+      hasNotificationPermission: hasNotification, // 👈 add
     );
+  }
+
+  // 👇 add this method
+  Future<void> requestNotificationPermission() async {
+    try {
+      final plugin = FlutterLocalNotificationsPlugin();
+      if (Platform.isIOS) {
+        final iosPlugin = plugin
+            .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+        await iosPlugin?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      } else {
+        final androidPlugin = plugin
+            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        await androidPlugin?.requestNotificationsPermission();
+      }
+    } catch (e) {
+      debugPrint('❌ notification permission error: $e');
+    }
+    await _checkPermissions();
   }
 
   Future<void> checkPermissions() async => _checkPermissions(); // 👈 expose publicly

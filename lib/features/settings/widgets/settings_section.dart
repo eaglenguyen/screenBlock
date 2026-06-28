@@ -3,7 +3,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class SettingsRow {
-  final IconData icon;
+  final IconData? icon;
+  final String? iconAsset;     // 👈 add this
   final Color iconColor;
   final Color iconBgColor;
   final String label;
@@ -12,14 +13,15 @@ class SettingsRow {
   final Widget? trailing;
 
   const SettingsRow({
-    required this.icon,
+    this.icon,
+    this.iconAsset,
     required this.iconColor,
     required this.iconBgColor,
     required this.label,
     required this.onTap,
     this.isDanger = false,
     this.trailing,
-  });
+  }): assert(icon != null || iconAsset != null, 'Provide either icon or iconAsset');
 }
 
 class SettingsSection extends StatelessWidget {
@@ -129,8 +131,18 @@ class SettingsSection extends StatelessWidget {
         color: row.iconBgColor,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(
-        row.icon,
+      child: row.iconAsset != null
+          ? ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.asset(
+          row.iconAsset!,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+        ),
+      )
+          : Icon(
+        row.icon!,
         color: row.iconColor,
         size: 22,
       ),

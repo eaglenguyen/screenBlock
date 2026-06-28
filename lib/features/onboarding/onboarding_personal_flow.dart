@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
+import '../../core/constants/hivebox_names.dart';
 import '../../core/theme/theme.notifier.dart';
 import 'data/onboarding_graph.dart';
 import 'data/onboarding_stats.dart';
@@ -579,12 +581,10 @@ class _PhoneMockupContent extends StatelessWidget {
 // ── Screen 1 — Age Range ──────────────────────────────
 
 class OnboardingAgeScreen extends StatefulWidget {
-  final VoidCallback onBack;
   final Function(int age) onSelected;
 
   const OnboardingAgeScreen({
     super.key,
-    required this.onBack,
     required this.onSelected,
   });
 
@@ -621,7 +621,6 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
   @override
   Widget build(BuildContext context) {
     return _StatsShell(
-      onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -727,10 +726,6 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
     );
   }
 }
-
-// ── Screen Time Goal Screen ───────────────────────────
-
-
 class OnboardingScreenTimeGoalScreen extends StatefulWidget {
   final Function(int hours) onSelected;
 
@@ -749,11 +744,11 @@ class _OnboardingScreenTimeGoalScreenState
   int? _selectedHours;
 
   final List<Map<String, dynamic>> _options = [
-    {'hours': 1, 'label': 'Under 1 hour', 'sub': 'Highly disciplined', 'emoji': '🏆'},
-    {'hours': 2, 'label': 'Under 2 hours', 'sub': 'Focused and intentional', 'emoji': '⚡'},
-    {'hours': 3, 'label': 'Under 3 hours', 'sub': 'Balanced lifestyle', 'emoji': '🎯'},
-    {'hours': 4, 'label': 'Under 4 hours', 'sub': 'Making progress', 'emoji': '📈'},
-    {'hours': 5, 'label': 'Under 5 hours', 'sub': 'Starting the journey', 'emoji': '🌱'},
+    {'hours': 1, 'label': '1 hour blocked', 'sub': 'A solid start', 'emoji': '🌱'},
+    {'hours': 2, 'label': '2 hours blocked', 'sub': 'Building momentum', 'emoji': '📈'},
+    {'hours': 3, 'label': '3 hours blocked', 'sub': 'Serious focus', 'emoji': '🎯'},
+    {'hours': 4, 'label': '4 hours blocked', 'sub': 'Deep work mode', 'emoji': '⚡'},
+    {'hours': 5, 'label': '5 hours blocked', 'sub': 'Maximum discipline', 'emoji': '🏆'},
   ];
 
   @override
@@ -799,7 +794,7 @@ class _OnboardingScreenTimeGoalScreenState
                 children: [
                   // headline
                   Text(
-                    'Set your daily\nscreen time goal',
+                    'Set your daily\nblocking goal',
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 34,
@@ -809,23 +804,13 @@ class _OnboardingScreenTimeGoalScreenState
                     ),
                   ),
                   const SizedBox(height: 8),
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'You can change this later in settings',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.45),
-                            fontSize: 14,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'How many hours do you want\nto block distracting apps each day?',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: 0.45),
+                      fontSize: 14,
+                      height: 1.5,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -838,14 +823,17 @@ class _OnboardingScreenTimeGoalScreenState
                       const SizedBox(height: 10),
                       itemBuilder: (context, i) {
                         final opt = _options[i];
-                        final isSelected =
-                            _selectedHours == opt['hours'];
+                        final isSelected = _selectedHours == opt['hours'];
 
                         return GestureDetector(
-                          onTap: () {
+                          onTap:  () async {
                             HapticFeedback.lightImpact();
-                            setState(
-                                    () => _selectedHours = opt['hours']);
+                            setState(() => _selectedHours = opt['hours']);
+
+                            // 👇 save to Hive
+                            final box = Hive.box(HiveBoxNames.settings);
+                            await box.put(HiveBoxNames.blockingGoalHours, opt['hours']);
+
                             Future.delayed(
                               const Duration(milliseconds: 300),
                                   () => widget.onSelected(opt['hours']),
@@ -872,8 +860,7 @@ class _OnboardingScreenTimeGoalScreenState
                             child: Row(
                               children: [
                                 Text(opt['emoji'],
-                                    style:
-                                    const TextStyle(fontSize: 24)),
+                                    style: const TextStyle(fontSize: 24)),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
@@ -924,9 +911,13 @@ class _OnboardingScreenTimeGoalScreenState
                   ),
 
                   const SizedBox(height: 12),
-                  // skip option
                   GestureDetector(
-                    onTap: () => widget.onSelected(3), // default 3h
+                    onTap: () async {
+                      // 👇 save default
+                      final box = Hive.box(HiveBoxNames.settings);
+                      await box.put(HiveBoxNames.blockingGoalHours, 2);
+                      widget.onSelected(2);
+                    },
                     child: Text(
                       'Skip for now',
                       textAlign: TextAlign.center,
@@ -1297,7 +1288,7 @@ class _OnboardingBadNewsScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 80),
 
         FadeTransition(
           opacity: _fades[0],
@@ -1445,13 +1436,11 @@ class _OnboardingBadNewsScreenState
 // ── Screen 4 — Life Grid ──────────────────────────────
 
 class OnboardingLifeGridScreen extends StatefulWidget {
-  final VoidCallback onBack;
   final VoidCallback onNext;
   final OnboardingStatsData data;
 
   const OnboardingLifeGridScreen({
     super.key,
-    required this.onBack,
     required this.onNext,
     required this.data,
   });
@@ -1507,7 +1496,6 @@ class _OnboardingLifeGridScreenState
     final yearsLost = widget.data.yearsLostTotal.round().clamp(1, 40);
 
     return _StatsShell(
-      onBack: widget.onBack,
       child: Column(
         children: [
           const SizedBox(height: 24),

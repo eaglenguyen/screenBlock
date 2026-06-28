@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import 'package:pausenow/features/home/schedule/widgets/session_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/schedule.dart';
+import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
 import '../../paywall/feature_paywall_screen.dart';
@@ -102,9 +105,13 @@ class ScheduleScreen extends ConsumerWidget {
                                       : () => _openEditSession(context, ref, s),
                                   onToggle: isManualBlocking || isPaused
                                       ? () {}
-                                      : () => ref
-                                      .read(scheduleViewModelProvider.notifier)
-                                      .toggleSchedule(s.id),
+                                      : () => _checkAccessibilityAndProceed(
+                                    context,
+                                    ref,
+                                        () => ref
+                                        .read(scheduleViewModelProvider.notifier)
+                                        .toggleSchedule(s.id),
+                                  ),
                                   isCurrentlyActive:
                                   ref.watch(homeViewModelProvider).isScheduleActive &&
                                       ScheduleChecker.instance.activeScheduleId == s.id,
@@ -236,27 +243,29 @@ class ScheduleScreen extends ConsumerWidget {
   }
 
   void _openCreateSession(BuildContext context, WidgetRef ref) {
-    final isPremium = ref.read(isPremiumProvider);
-    final scheduleCount = ref.read(scheduleViewModelProvider).schedules.length;
+    _checkAccessibilityAndProceed(context, ref, () {
+      final isPremium = ref.read(isPremiumProvider);
+      final scheduleCount = ref.read(scheduleViewModelProvider).schedules.length;
 
-    if (!isPremium && scheduleCount >= 1) {
+      if (!isPremium && scheduleCount >= 1) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          useRootNavigator: true,
+          builder: (_) => const FeaturePaywallScreen(),
+        );
+        return;
+      }
+
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         useRootNavigator: true,
-        builder: (_) => const FeaturePaywallScreen(),
+        builder: (_) => const SessionBottomSheet(),
       );
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (_) => const SessionBottomSheet(),
-    );
+    });
   }
 
   void _openEditSession(
@@ -370,6 +379,108 @@ class _LockedScheduleCard extends StatelessWidget {
       ],
     );
   }
+}
+
+Future<void> _checkAccessibilityAndProceed(
+    BuildContext context,
+    WidgetRef ref,
+    VoidCallback onGranted,
+    ) async {
+  if (!Platform.isAndroid) {
+    onGranted();
+    return;
+  }
+
+  final service = ref.read(blockingServiceProvider);
+  final hasAccessibility = await service.hasAccessibilityPermission();
+
+  if (!context.mounted) return;
+
+  if (hasAccessibility) {
+    onGranted();
+    return;
+  }
+
+  // 👇 show dialog before going to settings
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: AppColors.backgroundCard(context),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: AppColors.gold(context).withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.accessibility_new_rounded,
+              color: AppColors.gold(context),
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Accessibility Required',
+            style: TextStyle(
+              color: AppColors.textPrimary(context),
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Accessibility permission needed to block apps. Tap below to enable it in Settings.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.textSecondary(context),
+              fontSize: 13,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await service.requestAccessibilityPermission();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.gold(context),
+              foregroundColor: AppColors.goldText(context),
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: const Text(
+              'Open Settings',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Not Now',
+              style: TextStyle(
+                color: AppColors.textSecondary(context),
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 //
 

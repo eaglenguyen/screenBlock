@@ -69,6 +69,22 @@ class _OnboardingWelcomeFlowState
   String _commitmentLevel = '';
   bool _isHighCommitment = false;
 
+  double _getProgress() {
+    // define which steps are QB steps
+    const qbSteps = [
+      OnboardingSteps.qbGoals,
+      OnboardingSteps.qbFutureVision,
+      OnboardingSteps.qbGoalsConfirm,
+      OnboardingSteps.qbPhoneUsage,
+      OnboardingSteps.qbSocialMedia,
+      OnboardingSteps.qbBlockers,
+      OnboardingSteps.qbStruggles,
+    ];
+    final index = qbSteps.indexOf(_currentStep);
+    if (index == -1) return 0.0;
+    return (index + 1) / qbSteps.length;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -184,7 +200,6 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.ageQuestion:
         return OnboardingAgeScreen(
           key: const ValueKey('age'),
-          onBack: _previousStep,
           onSelected: (age) {
             _userAge = age;
             _nextStep();
@@ -210,7 +225,6 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.lifeGrid:
         return OnboardingLifeGridScreen(
           key: const ValueKey('lifegrid'),
-          onBack: _previousStep,
           onNext: _nextStep,
           data: _statsData,
         );
@@ -226,6 +240,7 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.qbGoals:
         return QBGoalsScreen(
           key: const ValueKey('qbGoals'),
+          progress: _getProgress(), // 👈
           onNext: (goals) {
             setState(() => _selectedGoals = goals);
             _nextStep();
@@ -233,6 +248,8 @@ class _OnboardingWelcomeFlowState
         );
       case OnboardingSteps.qbFutureVision:
         return QBFutureVisionScreen(
+          progress: _getProgress(), // 👈
+          onBack: _previousStep,
           key: const ValueKey('qbFuture'),
           onNext: (answer) {
             setState(() => _selectedFuture = answer);
@@ -242,6 +259,7 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.qbGoalsConfirm:
         return OnboardingGoalsConfirmScreen(
           key: const ValueKey('qbGoalsConfirm'),
+          progress: _getProgress(), // 👈
           selectedGoals: _selectedGoals,
           futureVision: _selectedFuture,
           onNext: _nextStep,
@@ -249,21 +267,29 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.qbPhoneUsage:
         return QBPhoneUsageScreen(
           key: const ValueKey('qbPhone'),
+          progress: _getProgress(),
+          onBack: _previousStep,
           onNext: (_) => _nextStep(),
         );
       case OnboardingSteps.qbSocialMedia:
         return QBSocialMediaRelationshipScreen(
           key: const ValueKey('qbSocial'),
+          progress: _getProgress(),
+          onBack: _previousStep,
           onNext: (_) => _nextStep(),
         );
       case OnboardingSteps.qbBlockers:
         return QBBlockersScreen(
           key: const ValueKey('qbBlockers'),
+          progress: _getProgress(), // 👈
+          onBack: _previousStep,
           onNext: (_) => _nextStep(),
         );
       case OnboardingSteps.qbStruggles:
         return QBStrugglesScreen(
           key: const ValueKey('qbStruggles'),
+          progress: _getProgress(), // 👈
+          onBack: _previousStep,
           onNext: (_) => _nextStep(),
         );
       case OnboardingSteps.qbSympathy: // 👈 new
@@ -467,33 +493,6 @@ class _WelcomeScreenState extends State<_WelcomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // debug skip button — remove before release
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
-                        onTap: widget.onSkip,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Text(
-                            'Skip (debug)',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
 
                     const Spacer(flex: 2),
 
@@ -1113,3 +1112,4 @@ Widget _buildProgressBar({required int step, required int total}) {
     }),
   );
 }
+

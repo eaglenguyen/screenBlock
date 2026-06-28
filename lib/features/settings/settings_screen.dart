@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
@@ -11,6 +12,7 @@ import 'package:pausenow/features/settings/widgets/acknowledgements_sheet.dart';
 import 'package:pausenow/features/settings/widgets/profile_card.dart';
 import 'package:pausenow/features/settings/widgets/settings_section.dart';
 import 'package:pausenow/features/settings/widgets/support_sheets.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -106,10 +108,10 @@ class SettingsScreen extends ConsumerWidget {
                     label: 'Support',
                     rows: [
                       SettingsRow(
-                        icon: Icons.help_outline_rounded,
+                        iconAsset: "assets/icons/mascot_face.png",
                         iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
-                        label: 'FAQS',
+                        iconBgColor: Colors.transparent,
+                        label: 'Get Help',
                         onTap: () => GetHelpSheet.show(context), // 👈
                       ),
                       SettingsRow(
@@ -143,6 +145,21 @@ class SettingsScreen extends ConsumerWidget {
                   SettingsSection(
                     label: 'Permissions',
                     rows: [
+                      SettingsRow(
+                        icon: Icons.notifications_rounded,
+                        iconColor: AppColors.gold(context),
+                        iconBgColor: AppColors.primarySubtle(context),
+                        label: 'Notifications',
+                        onTap: () async {
+                          if (Platform.isIOS) {
+                            await openAppSettings();
+                          } else {
+                            await notifier.requestNotificationPermission();
+                          }
+                          await notifier.checkPermissions();
+                        },
+                        trailing: _batteryBadge(state.hasNotificationPermission, context),
+                      ),
                       if (Platform.isIOS)
                         SettingsRow(
                           icon: Icons.screen_lock_portrait_rounded,
@@ -285,47 +302,7 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
 
                   // 👇 debug section — only shows in debug mode
-                  if (kDebugMode) ...[
-                    const SizedBox(height: 8),
-                    SettingsSection(
-                      label: '🛠 Debug',
-                      rows: [
-                        SettingsRow(
-                          icon: Icons.star_rounded,
-                          iconColor: Colors.purple,
-                          iconBgColor: Colors.purple.withValues(alpha: 0.1),
-                          label: 'Force Premium',
-                          onTap: () {},
-                          trailing: Switch(
-                            value: debugPremiumOverride,
-                            onChanged: (val) {
-                              debugPremiumOverride = val;
-                              ref.invalidate(isPremiumProvider); // 👈 force rebuild
-                            },
-                            activeColor: AppColors.gold(context),
-                            activeTrackColor: AppColors.gold(context).withValues(alpha: 0.3),
-                            inactiveThumbColor: AppColors.textSecondary(context),
-                            inactiveTrackColor: AppColors.backgroundSubtle(context),
-                          ),
-                        ),
-                        SettingsRow(
-                          icon: Icons.restart_alt_rounded,
-                          iconColor: Colors.red,
-                          iconBgColor: Colors.red.withValues(alpha: 0.1),
-                          label: 'Reset Onboarding',
-                          onTap: () async {
-                            final box = Hive.box(HiveBoxNames.settings);
-                            await box.put('onboardingComplete', false);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Onboarding reset — restart app')),
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+
 
 
                   Center(
@@ -440,4 +417,5 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+
 }

@@ -16,7 +16,8 @@ class NotificationService {
         requestSoundPermission: false,
       ),
     );
-    await _plugin.initialize(settings: initSettings); // 👈 named parameter
+    await _plugin.initialize(settings: initSettings);
+
   }
 
   Future<void> cancelNotification(int id) async {

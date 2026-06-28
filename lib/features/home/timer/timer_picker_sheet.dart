@@ -21,7 +21,7 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
 
   late int _selected;
 
-  final List<int> _presets = [5, 15, 30, 60, 90, 120];
+  final List<int> _presets = [5, 15, 30, 60, 120, 180];
 
   @override
   void initState() {

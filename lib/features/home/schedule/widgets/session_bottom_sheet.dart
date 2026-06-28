@@ -117,8 +117,6 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
             const SizedBox(height: 8),
             _buildDayPicker(context),
             const SizedBox(height: 16),
-            _buildXpRow(context),
-            const SizedBox(height: 20),
             _buildSaveButton(context),
             if (isEditing) ...[
               const SizedBox(height: 10),
@@ -271,8 +269,10 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
       ),
     );
   }
-
   Widget _buildBlockingTypeRow(BuildContext context) {
+    final isPremium = ref.watch(isPremiumProvider);
+    final isAllApps = _blockingType == AppConstants.blockingTypeAllApps;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -282,18 +282,130 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
       ),
       child: Row(
         children: [
-          Text('Blocking Type', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context))),
+          Text(
+            'Blocking Type',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.textPrimary(context),
+            ),
+          ),
           const Spacer(),
-          GestureDetector(
-            onTap: _toggleBlockingType,
+          PopupMenuButton<String>(
+            color: AppColors.backgroundCard(context),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(color: AppColors.border(context), width: 0.5),
+            ),
+            onSelected: (value) {
+              if (value == AppConstants.blockingTypeAllApps && !isPremium) {
+                Navigator.pop(context);
+                Future.microtask(() {
+                  Navigator.of(context, rootNavigator: true).push(
+                    ModalBottomSheetRoute(
+                      builder: (_) => const FeaturePaywallScreen(),
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      useSafeArea: true,
+                    ),
+                  );
+                });
+                return;
+              }
+              setState(() => _blockingType = value);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: AppConstants.blockingTypeSpecificApps,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.apps_rounded,
+                      color: !isAllApps
+                          ? AppColors.gold(context)
+                          : AppColors.textSecondary(context),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Specific Apps',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: !isAllApps
+                            ? AppColors.gold(context)
+                            : AppColors.textPrimary(context),
+                        fontWeight: !isAllApps
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                    if (!isAllApps) ...[
+                      const Spacer(),
+                      Icon(Icons.check_rounded,
+                          color: AppColors.gold(context), size: 16),
+                    ],
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: AppConstants.blockingTypeAllApps,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.block_rounded,
+                      color: isAllApps
+                          ? AppColors.gold(context)
+                          : AppColors.textSecondary(context),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'All Apps',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: isAllApps
+                            ? AppColors.gold(context)
+                            : AppColors.textPrimary(context),
+                        fontWeight: isAllApps
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (isAllApps)
+                      Icon(Icons.check_rounded,
+                          color: AppColors.gold(context), size: 16),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.gold(context),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'PRO',
+                          style: TextStyle(
+                            color: AppColors.goldText(context),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                ),
+              ),
+            ],
             child: Row(
               children: [
                 Text(
-                  _blockingType == AppConstants.blockingTypeAllApps ? 'All Apps' : 'Specific Apps',
-                  style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gold(context)),
+                  isAllApps ? 'All Apps' : 'Specific Apps',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.gold(context),
+                  ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.gold(context), size: 18),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: AppColors.gold(context),
+                  size: 18,
+                ),
               ],
             ),
           ),
@@ -301,6 +413,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
       ),
     );
   }
+
 
   void _openAppPicker(bool isAllApps) {
     if (Platform.isIOS) {
@@ -487,18 +600,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
     );
   }
 
-  Widget _buildXpRow(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('⚡', style: TextStyle(fontSize: 14)),
-        const SizedBox(width: 4),
-        Text("You'll earn ", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context))),
-        Text('10 XP', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gold(context), fontWeight: FontWeight.w700)),
-        Text(' for each session', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context))),
-      ],
-    );
-  }
+
 
   Widget _buildSaveButton(BuildContext context) {
     return SizedBox(
@@ -617,33 +719,6 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
     );
   }
 
-  void _toggleBlockingType() {
-
-    final isPremium = ref.read(isPremiumProvider);
-
-// switching TO all apps requires premium
-    if (_blockingType == AppConstants.blockingTypeSpecificApps && !isPremium) {
-      Navigator.pop(context);
-      final nav = Navigator.of(context, rootNavigator: true); // 👈 store before async
-      Future.microtask(() {
-        nav.push(
-          ModalBottomSheetRoute(
-            builder: (_) => const FeaturePaywallScreen(),
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            useSafeArea: true,
-          ),
-        );
-      });
-      return;
-    }
-
-    setState(() {
-      _blockingType = _blockingType == AppConstants.blockingTypeAllApps
-          ? AppConstants.blockingTypeSpecificApps
-          : AppConstants.blockingTypeAllApps;
-    });
-  }
 
   void _toggleDay(int day) {
     setState(() {

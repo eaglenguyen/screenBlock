@@ -9,6 +9,7 @@ class SettingsState {
   final bool isPremium;
   final String appVersion;
   final bool hasScreenTimePermission;
+  final bool hasNotificationPermission; // 👈 add
 
 
   const SettingsState({
@@ -19,6 +20,7 @@ class SettingsState {
     this.hasAccessibilityPermission = false,
     this.isPremium = false,
     this.appVersion = '1.0.0',
+    this.hasNotificationPermission = false, // 👈 add
 
   });
 
@@ -30,6 +32,8 @@ class SettingsState {
     bool? hasAccessibilityPermission,
     bool? isPremium,
     String? appVersion,
+    bool? hasNotificationPermission, // 👈 add
+
   }) {
     return SettingsState(
       hasScreenTimePermission:
@@ -44,6 +48,8 @@ class SettingsState {
       hasAccessibilityPermission ?? this.hasAccessibilityPermission,
       isPremium: isPremium ?? this.isPremium,
       appVersion: appVersion ?? this.appVersion,
+      hasNotificationPermission:
+      hasNotificationPermission ?? this.hasNotificationPermission,
     );
   }
 }

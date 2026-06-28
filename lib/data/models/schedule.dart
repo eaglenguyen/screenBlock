@@ -72,10 +72,40 @@ class Schedule extends HiveObject {
     if (days.length == 7) return 'Every day';
     if (days.length == 5 &&
         !days.contains(5) &&
-        !days.contains(6)) return 'Weekdays';
+        !days.contains(6)) {
+      return 'Weekdays';
+    }
     if (days.length == 2 &&
         days.contains(5) &&
-        days.contains(6)) return 'Weekends';
+        days.contains(6)) {
+      return 'Weekends';
+    }
     return days.map((d) => labels[d]).join(' ');
+  }
+
+  Schedule copyWith({
+    String? id,
+    String? name,
+    String? startTime,
+    String? endTime,
+    List<int>? days,
+    String? blockingType,
+    List<String>? blockedApps,
+    List<String>? allowedApps,
+    bool? isActive,
+    DateTime? createdAt,
+  }) {
+    return Schedule(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      days: days ?? this.days,
+      blockingType: blockingType ?? this.blockingType,
+      blockedApps: blockedApps ?? this.blockedApps,
+      allowedApps: allowedApps ?? this.allowedApps,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+    );
   }
 }

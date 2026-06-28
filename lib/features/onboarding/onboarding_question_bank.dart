@@ -10,7 +10,14 @@ import 'package:pausenow/features/onboarding/widgets/mascot_character.dart';
 
 class _QBShell extends StatelessWidget {
   final Widget child;
-  const _QBShell({required this.child});
+  final double? progress; // 👈 0.0 to 1.0
+  final VoidCallback? onBack; // 👈 optional back handler
+
+  const _QBShell({
+    required this.child,
+    this.progress,
+    this.onBack
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +57,76 @@ class _QBShell extends StatelessWidget {
               ),
             ),
           ),
-          SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(24, 24, 24, 36), child: child)),
+          SafeArea(
+            child: Column(
+              children: [
+                // 👇 top bar with back button and progress bar
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Row(
+                    children: [
+                      // back button
+                      if (onBack != null)
+                        GestureDetector(
+                          onTap: onBack,
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 36),
+
+                      const SizedBox(width: 12),
+
+                      // progress bar
+                      if (progress != null)
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFFEDB82A),
+                              ),
+                              minHeight: 4,
+                            ),
+                          ),
+                        )
+                      else
+                        const Expanded(child: SizedBox()),
+
+                      const SizedBox(width: 48), // balance the back button
+                    ],
+                  ),
+                ),
+
+                // content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+                    child: child,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
+
 
 // ── Shared continue button ────────────────────────────
 
@@ -176,7 +247,17 @@ class _QBChoiceCard extends StatelessWidget {
 
 class QBGoalsScreen extends StatefulWidget {
   final Function(List<String> goals) onNext;
-  const QBGoalsScreen({super.key, required this.onNext});
+  final VoidCallback? onBack;   // 👈 add
+  final double progress;
+
+
+
+  const QBGoalsScreen({
+    super.key,
+    required this.onNext,
+    this.onBack,
+    required this.progress
+  });
 
   @override
   State<QBGoalsScreen> createState() => _QBGoalsScreenState();
@@ -196,6 +277,7 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
   @override
   Widget build(BuildContext context) {
     return _QBShell(
+      progress: widget.progress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -266,7 +348,15 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
 
 class QBFutureVisionScreen extends StatefulWidget {
   final Function(String answer) onNext;
-  const QBFutureVisionScreen({super.key, required this.onNext});
+  final VoidCallback? onBack;   // 👈 add
+  final double progress;
+
+
+  const QBFutureVisionScreen({super.key,
+    required this.onNext,
+    this.onBack,
+    required this.progress
+  });
 
   @override
   State<QBFutureVisionScreen> createState() => _QBFutureVisionScreenState();
@@ -286,6 +376,8 @@ class _QBFutureVisionScreenState extends State<QBFutureVisionScreen> {
   @override
   Widget build(BuildContext context) {
     return _QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -332,7 +424,15 @@ class _QBFutureVisionScreenState extends State<QBFutureVisionScreen> {
 
 class QBPhoneUsageScreen extends StatefulWidget {
   final Function(double hours) onNext;
-  const QBPhoneUsageScreen({super.key, required this.onNext});
+  final VoidCallback? onBack;   // 👈 add
+  final double progress;
+
+  const QBPhoneUsageScreen({
+    super.key,
+    required this.onNext,
+    this.onBack,
+    required this.progress
+  });
 
   @override
   State<QBPhoneUsageScreen> createState() => _QBPhoneUsageScreenState();
@@ -360,6 +460,8 @@ class _QBPhoneUsageScreenState extends State<QBPhoneUsageScreen> {
   @override
   Widget build(BuildContext context) {
     return _QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -424,7 +526,15 @@ class _QBPhoneUsageScreenState extends State<QBPhoneUsageScreen> {
 
 class QBSocialMediaRelationshipScreen extends StatefulWidget {
   final Function(String answer) onNext;
-  const QBSocialMediaRelationshipScreen({super.key, required this.onNext});
+  final VoidCallback? onBack;   // 👈 add
+  final double progress;
+
+  const QBSocialMediaRelationshipScreen({
+    super.key,
+    required this.onNext,
+    this.onBack,
+    required this.progress
+  });
 
   @override
   State<QBSocialMediaRelationshipScreen> createState() => _QBSocialMediaRelationshipScreenState();
@@ -443,6 +553,8 @@ class _QBSocialMediaRelationshipScreenState extends State<QBSocialMediaRelations
   @override
   Widget build(BuildContext context) {
     return _QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -484,7 +596,11 @@ class _QBSocialMediaRelationshipScreenState extends State<QBSocialMediaRelations
 
 class QBBlockersScreen extends StatefulWidget {
   final Function(List<String> answers) onNext;
-  const QBBlockersScreen({super.key, required this.onNext});
+  final VoidCallback? onBack;   // 👈 add
+  final double progress;
+
+
+  const QBBlockersScreen({super.key, required this.onNext, this.onBack, required this.progress});
 
   @override
   State<QBBlockersScreen> createState() => _QBBlockersScreenState();
@@ -504,6 +620,8 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
   @override
   Widget build(BuildContext context) {
     return _QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -560,7 +678,10 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
 
 class QBStrugglesScreen extends StatefulWidget {
   final Function(List<String> answers) onNext;
-  const QBStrugglesScreen({super.key, required this.onNext});
+  final VoidCallback? onBack;   // 👈 add
+  final double progress;
+
+  const QBStrugglesScreen({super.key, required this.onNext, this.onBack, required this.progress});
 
   @override
   State<QBStrugglesScreen> createState() => _QBStrugglesScreenState();
@@ -580,6 +701,8 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
   @override
   Widget build(BuildContext context) {
     return _QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

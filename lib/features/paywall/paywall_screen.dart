@@ -88,8 +88,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     if (_selectedPackage == null) return '';
     final type = _selectedPackage!.packageType;
     final price = _selectedPackage!.storeProduct.priceString;
-    if (type == PackageType.annual) return '7 days free, then $price/year. Cancel anytime.';
-    if (type == PackageType.monthly) return '7 days free, then $price/month. Cancel anytime.';
+    if (type == PackageType.annual) return '7 days free, then $price/year. Cancel 24 hours before in the app store.';
+    if (type == PackageType.monthly) return '7 days free, then $price/month. Cancel 24 hours before in the app store.';
     return 'One-time payment of $price. No subscription.';
   }
 
@@ -329,7 +329,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         label: isLifetime ? 'Today' : 'Day 5', // 👈
         desc: isLifetime
             ? "We won't send you a reminder since you chose Lifetime."
-            : "We'll remind you before your trial ends.",
+            : "We'll remind you 2 days before trial ends.",
         isActive: false,
       ),
       _TimelineItem(
@@ -337,7 +337,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         label: isLifetime ? 'Today' : 'Day 7', // 👈
         desc: isLifetime
             ? 'You will be charged immediately.'
-            : 'Cancel anytime. No surprises.',
+            : 'Cancel 24 hours before in the app store.',
         isActive: false,
       ),
     ];

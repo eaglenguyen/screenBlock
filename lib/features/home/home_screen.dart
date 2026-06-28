@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pausenow/features/home/timer/break_sheet.dart';
@@ -12,6 +14,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/permission_dialogs.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../services/xp_animation.dart';
 import '../onboarding/manual_blocking_tutorial.dart';
@@ -224,13 +227,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  void _onBlockNowTapped() {
+  void _onBlockNowTapped() async {
     final state = ref.read(homeViewModelProvider);
     final notifier = ref.read(homeViewModelProvider.notifier);
+    final service = ref.read(blockingServiceProvider);
 
     if (state.phase == BlockingPhase.idle) {
-      final hasApps = state.blockingType ==
-          AppConstants.blockingTypeSpecificApps
+      final hasApps = state.blockingType == AppConstants.blockingTypeSpecificApps
           ? state.blockedApps.isNotEmpty
           : state.allowedApps.isNotEmpty;
 
@@ -239,8 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           SnackBar(
             backgroundColor: AppColors.backgroundCard(context),
             content: Text(
-              state.blockingType ==
-                  AppConstants.blockingTypeSpecificApps
+              state.blockingType == AppConstants.blockingTypeSpecificApps
                   ? 'Add apps to block first'
                   : 'Add apps to allow first',
               style: TextStyle(color: AppColors.textPrimary(context)),
@@ -253,6 +255,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         );
         return;
       }
+
+      if (Platform.isAndroid) {
+        // check accessibility
+        final hasAccessibility = await service.hasAccessibilityPermission();
+        if (!hasAccessibility) {
+          if (!context.mounted) return;
+          final openSettings = await showAccessibilityDialog(context);
+          if (openSettings && context.mounted) {
+            await service.requestAccessibilityPermission();
+          }
+          return;
+        }
+
+        // check overlay
+        final hasOverlay = await service.hasOverlayPermission();
+        if (!hasOverlay) {
+          if (!context.mounted) return;
+          await service.requestOverlayPermission();
+          return;
+        }
+      }
+
+      if (!context.mounted) return;
       notifier.startBlocking();
     }
   }

@@ -62,7 +62,7 @@ class HomeHeader extends StatelessWidget {
               children: [
                 const SizedBox(height: 16),
                 Text(
-                  'XP Stats',
+                  '⭐️ Stats',
                   style: TextStyle(
                     color: AppColors.textPrimary(context),
                     fontSize: 20,

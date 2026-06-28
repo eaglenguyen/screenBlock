@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../onboarding/widgets/mascot_character.dart';
@@ -21,6 +24,9 @@ class _OnboardingOutlookScreenState extends State<OnboardingOutlookScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late List<Animation<double>> _cardAnims;
+
+
+
 
   final List<_WeekData> _weeks = [
     _WeekData(
@@ -101,6 +107,7 @@ class _OnboardingOutlookScreenState extends State<OnboardingOutlookScreen>
     _ctrl.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -419,13 +426,45 @@ class _WeekCard extends StatelessWidget {
 
 // ── Trial Reminder Screen ─────────────────────────────
 
-class OnboardingTrialReminderScreen extends StatelessWidget {
+class OnboardingTrialReminderScreen extends StatefulWidget {
   final VoidCallback onNext;
 
   const OnboardingTrialReminderScreen({
     super.key,
     required this.onNext,
   });
+
+  @override
+  State<OnboardingTrialReminderScreen> createState() =>
+      _OnboardingTrialReminderScreenState();
+}
+
+class _OnboardingTrialReminderScreenState
+    extends State<OnboardingTrialReminderScreen> {
+
+  Future<void> _requestNotificationAndContinue() async {
+    HapticFeedback.lightImpact();
+    try {
+      final plugin = FlutterLocalNotificationsPlugin();
+      if (Platform.isIOS) {
+        final iosPlugin = plugin
+            .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+        await iosPlugin?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      } else {
+        final androidPlugin = plugin
+            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        await androidPlugin?.requestNotificationsPermission();
+      }
+    } catch (e) {
+      debugPrint('❌ notification permission error: $e');
+    }
+    widget.onNext();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -568,10 +607,7 @@ class OnboardingTrialReminderScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        onNext();
-                      },
+                      onPressed: _requestNotificationAndContinue, // 👈 replace onNext() call
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEDB82A),
                         foregroundColor: const Color(0xFF1A1208),

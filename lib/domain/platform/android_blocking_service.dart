@@ -198,7 +198,7 @@ class AndroidBlockingService implements BlockingService {
 
   @override
   Future<void> requestUsageStatsPermission() async {
-    await _methodChannel.invokeMethod('openAccessibilitySettings');
+    await _methodChannel.invokeMethod('openUsageAccessSettings');
   }
 
   @override
