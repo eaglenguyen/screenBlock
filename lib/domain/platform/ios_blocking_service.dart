@@ -154,12 +154,28 @@ class IOSBlockingService implements BlockingService {
   }
 // IOS logic
 
+  Future<void> playSystemSound(int soundId) async {
+    try {
+      await _channel.invokeMethod('playSystemSound', {'soundId': soundId});
+    } catch (e) {
+      debugPrint('❌ playSystemSound error: $e');
+    }
+  }
+
   Future<void> pauseBlocking(int minutes) async {
     try {
       await _channel.invokeMethod('pauseBlocking', {'minutes': minutes});
       debugPrint('⏸ iOS pauseBlocking: $minutes mins');
     } catch (e) {
       debugPrint('❌ pauseBlocking error: $e');
+    }
+  }
+
+  Future<void> stopSessionMonitoring() async {
+    try {
+      await _channel.invokeMethod('stopSessionMonitoring');
+    } catch (e) {
+      debugPrint('❌ stopSessionMonitoring error: $e');
     }
   }
 

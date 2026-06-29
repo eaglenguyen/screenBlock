@@ -4,6 +4,8 @@ import Flutter
 import SwiftUI
 import UserNotifications
 import os
+import AudioToolbox
+
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -179,6 +181,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             NSLog("📊 getScreenTimeTotal called — value: \(total)") 
             let date = sharedDefaults?.string(forKey: "screenTimeTotalDate") ?? ""
             result(["total": total, "date": date])
+        case "playSystemSound":
+            if let args = call.arguments as? [String: Any],
+               let soundId = args["soundId"] as? UInt32 {
+                AudioServicesPlaySystemSound(soundId)
+            }
+            result(nil)
+        case "stopSessionMonitoring":
+            service.stopSessionMonitoring()
+            result(nil)
         case "showScreenTimeReport":
             await showScreenTimeReport(result: result)
         case "checkNotificationPermission":

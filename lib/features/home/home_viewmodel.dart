@@ -19,6 +19,7 @@ import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
 import '../../providers/premium_provider.dart';
+import '../../services/notification_service.dart';
 import '../../services/schedule_checker.dart';
 import '../appPicker/app_picker_viewmodel.dart';
 import 'home_state.dart';
@@ -420,6 +421,19 @@ class HomeViewModel extends _$HomeViewModel {
       sessionStartTime: startTime,
     );
 
+    // 👇 schedule break notification if pomodoro mode
+    if (state.pomodoroConfig.isPomodoroMode) {
+      await NotificationService.instance.cancelNotification(200);
+      await NotificationService.instance.scheduleNotification(
+        id: 200,
+        title: 'Break time! 🍅',
+        body: 'Work session complete! Take a short break.',
+        scheduledTime: DateTime.now().add(
+          Duration(minutes: state.pomodoroConfig.workMinutes),
+        ),
+      );
+    }
+
     _sessionTimer?.cancel();
     _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
@@ -435,16 +449,15 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── Session complete ──────────────────────────────
   void _onSessionComplete() async {
+    if (state.pomodoroConfig.isPomodoroMode) {
+      _onPomodoroRoundComplete();
+      return;
+    }
+
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).stopBlockingCompletely();
     } else {
       _blockingService.stopAllMonitoring();
-    }
-
-    if (state.pomodoroConfig.isPomodoroMode) {
-      await Future.delayed(const Duration(milliseconds: 500));
-      startBreak(state.pomodoroConfig.shortBreakMinutes);
-      return;
     }
 
     if (state.activeSessionKey != null) {
@@ -464,9 +477,46 @@ class HomeViewModel extends _$HomeViewModel {
       xpEarned: state.selectedMinutes * 5,
     );
 
-    // check if a schedule should now be active
     ScheduleChecker.instance.checkNow();
   }
+
+  // ── Pomodoro round complete ───────────────────────
+  void _onPomodoroRoundComplete() async {
+    if (state.activeSessionKey != null) {
+      await _sessionRepo.endSession(
+        key: state.activeSessionKey!,
+        completed: true,
+      );
+    }
+
+    final newRoundCount = state.pomodoroRoundCount + 1;
+    state = state.copyWith(pomodoroRoundCount: newRoundCount);
+
+    final isLongBreak = newRoundCount % 4 == 0;
+    final breakMinutes = newRoundCount % 4 == 0
+        ? state.pomodoroConfig.longBreakMinutes
+        : state.pomodoroConfig.shortBreakMinutes;
+
+
+    if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).playSystemSound(1005);
+    }
+
+    // 👇 notify user work session ended
+    await NotificationService.instance.cancelNotification(200);
+    await NotificationService.instance.scheduleNotification(
+      id: 200,
+      title: 'Break time! 🍅',
+      body: breakMinutes == state.pomodoroConfig.longBreakMinutes
+          ? 'Great work! Time for a long break — you earned it.'
+          : 'Work session complete! Take a short break.',
+      scheduledTime: DateTime.now().add(const Duration(seconds: 1)),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 300));
+    startBreak(breakMinutes);
+  }
+
 
   void finishAndUnblock() {
     state = state.copyWith(phase: BlockingPhase.claimXp);
@@ -480,6 +530,7 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── Give up ───────────────────────────────────────
   Future<void> giveUp() async {
+    await NotificationService.instance.cancelNotification(200);
     _sessionTimer?.cancel();
     _breakTimer?.cancel();
 
@@ -554,12 +605,17 @@ class HomeViewModel extends _$HomeViewModel {
     _resumeAfterBreak(state.remainingSeconds);
   }
 
+
+// ── Resume after break ────────────────────────────
   Future<void> _resumeAfterBreak(int remainingSeconds) async {
+    if (state.pomodoroConfig.isPomodoroMode) {
+      await _resumeAfterPomodoroBreak();
+      return;
+    }
+
     _blockingService.setBlockingMode(state.blockingType);
 
     if (Platform.isIOS) {
-      // only resume from Flutter side for manual sessions
-      // schedule sessions are handled natively by IOSBlockingService
       if (state.phase == BlockingPhase.onBreak) {
         await (_blockingService as IOSBlockingService).resumeBlocking();
       }
@@ -581,10 +637,6 @@ class HomeViewModel extends _$HomeViewModel {
       }
     }
 
-    if (state.pomodoroConfig.isPomodoroMode) {
-      state = state.copyWith(selectedMinutes: state.pomodoroConfig.workMinutes);
-    }
-
     state = state.copyWith(
       phase: BlockingPhase.active,
       remainingSeconds: remainingSeconds,
@@ -603,6 +655,74 @@ class HomeViewModel extends _$HomeViewModel {
       }
     });
   }
+
+
+  // ── Resume after Pomodoro break ───────────────────
+  Future<void> _resumeAfterPomodoroBreak() async {
+    _blockingService.setBlockingMode(state.blockingType);
+    if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).playSystemSound(1005);
+    }
+    if (Platform.isIOS) {
+      final iosService = _blockingService as IOSBlockingService;
+      await iosService.startMonitoring(
+        'ios_apps',
+        state.pomodoroConfig.workMinutes,
+        'manual',
+        state.blockingType,
+      );
+    } else {
+      final apps = state.blockingType == AppConstants.blockingTypeSpecificApps
+          ? state.blockedApps
+          : state.allowedApps;
+      for (final pkg in apps) {
+        await _blockingService.startMonitoring(pkg, state.pomodoroConfig.workMinutes);
+      }
+      if (_blockingService is AndroidBlockingService) {
+        final svc = _blockingService as AndroidBlockingService;
+        await svc.savePauseEndTime(0);
+        await svc.persistBlockingState(
+          sessionMinutes: state.pomodoroConfig.workMinutes,
+          sessionType: 'manual',
+        );
+        await svc.checkCurrentForegroundApp();
+      }
+    }
+
+    final workMinutes = state.pomodoroConfig.workMinutes;
+    final newStartTime = DateTime.now();
+    final totalSeconds = workMinutes * 60;
+
+    state = state.copyWith(
+      phase: BlockingPhase.active,
+      selectedMinutes: workMinutes,
+      remainingSeconds: totalSeconds,
+      sessionStartTime: newStartTime,
+      breakRemainingSeconds: 0,
+    );
+
+    // 👇 reschedule break notification for next round
+    await NotificationService.instance.cancelNotification(200);
+    await NotificationService.instance.scheduleNotification(
+      id: 200,
+      title: 'Break time! 🍅',
+      body: 'Work session complete! Take a short break.',
+      scheduledTime: DateTime.now().add(Duration(minutes: workMinutes)),
+    );
+
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
+      final remaining = totalSeconds - elapsed;
+      if (remaining <= 0) {
+        timer.cancel();
+        _onPomodoroRoundComplete();
+      } else {
+        state = state.copyWith(remainingSeconds: remaining);
+      }
+    });
+  }
+
 
   // ── App resumed ───────────────────────────────────
   void onAppResumed() {

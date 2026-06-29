@@ -11,6 +11,8 @@ class ActiveBlockingCard extends StatelessWidget {
   final VoidCallback onGiveUp;
   final VoidCallback onEndBreak;
   final VoidCallback onBlockListTapped;
+  final bool isPomodoroMode;
+
 
 
   const ActiveBlockingCard({
@@ -20,6 +22,8 @@ class ActiveBlockingCard extends StatelessWidget {
     required this.onGiveUp,
     required this.onEndBreak,
     required this.onBlockListTapped,
+    required this.isPomodoroMode,
+
 
 
   });
@@ -59,6 +63,24 @@ class ActiveBlockingCard extends StatelessWidget {
   }
 
   Widget _buildSessionIcon() {
+    if (isPomodoroMode) {
+      return Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE74C3C).withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFE74C3C).withValues(alpha: 0.3),
+            width: 0.5,
+          ),
+        ),
+        child: const Center(
+          child: Text('🍅', style: TextStyle(fontSize: 28)),
+        ),
+      );
+    }
+
     return Container(
       width: 56,
       height: 56,
@@ -80,11 +102,10 @@ class ActiveBlockingCard extends StatelessWidget {
 
   Widget _buildSessionName() {
     return Text(
-      'Manual Session',
+      isPomodoroMode ? 'Pomodoro Session' : 'Manual Session',
       style: AppTextStyles.headlineSmall,
     );
   }
-
   Widget _buildBlockListPill(BuildContext context) {
     final label = state.blockingType == 'specific_apps'
         ? 'Specific Apps'

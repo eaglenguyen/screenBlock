@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -149,7 +151,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Work in focused bursts with automatic breaks',
+            'Work in focused bursts with automatic breaks\n(Allow Notifications!)',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textSecondary(context),
             ),
@@ -223,6 +225,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 minutes: _workMinutes,
                 min: 5,
                 max: 60,
+                defaultValue: 25, // 👈
                 onChanged: (v) => setState(() => _workMinutes = v),
               ),
               const SizedBox(height: 10),
@@ -231,8 +234,9 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 emoji: '☕',
                 label: 'Short Break',
                 minutes: _shortBreakMinutes,
-                min: 1,
+                min: 3,
                 max: 15,
+                defaultValue: 15, // 👈
                 onChanged: (v) => setState(() => _shortBreakMinutes = v),
               ),
               const SizedBox(height: 10),
@@ -241,8 +245,9 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 emoji: '🧘',
                 label: 'Long Break',
                 minutes: _longBreakMinutes,
-                min: 5,
+                min: 15,
                 max: 30,
+                defaultValue: 30, // 👈
                 onChanged: (v) => setState(() => _longBreakMinutes = v),
               ),
               const SizedBox(height: 20),
@@ -296,7 +301,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Enable Pomodoro Mode',
+                'Enable',
                 style: AppTextStyles.bodyLarge.copyWith(
                   color: AppColors.textPrimary(context),
                 ),
@@ -345,6 +350,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
         required int minutes,
         required int min,
         required int max,
+        required int defaultValue,  // 👈 add this for reset
         required ValueChanged<int> onChanged,
       }) {
     return Container(
@@ -368,14 +374,17 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
           ),
           Row(
             children: [
-              _stepButton(
+              _HoldStepButton(
                 icon: Icons.remove,
-                onTap: minutes > min
-                    ? () {
+                enabled: minutes > min,
+                onStep: () {
                   HapticFeedback.lightImpact();
-                  onChanged(minutes - 1);
-                }
-                    : null,
+                  onChanged((minutes - 1).clamp(min, max));
+                },
+                onFastStep: () {
+                  HapticFeedback.selectionClick();
+                  onChanged((minutes - 5).clamp(min, max));
+                },
               ),
               SizedBox(
                 width: 48,
@@ -388,21 +397,54 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   ),
                 ),
               ),
-              _stepButton(
+              _HoldStepButton(
                 icon: Icons.add,
-                onTap: minutes < max
-                    ? () {
+                enabled: minutes < max,
+                onStep: () {
                   HapticFeedback.lightImpact();
-                  onChanged(minutes + 1);
-                }
-                    : null,
+                  onChanged((minutes + 1).clamp(min, max));
+                },
+                onFastStep: () {
+                  HapticFeedback.selectionClick();
+                  onChanged((minutes + 5).clamp(min, max));
+                },
               ),
+              // 👇 reset button
+              if (minutes != defaultValue) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    onChanged(defaultValue);
+                  },
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundCard(context),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.border(context),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.refresh_rounded,
+                      size: 14,
+                      color: AppColors.textSecondary(context),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ],
       ),
     );
   }
+
+
+
 
   Widget _stepButton({
     required IconData icon,
@@ -429,3 +471,82 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
     );
   }
 }
+
+class _HoldStepButton extends StatefulWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onStep;
+  final VoidCallback onFastStep;
+
+  const _HoldStepButton({
+    required this.icon,
+    required this.enabled,
+    required this.onStep,
+    required this.onFastStep,
+  });
+
+  @override
+  State<_HoldStepButton> createState() => _HoldStepButtonState();
+}
+
+class _HoldStepButtonState extends State<_HoldStepButton> {
+  Timer? _holdTimer;
+  int _holdCount = 0;
+
+  void _startHold() {
+    if (!widget.enabled) return;
+    widget.onStep(); // immediate first step
+    _holdCount = 0;
+    _holdTimer = Timer.periodic(const Duration(milliseconds: 150), (_) {
+      if (!widget.enabled) {
+        _stopHold();
+        return;
+      }
+      _holdCount++;
+      // after 5 ticks (~0.75s) switch to fast +5 increments
+      if (_holdCount > 5) {
+        widget.onFastStep();
+      } else {
+        widget.onStep();
+      }
+    });
+  }
+
+  void _stopHold() {
+    _holdTimer?.cancel();
+    _holdTimer = null;
+    _holdCount = 0;
+  }
+
+  @override
+  void dispose() {
+    _holdTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _startHold(),
+      onTapUp: (_) => _stopHold(),
+      onTapCancel: _stopHold,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: AppColors.backgroundCard(context),
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.border(context), width: 0.5),
+        ),
+        child: Icon(
+          widget.icon,
+          size: 16,
+          color: widget.enabled
+              ? AppColors.textPrimary(context)
+              : AppColors.textSecondary(context),
+        ),
+      ),
+    );
+  }
+}
+

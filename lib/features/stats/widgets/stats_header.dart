@@ -28,7 +28,7 @@ class StatsHeader extends ConsumerWidget {
       child: Row(
         children: [
           Text(
-            "Today's Screen Time",
+            "Today's Stats",
             style: AppTextStyles.headlineSmall.copyWith(fontSize: 18),
           ),
           const Spacer(),

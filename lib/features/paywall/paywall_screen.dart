@@ -530,16 +530,38 @@ class _PlanCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    if (monthlyEquivalent != null)
-                    // 👇 replaces price entirely for annual
-                      Text(
-                        monthlyEquivalent!,
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
+                    if (monthlyEquivalent != null) ...[
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: price,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            TextSpan(
+                              text: period,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white.withValues(alpha: 0.45),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
                         ),
-                      )
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '($monthlyEquivalent)',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ]
                     else
                     // 👇 normal price for monthly and lifetime
                       RichText(

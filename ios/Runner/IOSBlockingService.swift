@@ -86,7 +86,10 @@ class IOSBlockingService: NSObject {
     // MARK: - Pause / Break
     var onPauseEnded: (() -> Void)?
 
-
+    func stopSessionMonitoring() {
+        activityCenter.stopMonitoring([activityName]) // stops "com.eagle.pausenow.session"
+    }
+    
     func pauseBlocking(forMinutes minutes: Int) {
         NSLog("⏸ pauseBlocking for \(minutes) minutes")
         

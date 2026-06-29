@@ -44,6 +44,7 @@ class HomeState {
   final int schedulePauseRemainingSeconds;
 
   final PomodoroConfig pomodoroConfig;
+  final int pomodoroRoundCount;
 
 
 
@@ -74,6 +75,7 @@ class HomeState {
     this.schedulePauseRemainingSeconds = 0,
 
     this.pomodoroConfig = const PomodoroConfig(),
+    this.pomodoroRoundCount = 0,
 
 
   });
@@ -105,6 +107,7 @@ class HomeState {
     bool? isSchedulePaused,
     int? schedulePauseRemainingSeconds,
     PomodoroConfig? pomodoroConfig,
+    int? pomodoroRoundCount,
 
   }) {
     return HomeState(
@@ -133,6 +136,8 @@ class HomeState {
       isSchedulePaused: isSchedulePaused ?? this.isSchedulePaused,
       schedulePauseRemainingSeconds: schedulePauseRemainingSeconds ?? this.schedulePauseRemainingSeconds,
       pomodoroConfig: pomodoroConfig ?? this.pomodoroConfig,
+      pomodoroRoundCount: pomodoroRoundCount ?? this.pomodoroRoundCount,
+
 
     );
   }
