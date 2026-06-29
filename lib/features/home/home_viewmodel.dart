@@ -151,10 +151,23 @@ class HomeViewModel extends _$HomeViewModel {
     // 👇 capture before state changes
     final wasAllApps = state.blockingType == AppConstants.blockingTypeAllApps;
 
+    // 👇 stop pomodoro session if active
+    if (state.pomodoroConfig.isPomodoroMode &&
+        (state.phase == BlockingPhase.active || state.phase == BlockingPhase.onBreak)) {
+      giveUp();
+    }
+
     // reset blocking type
     if (wasAllApps) {
       setBlockingType(AppConstants.blockingTypeSpecificApps);
       debugPrint('💎 blocking type reset to specific apps');
+    }
+
+    if (state.pomodoroConfig.isPomodoroMode) {
+      state = state.copyWith(
+        pomodoroConfig: state.pomodoroConfig.copyWith(isPomodoroMode: false),
+      );
+      debugPrint('💎 pomodoro mode disabled');
     }
 
     // 👇 update any saved schedules that use all_apps blocking type
@@ -167,7 +180,6 @@ class HomeViewModel extends _$HomeViewModel {
           blockingType: AppConstants.blockingTypeSpecificApps,
         );
         scheduleBox.put(key, updated);
-        debugPrint('💎 schedule ${schedule.name} reset to specific apps');
       }
     }
 
@@ -489,11 +501,19 @@ class HomeViewModel extends _$HomeViewModel {
       );
     }
 
+    // 👇 accumulate XP per round
+    final xpThisRound = state.pomodoroConfig.workMinutes * 5;
+    final totalXpEarned = state.xpEarned + xpThisRound;
+
     final newRoundCount = state.pomodoroRoundCount + 1;
-    state = state.copyWith(pomodoroRoundCount: newRoundCount);
+    state = state.copyWith(
+      pomodoroRoundCount: newRoundCount,
+      xpEarned: totalXpEarned,
+
+    );
 
     final isLongBreak = newRoundCount % 4 == 0;
-    final breakMinutes = newRoundCount % 4 == 0
+    final breakMinutes = isLongBreak
         ? state.pomodoroConfig.longBreakMinutes
         : state.pomodoroConfig.shortBreakMinutes;
 
@@ -530,9 +550,10 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── Give up ───────────────────────────────────────
   Future<void> giveUp() async {
-    await NotificationService.instance.cancelNotification(200);
     _sessionTimer?.cancel();
     _breakTimer?.cancel();
+
+    await NotificationService.instance.cancelNotification(200);
 
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).stopBlockingCompletely();
@@ -550,14 +571,26 @@ class HomeViewModel extends _$HomeViewModel {
     await Future.delayed(const Duration(milliseconds: 100));
     loadTodayBlockedTime();
 
-    state = state.copyWith(
-      phase: BlockingPhase.idle,
-      remainingSeconds: 0,
-      breakRemainingSeconds: 0,
-      activeSessionKey: null,
-    );
+    // 👇 pomodoro with completed rounds → show claim screen
+    // manual blocking or pomodoro with 0 rounds → go idle
+    if (state.pomodoroConfig.isPomodoroMode && state.xpEarned > 0) {
+      state = state.copyWith(
+        phase: BlockingPhase.completed,
+        remainingSeconds: 0,
+        activeSessionKey: null,
+        pomodoroRoundCount: 0,
+      );
+    } else {
+      state = state.copyWith(
+        phase: BlockingPhase.idle,
+        remainingSeconds: 0,
+        breakRemainingSeconds: 0,
+        activeSessionKey: null,
+        pomodoroRoundCount: 0,
+        xpEarned: 0,
+      );
+    }
 
-    // check if a schedule should now be active
     ScheduleChecker.instance.checkNow();
   }
 

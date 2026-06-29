@@ -18,6 +18,25 @@ class NotificationService {
     );
     await _plugin.initialize(settings: initSettings);
 
+    // 👇 create channels for Android 8+ (API 26+)
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'subscription_expiry',
+        'Subscription Expiry',
+        description: 'Notifies when subscription is about to expire',
+        importance: Importance.high,
+      ),
+    );
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'pomodoro',
+        'Pomodoro Timer',
+        description: 'Notifies when Pomodoro work or break ends',
+        importance: Importance.high,
+      ),
+    );
   }
 
   Future<void> cancelNotification(int id) async {
@@ -30,15 +49,19 @@ class NotificationService {
     required String body,
     required DateTime scheduledTime,
   }) async {
+
+    final channelId = (id == 200 || id == 201) ? 'pomodoro' : 'subscription_expiry';
+    final channelName = (id == 200 || id == 201) ? 'Pomodoro Timer' : 'Subscription Expiry';
+
     await _plugin.zonedSchedule(
       id: id,
       title: title,
       body: body,
       scheduledDate: tz.TZDateTime.from(scheduledTime, tz.local),
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
-          'subscription_expiry',
-          'Subscription Expiry',
+          channelId,
+          channelName,
           channelDescription: 'Notifies when subscription is about to expire',
           importance: Importance.high,
           priority: Priority.high,

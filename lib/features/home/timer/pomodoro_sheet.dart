@@ -236,17 +236,17 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 minutes: _shortBreakMinutes,
                 min: 3,
                 max: 15,
-                defaultValue: 15, // 👈
+                defaultValue: 5, // 👈
                 onChanged: (v) => setState(() => _shortBreakMinutes = v),
               ),
               const SizedBox(height: 10),
               _buildDurationRow(
                 context,
                 emoji: '🧘',
-                label: 'Long Break',
+                label: 'Long Break (4 rounds)',
                 minutes: _longBreakMinutes,
                 min: 15,
-                max: 30,
+                max: 60,
                 defaultValue: 30, // 👈
                 onChanged: (v) => setState(() => _longBreakMinutes = v),
               ),

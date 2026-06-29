@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive/hive.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:pausenow/features/settings/settings_viewmodel.dart';
 import 'package:pausenow/features/settings/widgets/acknowledgements_sheet.dart';
@@ -154,7 +153,14 @@ class SettingsScreen extends ConsumerWidget {
                           if (Platform.isIOS) {
                             await openAppSettings();
                           } else {
-                            await notifier.requestNotificationPermission();
+                            final androidPlugin = FlutterLocalNotificationsPlugin()
+                                .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+                            final granted = await androidPlugin?.areNotificationsEnabled() ?? false;
+                            if (!granted) {
+                              await notifier.requestNotificationPermission();
+                            } else {
+                              await openAppSettings(); // 👈 opens app settings where notifications toggle is
+                            }
                           }
                           await notifier.checkPermissions();
                         },
@@ -302,7 +308,32 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
 
                   // 👇 debug section — only shows in debug mode
-
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 8),
+                    SettingsSection(
+                      label: '🛠 Debug',
+                      rows: [
+                        SettingsRow(
+                          icon: Icons.star_rounded,
+                          iconColor: Colors.purple,
+                          iconBgColor: Colors.purple.withValues(alpha: 0.1),
+                          label: 'Force Premium',
+                          onTap: () {},
+                          trailing: Switch(
+                            value: debugPremiumOverride,
+                            onChanged: (val) {
+                              debugPremiumOverride = val;
+                              ref.invalidate(isPremiumProvider); // 👈 force rebuild
+                            },
+                            activeColor: AppColors.gold(context),
+                            activeTrackColor: AppColors.gold(context).withValues(alpha: 0.3),
+                            inactiveThumbColor: AppColors.textSecondary(context),
+                            inactiveTrackColor: AppColors.backgroundSubtle(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
 
 
                   Center(

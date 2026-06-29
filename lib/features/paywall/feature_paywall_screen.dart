@@ -29,7 +29,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     _FeatureItem(label: 'Unlimited schedules', free: false, pro: true),
     _FeatureItem(label: 'Unlimited apps per session', free: false, pro: true),
     _FeatureItem(label: '\'Block All Apps\' Mode', free: false, pro: true),
-   // _FeatureItem(label: 'XP Weekly Stats', free: false, pro: true),
+    _FeatureItem(label: 'Pomodoro Mode 🍅', free: false, pro: true),
   ];
 
   @override
