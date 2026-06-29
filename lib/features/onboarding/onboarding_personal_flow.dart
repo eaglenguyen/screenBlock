@@ -1277,7 +1277,6 @@ class _OnboardingBadNewsScreenState
 
         const SizedBox(height: 40),
 
-        // shimmer placeholders
 
       ],
     );
@@ -1285,7 +1284,8 @@ class _OnboardingBadNewsScreenState
 
   // ── Stats UI ──────────────────────────────────────
   Widget _buildStatsPhase(OnboardingStatsData d, int yearsLost) {
-    return Column(
+    return SingleChildScrollView(
+     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 80),
@@ -1311,7 +1311,7 @@ class _OnboardingBadNewsScreenState
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: '${d.hoursPerDay.toStringAsFixed(1)}',
+                  text: d.hoursPerDay.toStringAsFixed(1),
                   style: GoogleFonts.poppins(
                     color: const Color(0xFFEDB82A),
                     fontSize: 64,
@@ -1393,6 +1393,7 @@ class _OnboardingBadNewsScreenState
           opacity: _fades[5], // 👈 button is last
           child: _GoldButton(label: 'Show me', onTap: widget.onNext),
         ),      ],
+    ),
     );
   }
 

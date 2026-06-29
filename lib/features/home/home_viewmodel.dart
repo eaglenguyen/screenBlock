@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hive/hive.dart';
+import 'package:pausenow/features/home/timer/pomodoro_sheet.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -178,6 +179,14 @@ class HomeViewModel extends _$HomeViewModel {
     // end session if was blocking all apps
     if (state.phase == BlockingPhase.active && wasAllApps) {
       giveUp();
+    }
+  }
+
+  // Pro
+  void setPomodoroConfig(PomodoroConfig config) {
+    state = state.copyWith(pomodoroConfig: config);
+    if (config.isPomodoroMode) {
+      state = state.copyWith(selectedMinutes: config.workMinutes);
     }
   }
 
@@ -432,6 +441,12 @@ class HomeViewModel extends _$HomeViewModel {
       _blockingService.stopAllMonitoring();
     }
 
+    if (state.pomodoroConfig.isPomodoroMode) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      startBreak(state.pomodoroConfig.shortBreakMinutes);
+      return;
+    }
+
     if (state.activeSessionKey != null) {
       await _sessionRepo.endSession(
         key: state.activeSessionKey!,
@@ -564,6 +579,10 @@ class HomeViewModel extends _$HomeViewModel {
         );
         await svc.checkCurrentForegroundApp();
       }
+    }
+
+    if (state.pomodoroConfig.isPomodoroMode) {
+      state = state.copyWith(selectedMinutes: state.pomodoroConfig.workMinutes);
     }
 
     state = state.copyWith(

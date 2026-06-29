@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:pausenow/features/home/timer/pomodoro_sheet.dart';
 import '../../../data/models/timer_config.dart';
 import '../../../data/models/streak.dart';
 import '../../core/constants/app_constants.dart';
@@ -42,6 +43,9 @@ class HomeState {
   final bool isSchedulePaused;
   final int schedulePauseRemainingSeconds;
 
+  final PomodoroConfig pomodoroConfig;
+
+
 
 
   const HomeState({
@@ -68,6 +72,9 @@ class HomeState {
     this.isScheduleActive = false,
     this.isSchedulePaused = false,
     this.schedulePauseRemainingSeconds = 0,
+
+    this.pomodoroConfig = const PomodoroConfig(),
+
 
   });
 
@@ -97,6 +104,8 @@ class HomeState {
     bool? isScheduleActive,
     bool? isSchedulePaused,
     int? schedulePauseRemainingSeconds,
+    PomodoroConfig? pomodoroConfig,
+
   }) {
     return HomeState(
       trackedApps: trackedApps ?? this.trackedApps,
@@ -123,6 +132,8 @@ class HomeState {
       isScheduleActive: isScheduleActive ?? this.isScheduleActive,
       isSchedulePaused: isSchedulePaused ?? this.isSchedulePaused,
       schedulePauseRemainingSeconds: schedulePauseRemainingSeconds ?? this.schedulePauseRemainingSeconds,
+      pomodoroConfig: pomodoroConfig ?? this.pomodoroConfig,
+
     );
   }
 

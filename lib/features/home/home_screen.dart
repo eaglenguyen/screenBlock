@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:pausenow/features/home/timer/break_sheet.dart';
 import 'package:pausenow/features/home/cards/countdown_card.dart';
 import 'package:pausenow/features/home/cards/active_blocking_card.dart';
+import 'package:pausenow/features/home/timer/pomodoro_sheet.dart';
 import 'package:pausenow/features/home/widgets/app_list_sheet.dart';
 import 'package:pausenow/features/home/widgets/block_mode_sheet.dart';
 import 'package:pausenow/features/home/widgets/home_header.dart';
@@ -159,6 +159,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       blockedTime: state.formattedBlockedTime,
                       shouldAnimate: state.shouldAnimateBlockedTime,
                       isScheduleActive: state.isScheduleActive,
+                      onPomodoroTapped: _onPomodoroTapped,
+                      isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
                       onTutorialTap: () {
                         showGeneralDialog(
                           context: context,
@@ -224,6 +226,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
         ],
       ),
+    );
+  }
+
+  void _onPomodoroTapped() {
+    PomodoroSheet.show(
+      context,
+      config: ref.read(homeViewModelProvider).pomodoroConfig,
+      onSave: (config) {
+        ref.read(homeViewModelProvider.notifier).setPomodoroConfig(config);
+      },
     );
   }
 

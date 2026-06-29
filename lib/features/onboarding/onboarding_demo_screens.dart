@@ -356,6 +356,18 @@ class _DemoPickAppScreen extends ConsumerWidget {
             onTap: () => _openAppPicker(context, ref),
           ),
           const SizedBox(height: 16),
+          // 👇 add skip option
+          GestureDetector(
+            onTap: onNext,
+            child: Text(
+              'Skip for now',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: Colors.white.withValues(alpha: 0.3),
+                fontSize: 13,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1020,7 +1032,8 @@ class _DemoXpScreenState extends State<_DemoXpScreen>
   @override
   Widget build(BuildContext context) {
     return _DemoShell(
-      child: Column(
+        child: SingleChildScrollView( // 👈 add only here
+        child: Column(
         children: [
           const SizedBox(height: 24),
           Text(
@@ -1202,12 +1215,12 @@ class _DemoXpScreenState extends State<_DemoXpScreen>
             ],
           ),
 
-          const Spacer(),
+          const SizedBox(height: 24),
           if (_claimed)
             _DemoButton(label: 'Next →', onTap: widget.onNext),
         ],
       ),
-    );
+    ));
   }
 
   Widget _mockupStatCard({

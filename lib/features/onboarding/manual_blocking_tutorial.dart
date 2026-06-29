@@ -137,7 +137,8 @@ class _ManualStep1HomeScreen extends StatelessWidget {
             child: _HomeScreenMockup(highlightBlockNow: true),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 24),
+
           _TutorialButton(label: 'Next →', onTap: onNext),
         ],
       ),
@@ -217,7 +218,7 @@ class _ManualStep2BlockMode extends StatelessWidget {
             ),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 24),
           _TutorialButton(label: 'Next →', onTap: onNext),
           if (showSkip) ...[
             const SizedBox(height: 12),
@@ -279,7 +280,7 @@ class _ManualStep3AppPicker extends StatelessWidget {
             child: _AppPickerMockup(),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 24),
           _TutorialButton(label: 'Next →', onTap: onNext),
         ],
       ),
@@ -328,7 +329,7 @@ class _ManualStep4Timer extends StatelessWidget {
             child: _TimerSheetMockup(),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 24),
           _TutorialButton(label: 'Next →', onTap: onNext),
         ],
       ),
@@ -376,7 +377,7 @@ class _ManualStep5ActiveSession extends StatelessWidget {
             child: _ActiveSessionMockup(),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 24),
           _TutorialButton(label: "Let's go! 🚀", onTap: onNext),
         ],
       ),
@@ -703,7 +704,7 @@ class _HomeScreenMockupState extends State<_HomeScreenMockup>
               fontWeight: FontWeight.w600,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 24),
           _TutorialBottomNav(activeIndex: 0),
         ],
       ),
@@ -901,7 +902,7 @@ class _AppPickerMockup extends StatelessWidget {
             ),
           )),
 
-          const Spacer(),
+          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -1069,7 +1070,7 @@ class _ActiveSessionMockup extends StatelessWidget {
               ],
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 24),
           _TutorialBottomNav(activeIndex: 0),
         ],
       ),
@@ -1157,7 +1158,9 @@ class _TutorialShell extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
-              child: child,
+              child: SingleChildScrollView( // 👈 add this
+                child: child,
+              ),
             ),
           ),
         ],

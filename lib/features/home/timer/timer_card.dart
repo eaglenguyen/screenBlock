@@ -17,6 +17,9 @@ class TimerCard extends StatefulWidget {
   final VoidCallback? onAnimationStarted;
   final VoidCallback onTutorialTap;
   final bool isScheduleActive;
+  final VoidCallback onPomodoroTapped;
+  final bool isPomodoroMode;
+
 
 
   const TimerCard({
@@ -32,6 +35,8 @@ class TimerCard extends StatefulWidget {
     required this.onAnimationStarted,
     required this.onTutorialTap,
     this.isScheduleActive = false,
+    required this.onPomodoroTapped,
+    this.isPomodoroMode = false,
 
   });
 
@@ -298,7 +303,7 @@ class _TimerCardState extends State<TimerCard>
   }
 
   Widget _buildBlockNowButton() {
-    final isDisabled = widget.isScheduleActive; // 👈 add this param
+    final isDisabled = widget.isScheduleActive;
 
     return Row(
       children: [
@@ -315,10 +320,8 @@ class _TimerCardState extends State<TimerCard>
               size: 30,
             ),
             label: Text(
-              isDisabled ? 'Schedule is Active' : 'Block Now', // 👈 dynamic label
-              style: TextStyle(
-                fontSize: 20,
-              ),
+              isDisabled ? 'Schedule is Active' : 'Block Now',
+              style: const TextStyle(fontSize: 20),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: isDisabled
@@ -331,6 +334,30 @@ class _TimerCardState extends State<TimerCard>
               padding: const EdgeInsets.symmetric(vertical: 15),
               shape: const StadiumBorder(),
               textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 25),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // 👇 Pomodoro button
+        GestureDetector(
+          onTap: widget.onPomodoroTapped,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: widget.isPomodoroMode
+                  ? const Color(0xFFE74C3C).withValues(alpha: 0.15)
+                  : AppColors.backgroundSubtle(context),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: widget.isPomodoroMode
+                    ? const Color(0xFFE74C3C).withValues(alpha: 0.5)
+                    : AppColors.border(context),
+                width: widget.isPomodoroMode ? 1.5 : 0.5,
+              ),
+            ),
+            child: const Center(
+              child: Text('🍅', style: TextStyle(fontSize: 20)),
             ),
           ),
         ),
