@@ -55,6 +55,11 @@ void main() async {
   await Hive.openBox<Schedule>(HiveBoxNames.schedules);
   await Hive.openBox<BlockSession>(HiveBoxNames.blockSessions);
 
+  final settingsBox = Hive.box(HiveBoxNames.settings);
+  if (settingsBox.get('installDate') == null) {
+    await settingsBox.put('installDate', DateTime.now().millisecondsSinceEpoch);
+  }
+
   // 👇 initialize RevenueCat before app launches
   await RevenueCatService.instance.initialize();
 

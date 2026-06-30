@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pausenow/features/onboarding/widgets/mascot_character.dart';
+import 'package:pausenow/onboarding/widgets/mascot_character.dart';
 
 // ── Shared shell ──────────────────────────────────────
 
@@ -381,7 +381,6 @@ class _QBFutureVisionScreenState extends State<QBFutureVisionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 32),
           Text('Looking into the future...',
               style: GoogleFonts.poppins(
                 color: const Color(0xFFEDB82A), fontSize: 14, fontWeight: FontWeight.w600,
@@ -693,7 +692,7 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
   final List<Map<String, String>> _options = [
     {'emoji': '🌀', 'title': 'Anxiety or overthinking', 'sub': 'Mind won\'t stop racing'},
     {'emoji': '🔋', 'title': 'Low motivation', 'sub': 'Feeling stuck and stagnant'},
-    {'emoji': '🚶‍', 'title': 'Feeling disconnected from people', 'sub': 'Lonely even in a crowd'},
+    {'emoji': '🫪', 'title': 'Easily Distracted', 'sub': 'Hard time focusing on one thing'},
     {'emoji': '⏳', 'title': 'Procrastination', 'sub': 'Always putting things off'},
     {'emoji': '🙅', 'title': 'None of these really apply', 'sub': 'I\'m doing okay here'},
   ];
@@ -891,7 +890,7 @@ class QBCommitmentLowScreen extends StatelessWidget {
                 fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.2,
               )),
           const SizedBox(height: 16),
-          Text('You don\'t need to be ready — you just need\nto start. Pause Now is designed to make\nchange feel easy, not overwhelming.',
+          Text('You don\'t need to be ready —\n you just need to start.\npause now is designed to make change\nfeel easy, not overwhelming.',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 color: Colors.white.withValues(alpha: 0.45), fontSize: 15, height: 1.5,

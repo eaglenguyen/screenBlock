@@ -15,9 +15,9 @@ import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/permission_dialogs.dart';
+import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../services/xp_animation.dart';
-import '../onboarding/manual_blocking_tutorial.dart';
 import 'cards/claim_xp_card.dart';
 import 'cards/session_completed_card.dart';
 import 'home_state.dart';
@@ -80,6 +80,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             );
             Future.delayed(const Duration(milliseconds: 1000), () {
               _hasShownXpAnimation = false;
+
+              ref.read(homeViewModelProvider.notifier).requestReviewOnFirstClaim();
+
             });
           }
         });
@@ -198,7 +201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           onEndBreak: () => _showEndBreakConfirm(),
                           onBlockListTapped: _onBlockListTapped,
                           isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
-
+                          pomodoroRound: state.pomodoroRoundCount, // 👈 add
                         ),
                   // Completed
                     BlockingPhase.completed => SessionCompletedCard(

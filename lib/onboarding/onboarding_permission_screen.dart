@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pausenow/features/onboarding/widgets/onboarding_animations.dart';
 
 import '../../../providers/blocking_service_provider.dart';
+import 'onboarding_animations.dart';
 
 class OnboardingPermissionsScreen extends ConsumerStatefulWidget {
   final VoidCallback onNext;

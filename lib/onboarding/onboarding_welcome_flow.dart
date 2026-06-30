@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import '../../core/constants/hivebox_names.dart';
-import '../paywall/onboarding_outlook_screen.dart';
+import '../features/paywall/onboarding_outlook_screen.dart';
 import 'data/onboarding_stats.dart';
 import 'onboarding_permission_screen.dart';
 import 'onboarding_question_bank.dart';
@@ -38,14 +38,13 @@ class OnboardingSteps {
   static const int demo = 17;
   static const int commitment = 18;
   static const int commitmentResult = 19;
-  static const int reviewPopup = 20;
-  static const int themePicker = 21;
-  static const int screenTimeGoal = 22;
-  static const int loadingPlan = 23;
-  static const int reflection = 24;
-  static const int outlook = 25;
-  static const int trialReminder = 26;
-  static const int paywall = 27;
+  static const int themePicker = 20;
+  static const int screenTimeGoal = 21;
+  static const int loadingPlan = 22;
+  static const int reflection = 23;
+  static const int outlook = 24;
+  static const int trialReminder = 25;
+  static const int paywall = 26;
 }
 
 class OnboardingWelcomeFlow extends ConsumerStatefulWidget {
@@ -68,6 +67,8 @@ class _OnboardingWelcomeFlowState
   String _selectedFuture = '';
   String _commitmentLevel = '';
   bool _isHighCommitment = false;
+  bool _isNavigating = false;
+
 
   double _getProgress() {
     // define which steps are QB steps
@@ -98,15 +99,29 @@ class _OnboardingWelcomeFlowState
 
 
   void _nextStep() {
+    if (_isNavigating) return; // 👈 ignore rapid taps
+    _isNavigating = true;
+
     HapticFeedback.lightImpact();
     final nextStep = _currentStep + 1;
     setState(() => _currentStep = nextStep);
     _saveProgress(nextStep);
+
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) _isNavigating = false;
+    });
   }
 
   void _previousStep() {
+    if (_isNavigating) return; // 👈 reuse same flag
+    _isNavigating = true;
+
     HapticFeedback.lightImpact();
     setState(() => _currentStep--);
+
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) _isNavigating = false;
+    });
   }
 
   void _saveProgress(int step) {
@@ -125,7 +140,6 @@ class _OnboardingWelcomeFlowState
     int savedStep = box.get('onboardingStep', defaultValue: 0) as int;
 
     const autoAdvanceSteps = [
-      OnboardingSteps.reviewPopup,
       OnboardingSteps.paywall,
     ];
     if (autoAdvanceSteps.contains(savedStep)) {
@@ -298,7 +312,6 @@ class _OnboardingWelcomeFlowState
           userName: _userName,
           onNext: _nextStep,
         );
-
       case OnboardingSteps.permissions:
         return OnboardingPermissionsScreen(
           key: const ValueKey('permissions'),
@@ -334,9 +347,6 @@ class _OnboardingWelcomeFlowState
           level: _commitmentLevel,
           onNext: _nextStep,
         );
-      case OnboardingSteps.reviewPopup:
-        WidgetsBinding.instance.addPostFrameCallback((_) => _nextStep());
-        return const SizedBox.shrink();
       case OnboardingSteps.themePicker:
         return OnboardingThemeScreen(
           key: const ValueKey('theme'),
@@ -359,7 +369,6 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.reflection:
         return OnboardingProductivityScreen(
           key: const ValueKey('productivity'),
-          onBack: _previousStep,
           onNext: _nextStep,
         );
       case OnboardingSteps.outlook:
@@ -398,105 +407,135 @@ class _WelcomeScreen extends StatefulWidget {
   State<_WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<_WelcomeScreen> {
+class _WelcomeScreenState extends State<_WelcomeScreen>
+    with SingleTickerProviderStateMixin {
   int _slide = 0;
+  bool _isAdvancing = false;
+  late AnimationController _slideCtrl;
+  late Animation<double> _slideAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _slideAnim = CurvedAnimation(parent: _slideCtrl, curve: Curves.easeInOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _slideCtrl.dispose();
+    super.dispose();
+  }
 
   void _advance() {
+    if (_isAdvancing) return;
+    _isAdvancing = true;
+
     if (_slide < 2) {
-      setState(() => _slide++);
+      _slideCtrl.forward(from: 0).then((_) {
+        setState(() => _slide++);
+        _slideCtrl.value = 0;
+      });
     } else {
       widget.onGetStarted();
+      return;
     }
+
+    Future.delayed(const Duration(milliseconds: 750), () {
+      if (mounted) _isAdvancing = false;
+    });
   }
 
-  Widget _buildStatement() {
-    switch (_slide) {
-      case 0:
-        return RichText(
-          key: const ValueKey(0),
-          text: TextSpan(
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              height: 1.2,
-            ),
-            children: const [
-              TextSpan(
-                text: '66 days.',
-                style: TextStyle(color: Color(0xFFEDB82A)),
+  List<Widget> get _statements => [
+    RichText(
+      text: TextSpan(
+        style: GoogleFonts.poppins(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.5,
+          height: 1.2,
+        ),
+        children: const [
+          TextSpan(text: '66 days.', style: TextStyle(color: Color(0xFFEDB82A))),
+          TextSpan(text: " That's how long it takes to build a new habit."),
+        ],
+      ),
+    ),
+    Text(
+      'The secret? Pausing and being present in the moment.',
+      style: GoogleFonts.poppins(
+        color: Colors.white,
+        fontSize: 32,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.5,
+        height: 1.2,
+      ),
+    ),
+    Text(
+      'Pause Now turns that discipline into a lifestyle. Starting today.',
+      style: GoogleFonts.poppins(
+        color: Colors.white,
+        fontSize: 32,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.5,
+        height: 1.2,
+      ),
+    ),
+  ];
+
+  Widget _buildSlidingStatement() {
+    return ClipRect(
+      child: AnimatedBuilder(
+        animation: _slideAnim,
+        builder: (context, child) {
+          final progress = _slideAnim.value;
+          return Stack(
+            children: [
+              // current statement slides fully out to the left
+              Transform.translate(
+                offset: Offset(-progress * 400, 0), // 👈 slides all the way off screen
+                child: _statements[_slide],
               ),
-              TextSpan(
-                text: " That's how long it takes to build a new habit.",
-              ),
+              // next statement slides in from the right
+              if (_slide < 2)
+                Transform.translate(
+                  offset: Offset((1 - progress) * 400, 0), // 👈 starts off right, ends at 0
+                  child: _statements[_slide + 1],
+                ),
             ],
-          ),
-        );
-      case 1:
-        return Text(
-          'The secret? Pausing and being present in the moment.',
-          key: const ValueKey(1),
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-            height: 1.2,
-          ),
-        );
-      case 2:
-        return Text(
-          'Pause Now turns that discipline into a lifestyle. Starting today.',
-          key: const ValueKey(2),
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-            height: 1.2,
-          ),
-        );
-      default:
-        return const SizedBox.shrink();
-    }
+          );
+        },
+      ),
+    );
   }
-
   @override
   Widget build(BuildContext context) {
     final isLast = _slide == 2;
 
-    return GestureDetector(
-      onTap: _advance,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: const Color(0xFF0E0E1A),
         body: Stack(
           children: [
-            // subtle gradient bg
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF0E0E1A),
-                    Color(0xFF0A1628),
-                  ],
+                  colors: [Color(0xFF0E0E1A), Color(0xFF0A1628)],
                 ),
               ),
             ),
-
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(28, 24, 28, 40),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // debug skip button — remove before release
-
                     const Spacer(flex: 2),
-
-                    // app name
                     Text(
                       'pause now',
                       style: GoogleFonts.poppins(
@@ -507,8 +546,6 @@ class _WelcomeScreenState extends State<_WelcomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // progress dots
                     Row(
                       children: List.generate(3, (i) {
                         final isActive = i <= _slide;
@@ -526,45 +563,14 @@ class _WelcomeScreenState extends State<_WelcomeScreen> {
                         );
                       }),
                     ),
-
                     const SizedBox(height: 32),
 
-                    // bold statement
-                    // bold statement
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 700),
-                      transitionBuilder: (child, animation) {
-                        final isEntering = animation.status == AnimationStatus.forward ||
-                            animation.status == AnimationStatus.completed;
-
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: isEntering
-                                ? const Offset(-1, 0)   // 👈 entering slides in from right
-                                : const Offset(1, 0), // 👈 exiting slides out to left
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: FadeTransition(opacity: animation, child: child),
-                        );
-                      },
-                      layoutBuilder: (currentChild, previousChildren) {
-                        return Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            ...previousChildren,
-                            if (currentChild != null) currentChild,
-                          ],
-                        );
-                      },
-                      child: _buildStatement(),
+                    SizedBox(
+                      height: 160, // generous enough for 3 lines at 32px + buffer
+                      child: _buildSlidingStatement(),
                     ),
 
                     const Spacer(flex: 3),
-
-                    // bottom CTA
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       child: isLast
@@ -576,12 +582,9 @@ class _WelcomeScreenState extends State<_WelcomeScreen> {
                             ElevatedButton(
                               onPressed: widget.onGetStarted,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                const Color(0xFFEDB82A),
-                                foregroundColor:
-                                const Color(0xFF1A1208),
-                                minimumSize:
-                                const Size(double.infinity, 58),
+                                backgroundColor: const Color(0xFFEDB82A),
+                                foregroundColor: const Color(0xFF1A1208),
+                                minimumSize: const Size(double.infinity, 58),
                                 shape: const StadiumBorder(),
                                 elevation: 0,
                                 textStyle: GoogleFonts.poppins(
@@ -595,25 +598,27 @@ class _WelcomeScreenState extends State<_WelcomeScreen> {
                             Text(
                               'Free 7-day trial · No signup required',
                               style: GoogleFonts.poppins(
-                                color: Colors.white
-                                    .withValues(alpha: 0.28),
+                                color: Colors.white.withValues(alpha: 0.28),
                                 fontSize: 13,
                               ),
                             ),
                           ],
                         ),
                       )
-                          : Padding(
+                          : GestureDetector( // 👈 only this wraps in GestureDetector now
                         key: const ValueKey('tap'),
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Center(
-                          child: Text(
-                            'Tap to continue',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white
-                                  .withValues(alpha: 0.3),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                        onTap: _advance,
+                        behavior: HitTestBehavior.opaque, // 👈 ensures full padding area is tappable
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Center(
+                            child: Text(
+                              'Tap to continue',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
@@ -625,8 +630,7 @@ class _WelcomeScreenState extends State<_WelcomeScreen> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:pausenow/features/onboarding/widgets/bouncing_arrow.dart';
+import 'package:pausenow/onboarding/widgets/bouncing_arrow.dart';
 
 // ── Manual Blocking Tutorial Flow ────────────────────
 // Can be used in onboarding (step 7) or replayed from home screen
@@ -192,7 +192,7 @@ class _ManualStep2BlockMode extends StatelessWidget {
           Center(
             child: Container(
               width: 260,
-              height: 320,
+              height: 220,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
                 border: Border.all(color: const Color(0xFF3A3A5C), width: 2.5),
@@ -206,17 +206,13 @@ class _ManualStep2BlockMode extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(29),
-                child: OverflowBox(
-                  alignment: Alignment.bottomCenter, // 👈 anchor to bottom
-                  minWidth: 260,
-                  maxWidth: 260,
-                  minHeight: 600, // 👈 full phone height rendered
-                  maxHeight: 600,
+                child: SizedBox(
+                  height: 220, // 👈 matches actual sheet content height
                   child: _BlockModeSheetMockup(),
                 ),
               ),
+              ),
             ),
-          ),
 
           const SizedBox(height: 24),
           _TutorialButton(label: 'Next →', onTap: onNext),
@@ -275,12 +271,12 @@ class _ManualStep3AppPicker extends StatelessWidget {
           const SizedBox(height: 28),
 
           TutorialPhoneMockup(
-            height: 300,
+            height: 250,
             width: 250,
             child: _AppPickerMockup(),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 60),
           _TutorialButton(label: 'Next →', onTap: onNext),
         ],
       ),
@@ -704,8 +700,6 @@ class _HomeScreenMockupState extends State<_HomeScreenMockup>
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 24),
-          _TutorialBottomNav(activeIndex: 0),
         ],
       ),
     );
@@ -721,17 +715,8 @@ class _BlockModeSheetMockup extends StatelessWidget {
     return Container(
       color: const Color(0xFF1A1A1A),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.end, // 👈 push sheet to bottom
         children: [
-          // dimmed home screen behind
-          Expanded(
-            flex: 2,
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.5),
-              child: const Center(
-                child: Icon(Icons.home_rounded, color: Colors.white24, size: 30),
-              ),
-            ),
-          ),
           // bottom sheet
           Container(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
@@ -1070,8 +1055,6 @@ class _ActiveSessionMockup extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          _TutorialBottomNav(activeIndex: 0),
         ],
       ),
     );

@@ -167,7 +167,7 @@ class IOSBlockingService: NSObject {
         
     }
     
-    private func scheduleResumeNotification(afterSeconds seconds: Int) {
+    private func scheduleResumeNotification(afterSeconds seconds: Int) {                            
         let content = UNMutableNotificationContent()
         content.title = "Break Over 🔒"
         content.body = "Blocking has resumed. Please close any blocked apps."

@@ -9,7 +9,31 @@ import android.view.accessibility.AccessibilityEvent
 
 class AppBlockAccessibilityService : AccessibilityService() {
 
+
+
     companion object {
+        private val systemWhitelist = setOf(
+            "android",
+            "com.android.systemui",
+            "com.android.dialer",
+            "com.android.phone",
+            "com.android.contacts",
+            "com.android.mms",
+            "com.android.messaging",
+            "com.android.settings",
+            "com.google.android.gms",
+            "com.google.android.gsf",
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.inputmethod.latin",
+            "com.samsung.android.dialer",
+            "com.samsung.android.contacts",
+            "com.samsung.android.messaging",
+            "com.android.emergency",
+            "com.eagle.pausenow",
+        )
+
+
+
         var eventCallback: ((String) -> Unit)? = null
         var isRunning = false
         private val exemptedPackages = mutableSetOf<String>()
@@ -48,6 +72,23 @@ class AppBlockAccessibilityService : AccessibilityService() {
         }
     }
 
+    fun isSystemApp(packageName: String): Boolean {
+        // explicit whitelist
+        if (systemWhitelist.contains(packageName)) return true
+        if (packageName.contains("launcher")) return true
+        if (packageName.contains("systemui")) return true
+
+        // 👇 use PackageManager to check if it's a real system app
+        return try {
+            val pm = applicationContext.packageManager
+            val appInfo = pm.getApplicationInfo(packageName, 0)
+            // FLAG_SYSTEM means it's in /system/app or /system/priv-app
+            (appInfo.flags.toLong() and android.content.pm.ApplicationInfo.FLAG_SYSTEM.toLong()) != 0L
+        } catch (e: Exception) {
+            false // if we can't find the app, don't block it
+        }
+    }
+
     private lateinit var prefs: SharedPreferences
     private val pauseCheckHandler = android.os.Handler(android.os.Looper.getMainLooper())
 
@@ -65,7 +106,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
                     val monitoredApps = prefs.getStringSet("monitoredApps", emptySet()) ?: emptySet()
                     val shouldBlock = when (blockingMode) {
                         "specific_apps" -> monitoredApps.contains(pkg)
-                        else -> !monitoredApps.contains(pkg)
+                        else -> !monitoredApps.contains(pkg) && !isSystemApp(pkg)
                     }
                     if (shouldBlock && isBlocking &&
                         !exemptedPackages.contains(pkg)) {
@@ -105,7 +146,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
                     val monitoredApps = prefs.getStringSet("monitoredApps", emptySet()) ?: emptySet()
                     val shouldBlock = when (blockingMode) {
                         "specific_apps" -> monitoredApps.contains(pkg)
-                        else -> !monitoredApps.contains(pkg)
+                        else -> !monitoredApps.contains(pkg) && !isSystemApp(pkg)
                     }
                     if (shouldBlock) {
                         val now = System.currentTimeMillis()
@@ -202,30 +243,25 @@ class AppBlockAccessibilityService : AccessibilityService() {
             "Flutter not running — checking native prefs for: $packageName")
         checkAndBlockFromPrefs(packageName)
     }
+
+
     private fun checkAndBlockFromPrefs(packageName: String) {
-        android.util.Log.d("pausenow", "🔍 checkAndBlockFromPrefs pkg=$packageName")
+        if (isSystemApp(packageName)) return // 👈 add at top
+
         val isBlocking = prefs.getBoolean("isBlocking", false)
-        android.util.Log.d("pausenow", "🔍 isBlocking=$isBlocking")
         if (!isBlocking) return
 
         val blockingMode = prefs.getString("blockingMode", "specific_apps") ?: "specific_apps"
         val monitoredApps = prefs.getStringSet("monitoredApps", emptySet()) ?: emptySet()
-        android.util.Log.d("pausenow", "🔍 mode=$blockingMode monitoredApps=$monitoredApps")
-        android.util.Log.d("pausenow", "🔍 checking pkg=$packageName contains=${monitoredApps.contains(packageName)}")
 
         val shouldBlock = when (blockingMode) {
             "specific_apps" -> monitoredApps.contains(packageName)
-            else -> !monitoredApps.contains(packageName)
+            else -> !monitoredApps.contains(packageName) && !isSystemApp(packageName) // 👈 double check
         }
-
-        android.util.Log.d("pausenow", "🔍 shouldBlock=$shouldBlock isOverlayShowing=$isOverlayShowing")
 
         if (shouldBlock) {
             val now = System.currentTimeMillis()
-            if (now - lastBlockScreenLaunchTime < 4000) {
-                android.util.Log.d("pausenow", "⏳ skipping — block screen already loading")
-                return
-            }
+            if (now - lastBlockScreenLaunchTime < 4000) return
             lastBlockScreenLaunchTime = now
             isOverlayShowing = true
             val intent = Intent(this, BlockActivity::class.java).apply {

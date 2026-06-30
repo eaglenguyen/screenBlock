@@ -534,44 +534,6 @@ class _PhoneMockupContent extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-
-          // bottom nav
-          Container(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor, width: 0.5),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icons.home_rounded,
-                Icons.calendar_today_rounded,
-                Icons.bar_chart_rounded,
-                Icons.settings_rounded,
-              ].asMap().entries.map((e) {
-                final active = e.key == 0;
-                return Container(
-                  width: 20,
-                  height: 20,
-                  decoration: active
-                      ? const BoxDecoration(
-                    color: Color(0xFFEDB82A),
-                    shape: BoxShape.circle,
-                  )
-                      : null,
-                  child: Icon(
-                    e.value,
-                    color: active ? const Color(0xFF1A1208) : subColor,
-                    size: 11,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
         ],
       ),
     );
@@ -1675,7 +1637,7 @@ class _OnboardingGoodNewsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 150),
+          const SizedBox(height: 90),
 
           // "but here's the good news"
           FadeTransition(
@@ -1765,19 +1727,16 @@ class _OnboardingGoodNewsScreenState
 // Screen 6 - Graph
 
 class OnboardingProductivityScreen extends StatelessWidget {
-  final VoidCallback onBack;
   final VoidCallback onNext;
 
   const OnboardingProductivityScreen({
     super.key,
-    required this.onBack,
     required this.onNext,
   });
 
   @override
   Widget build(BuildContext context) {
     return _StatsShell(
-      onBack: onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

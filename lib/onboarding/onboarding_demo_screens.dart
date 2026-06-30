@@ -5,20 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:in_app_review/in_app_review.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:pausenow/features/onboarding/widgets/bouncing_arrow.dart';
-import 'package:pausenow/features/onboarding/widgets/mascot_character.dart';
-import 'package:pausenow/features/onboarding/widgets/pulsing_icon.dart';
-import 'package:uuid/uuid.dart';
-
+import 'package:pausenow/onboarding/widgets/bouncing_arrow.dart';
+import 'package:pausenow/onboarding/widgets/mascot_character.dart';
+import 'package:pausenow/onboarding/widgets/pulsing_icon.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/platform/ios_blocking_service.dart';
 import '../../providers/blocking_service_provider.dart';
-import '../home/home_viewmodel.dart';
-import '../home/schedule/schedule_viewmodel.dart';
-import '../home/widgets/app_list_sheet.dart';
+import '../features/home/home_viewmodel.dart';
+import '../features/home/schedule/schedule_viewmodel.dart';
+import '../features/home/widgets/app_list_sheet.dart';
 import 'manual_blocking_tutorial.dart';
+import 'mockups/onboarding_mockups.dart';
 
 // ── Pre Demo screen  ────────────────────────────
 
@@ -292,16 +290,8 @@ class _OnboardingDemoFlowState
       case 10:
         return _DemoXpScreen(
           key: const ValueKey('demo7'),
-          onNext: () async {
-            try {
-              final inAppReview = InAppReview.instance;
-              if (await inAppReview.isAvailable()) {
-                await inAppReview.requestReview();
-              }
-            } catch (e) {
-              debugPrint('❌ review error: $e');
-            }
-            widget.onComplete(); // 👈 continues after review dialog dismissed
+          onNext: () {
+            widget.onComplete(); // 👈 just continue, no review prompt
           },
         );
       default:
@@ -875,8 +865,8 @@ class _DemoScheduleTabScreen extends StatelessWidget {
           const SizedBox(height: 32),
 
           // phone mockup showing schedule screen
-          _PhoneMockup(
-            child: _ScheduleScreenMockup(),
+          PhoneMockup(
+            child: ScheduleScreenMockup(),
           ),
 
           const Spacer(),
@@ -911,11 +901,21 @@ class _DemoBlockingScreen extends StatelessWidget {
               height: 1.25,
             ),
           ),
+          const SizedBox(height: 8),
+          Text(
+            'can be toggled on & off',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.45),
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
           const SizedBox(height: 32),
 
           // phone mockup showing active blocking
-          _PhoneMockup(
-            child: _ActiveBlockingMockup(),
+          PhoneMockup(
+            child: ActiveBlockingMockup(),
           ),
 
           const Spacer(),
@@ -1266,545 +1266,7 @@ class _DemoXpScreenState extends State<_DemoXpScreen>
   }
 }
 
-// ── Phone mockup wrapper ──────────────────────────────
 
-class _PhoneMockup extends StatelessWidget {
-  final Widget child;
-
-  const _PhoneMockup({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 200,
-        height: 360,
-        decoration: BoxDecoration(
-          color: const Color(0xFF16162A),
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(
-            color: const Color(0xFF3A3A5C),
-            width: 2.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
-              blurRadius: 20,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(29),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-// ── Schedule screen mockup ────────────────────────────
-
-class _ScheduleScreenMockup extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF16162A),
-      padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Scheduled Sessions',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Container(
-                width: 18,
-                height: 18,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEDB82A),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.add, color: Color(0xFF1A1208), size: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          // session card
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E35),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: const Color(0xFFEDB82A).withValues(alpha: 0.4),
-                width: 0.5,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEDB82A),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Night Mode',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        '22:00 - 05:00 · Every day',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 7,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // toggle
-                Container(
-                  width: 28,
-                  height: 15,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDB82A),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      margin: const EdgeInsets.all(2),
-                      width: 11,
-                      height: 11,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // bottom nav
-          const Spacer(),
-          _MockBottomNav(activeIndex: 1),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Active blocking mockup ────────────────────────────
-
-class _ActiveBlockingMockup extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF16162A),
-      padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
-      child: Column(
-        children: [
-          // header badges
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.person_outline_rounded,
-                  color: Colors.white38,
-                  size: 13,
-                ),
-              ),
-              Row(
-                children: [
-                  const SizedBox(width: 4),
-                  _MockBadge(label: '49 ⭐️'),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // focus session card
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E35),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF2A2A48), width: 0.5),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3355FF).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.shield_rounded,
-                    color: Color(0xFF3355FF),
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Focus Session',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '00:00:57',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // progress bar
-                Container(
-                  height: 3,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF252542),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: FractionallySizedBox(
-                      widthFactor: 0.05,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEDB82A),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // buttons
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF252542),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '⏸ Take A Break',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE53935).withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '■ Give Up',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          _MockBottomNav(activeIndex: 0),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Home screen mockup ────────────────────────────────
-
-class _HomeScreenMockup extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF16162A),
-      padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
-      child: Column(
-        children: [
-          // header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.person_outline_rounded,
-                  color: Colors.white38,
-                  size: 13,
-                ),
-              ),
-              Row(
-                children: [
-                  _MockBadge(label: '🔥 3'),
-                  const SizedBox(width: 4),
-                  _MockBadge(
-                    label: '⚡ 49 XP',
-                    highlighted: true,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          // timer card
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E35),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF2A2A48), width: 0.5),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'Time Blocked Today',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                // timer display
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: ['00', '04', '00'].map((t) {
-                    return Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF252542),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            t,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white54,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        if (t != '00' || t == '00')
-                          const Text(
-                            ' : ',
-                            style: TextStyle(
-                              color: Colors.white24,
-                              fontSize: 12,
-                            ),
-                          ),
-                      ],
-                    );
-                  }).toList()
-                    ..removeLast(),
-                ),
-                const SizedBox(height: 8),
-                // block now button
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDB82A),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '▶  Block Now',
-                      style: GoogleFonts.poppins(
-                        color: const Color(0xFF1A1208),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // +XP floating label
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              margin: const EdgeInsets.only(top: 6, right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEDB82A),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFEDB82A).withValues(alpha: 0.4),
-                    blurRadius: 6,
-                  ),
-                ],
-              ),
-              child: Text(
-                '+10 XP',
-                style: GoogleFonts.poppins(
-                  color: const Color(0xFF1A1208),
-                  fontSize: 8,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ),
-
-          const Spacer(),
-          _MockBottomNav(activeIndex: 0),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Shared mock widgets ───────────────────────────────
-
-class _MockBadge extends StatelessWidget {
-  final String label;
-  final bool highlighted;
-
-  const _MockBadge({required this.label, this.highlighted = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: highlighted
-            ? const Color(0xFFEDB82A).withValues(alpha: 0.15)
-            : const Color(0xFF1E1E35),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: highlighted
-              ? const Color(0xFFEDB82A).withValues(alpha: 0.4)
-              : const Color(0xFF2A2A48),
-          width: 0.5,
-        ),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.poppins(
-          color: highlighted ? const Color(0xFFEDB82A) : Colors.white,
-          fontSize: 7,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _MockBottomNav extends StatelessWidget {
-  final int activeIndex;
-
-  const _MockBottomNav({required this.activeIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    final icons = [
-      Icons.home_rounded,
-      Icons.calendar_today_rounded,
-      Icons.bar_chart_rounded,
-      Icons.settings_rounded,
-    ];
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E35),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2A2A48), width: 0.5),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(icons.length, (i) {
-          final isActive = i == activeIndex;
-          return Container(
-            width: 24,
-            height: 24,
-            decoration: isActive
-                ? const BoxDecoration(
-                    color: Color(0xFFEDB82A),
-                    shape: BoxShape.circle,
-                  )
-                : null,
-            child: Icon(
-              icons[i],
-              color: isActive
-                  ? const Color(0xFF1A1208)
-                  : Colors.white.withValues(alpha: 0.3),
-              size: 13,
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
 
 // ── Shared button widgets ─────────────────────────────
 
@@ -1873,10 +1335,9 @@ class _DemoSkipButton extends StatelessWidget {
 }
 
 // ── Intro screen — two ways to block ─────────────────
-class _DemoIntroScreen extends StatelessWidget {
+class _DemoIntroScreen extends StatefulWidget {
   final VoidCallback onNext;
-  final bool highlightManual; // 👈 controls which side pulses
-
+  final bool highlightManual;
 
   const _DemoIntroScreen({
     super.key,
@@ -1884,6 +1345,68 @@ class _DemoIntroScreen extends StatelessWidget {
     this.highlightManual = false,
   });
 
+  @override
+  State<_DemoIntroScreen> createState() => _DemoIntroScreenState();
+}
+
+class _DemoIntroScreenState extends State<_DemoIntroScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late List<Animation<double>> _fades;
+  late List<Animation<Offset>> _slides;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2800),
+    );
+
+    // 4 sections: headline, mode row, "let's show you" text, button
+    _fades = List.generate(4, (i) {
+      final start = i * 0.2;
+      final end = (start + 0.4).clamp(0.0, 1.0);
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _ctrl,
+          curve: Interval(start, end, curve: Curves.easeOut),
+        ),
+      );
+    });
+
+    _slides = List.generate(4, (i) {
+      final start = i * 0.2;
+      final end = (start + 0.4).clamp(0.0, 1.0);
+      return Tween<Offset>(
+        begin: const Offset(0, 0.15),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: _ctrl,
+          curve: Interval(start, end, curve: Curves.easeOut),
+        ),
+      );
+    });
+
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Widget _staggered(int index, Widget child) {
+    return FadeTransition(
+      opacity: _fades[index],
+      child: SlideTransition(
+        position: _slides[index],
+        child: child,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1891,211 +1414,177 @@ class _DemoIntroScreen extends StatelessWidget {
       child: Column(
         children: [
           const Spacer(flex: 2),
-          Text(
-            highlightManual
-                ? 'Congrats on creating your first schedule!'
-                : 'Two ways to\nblock apps',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.15,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            highlightManual
-                ? "One step closer to being more productive"
-                : "We'll walk you through both",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 15,
-            ),
-          ),
-          const SizedBox(height: 32),
 
-          // two modes
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    highlightManual
-                        ? Container( // static + checkmark overlay
-                      width: 72, height: 72,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEDB82A).withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text('📅', style: TextStyle(fontSize: 32)),
-                      ),
-                    )
-                        : PulsingIcon(emoji: '📅'),
-                    const SizedBox(height: 10),
-                    Text('Schedule', style: GoogleFonts.poppins(
-                        color: highlightManual
-                            ? Colors.white.withValues(alpha: 0.4)
-                            : Colors.white,
-                        fontSize: 15, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text('Auto-block\nat set times',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            fontSize: 11, height: 1.4)),
-                  ],
-                ),
-              ),
-
-              // divider
-              Column(
-                children: [
-                  Container(width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Text('+', style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        fontSize: 11, fontWeight: FontWeight.w600)),
-                  ),
-                  Container(width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1)),
-                ],
-              ),
-
-              Expanded(
-                child: Column(
-                  children: [
-                    highlightManual
-                        ? PulsingIcon(emoji: '⚡') // 👈 pulses on bridge screen
-                        : Container(
-                      width: 72, height: 72,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEDB82A).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: const Color(0xFFEDB82A).withValues(alpha: 0.25),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text('⚡', style: TextStyle(fontSize: 32)),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text('Manual', style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 15, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text('Block on\ndemand instantly',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            fontSize: 11, height: 1.4)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 28),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
+          // 0 — headline + subtitle
+          _staggered(
+            0,
+            Column(
               children: [
-                TextSpan(
-                  text: highlightManual
-                      ? "Now let's show you "
-                      : "Let's show you ",
+                Text(
+                  widget.highlightManual
+                      ? 'Congrats on creating your first schedule!'
+                      : 'Two ways to\nblock apps',
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    color: Colors.white.withValues(alpha: 0.55),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.italic,
+                    color: Colors.white,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                    height: 1.15,
                   ),
                 ),
-                TextSpan(
-                  text: highlightManual ? 'Manual Blocking' : 'Scheduling',
+                const SizedBox(height: 8),
+                Text(
+                  widget.highlightManual
+                      ? "One step closer to being more productive"
+                      : "We'll walk you through both",
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    color: const Color(0xFFEDB82A),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.italic,
+                    color: Colors.white.withValues(alpha: 0.45),
+                    fontSize: 15,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 32),
+
+          // 1 — two modes row
+          _staggered(
+            1,
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      widget.highlightManual
+                          ? Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEDB82A).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Text('📅', style: TextStyle(fontSize: 32)),
+                        ),
+                      )
+                          : PulsingIcon(emoji: '📅'),
+                      const SizedBox(height: 10),
+                      Text('Schedule', style: GoogleFonts.poppins(
+                          color: widget.highlightManual
+                              ? Colors.white.withValues(alpha: 0.4)
+                              : Colors.white,
+                          fontSize: 15, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text('Auto-block\nat set times',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              fontSize: 11, height: 1.4)),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: [
+                    Container(width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Text('+', style: GoogleFonts.poppins(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          fontSize: 11, fontWeight: FontWeight.w600)),
+                    ),
+                    Container(width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1)),
+                  ],
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      widget.highlightManual
+                          ? PulsingIcon(emoji: '⚡')
+                          : Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEDB82A).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFEDB82A).withValues(alpha: 0.25),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Text('⚡', style: TextStyle(fontSize: 32)),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text('Manual', style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 15, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text('Block on\ndemand instantly',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              fontSize: 11, height: 1.4)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 28),
+
+          // 2 — "let's show you" text
+          _staggered(
+            2,
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: widget.highlightManual
+                        ? "Now let's show you "
+                        : "Let's show you ",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: 0.55),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  TextSpan(
+                    text: widget.highlightManual ? 'Manual Blocking' : 'Scheduling',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFFEDB82A),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           const Spacer(flex: 3),
-          _DemoButton(label: 'Show me', onTap: onNext),
+
+          // 3 — button loads last
+          _staggered(
+            3,
+            _DemoButton(label: 'Show me', onTap: widget.onNext),
+          ),
         ],
       ),
     );
   }
 }
 
-
-// ── Bridge screen — transition to manual ─────────────
-
-class _DemoBridgeScreen extends StatelessWidget {
-  final VoidCallback onNext;
-
-  const _DemoBridgeScreen({super.key, required this.onNext});
-
-  @override
-  Widget build(BuildContext context) {
-    return _DemoShell(
-      child: Column(
-        children: [
-          const Spacer(flex: 2),
-
-
-
-          Text(
-            'Scheduling\nmastered!',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.15,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Now let\'s look at\nManual Blocking ⚡',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: const Color(0xFFEDB82A),
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Block apps instantly whenever\nyou need to focus right now.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 14,
-              height: 1.5,
-            ),
-          ),
-          const Spacer(flex: 3),
-          _DemoButton(label: "Show me ", onTap: onNext),
-        ],
-      ),
-    );
-  }
-}
 
 // ── Shared shell ──────────────────────────────────────
 

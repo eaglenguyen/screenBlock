@@ -8,6 +8,7 @@ import 'blocking_service.dart';
 
 class AndroidBlockingService implements BlockingService {
 
+
   static const _methodChannel = MethodChannel(
     'com.eagle.pausenow/accessibility',
   );
@@ -311,13 +312,28 @@ class AndroidBlockingService implements BlockingService {
     ));
     _showBlockScreen(packageName);
   }
-
-  void _handleAllAppsMode(String packageName) {
+  Future<bool> _isSystemApp(String packageName) async {
+    try {
+      final result = await _methodChannel.invokeMethod<bool>(
+          'isSystemApp', {'packageName': packageName}
+      );
+      return result ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+  void _handleAllAppsMode(String packageName) async {
     if (_temporarilyExempted.contains(packageName)) return;
     if (_monitoredApps.containsKey(packageName)) return;
-
-    // 👇 never block our own app
     if (packageName == 'com.eagle.pausenow') return;
+    if (packageName.contains('launcher')) return;
+
+    // 👇 check PackageManager before blocking
+    final isSystem = await _isSystemApp(packageName);
+    if (isSystem) {
+      debugPrint('⚪ skipping system app: $packageName');
+      return;
+    }
 
     debugPrint('🟢 blocking non-allowed app: $packageName');
     _overlayShowing = true;

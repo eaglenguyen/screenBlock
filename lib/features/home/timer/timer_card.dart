@@ -268,40 +268,6 @@ class _TimerCardState extends State<TimerCard>
       ],
     );
   }
-
-  Widget _selectorPill({
-    required String icon,
-    required String label,
-    required VoidCallback onTap,
-    Color? iconColor,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle(context),
-          borderRadius: BorderRadius.circular(50),
-          border: Border.all(color: AppColors.border(context), width: 0.5),
-        ),
-        child: Row(
-          children: [
-            Text(icon, style: TextStyle(fontSize: 14, color: iconColor)),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(label, style: AppTextStyles.labelMedium),
-            ),
-             Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textSecondary(context),
-              size: 16,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildBlockNowButton() {
     final isDisabled = widget.isScheduleActive;
 
@@ -321,7 +287,7 @@ class _TimerCardState extends State<TimerCard>
             ),
             label: Text(
               isDisabled ? 'Schedule is Active' : 'Block Now',
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 19),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: isDisabled
@@ -385,5 +351,40 @@ class _TimerCardState extends State<TimerCard>
       ],
     );
   }
+
+  Widget _selectorPill({
+    required String icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSubtle(context),
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(color: AppColors.border(context), width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Text(icon, style: TextStyle(fontSize: 14, color: iconColor)),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(label, style: AppTextStyles.labelMedium),
+            ),
+             Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary(context),
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
 
 }

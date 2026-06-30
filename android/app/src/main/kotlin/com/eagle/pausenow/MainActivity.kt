@@ -55,6 +55,16 @@ class MainActivity : FlutterActivity() {
                 "isAccessibilityEnabled" -> {
                     result.success(isAccessibilityEnabled())
                 }
+                "isSystemApp" -> {
+                    val packageName = call.argument<String>("packageName") ?: ""
+                    try {
+                        val appInfo = packageManager.getApplicationInfo(packageName, 0)
+                        val isSystem = (appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0
+                        result.success(isSystem)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
                 "openAccessibilitySettings" -> {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                     result.success(null)

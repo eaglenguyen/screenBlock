@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../providers/premium_provider.dart';
+import '../../paywall/feature_paywall_screen.dart';
 
 // ── Pomodoro config ──────────────────────────────────────────────────────────
 class PomodoroConfig {
@@ -18,7 +18,7 @@ class PomodoroConfig {
   const PomodoroConfig({
     this.workMinutes = 25,
     this.shortBreakMinutes = 5,
-    this.longBreakMinutes = 15,
+    this.longBreakMinutes = 30,
     this.isPomodoroMode = false,
   });
 
@@ -140,7 +140,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                     ),
                   ),
                   child: Text(
-                    '⚡ Premium',
+                    'Pro',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.gold(context),
                       fontWeight: FontWeight.w700,
@@ -175,7 +175,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   const Text('🔒', style: TextStyle(fontSize: 32)),
                   const SizedBox(height: 12),
                   Text(
-                    'Pomodoro Mode is a Premium feature',
+                    'Pomodoro Mode is a Pro feature',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.textPrimary(context),
                       fontWeight: FontWeight.w700,
@@ -195,7 +195,13 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      context.push('/paywall');
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        useRootNavigator: true,
+                        builder: (_) => const FeaturePaywallScreen(),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.gold(context),
@@ -205,7 +211,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                       minimumSize: const Size(double.infinity, 0),
                     ),
                     child: Text(
-                      'Upgrade to Premium',
+                      'Upgrade to Pro',
                       style: AppTextStyles.labelLarge,
                     ),
                   ),
@@ -247,7 +253,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 minutes: _longBreakMinutes,
                 min: 15,
                 max: 60,
-                defaultValue: 30, // 👈
+                defaultValue: 30,
                 onChanged: (v) => setState(() => _longBreakMinutes = v),
               ),
               const SizedBox(height: 20),

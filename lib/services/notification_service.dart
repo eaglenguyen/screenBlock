@@ -14,6 +14,9 @@ class NotificationService {
         requestAlertPermission: false,
         requestBadgePermission: false,
         requestSoundPermission: false,
+        defaultPresentAlert: true,
+        defaultPresentBadge: true,
+        defaultPresentSound: true,
       ),
     );
     await _plugin.initialize(settings: initSettings);

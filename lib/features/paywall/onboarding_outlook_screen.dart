@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../onboarding/widgets/mascot_character.dart';
+import '../../onboarding/widgets/mascot_character.dart';
 
 class OnboardingOutlookScreen extends StatefulWidget {
   final VoidCallback onNext;
@@ -141,14 +141,24 @@ class _OnboardingOutlookScreenState extends State<OnboardingOutlookScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Your first month\nwith pause now',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -1,
-                          height: 1.2,
+                      RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.poppins(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -1,
+                            height: 1.2,
+                          ),
+                          children: [
+                            const TextSpan(
+                              text: 'Your first month\nwith ',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            const TextSpan(
+                              text: 'pause now',
+                              style: TextStyle(color: Color(0xFFEDB82A)),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 6),

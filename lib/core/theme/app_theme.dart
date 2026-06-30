@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'app_colors.dart';
 import 'app_text_styles.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -37,16 +36,16 @@ class AppTheme {
         surface: Color(0xFF252525),
         error: Color(0xFFE74C3C),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF1A1A1A),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
         centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle(
+        systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarBrightness: Brightness.dark,
           statusBarIconBrightness: Brightness.light,
         ),
         titleTextStyle: AppTextStyles.headlineSmall,
-        iconTheme: IconThemeData(color: Color(0xFFFFFFFF)),
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

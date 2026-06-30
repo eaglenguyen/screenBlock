@@ -12,6 +12,8 @@ class ActiveBlockingCard extends StatelessWidget {
   final VoidCallback onEndBreak;
   final VoidCallback onBlockListTapped;
   final bool isPomodoroMode;
+  final int pomodoroRound;
+
 
 
 
@@ -23,6 +25,7 @@ class ActiveBlockingCard extends StatelessWidget {
     required this.onEndBreak,
     required this.onBlockListTapped,
     required this.isPomodoroMode,
+    this.pomodoroRound = 0,
 
 
 
@@ -106,31 +109,72 @@ class ActiveBlockingCard extends StatelessWidget {
       style: AppTextStyles.headlineSmall,
     );
   }
+
+
   Widget _buildBlockListPill(BuildContext context) {
     final label = state.blockingType == 'specific_apps'
         ? 'Specific Apps'
         : 'All Apps';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle(context),
-        borderRadius: BorderRadius.circular(50),
-        border: Border.all(color: AppColors.border(context), width: 0.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
+    final isOnBreak = state.phase == BlockingPhase.onBreak;
+    final displayRound = isOnBreak
+        ? pomodoroRound       // 👈 during break show previous round
+        : pomodoroRound + 1;  // 👈 during work show current round
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundSubtle(context),
+            borderRadius: BorderRadius.circular(50),
+            border: Border.all(color: AppColors.border(context), width: 0.5),
+          ),
+          child: Text(
             label,
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textPrimary(context),
             ),
           ),
+        ),
+        if (isPomodoroMode) ...[
+          const SizedBox(height: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ...List.generate(4, (i) {
+                final currentRoundInCycle = displayRound % 4 == 0 && displayRound > 0
+                    ? 4
+                    : (displayRound % 4);
+                final completed = i < currentRoundInCycle;
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: completed
+                        ? const Color(0xFFE74C3C)
+                        : const Color(0xFFE74C3C).withValues(alpha: 0.2),
+                  ),
+                );
+              }),
+              const SizedBox(width: 8),
+              Text(
+              'Round $displayRound',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: const Color(0xFFE74C3C).withValues(alpha: 0.8),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ],
-      ),
+      ],
     );
   }
+
 
   Widget _buildTimer(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
@@ -202,6 +246,9 @@ class ActiveBlockingCard extends StatelessWidget {
   }
   Widget _buildTakeBreakButton(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
+
+    if (isPomodoroMode && !isOnBreak) return const SizedBox.shrink();
+
 
     return SizedBox(
       width: double.infinity,

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../onboarding/widgets/mascot_character.dart';
+import '../../../onboarding/widgets/mascot_character.dart';
 
 // ── Get Help Sheet ────────────────────────────────────
 

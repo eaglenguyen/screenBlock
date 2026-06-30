@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hive/hive.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:pausenow/features/home/timer/pomodoro_sheet.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
@@ -98,6 +99,43 @@ class HomeViewModel extends _$HomeViewModel {
 
     ScheduleChecker.instance.start(_blockingService);
     _restoreSession();
+
+    _requestReviewAfterDays();
+
+  }
+
+  Future<void> _requestReviewAfterDays() async {
+    final box = Hive.box(HiveBoxNames.settings);
+
+    final installDateMs = box.get('installDate') as int?;
+    if (installDateMs == null) return;
+
+    final installDate = DateTime.fromMillisecondsSinceEpoch(installDateMs);
+    final daysSinceInstall = DateTime.now().difference(installDate).inDays;
+
+    // 👇 day 3 trigger
+    final hasRequestedDay3 = box.get('hasRequestedReviewDay3', defaultValue: false) as bool;
+    if (!hasRequestedDay3 && daysSinceInstall >= 3) {
+      await box.put('hasRequestedReviewDay3', true);
+      await _showReviewPrompt();
+      return; // 👈 don't fire two prompts in one launch
+    }
+
+    // 👇 day 7 trigger — only if day 3 already happened
+    final hasRequestedDay7 = box.get('hasRequestedReviewDay7', defaultValue: false) as bool;
+    if (hasRequestedDay3 && !hasRequestedDay7 && daysSinceInstall >= 7) {
+      await box.put('hasRequestedReviewDay7', true);
+      await _showReviewPrompt();
+    }
+  }
+
+  Future<void> requestReviewOnFirstClaim() async {
+    final box = Hive.box(HiveBoxNames.settings);
+    final hasRequestedOnFirstClaim = box.get('hasRequestedReviewFirstClaim', defaultValue: false) as bool;
+    if (hasRequestedOnFirstClaim) return;
+
+    await box.put('hasRequestedReviewFirstClaim', true);
+    await _showReviewPrompt();
   }
 
   void _setupScheduleChecker() {
@@ -224,6 +262,21 @@ class HomeViewModel extends _$HomeViewModel {
       remainingSeconds: 0,
       shouldAnimateBlockedTime: true,
     );
+  }
+
+
+
+
+  Future<void> _showReviewPrompt() async {
+    try {
+      final inAppReview = InAppReview.instance;
+      if (await inAppReview.isAvailable()) {
+        await inAppReview.requestReview();
+        debugPrint('⭐️ review requested');
+      }
+    } catch (e) {
+      debugPrint('❌ review error: $e');
+    }
   }
 
   void resetAnimateBlockedTime() {
@@ -524,6 +577,15 @@ class HomeViewModel extends _$HomeViewModel {
 
     // 👇 notify user work session ended
     await NotificationService.instance.cancelNotification(200);
+
+    // Break ending (fires when break is over)
+    await NotificationService.instance.scheduleNotification(
+      id: 201, // different id for break-end notification
+      title: 'Break over! 🔒',
+      body: 'Time to focus. Blocking is resuming.',
+      scheduledTime: DateTime.now().add(Duration(minutes: breakMinutes)),
+    );
+    // Break start
     await NotificationService.instance.scheduleNotification(
       id: 200,
       title: 'Break time! 🍅',
@@ -554,6 +616,8 @@ class HomeViewModel extends _$HomeViewModel {
     _breakTimer?.cancel();
 
     await NotificationService.instance.cancelNotification(200);
+    await NotificationService.instance.cancelNotification(201); // 👈 add
+
 
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).stopBlockingCompletely();

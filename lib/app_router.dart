@@ -5,10 +5,10 @@ import 'core/constants/hivebox_names.dart';
 import 'features/bottomNav/shell_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/home/schedule/schedule_screen.dart';
-import 'features/onboarding/onboarding_welcome_flow.dart';
 import 'features/paywall/paywall_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/stats/stats_screen.dart';
+import 'onboarding/onboarding_welcome_flow.dart';
 
 class AppRouter {
   AppRouter._();

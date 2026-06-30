@@ -107,24 +107,10 @@ class SettingsScreen extends ConsumerWidget {
                     label: 'Support',
                     rows: [
                       SettingsRow(
-                        iconAsset: "assets/icons/mascot_face.png",
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: Colors.transparent,
-                        label: 'Get Help',
-                        onTap: () => GetHelpSheet.show(context), // 👈
-                      ),
-                      SettingsRow(
-                        icon: Icons.chat_bubble_outline_rounded,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
-                        label: 'Give Feedback',
-                        onTap: () => GiveFeedbackSheet.show(context), // 👈
-                      ),
-                      SettingsRow(
                         icon: Icons.star_outline_rounded,
                         iconColor: AppColors.gold(context),
                         iconBgColor: AppColors.primarySubtle(context),
-                        label: 'Rate the App',
+                        label: 'Rate the App  🙏',
                         onTap: () async {
                           final inAppReview = InAppReview.instance;
                           if (await inAppReview.isAvailable()) {
@@ -135,7 +121,22 @@ class SettingsScreen extends ConsumerWidget {
                               appStoreId: '6781065557', // 👈 add once app is live
                             );
                           }
-                        },                      ),
+                        },
+                      ),
+                      SettingsRow(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        iconColor: AppColors.gold(context),
+                        iconBgColor: AppColors.primarySubtle(context),
+                        label: 'Give Feedback',
+                        onTap: () => GiveFeedbackSheet.show(context), // 👈
+                      ),
+                      SettingsRow(
+                        iconAsset: "assets/icons/mascot_face.png",
+                        iconColor: AppColors.gold(context),
+                        iconBgColor: Colors.transparent,
+                        label: 'Get Help',
+                        onTap: () => GetHelpSheet.show(context), // 👈
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -266,6 +267,14 @@ class SettingsScreen extends ConsumerWidget {
                         iconBgColor: AppColors.primarySubtle(context),
                         label: 'Reset Time Blocked',
                         onTap: () => _confirmReset(context, notifier.resetDailyRecord),
+                      ),
+                      SettingsRow(
+                        icon: Icons.delete_outline_rounded,
+                        iconColor: AppColors.error(context),
+                        iconBgColor: AppColors.error(context).withValues(alpha: 0.1),
+                        label: 'Delete Account',
+                        isDanger: true,
+                        onTap: () => _showDeleteAccountDialog(context),
                       ),
                     ],
                   ),
@@ -442,6 +451,52 @@ class SettingsScreen extends ConsumerWidget {
                 color: AppColors.error(context),
                 fontWeight: FontWeight.w600,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundCard(context),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Text(
+              'pause now does not store accounts',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'To delete all your data, simply uninstall the app from your device!',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary(context),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.gold(context),
+                foregroundColor: AppColors.goldText(context),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: const StadiumBorder(),
+              ),
+              child: const Text('Okay'),
             ),
           ),
         ],

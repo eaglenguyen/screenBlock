@@ -118,7 +118,7 @@ class _XpFloatLabelState extends State<XpFloatLabel>
                   ],
                 ),
                 child: Text(
-                  '+${widget.xpAmount} XP',
+                  '+${widget.xpAmount} ⭐️',
                   style: GoogleFonts.poppins(
                     color: const Color(0xFF1A1208),
                     fontSize: 13,

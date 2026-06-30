@@ -72,7 +72,10 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
           .containsKey('pause now Premium');
       if (isPremium && mounted) {
         ref.invalidate(premiumProvider);
-        await _markPaywallSeen(context, ref, purchased: true);
+        final box = Hive.box(HiveBoxNames.settings);
+        await box.put('paywallSeen', true);
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (mounted) Navigator.pop(context); // 👈 dismiss the bottom sheet
       }
     } catch (e) {
       if (e is PurchasesError &&

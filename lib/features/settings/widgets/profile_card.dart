@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 import '../../../core/constants/hivebox_names.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../onboarding/onboarding_viewmodel.dart';
+import '../../../onboarding/onboarding_viewmodel.dart';
 
 class SettingsProfileCard extends ConsumerWidget {
   const SettingsProfileCard({super.key});
