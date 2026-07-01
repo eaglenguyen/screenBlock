@@ -60,7 +60,7 @@ class IOSBlockingService: NSObject {
         applyShield(mode: blockingMode)
 
     }
-    
+
     func stopBlocking() {
         sharedDefaults?.set(false, forKey: "isBlocking")
         sharedDefaults?.removeObject(forKey: "sessionStartTime")
@@ -69,7 +69,7 @@ class IOSBlockingService: NSObject {
         store.clearAllSettings()
         activityCenter.stopMonitoring([activityName])
     }
-    
+
     func stopBlockingCompletely() {
         sharedDefaults?.set(false, forKey: "isBlocking")
         sharedDefaults?.removeObject(forKey: "sessionStartTime")
@@ -82,20 +82,20 @@ class IOSBlockingService: NSObject {
         pauseTimer = nil
         cancelPauseNotification()
     }
-    
+
     // MARK: - Pause / Break
     var onPauseEnded: (() -> Void)?
 
     func stopSessionMonitoring() {
         activityCenter.stopMonitoring([activityName]) // stops "com.eagle.pausenow.session"
     }
-    
+
     func pauseBlocking(forMinutes minutes: Int) {
         NSLog("⏸ pauseBlocking for \(minutes) minutes")
-        
+
         let now = Date()
         let pauseEndsAt = now.addingTimeInterval(TimeInterval(minutes * 60))
-        
+
         // 👇 start timer FIRST before any other setup
          pauseTimer?.invalidate()
          pauseTimer = Timer.scheduledTimer(
@@ -106,15 +106,15 @@ class IOSBlockingService: NSObject {
              self?.resumeBlocking()
              self?.onPauseEnded?() // 👈 notify Flutter
          }
-        
+
         sharedDefaults?.set(pauseEndsAt.timeIntervalSince1970, forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
-        
+
         store.clearAllSettings()
         activityCenter.stopMonitoring([DeviceActivityName("com.eagle.pausenow.pause")])
-        
+
         let calendar = Calendar.current
-        
+
         // round start up to next minute to account for dropped seconds
         let roundedStart = calendar.date(
             bySetting: .second,
@@ -122,9 +122,9 @@ class IOSBlockingService: NSObject {
             of: now.addingTimeInterval(60)
         ) ?? now
         let startComponents = calendar.dateComponents([.hour, .minute], from: roundedStart)
-        
+
         let schedule: DeviceActivitySchedule
-        
+
         if minutes < 15 {
             // always use 30 min window — plenty of buffer
             let endDate = now.addingTimeInterval(30 * 60)
@@ -149,7 +149,7 @@ class IOSBlockingService: NSObject {
             )
             NSLog("⏸ exact schedule: ends in \(minutes) mins + 1 min buffer")
         }
-        
+
         do {
             try activityCenter.startMonitoring(
                 DeviceActivityName("com.eagle.pausenow.pause"),
@@ -161,30 +161,30 @@ class IOSBlockingService: NSObject {
             NSLog("❌ startMonitoring error: \(error)")
             sharedDefaults?.set("failed:\(error.localizedDescription)", forKey: "monitoringStatus")
         }
-        
+
         cancelPauseNotification()
         scheduleResumeNotification(afterSeconds: minutes * 60)
-        
+
     }
-    
-    private func scheduleResumeNotification(afterSeconds seconds: Int) {                            
+
+    private func scheduleResumeNotification(afterSeconds seconds: Int) {
         let content = UNMutableNotificationContent()
         content.title = "Break Over 🔒"
         content.body = "Blocking has resumed. Please close any blocked apps."
         content.sound = .default
         content.interruptionLevel = .timeSensitive
-        
+
         let trigger = UNTimeIntervalNotificationTrigger(
             timeInterval: TimeInterval(seconds),
             repeats: false
         )
-        
+
         let request = UNNotificationRequest(
             identifier: "com.eagle.pausenow.pauseResume",
             content: content,
             trigger: trigger
         )
-        
+
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
                 NSLog("❌ notification error: \(error)")
@@ -199,28 +199,28 @@ class IOSBlockingService: NSObject {
             )
     }
     func resumeBlocking() {
-        
+
         let currentSessionType = sharedDefaults?.string(forKey: "sessionType") ?? "manual"
-        
+
         sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
-        
+
         activityCenter.stopMonitoring([DeviceActivityName("com.eagle.pausenow.pause")])
         pauseTimer?.invalidate()
         pauseTimer = nil
         cancelPauseNotification()
-        
+
         let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
         applyShield(mode: blockingMode)
-        
+
         // 👇 only notify Flutter for manual sessions
         if currentSessionType == "manual" {
             onPauseEnded?()
         }
     }
-    
 
-    
+
+
     func getPersistedSession() -> [String: Any] {
         let isBlocking = sharedDefaults?.bool(forKey: "isBlocking") ?? false
         let sessionType = sharedDefaults?.string(forKey: "sessionType") ?? "manual"
@@ -234,9 +234,9 @@ class IOSBlockingService: NSObject {
             "minutes": minutes
         ]
     }
-    
+
     // MARK: - App Selection
-    
+
     func saveAppSelection(
         _ selection: FamilyActivitySelection,
         forKey key: String
@@ -255,34 +255,34 @@ class IOSBlockingService: NSObject {
             print("🦅 encoding failed: \(error)")
         }
     }
-    
+
     func getStoredAppTokens(mode: String) -> Set<ApplicationToken> {
         let key = mode == "specific_apps" ? "blockedApps" : "allowedApps"
-        
+
         guard let data = sharedDefaults?.data(forKey: key),
               let selection = try? JSONDecoder().decode(
                 FamilyActivitySelection.self,
                 from: data
               )
         else { return [] }
-        
+
         return selection.applicationTokens
     }
-    
+
     // MARK: - Usage Stats
-    
+
     func fetchTodayUsage() async -> [[String: Any]] {
         let center = DeviceActivityCenter()
         let calendar = Calendar.current
         let now = Date()
         let startOfDay = calendar.startOfDay(for: now)
-        
+
         let schedule = DeviceActivitySchedule(
             intervalStart: calendar.dateComponents([.hour, .minute], from: startOfDay),
             intervalEnd: calendar.dateComponents([.hour, .minute], from: now),
             repeats: false
         )
-        
+
         do {
             try center.startMonitoring(
                 DeviceActivityName("com.eagle.pausenow.stats"),
@@ -291,10 +291,10 @@ class IOSBlockingService: NSObject {
         } catch {
             print("❌ stats monitoring error: \(error)")
         }
-        
+
         return []
     }
-    
+
     func checkAuthorizationStatus() {
         let status = center.authorizationStatus
         NSLog("🦅 FamilyControls auth status: \(status)")
@@ -311,7 +311,7 @@ class IOSBlockingService: NSObject {
             NSLog("🦅 unknown status")
         }
     }
-    
+
         // MARK - Shield
     private func applyShield(mode: String) {
         store.clearAllSettings()

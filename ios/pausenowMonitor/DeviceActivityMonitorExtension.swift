@@ -12,7 +12,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     
     override func intervalDidStart(for activity: DeviceActivityName) {
         super.intervalDidStart(for: activity)
-        os_log("🔥 intervalDidStart: %{public}@", log: logger, type: .fault, activity.rawValue)
         sharedDefaults?.set("intervalDidStart", forKey: "extensionLastEvent")
         sharedDefaults?.set(activity.rawValue, forKey: "extensionLastActivity")
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")

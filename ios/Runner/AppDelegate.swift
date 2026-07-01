@@ -95,13 +95,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
              }
          }
         
-        
+
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self = self else { return }
             Task { await self.handleMethodCall(call, result: result) }
         }
     }
-    
+
     // ── Sheet dismiss delegate ────────────────────────
     class SheetDismissDelegate: NSObject, UIAdaptivePresentationControllerDelegate {
         let onDismiss: () -> Void
@@ -116,7 +116,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             onDismiss()
         }
     }
-    
+
     // ── Updated showScreenTimeReport ──────────────────
     @available(iOS 16.0, *)
     @MainActor
@@ -164,8 +164,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         rootVC.present(reportVC, animated: true)
     }
-    
-    
+
+
     @available(iOS 16.0, *)
     private func handleMethodCall(
         _ call: FlutterMethodCall,
@@ -174,11 +174,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
-            
+
         case "getScreenTimeTotal":
             let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let total = sharedDefaults?.double(forKey: "totalScreenTimeToday") ?? 0
-            NSLog("📊 getScreenTimeTotal called — value: \(total)") 
+            NSLog("📊 getScreenTimeTotal called — value: \(total)")
             let date = sharedDefaults?.string(forKey: "screenTimeTotalDate") ?? ""
             result(["total": total, "date": date])
         case "playSystemSound":
@@ -207,7 +207,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                         result(granted)
                     }
                 }
-            
+
         case "checkMonitoringStatus":
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let status = defaults?.string(forKey: "monitoringStatus") ?? "never called"
@@ -216,7 +216,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 "status": status,
                 "activities": activities,
             ])
-            
+
         case "checkExtensionRan":
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let lastRan = defaults?.double(forKey: "extensionLastRan") ?? 0
@@ -283,7 +283,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             UNUserNotificationCenter.current()
                 .removePendingNotificationRequests(withIdentifiers: ["scheduleResume"])
             result(nil)
-            
+
         case "pauseBlocking":
             if let args = call.arguments as? [String: Any],
                let minutes = args["minutes"] as? Int {
