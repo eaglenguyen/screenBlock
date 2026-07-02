@@ -27,11 +27,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         sharedDefaults?.synchronize()
         
         if activity.rawValue == "com.eagle.pausenow.pause" {
-            os_log("⏰ pause ended — re-shielding", log: logger, type: .fault)
             reshieldApps()
             sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
             sharedDefaults?.synchronize()
         }
+        
     }
     
     override func intervalWillEndWarning(for activity: DeviceActivityName) {

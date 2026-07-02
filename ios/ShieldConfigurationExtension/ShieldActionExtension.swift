@@ -1,35 +1,48 @@
-//
-//  ShieldActionExtension.swift
-//  ShieldConfigurationExtension
-//
-//  Created by Egor on 5/22/26.
-//
-
 import ManagedSettings
+import UIKit
 
-// Override the functions below to customize the shield actions used in various situations.
-// The system provides a default response for any functions that your subclass doesn't override.
-// Make sure that your class name matches the NSExtensionPrincipalClass in your Info.plist.
 class ShieldActionExtension: ShieldActionDelegate {
+
     override func handle(action: ShieldAction, for application: ApplicationToken, completionHandler: @escaping (ShieldActionResponse) -> Void) {
-        // Handle the action as needed.
-        switch action {
-        case .primaryButtonPressed:
-            completionHandler(.close)
-        case .secondaryButtonPressed:
-            completionHandler(.defer)
-        @unknown default:
-            fatalError()
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        let isBlocking = sharedDefaults?.bool(forKey: "isBlocking") ?? false
+        let isPomodoroMode = sharedDefaults?.bool(forKey: "isPomodoroMode") ?? false
+
+        if !isBlocking {
+            // session complete screen
+            switch action {
+            case .primaryButtonPressed:
+                // "Claim your ⭐️" or "Take a Break" — open Pause Now
+                completionHandler(.close)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    if let url = URL(string: "pausenow://") {
+                        // open Pause Now — requires URL scheme registered
+                    }
+                }
+            case .secondaryButtonPressed:
+                // "Stay Focused" — dismiss shield, keep going
+                completionHandler(.close)
+            @unknown default:
+                fatalError()
+            }
+        } else {
+            // active blocking screen
+            switch action {
+            case .primaryButtonPressed:
+                completionHandler(.close)
+            case .secondaryButtonPressed:
+                completionHandler(.defer)
+            @unknown default:
+                fatalError()
+            }
         }
     }
-    
+
     override func handle(action: ShieldAction, for webDomain: WebDomainToken, completionHandler: @escaping (ShieldActionResponse) -> Void) {
-        // Handle the action as needed.
         completionHandler(.close)
     }
-    
+
     override func handle(action: ShieldAction, for category: ActivityCategoryToken, completionHandler: @escaping (ShieldActionResponse) -> Void) {
-        // Handle the action as needed.
         completionHandler(.close)
     }
 }

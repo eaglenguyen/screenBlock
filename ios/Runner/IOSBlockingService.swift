@@ -163,34 +163,10 @@ class IOSBlockingService: NSObject {
         }
 
         cancelPauseNotification()
-        scheduleResumeNotification(afterSeconds: minutes * 60)
 
     }
 
-    private func scheduleResumeNotification(afterSeconds seconds: Int) {
-        let content = UNMutableNotificationContent()
-        content.title = "Break Over 🔒"
-        content.body = "Blocking has resumed. Please close any blocked apps."
-        content.sound = .default
-        content.interruptionLevel = .timeSensitive
 
-        let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: TimeInterval(seconds),
-            repeats: false
-        )
-
-        let request = UNNotificationRequest(
-            identifier: "com.eagle.pausenow.pauseResume",
-            content: content,
-            trigger: trigger
-        )
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                NSLog("❌ notification error: \(error)")
-            }
-        }
-    }
 
     private func cancelPauseNotification() {
         UNUserNotificationCenter.current()

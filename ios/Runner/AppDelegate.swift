@@ -45,6 +45,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         return true
     }
+    
+    func application(
+        _ app: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    ) -> Bool {
+        // opened from shield action — app is now in foreground
+        // Flutter's onAppResumed will handle state sync
+        return true
+    }
 
     // ── Notification delegate ─────────────────────────
 
