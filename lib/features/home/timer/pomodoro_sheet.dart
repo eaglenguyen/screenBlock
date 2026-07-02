@@ -229,7 +229,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 emoji: '💼',
                 label: 'Work',
                 minutes: _workMinutes,
-                min: 5,
+                min: 2,
                 max: 60,
                 defaultValue: 25, // 👈
                 onChanged: (v) => setState(() => _workMinutes = v),
@@ -240,7 +240,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 emoji: '☕',
                 label: 'Short Break',
                 minutes: _shortBreakMinutes,
-                min: 3,
+                min: 2,
                 max: 15,
                 defaultValue: 5, // 👈
                 onChanged: (v) => setState(() => _shortBreakMinutes = v),

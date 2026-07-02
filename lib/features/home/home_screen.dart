@@ -216,7 +216,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       xpEarned: state.xpEarned,
                       sessionMinutes: state.selectedMinutes,
                       todayBlocked: state.formattedBlockedTime,
-                      totalXp: state.totalXp,
+                      totalXp: state.totalXp - state.xpEarned,
                       onClaim: () => ref
                           .read(homeViewModelProvider.notifier)
                           .claimXp(),

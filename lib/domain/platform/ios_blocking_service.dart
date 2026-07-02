@@ -154,7 +154,14 @@ class IOSBlockingService implements BlockingService {
   }
 // IOS logic
 
-
+  Future<void> setSessionComplete() async {
+    try {
+      await _channel.invokeMethod('setSessionComplete');
+      debugPrint('✅ setSessionComplete called');
+    } catch (e) {
+      debugPrint('❌ setSessionComplete error: $e');
+    }
+  }
 
   Future<void> playSystemSound(int soundId) async {
     try {

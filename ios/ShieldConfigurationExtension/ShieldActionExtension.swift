@@ -12,11 +12,9 @@ class ShieldActionExtension: ShieldActionDelegate {
             // session complete screen
             switch action {
             case .primaryButtonPressed:
-                // "Claim your ⭐️" or "Take a Break" — open Pause Now
                 completionHandler(.close)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     if let url = URL(string: "pausenow://") {
-                        // open Pause Now — requires URL scheme registered
                     }
                 }
             case .secondaryButtonPressed:

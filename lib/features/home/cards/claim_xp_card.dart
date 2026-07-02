@@ -42,6 +42,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
   @override
   void initState() {
     super.initState();
+    _displayXp = widget.totalXp;
 
     _successPlayer = AudioPlayer();
     _tickPlayer = AudioPlayer();
@@ -110,8 +111,12 @@ class _ClaimXpCardState extends State<ClaimXpCard>
       _tickPlayer.play();
     } catch (_) {}
 
-    final total = widget.xpEarned;
-    final steps = total.clamp(1, 30);
+    final startXp = widget.totalXp; // 30
+    final earnedXp = widget.xpEarned; // 10
+    final endXp = startXp + earnedXp;
+    final finalTotal = endXp + earnedXp;
+
+    final steps = finalTotal.clamp(1, 30);
     final interval = Duration(
       milliseconds: (1200 / steps).round(),
     );
@@ -120,7 +125,8 @@ class _ClaimXpCardState extends State<ClaimXpCard>
       await Future.delayed(interval);
       if (!mounted) return;
       setState(() {
-        _displayXp = ((total * i) / steps).round();
+        final progress = i / steps;
+        _displayXp = startXp + ((finalTotal - startXp) * progress).round();
       });
       HapticFeedback.lightImpact();
       // no sound per tick
@@ -205,21 +211,16 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                   Expanded(
                     child: _statCard(
                       label: '⭐️ this session',
-                      value: _claiming
-                          ? '$_displayXp'
-                          : '${widget.xpEarned}',
+                      value: '${widget.xpEarned}',
                       icon: Icons.star,
                       iconColor: AppColors.gold(context),
-                      highlight: _claiming,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _statCard(
                       label: 'Total ⭐️',
-                      value: _claiming
-                          ? '${widget.totalXp + _displayXp}'
-                          : '${widget.totalXp + widget.xpEarned}',
+                      value: '$_displayXp',
                       icon: Icons.stars_rounded,
                       iconColor: AppColors.gold(context),
                       highlight: _claiming,

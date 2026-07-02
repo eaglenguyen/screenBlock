@@ -184,7 +184,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
-
+        case "checkAndClearPendingClaim":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            let pending = defaults?.bool(forKey: "pendingXpClaim") ?? false
+            if pending {
+                defaults?.set(false, forKey: "pendingXpClaim")
+                defaults?.synchronize()
+            }
+            result(pending)
+        case "setSessionComplete":
+            service.setSessionComplete()
+            result(nil)
         case "getScreenTimeTotal":
             let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let total = sharedDefaults?.double(forKey: "totalScreenTimeToday") ?? 0

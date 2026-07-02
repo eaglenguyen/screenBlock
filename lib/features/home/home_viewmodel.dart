@@ -255,6 +255,14 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> claimXp() async {
     final newTotal = state.totalXp + state.xpEarned;
     await _saveTotalXp(newTotal);
+
+    if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).stopBlockingCompletely();
+    }
+
+    await NotificationService.instance.cancelNotification(202);
+
+
     state = state.copyWith(
       phase: BlockingPhase.idle,
       totalXp: newTotal,
@@ -433,6 +441,19 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> _beginActiveBlocking() async {
     _blockingService.setBlockingMode(state.blockingType);
 
+    // 👇 schedule session complete notification at start
+    if (!state.pomodoroConfig.isPomodoroMode) {
+      await NotificationService.instance.cancelNotification(202);
+      await NotificationService.instance.scheduleNotification(
+        id: 202,
+        title: 'Session Complete! ⚡',
+        body: 'Tap to claim your ⭐️ stars.',
+        scheduledTime: DateTime.now().add(
+          Duration(minutes: state.selectedMinutes),
+        ),
+      );
+    }
+
     if (Platform.isIOS) {
       final hasApps = state.blockingType == AppConstants.blockingTypeSpecificApps
           ? state.blockedApps.isNotEmpty
@@ -487,17 +508,7 @@ class HomeViewModel extends _$HomeViewModel {
     );
 
     // 👇 schedule break notification if pomodoro mode
-    if (state.pomodoroConfig.isPomodoroMode) {
-      await NotificationService.instance.cancelNotification(200);
-      await NotificationService.instance.scheduleNotification(
-        id: 200,
-        title: 'Break time! 🍅',
-        body: 'Work session complete! Take a short break.',
-        scheduledTime: DateTime.now().add(
-          Duration(minutes: state.pomodoroConfig.workMinutes),
-        ),
-      );
-    }
+
 
     _sessionTimer?.cancel();
     _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -514,13 +525,19 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── Session complete ──────────────────────────────
   void _onSessionComplete() async {
+    if (state.phase != BlockingPhase.active) {
+      debugPrint('⚠️ _onSessionComplete ignored — phase is ${state.phase}');
+      return;
+    }
+
+
     if (state.pomodoroConfig.isPomodoroMode) {
       _onPomodoroRoundComplete();
       return;
     }
 
     if (Platform.isIOS) {
-      await (_blockingService as IOSBlockingService).stopBlockingCompletely();
+      await (_blockingService as IOSBlockingService).setSessionComplete();
     } else {
       _blockingService.stopAllMonitoring();
     }
@@ -617,7 +634,7 @@ class HomeViewModel extends _$HomeViewModel {
 
     await NotificationService.instance.cancelNotification(200);
     await NotificationService.instance.cancelNotification(201); // 👈 add
-
+    await NotificationService.instance.cancelNotification(202);
 
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).stopBlockingCompletely();
@@ -798,14 +815,6 @@ class HomeViewModel extends _$HomeViewModel {
       breakRemainingSeconds: 0,
     );
 
-    // 👇 reschedule break notification for next round
-    await NotificationService.instance.cancelNotification(200);
-    await NotificationService.instance.scheduleNotification(
-      id: 200,
-      title: 'Break time! 🍅',
-      body: 'Work session complete! Take a short break.',
-      scheduledTime: DateTime.now().add(Duration(minutes: workMinutes)),
-    );
 
     _sessionTimer?.cancel();
     _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -824,7 +833,9 @@ class HomeViewModel extends _$HomeViewModel {
   // ── App resumed ───────────────────────────────────
   void onAppResumed() {
     debugPrint('🔄 onAppResumed — phase: ${state.phase} isScheduleActive: ${state.isScheduleActive}');
-
+    if (Platform.isIOS) {
+      _checkPendingXpClaim();
+    }
     if (state.isSchedulePaused) {
       final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
       if (pauseEndTime != null && DateTime.now().isAfter(pauseEndTime)) {
@@ -872,6 +883,19 @@ class HomeViewModel extends _$HomeViewModel {
 
       default:
         break;
+    }
+  }
+
+  Future<void> _checkPendingXpClaim() async {
+    try {
+      final result = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod<bool>('checkAndClearPendingClaim');
+      if (result == true && state.phase == BlockingPhase.completed) {
+        debugPrint('⭐️ pending XP claim detected — showing claim screen');
+        // state is already BlockingPhase.completed so claim screen shows automatically
+      }
+    } catch (e) {
+      debugPrint('❌ checkPendingXpClaim error: $e');
     }
   }
 

@@ -14,6 +14,9 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74365F022FD9F0D8008C1DEC /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74E130AB2FC0E84E00D45757 /* DeviceActivity.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		74A56F1D2FF62CD500D0D988 /* ShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */; };
+		74A56F1E2FF62CD500D0D988 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A56F1B2FF62CD500D0D988 /* ShieldConfigurationExtension.swift */; };
+		74A56F202FF62D8B00D0D988 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74A56F1F2FF62D8B00D0D988 /* Assets.xcassets */; };
 		74BFE2BA2FDA037A0028C86B /* pausenowMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 74365F012FD9F0D8008C1DEC /* pausenowMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74BFE7302FDDE3E30028C86B /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74E130DE2FC0EA1D00D45757 /* ManagedSettings.framework */; };
 		74BFE7322FDDE3E30028C86B /* ManagedSettingsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74BFE7312FDDE3E30028C86B /* ManagedSettingsUI.framework */; };
@@ -128,6 +131,11 @@
 		74365F012FD9F0D8008C1DEC /* pausenowMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = pausenowMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionExtension.swift; sourceTree = "<group>"; };
+		74A56F1A2FF62CD500D0D988 /* ShieldConfigurationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShieldConfigurationExtension.entitlements; sourceTree = "<group>"; };
+		74A56F1B2FF62CD500D0D988 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
+		74A56F1F2FF62D8B00D0D988 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		74A56F472FF62F5D00D0D988 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		74BFE72F2FDDE3E30028C86B /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		74BFE7312FDDE3E30028C86B /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
 		74BFE9BC2FE315910028C86B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
@@ -173,13 +181,6 @@
 			);
 			target = 74365F002FD9F0D8008C1DEC /* pausenowMonitor */;
 		};
-		74BFE73B2FDDE3E30028C86B /* Exceptions for "ShieldConfigurationExtension" folder in "ShieldConfigurationExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 74BFE72E2FDDE3E30028C86B /* ShieldConfigurationExtension */;
-		};
 		74E131222FC0EADB00D45757 /* Exceptions for "ShieldActionExtension" folder in "ShieldActionExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -207,29 +208,6 @@
 			explicitFolders = (
 			);
 			path = pausenowMonitor;
-			sourceTree = "<group>";
-		};
-		74BFE7332FDDE3E30028C86B /* ShieldConfigurationExtension */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				74BFE73B2FDDE3E30028C86B /* Exceptions for "ShieldConfigurationExtension" folder in "ShieldConfigurationExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = ShieldConfigurationExtension;
-			sourceTree = "<group>";
-		};
-		74E130E02FC0EA1D00D45757 /* ShieldConfigurationExtension */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = ShieldConfigurationExtension;
 			sourceTree = "<group>";
 		};
 		74E131172FC0EADB00D45757 /* ShieldActionExtension */ = {
@@ -340,6 +318,18 @@
 			path = RunnerTests;
 			sourceTree = "<group>";
 		};
+		74A56F1C2FF62CD500D0D988 /* ShieldConfigurationExtension */ = {
+			isa = PBXGroup;
+			children = (
+				74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */,
+				74A56F1A2FF62CD500D0D988 /* ShieldConfigurationExtension.entitlements */,
+				74A56F1B2FF62CD500D0D988 /* ShieldConfigurationExtension.swift */,
+				74A56F1F2FF62D8B00D0D988 /* Assets.xcassets */,
+				74A56F472FF62F5D00D0D988 /* Info.plist */,
+			);
+			path = ShieldConfigurationExtension;
+			sourceTree = "<group>";
+		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
@@ -356,15 +346,14 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
-				74E130E02FC0EA1D00D45757 /* ShieldConfigurationExtension */,
 				74E131172FC0EADB00D45757 /* ShieldActionExtension */,
 				74E131902FC0EC3E00D45757 /* DeviceActivityReportExtension */,
 				74365F032FD9F0D8008C1DEC /* pausenowMonitor */,
-				74BFE7332FDDE3E30028C86B /* ShieldConfigurationExtension */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				A6C95E14380F0FECE5A072D4 /* Pods */,
 				1829C2F4361A8CC2438ED504 /* Frameworks */,
+				74A56F1C2FF62CD500D0D988 /* ShieldConfigurationExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -481,9 +470,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				74BFE7332FDDE3E30028C86B /* ShieldConfigurationExtension */,
 			);
 			name = ShieldConfigurationExtension;
 			productName = ShieldConfigurationExtension;
@@ -636,6 +622,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74A56F202FF62D8B00D0D988 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -887,6 +874,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74A56F1D2FF62CD500D0D988 /* ShieldActionExtension.swift in Sources */,
+				74A56F1E2FF62CD500D0D988 /* ShieldConfigurationExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

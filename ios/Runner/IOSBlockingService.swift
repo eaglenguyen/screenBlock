@@ -96,16 +96,15 @@ class IOSBlockingService: NSObject {
         let now = Date()
         let pauseEndsAt = now.addingTimeInterval(TimeInterval(minutes * 60))
 
-        // 👇 start timer FIRST before any other setup
-         pauseTimer?.invalidate()
-         pauseTimer = Timer.scheduledTimer(
-             withTimeInterval: TimeInterval(minutes * 60),
-             repeats: false
-         ) { [weak self] _ in
-             NSLog("⏱ native pause timer fired — resuming blocking")
-             self?.resumeBlocking()
-             self?.onPauseEnded?() // 👈 notify Flutter
-         }
+        pauseTimer?.invalidate()
+        pauseTimer = Timer.scheduledTimer(
+            withTimeInterval: TimeInterval(minutes * 60),
+            repeats: false
+        ) { [weak self] _ in
+            NSLog("⏱ native pause timer fired — resuming blocking")
+            self?.resumeBlocking()
+            self?.onPauseEnded?()
+        }
 
         sharedDefaults?.set(pauseEndsAt.timeIntervalSince1970, forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
@@ -114,8 +113,6 @@ class IOSBlockingService: NSObject {
         activityCenter.stopMonitoring([DeviceActivityName("com.eagle.pausenow.pause")])
 
         let calendar = Calendar.current
-
-        // round start up to next minute to account for dropped seconds
         let roundedStart = calendar.date(
             bySetting: .second,
             value: 0,
@@ -126,10 +123,8 @@ class IOSBlockingService: NSObject {
         let schedule: DeviceActivitySchedule
 
         if minutes < 15 {
-            // always use 30 min window — plenty of buffer
             let endDate = now.addingTimeInterval(30 * 60)
             let endComponents = calendar.dateComponents([.hour, .minute], from: endDate)
-            // warning fires at pause end: 30 - minutes mins before end
             let warningMinutes = 30 - minutes
             schedule = DeviceActivitySchedule(
                 intervalStart: startComponents,
@@ -138,9 +133,8 @@ class IOSBlockingService: NSObject {
                 warningTime: DateComponents(minute: warningMinutes)
             )
             NSLog("⏸ warningTime trick: 30min window, warning at \(minutes) mins (warningMinutes=\(warningMinutes))")
-        }else {
-            // add 1 extra min to end to compensate for 1 min rounding on start
-            let adjustedEnd = pauseEndsAt.addingTimeInterval(60) // 👈 add 1 min
+        } else {
+            let adjustedEnd = pauseEndsAt.addingTimeInterval(60)
             let endComponents = calendar.dateComponents([.hour, .minute], from: adjustedEnd)
             schedule = DeviceActivitySchedule(
                 intervalStart: startComponents,
@@ -165,6 +159,7 @@ class IOSBlockingService: NSObject {
         cancelPauseNotification()
 
     }
+
 
 
 
@@ -317,5 +312,10 @@ class IOSBlockingService: NSObject {
         default:
             NSLog("⚠️ applyShield: unknown mode '\(mode)'")
         }
+    }
+    
+    func setSessionComplete() {
+        sharedDefaults?.set(false, forKey: "isBlocking")
+        sharedDefaults?.synchronize()
     }
 }
