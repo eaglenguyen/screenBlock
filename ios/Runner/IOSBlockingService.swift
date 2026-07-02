@@ -314,8 +314,5 @@ class IOSBlockingService: NSObject {
         }
     }
     
-    func setSessionComplete() {
-        sharedDefaults?.set(false, forKey: "isBlocking")
-        sharedDefaults?.synchronize()
-    }
+
 }

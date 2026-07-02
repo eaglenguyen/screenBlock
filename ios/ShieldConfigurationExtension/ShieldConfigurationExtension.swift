@@ -31,25 +31,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         let mutedWhite = UIColor(white: 1.0, alpha: 0.5)
 
         // ── Session complete screen ───────────────────
-        if !isBlocking {
-            return ShieldConfiguration(
-                backgroundColor: navyBg,
-                icon: UIImage(named: "PauseNowIcon"),
-                title: ShieldConfiguration.Label(
-                    text: "Session Complete!",
-                    color: .white
-                ),
-                subtitle: ShieldConfiguration.Label(
-                    text: "You earned \(sessionMinutes * 5) ⭐️ — open Pause Now to claim.",
-                    color: mutedWhite
-                ),
-                primaryButtonLabel: ShieldConfiguration.Label(
-                    text: "Got it",
-                    color: goldText
-                ),
-                primaryButtonBackgroundColor: gold
-            )
-        }
+
 
         // ── Active blocking screen ────────────────────
         return ShieldConfiguration(

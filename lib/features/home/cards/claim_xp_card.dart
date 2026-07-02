@@ -113,8 +113,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
 
     final startXp = widget.totalXp; // 30
     final earnedXp = widget.xpEarned; // 10
-    final endXp = startXp + earnedXp;
-    final finalTotal = endXp + earnedXp;
+    final finalTotal = startXp + earnedXp;
 
     final steps = finalTotal.clamp(1, 30);
     final interval = Duration(

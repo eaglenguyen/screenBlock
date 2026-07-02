@@ -192,9 +192,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 defaults?.synchronize()
             }
             result(pending)
-        case "setSessionComplete":
-            service.setSessionComplete()
-            result(nil)
         case "getScreenTimeTotal":
             let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let total = sharedDefaults?.double(forKey: "totalScreenTimeToday") ?? 0

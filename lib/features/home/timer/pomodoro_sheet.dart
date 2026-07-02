@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../providers/premium_provider.dart';
+import '../../../services/notification_service.dart';
 import '../../paywall/feature_paywall_screen.dart';
 
 // ── Pomodoro config ──────────────────────────────────────────────────────────
@@ -261,8 +262,11 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
 
             // save button
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 HapticFeedback.mediumImpact();
+
+                await NotificationService.instance.requestPermission();
+
                 widget.onSave(PomodoroConfig(
                   workMinutes: _workMinutes,
                   shortBreakMinutes: _shortBreakMinutes,

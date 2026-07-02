@@ -256,9 +256,6 @@ class HomeViewModel extends _$HomeViewModel {
     final newTotal = state.totalXp + state.xpEarned;
     await _saveTotalXp(newTotal);
 
-    if (Platform.isIOS) {
-      await (_blockingService as IOSBlockingService).stopBlockingCompletely();
-    }
 
     await NotificationService.instance.cancelNotification(202);
 
@@ -508,6 +505,17 @@ class HomeViewModel extends _$HomeViewModel {
     );
 
     // 👇 schedule break notification if pomodoro mode
+    if (state.pomodoroConfig.isPomodoroMode) {
+      await NotificationService.instance.cancelNotification(200);
+      await NotificationService.instance.scheduleNotification(
+        id: 200,
+        title: 'Break time! 🍅',
+        body: 'Work session complete! Take a short break.',
+        scheduledTime: DateTime.now().add(
+          Duration(minutes: state.pomodoroConfig.workMinutes),
+        ),
+      );
+    }
 
 
     _sessionTimer?.cancel();
@@ -537,7 +545,7 @@ class HomeViewModel extends _$HomeViewModel {
     }
 
     if (Platform.isIOS) {
-      await (_blockingService as IOSBlockingService).setSessionComplete();
+      await (_blockingService as IOSBlockingService).stopBlockingCompletely();
     } else {
       _blockingService.stopAllMonitoring();
     }
