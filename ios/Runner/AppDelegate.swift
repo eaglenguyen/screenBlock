@@ -12,15 +12,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     var window: UIWindow?
     private var flutterEngine: FlutterEngine?
+    var flutterChannel: FlutterMethodChannel? // 👈 add this
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions:
             [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-
-        os_log("🦅🦅🦅 APP LAUNCHED", log: .default, type: .fault)
-
         // setup notification delegate
         UNUserNotificationCenter.current().delegate = self
 
@@ -42,6 +40,53 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = flutterVC
         window?.makeKeyAndVisible()
+        
+        // add in didFinishLaunchingWithOptions before return true
+        func registerNotificationCategories() {
+            // Pomodoro work ended actions
+            let startBreakAction = UNNotificationAction(
+                identifier: "START_BREAK",
+                title: "Start Break 🍅",
+                options: []
+            )
+            let keepWorkingAction = UNNotificationAction(
+                identifier: "KEEP_WORKING",
+                title: "Keep Working 💪",
+                options: []
+            )
+            let workEndedCategory = UNNotificationCategory(
+                identifier: "POMODORO_WORK_ENDED",
+                actions: [startBreakAction, keepWorkingAction],
+                intentIdentifiers: [],
+                options: []
+            )
+
+            // Pomodoro break ended actions
+            let startWorkAction = UNNotificationAction(
+                identifier: "START_WORK",
+                title: "Start Working 🔒",
+                options: []
+            )
+            let extendBreakAction = UNNotificationAction(
+                identifier: "EXTEND_BREAK",
+                title: "5 More Minutes ⏳",
+                options: []
+            )
+            let breakEndedCategory = UNNotificationCategory(
+                identifier: "POMODORO_BREAK_ENDED",
+                actions: [startWorkAction, extendBreakAction],
+                intentIdentifiers: [],
+                options: []
+            )
+
+            UNUserNotificationCenter.current().setNotificationCategories([
+                workEndedCategory,
+                breakEndedCategory
+            ])
+        }
+        
+        registerNotificationCategories()
+        UNUserNotificationCenter.current().delegate = self
 
         return true
     }
@@ -57,6 +102,54 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 
     // ── Notification delegate ─────────────────────────
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let action = response.actionIdentifier
+        let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        NSLog("🔔 notification action: \(action)")
+
+        if response.notification.request.identifier == "scheduleResume" {
+            handleScheduleResume()
+        }
+        if #available(iOS 16.0, *) {
+            switch action {
+            case "START_BREAK":
+                // 👇 unblock apps immediately for break
+                IOSBlockingService.shared.store.clearAllSettings()
+                defaults?.set("break", forKey: "pomodoroPhase")
+                defaults?.set(Date().timeIntervalSince1970, forKey: "pomodoroBreakStartTime")
+                defaults?.synchronize()
+
+            case "KEEP_WORKING":
+                // do nothing — apps stay blocked
+                NSLog("Nothing happens")
+
+            case "START_WORK":
+                // 👇 reblock apps immediately for work
+                let blockingMode = defaults?.string(forKey: "blockingMode") ?? "specific_apps"
+                IOSBlockingService.shared.applyShield(mode: blockingMode)
+                defaults?.set("work", forKey: "pomodoroPhase")
+                defaults?.set(Date().timeIntervalSince1970, forKey: "pomodoroWorkStartTime")
+                defaults?.synchronize()
+
+            case "EXTEND_BREAK":
+                // 👇 keep apps unblocked, update break end time
+                IOSBlockingService.shared.store.clearAllSettings()
+                let newBreakEnd = Date().addingTimeInterval(5 * 60)
+                defaults?.set(newBreakEnd.timeIntervalSince1970, forKey: "pomodoroBreakEndsAt")
+                defaults?.synchronize()
+                NSLog("⏳ EXTEND_BREAK — 5 more minutes")
+
+            default:
+                break
+            }
+        }
+        completionHandler()
+    }
+    
 
     // called when notification received while app is in foreground
     func userNotificationCenter(
@@ -71,17 +164,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler([])
     }
 
-    // called when user taps notification
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        if response.notification.request.identifier == "scheduleResume" {
-            handleScheduleResume()
-        }
-        completionHandler()
-    }
+
 
     private func handleScheduleResume() {
         NSLog("⏰ scheduleResume notification received — resuming blocking")
@@ -97,6 +180,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             name: "com.eagle.pausenow/ios_blocking",
             binaryMessenger: engine.binaryMessenger
         )
+        flutterChannel = channel // 👈 add this line
+
         
         // 👇 notify Flutter when native pause timer fires
          IOSBlockingService.shared.onPauseEnded = {
@@ -184,6 +269,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+        case "savePomodoroBreakState":
+            if let args = call.arguments as? [String: Any] {
+                let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+                defaults?.set(args["roundCount"], forKey: "pomodoroRoundCount")
+                defaults?.set(args["breakMinutes"], forKey: "pomodoroBreakMinutes")
+                defaults?.set(args["breakStartTime"], forKey: "pomodoroBreakStartTime")
+                defaults?.set(args["isLongBreak"], forKey: "pomodoroIsLongBreak")
+                defaults?.set("break", forKey: "pomodoroPhase")
+                defaults?.synchronize()
+            }
+            result(nil)
+        case "getPomodoroBreakState":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            result([
+                "pomodoroPhase": defaults?.string(forKey: "pomodoroPhase") ?? "work",
+                "pomodoroBreakMinutes": defaults?.integer(forKey: "pomodoroBreakMinutes") ?? 5,
+                "pomodoroBreakStartTime": defaults?.integer(forKey: "pomodoroBreakStartTime") ?? 0,
+                "pomodoroRoundCount": defaults?.integer(forKey: "pomodoroRoundCount") ?? 0,
+                "pomodoroIsLongBreak": defaults?.bool(forKey: "pomodoroIsLongBreak") ?? false,
+            ])
+        case "clearPomodoroBreakState":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            defaults?.removeObject(forKey: "pomodoroBreakMinutes")
+            defaults?.removeObject(forKey: "pomodoroBreakStartTime")
+            defaults?.removeObject(forKey: "pomodoroIsLongBreak")
+            defaults?.set("work", forKey: "pomodoroPhase")
+            defaults?.synchronize()
+            result(nil)
         case "checkAndClearPendingClaim":
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let pending = defaults?.bool(forKey: "pendingXpClaim") ?? false

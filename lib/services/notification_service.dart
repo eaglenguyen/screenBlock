@@ -53,8 +53,8 @@ class NotificationService {
     required String title,
     required String body,
     required DateTime scheduledTime,
+    String? categoryIdentifier, // 👈 add this
   }) async {
-
     final channelId = (id == 200 || id == 201) ? 'pomodoro' : 'subscription_expiry';
     final channelName = (id == 200 || id == 201) ? 'Pomodoro Timer' : 'Subscription Expiry';
 
@@ -67,7 +67,6 @@ class NotificationService {
         android: AndroidNotificationDetails(
           channelId,
           channelName,
-          channelDescription: 'Notifies when subscription is about to expire',
           importance: Importance.high,
           priority: Priority.high,
         ),
@@ -75,6 +74,7 @@ class NotificationService {
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
+          categoryIdentifier: categoryIdentifier, // 👈 pass category
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

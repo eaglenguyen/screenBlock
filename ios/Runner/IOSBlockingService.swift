@@ -19,7 +19,7 @@ class IOSBlockingService: NSObject {
     
     private let center = AuthorizationCenter.shared
     private let activityCenter = DeviceActivityCenter()
-    private let store = ManagedSettingsStore()
+    let store = ManagedSettingsStore()
     private let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
     private var pauseTimer: Timer?
     private let activityName = DeviceActivityName("com.eagle.pausenow.session")
@@ -284,7 +284,7 @@ class IOSBlockingService: NSObject {
     }
 
         // MARK - Shield
-    private func applyShield(mode: String) {
+    func applyShield(mode: String) {
         store.clearAllSettings()
 
         switch mode {
