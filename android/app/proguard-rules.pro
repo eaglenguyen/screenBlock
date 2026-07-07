@@ -1,0 +1,2 @@
+-keep class com.revenuecat.purchases.** { *; }
+-keep class com.android.billingclient.** { *; }

@@ -138,7 +138,7 @@ class _ManualStep1HomeScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-
+          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
           _TutorialButton(label: 'Next →', onTap: onNext),
         ],
       ),
@@ -165,7 +165,7 @@ class _ManualStep2BlockMode extends StatelessWidget {
     return _TutorialShell(
       child: Column(
         children: [
-          const SizedBox(height: 100),
+          const SizedBox(height: 160),
           Text(
             'Choose your block mode',
             textAlign: TextAlign.center,
@@ -215,6 +215,7 @@ class _ManualStep2BlockMode extends StatelessWidget {
             ),
 
           const SizedBox(height: 24),
+          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
           _TutorialButton(label: 'Next →', onTap: onNext),
           if (showSkip) ...[
             const SizedBox(height: 12),
@@ -277,6 +278,7 @@ class _ManualStep3AppPicker extends StatelessWidget {
           ),
 
           const SizedBox(height: 60),
+          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
           _TutorialButton(label: 'Next →', onTap: onNext),
         ],
       ),
@@ -326,6 +328,7 @@ class _ManualStep4Timer extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
+          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
           _TutorialButton(label: 'Next →', onTap: onNext),
         ],
       ),
@@ -374,6 +377,7 @@ class _ManualStep5ActiveSession extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
+          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
           _TutorialButton(label: "Let's go! 🚀", onTap: onNext),
         ],
       ),
@@ -1141,8 +1145,15 @@ class _TutorialShell extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
-              child: SingleChildScrollView( // 👈 add this
-                child: child,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      child: IntrinsicHeight(child: child),
+                    ),
+                  );
+                },
               ),
             ),
           ),

@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
+import 'package:pausenow/paywall/paywall_screen.dart';
 import 'core/constants/hivebox_names.dart';
 import 'features/bottomNav/shell_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/home/schedule/schedule_screen.dart';
-import 'features/paywall/paywall_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/stats/stats_screen.dart';
 import 'onboarding/onboarding_welcome_flow.dart';
@@ -93,8 +93,10 @@ class AppRouter {
       GoRoute(
         path: '/paywall',
         name: 'paywall',
-        builder: (context, state) => const PaywallScreen(),
-      ),
+        builder: (context, state) {
+          final source = (state.extra as String?) ?? 'onboarding'; // 👈
+          return PaywallScreen(source: source);
+        },      ),
     ],
   );
 }

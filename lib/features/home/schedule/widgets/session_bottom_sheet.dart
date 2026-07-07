@@ -11,10 +11,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/schedule.dart';
 import '../../../../domain/platform/ios_blocking_service.dart';
+import '../../../../paywall/feature_paywall_screen.dart';
 import '../../../../providers/blocking_service_provider.dart';
 import '../../../../providers/premium_provider.dart';
 import '../../../../services/schedule_checker.dart';
-import '../../../paywall/feature_paywall_screen.dart';
 import '../../home_viewmodel.dart';
 import '../../widgets/app_list_sheet.dart';
 import '../schedule_viewmodel.dart';
@@ -301,7 +301,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                 Future.microtask(() {
                   Navigator.of(context, rootNavigator: true).push(
                     ModalBottomSheetRoute(
-                      builder: (_) => const FeaturePaywallScreen(),
+                      builder: (_) => const FeaturePaywallScreen(source: 'block_all_apps',),
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       useSafeArea: true,
@@ -459,7 +459,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           useRootNavigator: true,
-          builder: (_) => const FeaturePaywallScreen(),
+          builder: (_) => const FeaturePaywallScreen(source: "multiple_schedules"),
         );
         return;
       }

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+19
+version: 1.0.0+24
 
 environment:
   sdk: ^3.10.7
@@ -79,6 +79,8 @@ dependencies:
   rive: ^0.14.8
   timezone: ^0.11.0
   permission_handler: ^11.3.1
+  posthog_flutter: ^5.30.0
+
 
 
 
@@ -121,11 +123,11 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path_ios: "assets/icons/pauseIcon.png"
-  image_path_android: "assets/icons/pausePlaystore.png"
+  image_path_android: "assets/icons/pauseEdit.png"
   min_sdk_android: 21
   remove_alpha_ios: true  # 👈 add this
-  adaptive_icon_background: "#16162A"  # 👈 your navy color
-  adaptive_icon_foreground: "assets/icons/pausePlaystore.png"
+  adaptive_icon_background: "#22224A"  # 👈 your navy color
+  adaptive_icon_foreground: "assets/icons/pauseEdit.png"
 
 
 flutter_native_splash:

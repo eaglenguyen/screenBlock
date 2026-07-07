@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import 'package:pausenow/services/notification_service.dart';
 import 'package:pausenow/services/revenuecat_service.dart';
 import 'package:pausenow/services/schedule_checker.dart';
 import 'package:pausenow/services/xp_animation.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:rive/rive.dart';
 import 'app_router.dart';
 import 'core/constants/hivebox_names.dart';
@@ -63,6 +65,12 @@ void main() async {
   // 👇 initialize RevenueCat before app launches
   await RevenueCatService.instance.initialize();
 
+  //PostHog setup
+  final config = PostHogConfig('phc_B87VKMMuFwotFDUuDJuGiKpNWSTPQfEFd3YrrLQLKJnJ')
+    ..host = 'https://us.i.posthog.com'
+    ..debug = kDebugMode
+    ..captureApplicationLifecycleEvents = true;
+  await Posthog().setup(config);
 
 
 

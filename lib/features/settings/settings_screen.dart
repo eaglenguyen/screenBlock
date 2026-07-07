@@ -16,8 +16,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../core/constants/hivebox_names.dart';
 import '../../core/theme/theme.notifier.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/premium_provider.dart';
@@ -56,7 +54,7 @@ class SettingsScreen extends ConsumerWidget {
                           iconColor: const Color(0xFF1A1208),
                           iconBgColor: const Color(0xFFEDB82A),
                           label: 'Upgrade to Pro',
-                          onTap: () => context.push('/paywall'),
+                          onTap: () => context.push('/paywall', extra: 'settings_upgrade'), // 👈
                           trailing: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(

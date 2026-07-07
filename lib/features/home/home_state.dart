@@ -18,7 +18,6 @@ enum BlockingPhase {
 @immutable
 class HomeState {
   final List<TimerConfig> trackedApps;
-  final Streak? streak;
   final bool isLoading;
   final String? error;
   final String blockingType; // 'all_apps' or 'specific_apps'
@@ -51,7 +50,6 @@ class HomeState {
 
   const HomeState({
     this.trackedApps = const [],
-    this.streak,
     this.isLoading = false,
     this.error,
     this.blockingType = AppConstants.blockingTypeSpecificApps, // keep const default
@@ -112,7 +110,6 @@ class HomeState {
   }) {
     return HomeState(
       trackedApps: trackedApps ?? this.trackedApps,
-      streak: streak ?? this.streak,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       blockingType: blockingType ?? this.blockingType,

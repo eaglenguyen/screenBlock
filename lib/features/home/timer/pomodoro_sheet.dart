@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/notification_service.dart';
-import '../../paywall/feature_paywall_screen.dart';
 
 // ── Pomodoro config ──────────────────────────────────────────────────────────
 class PomodoroConfig {
@@ -201,7 +201,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         useRootNavigator: true,
-                        builder: (_) => const FeaturePaywallScreen(),
+                        builder: (_) => const FeaturePaywallScreen(source: 'pomodoro',),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -230,7 +230,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 emoji: '💼',
                 label: 'Work',
                 minutes: _workMinutes,
-                min: 2,
+                min: 5,
                 max: 60,
                 defaultValue: 25, // 👈
                 onChanged: (v) => setState(() => _workMinutes = v),
@@ -241,7 +241,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 emoji: '☕',
                 label: 'Short Break',
                 minutes: _shortBreakMinutes,
-                min: 2,
+                min: 3,
                 max: 15,
                 defaultValue: 5, // 👈
                 onChanged: (v) => setState(() => _shortBreakMinutes = v),
@@ -419,33 +419,31 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   onChanged((minutes + 5).clamp(min, max));
                 },
               ),
-              // 👇 reset button
-              if (minutes != defaultValue) ...[
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    onChanged(defaultValue);
-                  },
-                  child: Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: AppColors.backgroundCard(context),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.border(context),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.refresh_rounded,
-                      size: 14,
-                      color: AppColors.textSecondary(context),
+              // 👇 reset button (always visible)
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onChanged(defaultValue);
+                },
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundCard(context),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.border(context),
+                      width: 0.5,
                     ),
                   ),
+                  child: Icon(
+                    Icons.refresh_rounded,
+                    size: 14,
+                    color: AppColors.textSecondary(context),
+                  ),
                 ),
-              ],
+              ),
             ],
           ),
         ],
@@ -456,30 +454,8 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
 
 
 
-  Widget _stepButton({
-    required IconData icon,
-    required VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: AppColors.backgroundCard(context),
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.border(context), width: 0.5),
-        ),
-        child: Icon(
-          icon,
-          size: 16,
-          color: onTap != null
-              ? AppColors.textPrimary(context)
-              : AppColors.textSecondary(context),
-        ),
-      ),
-    );
-  }
+
+
 }
 
 class _HoldStepButton extends StatefulWidget {

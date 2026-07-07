@@ -7,9 +7,13 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/premium_provider.dart';
+import '../core/analytics/analytics_events.dart';
+import '../core/analytics/analytics_service.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
-  const PaywallScreen({super.key});
+  final String source; // 👈 add this
+
+  const PaywallScreen({super.key, required this.source});
 
   @override
   ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
@@ -25,6 +29,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void initState() {
     super.initState();
     _loadOfferings();
+
+    // 👇 track paywall view with its source
+    AnalyticsService.instance.capture(
+      AnalyticsEvents.paywallViewed,
+      {AnalyticsProps.source: widget.source},
+    );
   }
 
   Future<void> _loadOfferings() async {
@@ -64,6 +74,16 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           .containsKey('pause now Premium');
       if (isPremium && mounted) {
         ref.invalidate(premiumProvider);
+
+        // 👇 track purchase with source + plan
+        await AnalyticsService.instance.capture(
+          AnalyticsEvents.purchaseCompleted,
+          {
+            AnalyticsProps.source: widget.source,
+            AnalyticsProps.plan: _selectedPackage!.packageType.name,
+          },
+        );
+
         await _markPaywallSeen(context, ref, purchased: true);
       }
     } catch (e) {

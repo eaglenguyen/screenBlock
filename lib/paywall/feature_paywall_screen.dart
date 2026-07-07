@@ -5,12 +5,14 @@ import 'package:hive/hive.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../../providers/premium_provider.dart';
-import 'package:go_router/go_router.dart';
-
 import '../../core/theme/app_colors.dart';
+import '../core/analytics/analytics_events.dart';
+import '../core/analytics/analytics_service.dart';
 
 class FeaturePaywallScreen extends ConsumerStatefulWidget {
-  const FeaturePaywallScreen({super.key});
+  final String source; // 👈 add this
+
+  const FeaturePaywallScreen({super.key, required this.source});
 
   @override
   ConsumerState<FeaturePaywallScreen> createState() => _FeaturePaywallScreenState();
@@ -36,6 +38,12 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   void initState() {
     super.initState();
     _loadOfferings();
+
+    // 👇 track paywall view with its source
+    AnalyticsService.instance.capture(
+      AnalyticsEvents.paywallViewed,
+      {AnalyticsProps.source: widget.source},
+    );
   }
 
   Future<void> _loadOfferings() async {
@@ -57,8 +65,8 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     if (purchased) {
       ref.invalidate(premiumProvider);
       await Future.delayed(const Duration(milliseconds: 800));
+      if (mounted) Navigator.pop(context); // 👈 dismiss the bottom sheet
     }
-    if (context.mounted) context.go('/home');
   }
 
   Future<void> _purchase() async {
@@ -72,10 +80,17 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
           .containsKey('pause now Premium');
       if (isPremium && mounted) {
         ref.invalidate(premiumProvider);
-        final box = Hive.box(HiveBoxNames.settings);
-        await box.put('paywallSeen', true);
-        await Future.delayed(const Duration(milliseconds: 800));
-        if (mounted) Navigator.pop(context); // 👈 dismiss the bottom sheet
+
+        // 👇 track purchase with source + plan
+        await AnalyticsService.instance.capture(
+          AnalyticsEvents.purchaseCompleted,
+          {
+            AnalyticsProps.source: widget.source,
+            AnalyticsProps.plan: _selectedPackage!.packageType.name,
+          },
+        );
+
+        await _markPaywallSeen(context, ref);
       }
     } catch (e) {
       if (e is PurchasesError &&

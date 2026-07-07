@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import '../../core/constants/hivebox_names.dart';
-import '../features/paywall/onboarding_outlook_screen.dart';
+import '../core/analytics/analytics_events.dart';
+import '../core/analytics/analytics_service.dart';
+import '../paywall/onboarding_outlook_screen.dart';
 import 'data/onboarding_stats.dart';
 import 'onboarding_permission_screen.dart';
 import 'onboarding_question_bank.dart';
@@ -45,6 +47,38 @@ class OnboardingSteps {
   static const int outlook = 24;
   static const int trialReminder = 25;
   static const int paywall = 26;
+}
+
+class OnboardingStepNames {
+  static const Map<int, String> names = {
+    OnboardingSteps.welcome: 'welcome',
+    OnboardingSteps.chatIntro: 'chat_intro',
+    OnboardingSteps.chat: 'chat',
+    OnboardingSteps.ageQuestion: 'age_question',
+    OnboardingSteps.hoursQuestion: 'hours_question',
+    OnboardingSteps.badNewsStats: 'bad_news_stats',
+    OnboardingSteps.lifeGrid: 'life_grid',
+    OnboardingSteps.goodNews: 'good_news',
+    OnboardingSteps.qbGoals: 'qb_goals',
+    OnboardingSteps.qbFutureVision: 'qb_future_vision',
+    OnboardingSteps.qbGoalsConfirm: 'qb_goals_confirm',
+    OnboardingSteps.qbPhoneUsage: 'qb_phone_usage',
+    OnboardingSteps.qbSocialMedia: 'qb_social_media',
+    OnboardingSteps.qbBlockers: 'qb_blockers',
+    OnboardingSteps.qbStruggles: 'qb_struggles',
+    OnboardingSteps.qbSympathy: 'qb_sympathy',
+    OnboardingSteps.permissions: 'permissions',
+    OnboardingSteps.demo: 'demo',
+    OnboardingSteps.commitment: 'commitment',
+    OnboardingSteps.commitmentResult: 'commitment_result',
+    OnboardingSteps.themePicker: 'theme_picker',
+    OnboardingSteps.screenTimeGoal: 'screen_time_goal',
+    OnboardingSteps.loadingPlan: 'loading_plan',
+    OnboardingSteps.reflection: 'reflection',
+    OnboardingSteps.outlook: 'outlook',
+    OnboardingSteps.trialReminder: 'trial_reminder',
+    OnboardingSteps.paywall: 'paywall',
+  };
 }
 
 class OnboardingWelcomeFlow extends ConsumerStatefulWidget {
@@ -163,14 +197,32 @@ class _OnboardingWelcomeFlowState
     final box = Hive.box(HiveBoxNames.settings);
     await box.put('onboardingComplete', true);
     await box.delete('onboardingStep'); // 👈 clean up saved step
+    await AnalyticsService.instance.captureOnce(AnalyticsEvents.onboardingCompleted); // posthog
     await ref
         .read(onboardingViewModelProvider.notifier)
         .completeOnboarding();
     if (mounted) context.go('/paywall');
   }
 
+  // PostHog logic
+  int? _lastTrackedStep;
+
+  void _trackStepIfChanged() {
+    if (_lastTrackedStep == _currentStep) return;
+    _lastTrackedStep = _currentStep;
+    AnalyticsService.instance.capture(
+      AnalyticsEvents.onboardingStepViewed,
+      {
+        AnalyticsProps.stepIndex: _currentStep,
+        AnalyticsProps.stepName: OnboardingStepNames.names[_currentStep] ?? 'unknown',
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    _trackStepIfChanged();
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 600),
       transitionBuilder: (child, animation) {

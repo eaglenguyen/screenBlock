@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -6,6 +7,7 @@ class RevenueCatService {
   static final instance = RevenueCatService._();
 
   static const _iosApiKey = 'appl_sGiWZFRTsStgZHfTJKWClTYWWko';
+  static const _androidApiKey = 'goog_MnWEimkWbZdzyQAMTHfZPImmMyX';
 
   bool _initialized = false;
 
@@ -16,12 +18,14 @@ class RevenueCatService {
       kDebugMode ? LogLevel.debug : LogLevel.error,
     );
 
-    final config = PurchasesConfiguration(_iosApiKey);
+    // 👇 use correct key per platform
+    final apiKey = Platform.isIOS ? _iosApiKey : _androidApiKey;
+    final config = PurchasesConfiguration(apiKey);
     await Purchases.configure(config);
     await Purchases.invalidateCustomerInfoCache();
 
     _initialized = true;
-    debugPrint('✅ RevenueCat initialized');
+    debugPrint('✅ RevenueCat initialized (${Platform.isIOS ? 'iOS' : 'Android'})');
   }
 
   Future<bool> isPremium() async {

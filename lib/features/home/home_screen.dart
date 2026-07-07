@@ -201,7 +201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           onEndBreak: () => _showEndBreakConfirm(),
                           onBlockListTapped: _onBlockListTapped,
                           isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
-                          pomodoroRound: state.pomodoroRoundCount, // 👈 add
+                          pomodoroRound: state.pomodoroRoundCount,
                         ),
                   // Completed
                     BlockingPhase.completed => SessionCompletedCard(

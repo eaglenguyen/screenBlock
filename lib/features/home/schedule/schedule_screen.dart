@@ -11,10 +11,10 @@ import 'package:pausenow/features/home/schedule/widgets/session_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/schedule.dart';
+import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
-import '../../paywall/feature_paywall_screen.dart';
 import '../home_state.dart';
 import '../home_viewmodel.dart';
 
@@ -253,7 +253,7 @@ class ScheduleScreen extends ConsumerWidget {
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           useRootNavigator: true,
-          builder: (_) => const FeaturePaywallScreen(),
+          builder: (_) => const FeaturePaywallScreen(source: 'multiple_schedules'),
         );
         return;
       }
@@ -348,7 +348,7 @@ class _LockedScheduleCard extends StatelessWidget {
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
               useRootNavigator: true,
-              builder: (_) => const FeaturePaywallScreen(),
+              builder: (_) => const FeaturePaywallScreen(source: 'locked_schedule_card'),
             ),
             child: Container(
               decoration: BoxDecoration(

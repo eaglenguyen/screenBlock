@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hive/hive.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:pausenow/features/home/timer/pomodoro_sheet.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
@@ -380,10 +381,8 @@ class HomeViewModel extends _$HomeViewModel {
   void loadTrackedApps() {
     try {
       final timers = _blockingRepo.getAllTimers();
-      final streak = _usageRepo.getStreak();
       state = state.copyWith(
         trackedApps: timers,
-        streak: streak,
         isLoading: false,
         error: null,
       );
@@ -572,6 +571,23 @@ class HomeViewModel extends _$HomeViewModel {
       _blockingService.stopAllMonitoring();
     }
 
+    // 👇 play completion sound
+    if (Platform.isAndroid) {
+      try {
+        final player = AudioPlayer();
+        await player.setAsset('assets/sounds/bell.wav');
+        await player.setVolume(0.8);
+        await player.play();
+        await player.playerStateStream.firstWhere(
+              (state) => state.processingState == ProcessingState.completed,
+        );
+        await player.dispose();
+      } catch (e) {
+        debugPrint('❌ sound error: $e');
+      }
+      HapticFeedback.heavyImpact();
+    }
+
     if (state.activeSessionKey != null) {
       await _sessionRepo.endSession(
         key: state.activeSessionKey!,
@@ -625,6 +641,21 @@ class HomeViewModel extends _$HomeViewModel {
         'isLongBreak': isLongBreak,
       });
       await (_blockingService as IOSBlockingService).playSystemSound(1005);
+    } else {
+      // 👇 Android sound
+      try {
+        final player = AudioPlayer();
+        await player.setAsset('assets/sounds/bell.wav');
+        await player.setVolume(0.8);
+        await player.play();
+        await player.playerStateStream.firstWhere(
+              (state) => state.processingState == ProcessingState.completed,
+        );
+        await player.dispose();
+      } catch (e) {
+        debugPrint('❌ sound error: $e');
+      }
+      HapticFeedback.heavyImpact();
     }
 
     await NotificationService.instance.cancelNotification(200);
