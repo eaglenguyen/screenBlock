@@ -15,6 +15,11 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.4.8):
     - Flutter
+  - PostHog (3.64.1)
+  - posthog_flutter (0.0.1):
+    - Flutter
+    - FlutterMacOS
+    - PostHog (< 4.0.0, >= 3.61.0)
   - purchases_flutter (9.16.1):
     - Flutter
     - PurchasesHybridCommon (= 17.55.1)
@@ -46,6 +51,7 @@ DEPENDENCIES:
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - posthog_flutter (from `.symlinks/plugins/posthog_flutter/darwin`)
   - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - purchases_ui_flutter (from `.symlinks/plugins/purchases_ui_flutter/ios`)
   - rive_native (from `.symlinks/plugins/rive_native/ios`)
@@ -54,6 +60,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - PostHog
     - PurchasesHybridCommon
     - PurchasesHybridCommonUI
     - RevenueCat
@@ -76,6 +83,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/just_audio/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  posthog_flutter:
+    :path: ".symlinks/plugins/posthog_flutter/darwin"
   purchases_flutter:
     :path: ".symlinks/plugins/purchases_flutter/ios"
   purchases_ui_flutter:
@@ -96,6 +105,8 @@ SPEC CHECKSUMS:
   in_app_review: 7dd1ea365263f834b8464673f9df72c80c17c937
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
+  PostHog: 3a3e8319a0684f78e1ae8568a1dbd42c2596061f
+  posthog_flutter: 35d27c0ca7b0afe0e24789b1c6594e88dfffe066
   purchases_flutter: b44fcb4ff5e68a4dfe53fd0c339683803b04dd2c
   purchases_ui_flutter: 64afab2a2adc79a73ed5ca77f416c8d360a12734
   PurchasesHybridCommon: ecd9d7c586287625f1225b8de5e24c1021502270

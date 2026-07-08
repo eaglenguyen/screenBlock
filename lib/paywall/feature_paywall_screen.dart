@@ -5,6 +5,8 @@ import 'package:hive/hive.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../../providers/premium_provider.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../core/analytics/analytics_events.dart';
 import '../core/analytics/analytics_service.dart';
@@ -58,16 +60,6 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     }
   }
 
-  Future<void> _markPaywallSeen(BuildContext context, WidgetRef ref,
-      {bool purchased = false}) async {
-    final box = Hive.box(HiveBoxNames.settings);
-    await box.put('paywallSeen', true);
-    if (purchased) {
-      ref.invalidate(premiumProvider);
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (mounted) Navigator.pop(context); // 👈 dismiss the bottom sheet
-    }
-  }
 
   Future<void> _purchase() async {
     if (_selectedPackage == null) return;
@@ -90,7 +82,10 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
           },
         );
 
-        await _markPaywallSeen(context, ref);
+        final box = Hive.box(HiveBoxNames.settings);
+        await box.put('paywallSeen', true);
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (mounted) Navigator.pop(context); // 👈 dismiss the bottom sheet
       }
     } catch (e) {
       if (e is PurchasesError &&

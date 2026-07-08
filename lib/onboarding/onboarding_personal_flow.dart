@@ -1741,13 +1741,13 @@ class OnboardingProductivityScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 90),
+          const SizedBox(height: 60),
           Text(
-            'See Change Within \n2 Months!',
+            'Your Plan is Ready',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
-              fontSize: 30,
+              fontSize: 34,
               fontWeight: FontWeight.w800,
               letterSpacing: -1,
               height: 1.2,
@@ -1755,7 +1755,7 @@ class OnboardingProductivityScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '',
+            'based on all of your answers,\nyou will start to see improvement within \n2 months',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),

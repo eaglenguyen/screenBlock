@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,6 +43,7 @@ class _GoalMenuSheet extends StatelessWidget {
           _dragHandle(),
           Text('Goals', style: AppTextStyles.headlineSmall),
           const SizedBox(height: 20),
+        if (!Platform.isIOS) ...[
           _GoalTile(
             color: const Color(0xFF4CAF50),
             icon: Icons.phone_android_rounded,
@@ -52,6 +55,7 @@ class _GoalMenuSheet extends StatelessWidget {
             },
           ),
           const SizedBox(height: 12),
+          ],
           _GoalTile(
             color: const Color(0xFF4ECDC4),
             icon: Icons.shield_rounded,
