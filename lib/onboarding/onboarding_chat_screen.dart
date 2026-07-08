@@ -94,11 +94,11 @@ class _OnboardingChatIntroScreenState
             const MascotCharacter(size: 160),
 
 
-            const Spacer(flex: 3),
+            const Spacer(flex: 2),
 
             // start button
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -117,7 +117,7 @@ class _OnboardingChatIntroScreenState
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  child: const Text('Yap to Boxy'),
+                  child: const Text('Chat with Boxy'),
                 ),
               ),
             ),

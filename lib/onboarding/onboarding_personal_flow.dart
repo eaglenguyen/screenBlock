@@ -486,55 +486,6 @@ class PhoneMockupContent extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 4),
-
-          // third card
-          Container(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: borderColor, width: 0.5),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: gold.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 4,
-                        width: 55,
-                        decoration: BoxDecoration(
-                          color: textColor.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Container(
-                        height: 3,
-                        width: 35,
-                        decoration: BoxDecoration(
-                          color: subColor.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -587,7 +538,7 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 24),
+          const SizedBox(height: 140),
           Text(
             'How old are you?',
             textAlign: TextAlign.center,
@@ -998,7 +949,6 @@ class _OnboardingHoursScreenState extends State<OnboardingHoursScreen> {
                               : FontWeight.w500,
                         ),
                       ),
-                      const Spacer(),
                       if (isSelected) _AnimatedCheck(),
                     ],
                   ),
@@ -1138,22 +1088,13 @@ class _OnboardingBadNewsScreenState
       children: [
         const SizedBox(height: 60),
 
+
         // icon
         Center(
-          child: Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEDB82A).withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: const Color(0xFFEDB82A).withValues(alpha: 0.2),
-                width: 0.5,
-              ),
-            ),
-            child: const Center(
-              child: Text('📊', style: TextStyle(fontSize: 36)),
-            ),
+          child: Image.asset(
+            'assets/icons/square_notes_cutout.png',
+            width: 140,
+            height: 140,
           ),
         ),
         const SizedBox(height: 32),

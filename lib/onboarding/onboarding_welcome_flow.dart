@@ -405,6 +405,7 @@ class _OnboardingWelcomeFlowState
           key: const ValueKey('snapshot'),
           userName: _userName,
           age: _userAge,
+          currentDailyHours: _userHours, // 👈 new
           screenTimeGoalHours: Hive.box(HiveBoxNames.settings)
               .get('dailyScreenTimeGoal', defaultValue: _userHours) as double,
           selectedGoals: _selectedGoals,

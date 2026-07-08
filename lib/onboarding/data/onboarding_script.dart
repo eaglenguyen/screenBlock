@@ -78,7 +78,7 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
       ChatMessage(
         type: MessageType.bot,
-        text: 'instead of reacting automatically.',
+        text: 'instead of reacting.',
         textColor: Color(0xFF4CAF50),
       ),
     ],
@@ -127,7 +127,7 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
     ],
     userResponses: [
-      'that\'s actually beautiful 🙏',
+      'i want this!',
       'ok I get it now',
     ],
   ),
