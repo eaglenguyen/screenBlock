@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hive/hive.dart';
+import '../../../core/analytics/analytics_events.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/constants/hivebox_names.dart';
 import '../../../data/models/schedule.dart';
 import '../../../services/schedule_checker.dart';
@@ -73,6 +75,8 @@ class ScheduleViewModel extends _$ScheduleViewModel {
     required List<String> allowedApps,
   }) async {
     try {
+      final isNewSchedule = existingId == null; // 👈 capture before overwriting
+
       final schedule = Schedule(
         id: existingId ?? const Uuid().v4(),
         name: name,
@@ -86,6 +90,10 @@ class ScheduleViewModel extends _$ScheduleViewModel {
 
       await _box.put(schedule.id, schedule);
 
+      // 👇 activation event — first schedule ever created (not edits)
+      if (isNewSchedule) {
+        await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstBlockCreated);
+      }
 
       if (ScheduleChecker.instance.activeScheduleId == schedule.id) {
         debugPrint('📅 Active schedule updated — restarting blocking');

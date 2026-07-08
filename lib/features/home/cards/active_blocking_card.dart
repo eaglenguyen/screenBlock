@@ -198,12 +198,12 @@ class ActiveBlockingCard extends StatelessWidget {
           ),
         Text(
           '$h:$m:$s',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 48,
             fontWeight: FontWeight.w900,
-            color: Colors.white,
+            color: AppColors.textPrimary(context), // 👈 theme-aware
             letterSpacing: -1,
-            fontFeatures: [FontFeature.tabularFigures()],
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],

@@ -19,6 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/theme.notifier.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/premium_provider.dart';
+import '../stats/widgets/goal_settings_sheet.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -222,6 +223,13 @@ class SettingsScreen extends ConsumerWidget {
                   SettingsSection(
                     label: 'Account',
                     rows: [
+                      SettingsRow(
+                        icon: Icons.track_changes_rounded,
+                        iconColor: AppColors.gold(context),
+                        iconBgColor: AppColors.primarySubtle(context),
+                        label: 'Goals',
+                        onTap: () => GoalSettingsSheet.show(context, ref),
+                      ),
                       SettingsRow(
                         icon: Icons.settings_outlined,
                         iconColor: AppColors.gold(context),

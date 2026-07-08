@@ -17,14 +17,7 @@ class CountdownCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF1a2a4a),
-            Color(0xFF16162a),
-          ],
-        ),
+        color: AppColors.backgroundCard(context), // 👈 was hardcoded dark gradient
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: AppColors.border(context),
@@ -40,7 +33,7 @@ class CountdownCard extends StatelessWidget {
           Text(
             'Blocking apps in',
             style: AppTextStyles.bodyLarge.copyWith(
-              color: Colors.white.withOpacity(0.6),
+              color: AppColors.textSecondary(context), // 👈 was Colors.white.withOpacity(0.6)
             ),
           ),
           const SizedBox(height: 16),
@@ -58,10 +51,10 @@ class CountdownCard extends StatelessWidget {
             child: Text(
               '$count',
               key: ValueKey(count),
-              style: const TextStyle(
+              style: TextStyle( // 👈 no longer const — needs context now
                 fontSize: 100,
                 fontWeight: FontWeight.w900,
-                color: Colors.white,
+                color: AppColors.textPrimary(context), // 👈 was Colors.white
                 height: 1,
               ),
             ),
@@ -72,16 +65,16 @@ class CountdownCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.close_rounded,
-                  color: Colors.white54,
+                  color: AppColors.textSecondary(context), // 👈 was Colors.white54
                   size: 18,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'Cancel',
                   style: AppTextStyles.bodyLarge.copyWith(
-                    color: Colors.white54,
+                    color: AppColors.textSecondary(context), // 👈 was Colors.white54
                     fontWeight: FontWeight.w600,
                   ),
                 ),

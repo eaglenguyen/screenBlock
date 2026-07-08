@@ -235,7 +235,7 @@ class _GoalSliderSheetState extends State<_GoalSliderSheet> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: confirmController.text.trim() == confirmWord
+                    onPressed: confirmController.text.trim().toUpperCase() == confirmWord
                         ? () async {
                       Navigator.pop(ctx);
                       final box = Hive.box(HiveBoxNames.settings);

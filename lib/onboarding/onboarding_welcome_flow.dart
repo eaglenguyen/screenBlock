@@ -12,6 +12,7 @@ import '../paywall/onboarding_outlook_screen.dart';
 import 'data/onboarding_stats.dart';
 import 'onboarding_permission_screen.dart';
 import 'onboarding_question_bank.dart';
+import 'onboarding_snapshot_screen.dart';
 import 'widgets/onboarding_animations.dart';
 import 'onboarding_chat_screen.dart';
 import 'onboarding_demo_screens.dart';
@@ -40,9 +41,9 @@ class OnboardingSteps {
   static const int demo = 17;
   static const int commitment = 18;
   static const int commitmentResult = 19;
-  static const int themePicker = 20;
-  static const int screenTimeGoal = 21;
-  static const int loadingPlan = 22;
+  static const int screenTimeGoal = 20;
+  static const int loadingPlan = 21;
+  static const int snapshot = 22;   // 👈 moved here
   static const int reflection = 23;
   static const int outlook = 24;
   static const int trialReminder = 25;
@@ -71,9 +72,9 @@ class OnboardingStepNames {
     OnboardingSteps.demo: 'demo',
     OnboardingSteps.commitment: 'commitment',
     OnboardingSteps.commitmentResult: 'commitment_result',
-    OnboardingSteps.themePicker: 'theme_picker',
     OnboardingSteps.screenTimeGoal: 'screen_time_goal',
     OnboardingSteps.loadingPlan: 'loading_plan',
+    OnboardingSteps.snapshot: 'snapshot',
     OnboardingSteps.reflection: 'reflection',
     OnboardingSteps.outlook: 'outlook',
     OnboardingSteps.trialReminder: 'trial_reminder',
@@ -399,9 +400,16 @@ class _OnboardingWelcomeFlowState
           level: _commitmentLevel,
           onNext: _nextStep,
         );
-      case OnboardingSteps.themePicker:
-        return OnboardingThemeScreen(
-          key: const ValueKey('theme'),
+      case OnboardingSteps.snapshot:
+        return OnboardingSnapshotScreen(
+          key: const ValueKey('snapshot'),
+          userName: _userName,
+          age: _userAge,
+          screenTimeGoalHours: Hive.box(HiveBoxNames.settings)
+              .get('dailyScreenTimeGoal', defaultValue: _userHours) as double,
+          selectedGoals: _selectedGoals,
+          futureVision: _selectedFuture,
+          isHighCommitment: _isHighCommitment,
           onNext: _nextStep,
         );
       case OnboardingSteps.screenTimeGoal:

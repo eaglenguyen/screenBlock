@@ -140,7 +140,7 @@ class _OnboardingThemeScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: _ThemeOption(
+                        child: ThemeOption(
                           isDark: true,
                           isSelected: _selectedDark,
                           onTap: () => _select(true),
@@ -150,7 +150,7 @@ class _OnboardingThemeScreenState
                       ),
                       const SizedBox(width: 14),
                       Expanded(
-                        child: _ThemeOption(
+                        child: ThemeOption(
                           isDark: false,
                           isSelected: !_selectedDark,
                           onTap: () => _select(false),
@@ -196,14 +196,15 @@ class _OnboardingThemeScreenState
 }
 
 // ── Theme option ──────────────────────────────────────
-class _ThemeOption extends StatelessWidget {
+class ThemeOption extends StatelessWidget {
   final bool isDark;
   final bool isSelected;
   final VoidCallback onTap;
   final String label;
   final String? badge;
 
-  const _ThemeOption({
+  const ThemeOption({
+    super.key,
     required this.isDark,
     required this.isSelected,
     required this.onTap,
@@ -224,7 +225,7 @@ class _ThemeOption extends StatelessWidget {
           Expanded(
               child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            height: 280,
+            height: 200,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
@@ -243,7 +244,7 @@ class _ThemeOption extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(18),
-              child: _PhoneMockupContent(isDark: isDark),
+              child: PhoneMockupContent(isDark: isDark),
             ),
           )
           ),
@@ -308,10 +309,10 @@ class _ThemeOption extends StatelessWidget {
 }
 
 // ── Phone mockup content ──────────────────────────────
-class _PhoneMockupContent extends StatelessWidget {
+class PhoneMockupContent extends StatelessWidget {
   final bool isDark;
 
-  const _PhoneMockupContent({required this.isDark});
+  const PhoneMockupContent({super.key, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -1740,13 +1741,13 @@ class OnboardingProductivityScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 60),
+          const SizedBox(height: 90),
           Text(
-            'Your Plan is Ready',
+            'See Change Within \n2 Months!',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
-              fontSize: 34,
+              fontSize: 30,
               fontWeight: FontWeight.w800,
               letterSpacing: -1,
               height: 1.2,
@@ -1754,7 +1755,7 @@ class OnboardingProductivityScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'based on all of your answers,\nyou will start to see improvement within \n2 months',
+            '',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),

@@ -17,6 +17,10 @@ class AnalyticsEvents {
   static const paywallViewed = 'paywall_viewed';
   static const paywallDismissed = 'paywall_dismissed';
   static const purchaseCompleted = 'purchase_completed';
+
+  //
+  static const firstPomodoroCompleted = 'first_pomodoro_completed';
+
 }
 
 class AnalyticsProps {

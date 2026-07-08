@@ -13,6 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../domain/platform/blocking_service.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/blocking_service_provider.dart';
+import '../../core/analytics/analytics_events.dart';
+import '../../core/analytics/analytics_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../../data/models/schedule.dart';
@@ -598,6 +600,9 @@ class HomeViewModel extends _$HomeViewModel {
     await Future.delayed(const Duration(milliseconds: 100));
     loadTodayBlockedTime();
 
+    await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstSessionCompleted);
+
+
     state = state.copyWith(
       phase: BlockingPhase.completed,
       remainingSeconds: 0,
@@ -617,6 +622,9 @@ class HomeViewModel extends _$HomeViewModel {
       );
     }
 
+    await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstPomodoroCompleted);
+
+
     final xpThisRound = state.pomodoroConfig.workMinutes * 5;
     final totalXpEarned = state.xpEarned + xpThisRound;
     final newRoundCount = state.pomodoroRoundCount + 1;
@@ -630,6 +638,15 @@ class HomeViewModel extends _$HomeViewModel {
     final breakMinutes = isLongBreak
         ? state.pomodoroConfig.longBreakMinutes
         : state.pomodoroConfig.shortBreakMinutes;
+
+    // 👇 core-loop event — every round, not just the first
+    await AnalyticsService.instance.capture(
+      AnalyticsEvents.pomodoroRoundCompleted,
+      {
+        AnalyticsProps.roundNumber: newRoundCount,
+        AnalyticsProps.isLongBreak: isLongBreak,
+      },
+    );
 
     // 👇 save to shared defaults so onAppResumed knows break already started
     if (Platform.isIOS) {
