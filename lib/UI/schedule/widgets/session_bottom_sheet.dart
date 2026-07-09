@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
-import 'package:pausenow/features/home/schedule/widgets/schedule_presets.dart';
+import 'package:pausenow/UI/schedule/widgets/schedule_presets.dart';
+
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/hivebox_names.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -15,8 +15,9 @@ import '../../../../paywall/feature_paywall_screen.dart';
 import '../../../../providers/blocking_service_provider.dart';
 import '../../../../providers/premium_provider.dart';
 import '../../../../services/schedule_checker.dart';
-import '../../home_viewmodel.dart';
-import '../../widgets/app_list_sheet.dart';
+
+import '../../home/home_viewmodel.dart';
+import '../../home/widgets/app_list_sheet.dart';
 import '../schedule_viewmodel.dart';
 
 class SessionBottomSheet extends ConsumerStatefulWidget {

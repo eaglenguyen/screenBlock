@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../schedule/widgets/hold_to_confirm.dart';
+import '../../schedule/widgets/hold_to_confirm.dart';
 
 class BreakSheet extends StatefulWidget {
   const BreakSheet({

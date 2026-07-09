@@ -3,6 +3,10 @@ import 'package:pausenow/data/repositoryImpl/BlockingRepoImpl.dart';
 import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
 
 import '../data/repositories/BlockingRepo.dart';
+import '../data/repositories/ScheduleRepo.dart';
+import '../data/repositories/SettingsRepo.dart';
+import '../data/repositoryImpl/ScheduleRepoImpl.dart';
+import '../data/repositoryImpl/SettingsRepoImpl.dart';
 import '../data/repositoryImpl/block_session_repository.dart';
 
 
@@ -19,4 +23,12 @@ final usageRepositoryProvider = Provider<UsageStreakRepo>((ref) {
 final blockSessionRepositoryProvider =
     Provider<BlockSessionRepository>((ref) {
       return BlockSessionRepository();
+});
+
+final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
+  return SettingsRepositoryImpl();
+});
+
+final scheduleRepositoryProvider = Provider<ScheduleRepository>((ref) {
+  return ScheduleRepositoryImpl();
 });

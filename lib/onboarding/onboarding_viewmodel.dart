@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../domain/platform/blocking_service.dart';
+import '../domain/blocking_service.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../core/constants/hivebox_names.dart';
 import 'onboarding_state.dart';

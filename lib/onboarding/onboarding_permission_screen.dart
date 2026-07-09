@@ -155,6 +155,10 @@ class _OnboardingPermissionsScreenState
           isGranted: _hasAccessibility,
           isRequired: true,
           onRequest: () async {
+            // 👇 show disclosure first — required for Google Play policy compliance
+            final consented = await AccessibilityDisclosureDialog.show(context);
+            if (!consented) return; // user declined — don't open settings
+
             final service = ref.read(blockingServiceProvider);
             await service.requestAccessibilityPermission();
             await Future.delayed(const Duration(seconds: 2));
@@ -605,4 +609,133 @@ Widget _buildCircles() {
       ),
     ],
   );
+}
+
+/// Shows the disclosure dialog for google review. Returns true if the user tapped Continue,
+/// false if they dismissed/cancelled.
+
+class AccessibilityDisclosureDialog {
+  static Future<bool> show(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (ctx) => Dialog(
+        backgroundColor: const Color(0xFF1E1E35),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: const Color(0xFFEDB82A).withValues(alpha: 0.3),
+            width: 0.5,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Text('🛡️', style: TextStyle(fontSize: 22)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Accessibility Access',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Pause Now needs Accessibility access to block distracting apps',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'To block the apps you choose, Pause Now uses Android\'s Accessibility Service to detect which app is currently open on your screen. When you\'ve started a focus session and open a blocked app, Pause Now shows the block screen to help you stay on track.',
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'This is used only to power app blocking — Pause Now does not read the content of your screen, and no data about which apps you use is ever collected, stored, or shared.',
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'You\'ll be taken to your device\'s Accessibility settings to turn this on for Pause Now.',
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.45),
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEDB82A),
+                    foregroundColor: const Color(0xFF1A1208),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: const StadiumBorder(),
+                    textStyle: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  child: const Text('Continue'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white.withValues(alpha: 0.5),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text('Not now'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    return result ?? false;
+  }
 }

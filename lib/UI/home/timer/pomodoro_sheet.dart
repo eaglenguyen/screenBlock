@@ -267,6 +267,11 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
 
                 await NotificationService.instance.requestPermission();
 
+                // 👇 exact alarm access only matters if Pomodoro is being enabled
+                if (_isPomodoroMode) {
+                  await NotificationService.instance.requestExactAlarmPermission();
+                }
+
                 widget.onSave(PomodoroConfig(
                   workMinutes: _workMinutes,
                   shortBreakMinutes: _shortBreakMinutes,

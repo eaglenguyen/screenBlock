@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:pausenow/paywall/paywall_screen.dart';
+import 'UI/bottomNav/shell_screen.dart';
+import 'UI/home/home_screen.dart';
+import 'UI/schedule/schedule_screen.dart';
+import 'UI/settings/settings_screen.dart';
+import 'UI/stats/stats_screen.dart';
 import 'core/constants/hivebox_names.dart';
-import 'features/bottomNav/shell_screen.dart';
-import 'features/home/home_screen.dart';
-import 'features/home/schedule/schedule_screen.dart';
-import 'features/settings/settings_screen.dart';
-import 'features/stats/stats_screen.dart';
 import 'onboarding/onboarding_welcome_flow.dart';
 
 class AppRouter {

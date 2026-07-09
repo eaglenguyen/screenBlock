@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import '../features/home/widgets/xp_float_label.dart';
+import 'xp_float_label.dart';
 
 class XpAnimation {
   XpAnimation._();

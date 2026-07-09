@@ -7,7 +7,7 @@ import '../core/constants/app_constants.dart';
 import '../core/constants/hivebox_names.dart';
 import '../data/models/schedule.dart';
 import '../domain/platform/android_blocking_service.dart';
-import '../domain/platform/blocking_service.dart';
+import '../domain/blocking_service.dart';
 import '../domain/platform/ios_blocking_service.dart';
 
 class ScheduleChecker {

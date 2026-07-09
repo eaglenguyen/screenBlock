@@ -340,8 +340,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         icon: Icons.lock_open_rounded,
         label: 'Today',
         desc: isLifetime
-            ? 'All features unlocked instantly.'
-            : 'All features unlocked instantly. No charge.',
+            ? 'All UI unlocked instantly.'
+            : 'All UI unlocked instantly. No charge.',
         isActive: true,
       ),
       _TimelineItem(

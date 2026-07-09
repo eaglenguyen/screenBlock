@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:pausenow/features/home/timer/pomodoro_sheet.dart';
+import 'package:pausenow/UI/home/timer/pomodoro_sheet.dart';
 import '../../../data/models/timer_config.dart';
 import '../../../data/models/streak.dart';
 import '../../core/constants/app_constants.dart';

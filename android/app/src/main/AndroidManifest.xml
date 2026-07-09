@@ -11,7 +11,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
 
     <application
         android:label="pause now"
@@ -77,7 +76,7 @@
 
         <meta-data android:name="com.posthog.posthog.PROJECT_TOKEN" android:value="phc_B87VKMMuFwotFDUuDJuGiKpNWSTPQfEFd3YrrLQLKJnJ" />
         <meta-data android:name="com.posthog.posthog.POSTHOG_HOST" android:value="https://us.i.posthog.com" />
-        <meta-data android:name="com.posthog.posthog.DEBUG" android:value="true" />
+        <meta-data android:name="com.posthog.posthog.DEBUG" android:value="false" />
 
     </application>
 

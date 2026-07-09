@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pausenow/features/stats/stats_state.dart';
-import 'package:pausenow/features/stats/stats_viewmodel.dart';
-import 'package:pausenow/features/stats/widgets/app_usage_list.dart';
-import 'package:pausenow/features/stats/widgets/stats_header.dart';
-import 'package:pausenow/features/stats/widgets/usage_gauge.dart';
+import 'package:pausenow/UI/stats/stats_state.dart';
+import 'package:pausenow/UI/stats/stats_viewmodel.dart';
+import 'package:pausenow/UI/stats/widgets/app_usage_list.dart';
+import 'package:pausenow/UI/stats/widgets/stats_header.dart';
+import 'package:pausenow/UI/stats/widgets/usage_gauge.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'dart:io';

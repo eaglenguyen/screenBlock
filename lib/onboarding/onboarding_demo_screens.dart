@@ -12,9 +12,9 @@ import 'package:pausenow/onboarding/widgets/pulsing_icon.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/platform/ios_blocking_service.dart';
 import '../../providers/blocking_service_provider.dart';
-import '../features/home/home_viewmodel.dart';
-import '../features/home/schedule/schedule_viewmodel.dart';
-import '../features/home/widgets/app_list_sheet.dart';
+import '../UI/home/home_viewmodel.dart';
+import '../UI/home/widgets/app_list_sheet.dart';
+import '../UI/schedule/schedule_viewmodel.dart';
 import 'manual_blocking_tutorial.dart';
 import 'mockups/onboarding_mockups.dart';
 

@@ -6,11 +6,12 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hive/hive.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:pausenow/features/home/timer/pomodoro_sheet.dart';
+import 'package:pausenow/UI/home/timer/pomodoro_sheet.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../domain/platform/blocking_service.dart';
+import '../../data/repositories/SettingsRepo.dart';
+import '../../domain/blocking_service.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../core/analytics/analytics_events.dart';
@@ -26,6 +27,7 @@ import '../../providers/premium_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/schedule_checker.dart';
 import '../appPicker/app_picker_viewmodel.dart';
+import '../schedule/schedule_viewmodel.dart';
 import 'home_state.dart';
 
 part 'home_viewmodel.g.dart';
@@ -66,7 +68,6 @@ class HomeViewModel extends _$HomeViewModel {
     if (_initialized) return;
     _initialized = true;
 
-    // listen for native pause ended event — iOS only
     if (Platform.isIOS) {
       IOSBlockingService.listenForNativeEvents(
         onPauseEnded: () {
@@ -81,22 +82,21 @@ class HomeViewModel extends _$HomeViewModel {
             _onSessionComplete();
           }
         },
-        onNotificationStartBreak: () { // 👈 add
+        onNotificationStartBreak: () {
           debugPrint('🔔 user tapped Start Break from notification');
           if (state.phase == BlockingPhase.active) {
             _onPomodoroRoundComplete();
           }
         },
-        onNotificationStartWork: () { // 👈 add
+        onNotificationStartWork: () {
           debugPrint('🔔 user tapped Start Working from notification');
           if (state.phase == BlockingPhase.onBreak) {
             _resumeAfterPomodoroBreak();
           }
         },
-        onNotificationExtendBreak: () { // 👈 add
+        onNotificationExtendBreak: () {
           debugPrint('🔔 user tapped Extend Break from notification');
           if (state.phase == BlockingPhase.onBreak) {
-            // add 5 more minutes to current break
             startBreak(5);
           }
         },
@@ -108,10 +108,9 @@ class HomeViewModel extends _$HomeViewModel {
     loadTodayBlockedTime();
     _loadBlockingConfig();
 
-    final savedXp = _loadTotalXp();
+    final savedXp = _settingsRepo.getTotalXp(); // 👈 was _loadTotalXp()
     state = state.copyWith(totalXp: savedXp);
 
-    // pre-load Android app list in background
     if (Platform.isAndroid) {
       Future.microtask(() {
         ref.read(appPickerViewModelProvider.notifier).loadApps();
@@ -129,36 +128,33 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   Future<void> _requestReviewAfterDays() async {
-    final box = Hive.box(HiveBoxNames.settings);
+    final installDate = _settingsRepo.getInstallDate(); // 👈 was reading Hive directly
+    if (installDate == null) return;
 
-    final installDateMs = box.get('installDate') as int?;
-    if (installDateMs == null) return;
-
-    final installDate = DateTime.fromMillisecondsSinceEpoch(installDateMs);
     final daysSinceInstall = DateTime.now().difference(installDate).inDays;
 
     // 👇 day 3 trigger
-    final hasRequestedDay3 = box.get('hasRequestedReviewDay3', defaultValue: false) as bool;
+    final hasRequestedDay3 = _settingsRepo.hasRequestedReview('hasRequestedReviewDay3');
     if (!hasRequestedDay3 && daysSinceInstall >= 3) {
-      await box.put('hasRequestedReviewDay3', true);
+      await _settingsRepo.markReviewRequested('hasRequestedReviewDay3');
       await _showReviewPrompt();
       return; // 👈 don't fire two prompts in one launch
     }
 
     // 👇 day 7 trigger — only if day 3 already happened
-    final hasRequestedDay7 = box.get('hasRequestedReviewDay7', defaultValue: false) as bool;
+    final hasRequestedDay7 = _settingsRepo.hasRequestedReview('hasRequestedReviewDay7');
     if (hasRequestedDay3 && !hasRequestedDay7 && daysSinceInstall >= 7) {
-      await box.put('hasRequestedReviewDay7', true);
+      await _settingsRepo.markReviewRequested('hasRequestedReviewDay7');
       await _showReviewPrompt();
     }
   }
 
   Future<void> requestReviewOnFirstClaim() async {
-    final box = Hive.box(HiveBoxNames.settings);
-    final hasRequestedOnFirstClaim = box.get('hasRequestedReviewFirstClaim', defaultValue: false) as bool;
+    final hasRequestedOnFirstClaim =
+    _settingsRepo.hasRequestedReview('hasRequestedReviewFirstClaim');
     if (hasRequestedOnFirstClaim) return;
 
-    await box.put('hasRequestedReviewFirstClaim', true);
+    await _settingsRepo.markReviewRequested('hasRequestedReviewFirstClaim');
     await _showReviewPrompt();
   }
 
@@ -207,19 +203,16 @@ class HomeViewModel extends _$HomeViewModel {
 
   // ── Premium Logic───────────────────────────────────────
 
-  void _onPremiumLost() {
+  void _onPremiumLost() async {
     debugPrint('💎 Premium lost — enforcing free tier');
 
-    // 👇 capture before state changes
     final wasAllApps = state.blockingType == AppConstants.blockingTypeAllApps;
 
-    // 👇 stop pomodoro session if active
     if (state.pomodoroConfig.isPomodoroMode &&
         (state.phase == BlockingPhase.active || state.phase == BlockingPhase.onBreak)) {
       giveUp();
     }
 
-    // reset blocking type
     if (wasAllApps) {
       setBlockingType(AppConstants.blockingTypeSpecificApps);
       debugPrint('💎 blocking type reset to specific apps');
@@ -232,17 +225,12 @@ class HomeViewModel extends _$HomeViewModel {
       debugPrint('💎 pomodoro mode disabled');
     }
 
-    // 👇 update any saved schedules that use all_apps blocking type
-    final scheduleBox = Hive.box<Schedule>(HiveBoxNames.schedules);
-    for (final key in scheduleBox.keys) {
-      final schedule = scheduleBox.get(key);
-      if (schedule != null &&
-          schedule.blockingType == AppConstants.blockingTypeAllApps) {
-        final updated = schedule.copyWith(
-          blockingType: AppConstants.blockingTypeSpecificApps,
-        );
-        scheduleBox.put(key, updated);
-      }
+    // 👇 goes through the repository now, not Hive directly
+    final changedIds = await ref.read(scheduleRepositoryProvider).downgradeAllAppsSchedules();
+    if (changedIds.isNotEmpty) {
+      debugPrint('💎 downgraded ${changedIds.length} schedule(s) from all_apps: $changedIds');
+      // 👇 tell ScheduleViewModel its cached state is now stale
+      ref.read(scheduleViewModelProvider.notifier).loadSchedules();
     }
 
     if (state.isScheduleActive) {
@@ -251,7 +239,6 @@ class HomeViewModel extends _$HomeViewModel {
       ScheduleChecker.instance.checkNow();
     }
 
-    // end session if was blocking all apps
     if (state.phase == BlockingPhase.active && wasAllApps) {
       giveUp();
     }
@@ -266,23 +253,13 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   // ── XP ───────────────────────────────────────────
-  int _loadTotalXp() {
-    final box = Hive.box(HiveBoxNames.settings);
-    return box.get('totalXp', defaultValue: 0) as int;
-  }
-
-  Future<void> _saveTotalXp(int xp) async {
-    final box = Hive.box(HiveBoxNames.settings);
-    await box.put('totalXp', xp);
-  }
+  // 👇 _loadTotalXp() and _saveTotalXp() removed — now handled by _settingsRepo directly
 
   Future<void> claimXp() async {
     final newTotal = state.totalXp + state.xpEarned;
-    await _saveTotalXp(newTotal);
-
+    await _settingsRepo.saveTotalXp(newTotal); // 👈 was _saveTotalXp(newTotal)
 
     await NotificationService.instance.cancelNotification(202);
-
 
     state = state.copyWith(
       phase: BlockingPhase.idle,
@@ -292,9 +269,6 @@ class HomeViewModel extends _$HomeViewModel {
       shouldAnimateBlockedTime: true,
     );
   }
-
-
-
 
   Future<void> _showReviewPrompt() async {
     try {
@@ -394,22 +368,21 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   // ── Blocking config ───────────────────────────────
+  // 👇 _saveBlockingConfig() and _loadBlockingConfig() now route through _settingsRepo
+
   void _saveBlockingConfig() {
-    final box = Hive.box(HiveBoxNames.settings);
-    box.put('blockingType', state.blockingType);
-    box.put('blockedApps', state.blockedApps);
-    box.put('allowedApps', state.allowedApps);
+    _settingsRepo.saveBlockingConfig(
+      blockingType: state.blockingType,
+      blockedApps: state.blockedApps,
+      allowedApps: state.allowedApps,
+    );
   }
 
   void _loadBlockingConfig() {
-    final box = Hive.box(HiveBoxNames.settings);
     state = state.copyWith(
-      blockingType: box.get('blockingType',
-          defaultValue: AppConstants.blockingTypeSpecificApps),
-      blockedApps: List<String>.from(
-          box.get('blockedApps', defaultValue: <String>[])),
-      allowedApps: List<String>.from(
-          box.get('allowedApps', defaultValue: <String>[])),
+      blockingType: _settingsRepo.getBlockingType(),
+      blockedApps: _settingsRepo.getBlockedApps(),
+      allowedApps: _settingsRepo.getAllowedApps(),
     );
   }
 
@@ -450,7 +423,17 @@ class HomeViewModel extends _$HomeViewModel {
       final remaining = 3 - elapsed;
       if (remaining <= 0) {
         timer.cancel();
-        await _beginActiveBlocking();
+        try {
+          await _beginActiveBlocking();
+        } catch (e, st) {
+          debugPrint('❌ _beginActiveBlocking failed: $e');
+          debugPrint(st.toString());
+          state = state.copyWith(
+            phase: BlockingPhase.idle,
+            remainingSeconds: 0,
+            error: e.toString(),
+          );
+        }
       } else {
         state = state.copyWith(remainingSeconds: remaining);
       }
@@ -460,7 +443,6 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> _beginActiveBlocking() async {
     _blockingService.setBlockingMode(state.blockingType);
 
-    // 👇 schedule session complete notification at start
     if (!state.pomodoroConfig.isPomodoroMode) {
       await NotificationService.instance.cancelNotification(202);
       await NotificationService.instance.scheduleNotification(
@@ -526,7 +508,6 @@ class HomeViewModel extends _$HomeViewModel {
       sessionStartTime: startTime,
     );
 
-    // 👇 schedule break notification if pomodoro mode
     if (state.pomodoroConfig.isPomodoroMode) {
       await NotificationService.instance.cancelNotification(200);
       await NotificationService.instance.scheduleNotification(
@@ -536,10 +517,9 @@ class HomeViewModel extends _$HomeViewModel {
         scheduledTime: DateTime.now().add(
           Duration(minutes: state.pomodoroConfig.workMinutes),
         ),
-        categoryIdentifier: 'POMODORO_WORK_ENDED', // 👈 add actions
+        categoryIdentifier: 'POMODORO_WORK_ENDED',
       );
     }
-
 
     _sessionTimer?.cancel();
     _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -561,7 +541,6 @@ class HomeViewModel extends _$HomeViewModel {
       return;
     }
 
-
     if (state.pomodoroConfig.isPomodoroMode) {
       _onPomodoroRoundComplete();
       return;
@@ -573,7 +552,6 @@ class HomeViewModel extends _$HomeViewModel {
       _blockingService.stopAllMonitoring();
     }
 
-    // 👇 play completion sound
     if (Platform.isAndroid) {
       try {
         final player = AudioPlayer();
@@ -602,7 +580,6 @@ class HomeViewModel extends _$HomeViewModel {
 
     await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstSessionCompleted);
 
-
     state = state.copyWith(
       phase: BlockingPhase.completed,
       remainingSeconds: 0,
@@ -624,7 +601,6 @@ class HomeViewModel extends _$HomeViewModel {
 
     await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstPomodoroCompleted);
 
-
     final xpThisRound = state.pomodoroConfig.workMinutes * 5;
     final totalXpEarned = state.xpEarned + xpThisRound;
     final newRoundCount = state.pomodoroRoundCount + 1;
@@ -639,7 +615,6 @@ class HomeViewModel extends _$HomeViewModel {
         ? state.pomodoroConfig.longBreakMinutes
         : state.pomodoroConfig.shortBreakMinutes;
 
-    // 👇 core-loop event — every round, not just the first
     await AnalyticsService.instance.capture(
       AnalyticsEvents.pomodoroRoundCompleted,
       {
@@ -648,7 +623,6 @@ class HomeViewModel extends _$HomeViewModel {
       },
     );
 
-    // 👇 save to shared defaults so onAppResumed knows break already started
     if (Platform.isIOS) {
       await const MethodChannel('com.eagle.pausenow/ios_blocking')
           .invokeMethod('savePomodoroBreakState', {
@@ -659,7 +633,6 @@ class HomeViewModel extends _$HomeViewModel {
       });
       await (_blockingService as IOSBlockingService).playSystemSound(1005);
     } else {
-      // 👇 Android sound
       try {
         final player = AudioPlayer();
         await player.setAsset('assets/sounds/bell.wav');
@@ -713,7 +686,7 @@ class HomeViewModel extends _$HomeViewModel {
     _breakTimer?.cancel();
 
     await NotificationService.instance.cancelNotification(200);
-    await NotificationService.instance.cancelNotification(201); // 👈 add
+    await NotificationService.instance.cancelNotification(201);
     await NotificationService.instance.cancelNotification(202);
 
     if (Platform.isIOS) {
@@ -732,8 +705,6 @@ class HomeViewModel extends _$HomeViewModel {
     await Future.delayed(const Duration(milliseconds: 100));
     loadTodayBlockedTime();
 
-    // 👇 pomodoro with completed rounds → show claim screen
-    // manual blocking or pomodoro with 0 rounds → go idle
     if (state.pomodoroConfig.isPomodoroMode && state.xpEarned > 0) {
       state = state.copyWith(
         phase: BlockingPhase.completed,
@@ -799,8 +770,7 @@ class HomeViewModel extends _$HomeViewModel {
     _resumeAfterBreak(state.remainingSeconds);
   }
 
-
-// ── Resume after break ────────────────────────────
+  // ── Resume after break ────────────────────────────
   Future<void> _resumeAfterBreak(int remainingSeconds) async {
     if (state.pomodoroConfig.isPomodoroMode) {
       await _resumeAfterPomodoroBreak();
@@ -850,13 +820,11 @@ class HomeViewModel extends _$HomeViewModel {
     });
   }
 
-
   // ── Resume after Pomodoro break ───────────────────
   Future<void> _resumeAfterPomodoroBreak() async {
     _blockingService.setBlockingMode(state.blockingType);
 
     if (Platform.isIOS) {
-      // 👇 all iOS stuff in one block
       await (_blockingService as IOSBlockingService).playSystemSound(1005);
       await const MethodChannel('com.eagle.pausenow/ios_blocking')
           .invokeMethod('clearPomodoroBreakState');
@@ -897,7 +865,6 @@ class HomeViewModel extends _$HomeViewModel {
       breakRemainingSeconds: 0,
     );
 
-    // 👇 reschedule break notification for next round
     await NotificationService.instance.cancelNotification(200);
     await NotificationService.instance.scheduleNotification(
       id: 200,
@@ -934,9 +901,6 @@ class HomeViewModel extends _$HomeViewModel {
       }
     }
 
-
-
-
     switch (state.phase) {
       case BlockingPhase.active:
         if (state.sessionStartTime == null) return;
@@ -946,13 +910,11 @@ class HomeViewModel extends _$HomeViewModel {
         if (remaining <= 0) {
           _sessionTimer?.cancel();
 
-          // 👇 check if Pomodoro break already started natively
           if (Platform.isIOS && state.pomodoroConfig.isPomodoroMode) {
             final breakState = await const MethodChannel('com.eagle.pausenow/ios_blocking')
                 .invokeMethod<Map>('getPomodoroBreakState');
 
             if (breakState != null && breakState['pomodoroPhase'] == 'break') {
-              // break already started — sync state from native
               final breakMinutes = breakState['pomodoroBreakMinutes'] as int?
                   ?? state.pomodoroConfig.shortBreakMinutes;
               final breakStartMs = breakState['pomodoroBreakStartTime'] as int? ?? 0;
@@ -965,11 +927,9 @@ class HomeViewModel extends _$HomeViewModel {
               debugPrint('🍅 break already started — round=$roundCount breakMinutes=$breakMinutes remaining=${breakRemaining}s');
 
               if (breakRemaining <= 0) {
-                // break already ended — start next work
                 state = state.copyWith(pomodoroRoundCount: roundCount);
                 await _resumeAfterPomodoroBreak();
               } else {
-                // sync to correct break state
                 state = state.copyWith(
                   phase: BlockingPhase.onBreak,
                   pomodoroRoundCount: roundCount,
@@ -995,7 +955,7 @@ class HomeViewModel extends _$HomeViewModel {
             }
           }
 
-          _onSessionComplete(); // 👈 only if no native break state found
+          _onSessionComplete();
         } else {
           state = state.copyWith(remainingSeconds: remaining);
         }
@@ -1035,7 +995,6 @@ class HomeViewModel extends _$HomeViewModel {
           .invokeMethod<bool>('checkAndClearPendingClaim');
       if (result == true && state.phase == BlockingPhase.completed) {
         debugPrint('⭐️ pending XP claim detected — showing claim screen');
-        // state is already BlockingPhase.completed so claim screen shows automatically
       }
     } catch (e) {
       debugPrint('❌ checkPendingXpClaim error: $e');
@@ -1147,6 +1106,7 @@ class HomeViewModel extends _$HomeViewModel {
   BlockSessionRepository get _sessionRepo => ref.read(blockSessionRepositoryProvider);
   UsageStreakRepo get _usageRepo => ref.read(usageRepositoryProvider);
   BlockingService get _blockingService => ref.read(blockingServiceProvider);
+  SettingsRepository get _settingsRepo => ref.read(settingsRepositoryProvider); // 👈 new
 
   static const _methodChannel = MethodChannel('com.eagle.pausenow/block');
 

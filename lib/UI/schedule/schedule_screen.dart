@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pausenow/features/home/schedule/schedule_viewmodel.dart';
-import 'package:pausenow/features/home/schedule/widgets/pause_sheet.dart';
-import 'package:pausenow/features/home/schedule/widgets/presets_section.dart';
-import 'package:pausenow/features/home/schedule/widgets/session_bottom_sheet.dart';
-import 'package:pausenow/features/home/schedule/widgets/session_card.dart';
+import 'package:pausenow/UI/schedule/schedule_viewmodel.dart';
+import 'package:pausenow/UI/schedule/widgets/pause_sheet.dart';
+import 'package:pausenow/UI/schedule/widgets/presets_section.dart';
+import 'package:pausenow/UI/schedule/widgets/session_bottom_sheet.dart';
+import 'package:pausenow/UI/schedule/widgets/session_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/schedule.dart';
@@ -15,9 +15,8 @@ import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
-import '../home_state.dart';
-import '../home_viewmodel.dart';
-
+import '../home/home_state.dart';
+import '../home/home_viewmodel.dart';
 
 class ScheduleScreen extends ConsumerWidget {
   const ScheduleScreen({super.key});

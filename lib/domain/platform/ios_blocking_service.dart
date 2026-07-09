@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'blocking_service.dart';
+import '../blocking_service.dart';
 
 class IOSBlockingService implements BlockingService {
 

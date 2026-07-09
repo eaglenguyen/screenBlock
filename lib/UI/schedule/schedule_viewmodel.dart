@@ -6,7 +6,9 @@ import '../../../core/analytics/analytics_events.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/constants/hivebox_names.dart';
 import '../../../data/models/schedule.dart';
+import '../../../providers/repository_providers.dart'; // 👈 wherever scheduleRepositoryProvider lives
 import '../../../services/schedule_checker.dart';
+import '../../data/repositories/ScheduleRepo.dart';
 import 'schedule_state.dart';
 
 part 'schedule_viewmodel.g.dart';
@@ -14,8 +16,7 @@ part 'schedule_viewmodel.g.dart';
 @riverpod
 class ScheduleViewModel extends _$ScheduleViewModel {
 
-  Box<Schedule> get _box =>
-      Hive.box<Schedule>(HiveBoxNames.schedules);
+  ScheduleRepository get _repo => ref.read(scheduleRepositoryProvider); // 👈 replaces _box getter
 
   @override
   ScheduleState build() {
@@ -25,7 +26,7 @@ class ScheduleViewModel extends _$ScheduleViewModel {
 
   void loadSchedules() {
     try {
-      final allSchedules = _box.values.toList();
+      final allSchedules = _repo.getAllSchedules(); // 👈 was _box.values.toList()
       final order = _getOrder();
 
       List<Schedule> ordered;
@@ -33,19 +34,15 @@ class ScheduleViewModel extends _$ScheduleViewModel {
       if (order.isEmpty) {
         ordered = allSchedules;
       } else {
-        // 👇 safely sort — skip any IDs that no longer exist in Hive
         final orderedById = {for (final s in allSchedules) s.id: s};
         ordered = [
-          // first: schedules that exist in saved order
           ...order
               .where((id) => orderedById.containsKey(id))
               .map((id) => orderedById[id]!),
-          // then: any new schedules not in saved order yet
           ...allSchedules.where((s) => !order.contains(s.id)),
         ];
       }
 
-      // 👇 clean up order — remove deleted IDs
       _saveOrderFromList(ordered);
 
       state = state.copyWith(
@@ -75,7 +72,7 @@ class ScheduleViewModel extends _$ScheduleViewModel {
     required List<String> allowedApps,
   }) async {
     try {
-      final isNewSchedule = existingId == null; // 👈 capture before overwriting
+      final isNewSchedule = existingId == null;
 
       final schedule = Schedule(
         id: existingId ?? const Uuid().v4(),
@@ -88,9 +85,8 @@ class ScheduleViewModel extends _$ScheduleViewModel {
         allowedApps: allowedApps,
       );
 
-      await _box.put(schedule.id, schedule);
+      await _repo.saveSchedule(schedule); // 👈 was _box.put(schedule.id, schedule)
 
-      // 👇 activation event — first schedule ever created (not edits)
       if (isNewSchedule) {
         await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstBlockCreated);
       }
@@ -107,22 +103,21 @@ class ScheduleViewModel extends _$ScheduleViewModel {
   }
 
   Future<void> deleteSchedule(String id) async {
-    await _box.delete(id);
+    await _repo.deleteSchedule(id); // 👈 was _box.delete(id)
     loadSchedules();
   }
 
   Future<void> toggleSchedule(String id) async {
-    final schedule = _box.get(id);
+    final schedule = _repo.getSchedule(id); // 👈 was _box.get(id)
     if (schedule == null) return;
-    schedule.isActive = !schedule.isActive;
-    await schedule.save();
-    //ScheduleChecker.instance.checkNow(); // 👈 add
+    final updated = schedule.copyWith(isActive: !schedule.isActive); // 👈 was mutate + schedule.save()
+    await _repo.saveSchedule(updated);
+    //ScheduleChecker.instance.checkNow();
 
     loadSchedules();
   }
 
   // Reordering list
-
 
   List<String> _getOrder() {
     final box = Hive.box(HiveBoxNames.settings);

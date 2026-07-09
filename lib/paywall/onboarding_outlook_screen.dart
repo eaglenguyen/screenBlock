@@ -577,7 +577,7 @@ class _OnboardingTrialReminderScreenState
                         height: 1.5,
                       ),
                       children: [
-                        const TextSpan(text: 'All features are '),
+                        const TextSpan(text: 'All UI are '),
                         TextSpan(
                           text: '7 days free',
                           style: GoogleFonts.poppins(

@@ -9,4 +9,4 @@
     android:notificationTimeout="100"
     android:settingsActivity=""
     android:summary="@string/accessibility_service_description"
-    android:isAccessibilityTool="true"/>
+    android:isAccessibilityTool="false"/>

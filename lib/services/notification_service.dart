@@ -48,15 +48,29 @@ class NotificationService {
     await _plugin.cancel(id: id); // 👈 named parameter
   }
 
+  // 👇 new — request exact alarm access (Android only, no-op elsewhere)
+  Future<bool> requestExactAlarmPermission() async {
+    if (!Platform.isAndroid) return true;
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final granted = await androidPlugin?.requestExactAlarmsPermission();
+    return granted ?? false;
+  }
+
+
+
   Future<void> scheduleNotification({
     required int id,
     required String title,
     required String body,
     required DateTime scheduledTime,
-    String? categoryIdentifier, // 👈 add this
+    String? categoryIdentifier,
   }) async {
     final channelId = (id == 200 || id == 201) ? 'pomodoro' : 'subscription_expiry';
     final channelName = (id == 200 || id == 201) ? 'Pomodoro Timer' : 'Subscription Expiry';
+
+    // 👇 only Pomodoro transitions need exact timing
+    final isPomodoroTransition = id == 200 || id == 201;
 
     await _plugin.zonedSchedule(
       id: id,
@@ -74,10 +88,12 @@ class NotificationService {
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
-          categoryIdentifier: categoryIdentifier, // 👈 pass category
+          categoryIdentifier: categoryIdentifier,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: isPomodoroTransition
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
 
