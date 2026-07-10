@@ -74,6 +74,14 @@ class IOSBlockingService implements BlockingService {
     return count;
   }
 
+  Future<int?> showTimeLimitAppPicker({required String configId}) async {
+    final count = await _channel.invokeMethod<int>('showTimeLimitAppPicker', {
+      'configId': configId,
+    });
+    debugPrint('🔵 iOS time-limit picker returned: $count apps saved');
+    return count;
+  }
+
   // ── Monitoring ───────────────────────────────────
   @override
   Future<void> startMonitoring(
@@ -226,6 +234,8 @@ class IOSBlockingService implements BlockingService {
       debugPrint('❌ stopBlockingCompletely error: $e');
     }
   }
+
+
 
   @override
   Stream<AppUsageEvent> get usageEvents =>

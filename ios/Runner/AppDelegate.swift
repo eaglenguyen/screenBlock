@@ -269,6 +269,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+        case "saveTimeLimitDays":
+            if let args = call.arguments as? [String: Any],
+               let configId = args["configId"] as? String,
+               let daysJson = args["daysJson"] as? String {
+                let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+                defaults?.set(daysJson, forKey: "timeLimitDays_\(configId)")
+                defaults?.synchronize()
+            }
+            result(nil)
+        case "syncTimeLimitConfigs":
+            if let args = call.arguments as? [String: Any],
+               let configs = args["configs"] as? [[String: Any]] {
+                service.syncTimeLimitConfigs(configs)
+            }
+            result(nil)
+        case "showTimeLimitAppPicker":
+            if let args = call.arguments as? [String: Any],
+               let configId = args["configId"] as? String {
+                await showTimeLimitAppPicker(configId: configId, result: result)
+            } else {
+                result(FlutterError(code: "BAD_ARGS", message: "configId required", details: nil))
+            }
         case "savePomodoroBreakState":
             if let args = call.arguments as? [String: Any] {
                 let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
@@ -610,6 +632,52 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
                 } else {
                     // decode failed — picker dismissed without saving, restore backup
+                    if let backup = sharedDefaults?.data(forKey: backupKey) {
+                        sharedDefaults?.set(backup, forKey: saveKey)
+                    }
+                    sharedDefaults?.removeObject(forKey: backupKey)
+                    sharedDefaults?.synchronize()
+                    result(0)
+                }
+            },
+            saveKey: saveKey
+        )
+        rootVC.present(picker, animated: true)
+    }
+    
+    @available(iOS 16.0, *)
+    @MainActor
+    private func showTimeLimitAppPicker(configId: String, result: @escaping FlutterResult) async {
+        guard let windowScene = UIApplication.shared
+            .connectedScenes
+            .first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?.rootViewController
+        else {
+            result(FlutterError(code: "NO_VIEW", message: "No view controller", details: nil))
+            return
+        }
+
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        let saveKey = "timeLimitApps_\(configId)"
+        let backupKey = "\(saveKey)_backup"
+
+        if let existing = sharedDefaults?.data(forKey: saveKey) {
+            sharedDefaults?.set(existing, forKey: backupKey)
+        } else {
+            sharedDefaults?.removeObject(forKey: backupKey)
+        }
+        sharedDefaults?.synchronize()
+
+        let picker = FamilyActivityPickerViewController(
+            service: IOSBlockingService.shared,
+            onDismiss: {
+                if let data = sharedDefaults?.data(forKey: saveKey),
+                   let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
+                    let count = selection.applicationTokens.count
+                    sharedDefaults?.removeObject(forKey: backupKey)
+                    sharedDefaults?.synchronize()
+                    result(count)
+                } else {
                     if let backup = sharedDefaults?.data(forKey: backupKey) {
                         sharedDefaults?.set(backup, forKey: saveKey)
                     }

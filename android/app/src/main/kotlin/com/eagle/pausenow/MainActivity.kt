@@ -104,6 +104,12 @@ class MainActivity : FlutterActivity() {
                         "saveBlockingState: isBlocking=$isBlocking mode=$mode apps=$apps")
                     result.success(null)
                 }
+                "saveTimeLimitConfigs" -> {
+                    val configsJson = call.argument<String>("configsJson") ?: "[]"
+                    val nativePrefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+                    nativePrefs.edit().putString("timeLimitConfigs", configsJson).apply()
+                    result.success(null)
+                }
                 "hasUsageStatsPermission" -> {
                     val appOps = getSystemService(Context.APP_OPS_SERVICE)
                             as android.app.AppOpsManager

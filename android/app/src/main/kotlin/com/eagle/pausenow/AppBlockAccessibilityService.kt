@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.view.accessibility.AccessibilityEvent
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
 
 class AppBlockAccessibilityService : AccessibilityService() {
 
@@ -170,6 +173,17 @@ class AppBlockAccessibilityService : AccessibilityService() {
         }
     }
 
+    // 👇 INSERT HERE — Runnable 3, time-limit checking
+    private val timeLimitCheckRunnable = object : Runnable {
+        override fun run() {
+            val pkg = currentForegroundApp
+            if (pkg != null && pkg != "com.eagle.pausenow" && !isOverlayShowing) {
+                checkTimeLimitForApp(pkg)
+            }
+            pauseCheckHandler.postDelayed(this, 5000)
+        }
+    }
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         isRunning = true
@@ -184,6 +198,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
         serviceInfo = info
         pauseCheckHandler.postDelayed(pauseCheckRunnable, 5000) // 👈 start 1
         pauseCheckHandler.postDelayed(blockingPollRunnable, 5000) // 👈 Start 2
+        pauseCheckHandler.postDelayed(timeLimitCheckRunnable, 5000) //
 
         android.util.Log.d("AccessibilityService", "onServiceConnected")
     }
@@ -209,6 +224,9 @@ class AppBlockAccessibilityService : AccessibilityService() {
 
 
         currentForegroundApp = packageName
+
+        checkTimeLimitForApp(packageName)
+
 
         // 👇 check pause expiry ALWAYS — regardless of Flutter state
         if (isPauseExpired()) {
@@ -273,6 +291,89 @@ class AppBlockAccessibilityService : AccessibilityService() {
         }
     }
 
+    private fun getTodayUsageMinutes(packageName: String): Int? {
+        return try {
+            val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE)
+                    as android.app.usage.UsageStatsManager
+
+            val calendar = java.util.Calendar.getInstance()
+            val endTime = calendar.timeInMillis
+            calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+            calendar.set(java.util.Calendar.MINUTE, 0)
+            calendar.set(java.util.Calendar.SECOND, 0)
+            calendar.set(java.util.Calendar.MILLISECOND, 0)
+            val startTime = calendar.timeInMillis
+
+            val stats = usageStatsManager.queryUsageStats(
+                android.app.usage.UsageStatsManager.INTERVAL_DAILY,
+                startTime,
+                endTime
+            )
+
+            val appStats = stats?.find { it.packageName == packageName }
+            val totalMs = appStats?.totalTimeInForeground ?: return null
+            if (totalMs == 0L) return null
+
+            (totalMs / 1000 / 60).toInt()
+        } catch (e: Exception) {
+            android.util.Log.e("pausenow", "❌ usage stats error: $e")
+            null
+        }
+    }
+
+    // 👇 INSERT HERE — new methods
+    private fun checkTimeLimitForApp(packageName: String) {
+        val configsJson = prefs.getString("timeLimitConfigs", null) ?: return
+        val configs = parseTimeLimitConfigs(configsJson)
+        val today = getDayOfWeekIndex()
+
+        for (config in configs) {
+            if (!config.packageNames.contains(packageName)) continue
+            if (!config.days.contains(today)) continue
+            if (!config.isActive) continue
+            if (exemptedPackages.contains(packageName)) continue
+
+            val usedMinutes = getTodayUsageMinutes(packageName) ?: continue
+            if (usedMinutes >= config.limitMinutes) {
+                val now = System.currentTimeMillis()
+                if (now - lastBlockScreenLaunchTime < 4000) return
+                lastBlockScreenLaunchTime = now
+                isOverlayShowing = true
+                val intent = Intent(this, BlockActivity::class.java).apply {
+                    putExtra("blocked_package", packageName)
+                    putExtra("block_reason", "time_limit")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                }
+                startActivity(intent)
+                return
+            }
+        }
+    }
+
+    private fun getDayOfWeekIndex(): Int {
+        val calendar = java.util.Calendar.getInstance()
+        val javaDay = calendar.get(java.util.Calendar.DAY_OF_WEEK)
+        return if (javaDay == java.util.Calendar.SUNDAY) 6 else javaDay - 2
+    }
+
+    private data class TimeLimitConfigNative(
+        val packageNames: List<String>,
+        val limitMinutes: Int,
+        val days: List<Int>,
+        val isActive: Boolean
+    )
+
+    private fun parseTimeLimitConfigs(json: String): List<TimeLimitConfigNative> {
+        return try {
+            val type = object : TypeToken<List<TimeLimitConfigNative>>() {}.type
+            Gson().fromJson(json, type)
+        } catch (e: Exception) {
+            android.util.Log.e("pausenow", "❌ parseTimeLimitConfigs error: $e")
+            emptyList()
+        }
+    }
+
     private fun isPauseExpired(): Boolean {
         val prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
         val pauseEndTime = prefs.getLong("schedulePauseEndTime", 0L)
@@ -302,6 +403,8 @@ class AppBlockAccessibilityService : AccessibilityService() {
         eventCallback = null
         pauseCheckHandler.removeCallbacks(pauseCheckRunnable) // 👈 stop
         pauseCheckHandler.removeCallbacks(blockingPollRunnable) // 👈 add
+        pauseCheckHandler.removeCallbacks(timeLimitCheckRunnable)
+
 
     }
 }

@@ -314,5 +314,71 @@ class IOSBlockingService: NSObject {
         }
     }
     
+    // MARK: - Time Limit Monitoring
+
+    func startTimeLimitMonitoring(configId: String, limitMinutes: Int) {
+        let saveKey = "timeLimitApps_\(configId)"
+        guard let data = sharedDefaults?.data(forKey: saveKey),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data),
+              !selection.applicationTokens.isEmpty
+        else {
+            NSLog("❌ startTimeLimitMonitoring: no tokens found for config \(configId)")
+            return
+        }
+
+        let activityName = DeviceActivityName("com.eagle.pausenow.timelimit.\(configId)")
+        let calendar = Calendar.current
+
+        // full-day schedule — day-of-week filtering happens in the extension callback
+        let schedule = DeviceActivitySchedule(
+            intervalStart: DateComponents(hour: 0, minute: 0),
+            intervalEnd: DateComponents(hour: 23, minute: 59),
+            repeats: true
+        )
+
+        // one event per app token, all sharing the same threshold
+        var events: [DeviceActivityEvent.Name: DeviceActivityEvent] = [:]
+        for (index, token) in selection.applicationTokens.enumerated() {
+            let eventName = DeviceActivityEvent.Name("timelimit_\(configId)_\(index)")
+            events[eventName] = DeviceActivityEvent(
+                applications: [token],
+                threshold: DateComponents(minute: limitMinutes)
+            )
+        }
+
+        do {
+            try activityCenter.startMonitoring(activityName, during: schedule, events: events)
+            NSLog("✅ time-limit monitoring started for config \(configId), \(events.count) apps, limit=\(limitMinutes)min")
+        } catch {
+            NSLog("❌ startTimeLimitMonitoring error: \(error)")
+        }
+    }
+
+    func stopTimeLimitMonitoring(configId: String) {
+        let activityName = DeviceActivityName("com.eagle.pausenow.timelimit.\(configId)")
+        activityCenter.stopMonitoring([activityName])
+        NSLog("🛑 stopped time-limit monitoring for config \(configId)")
+    }
+
+    func syncTimeLimitConfigs(_ configs: [[String: Any]]) {
+        // stop all existing time-limit monitoring first, then re-register from scratch —
+        // simplest way to keep native state consistent with Dart's current config list
+        let allActivities = configs.compactMap { config -> DeviceActivityName? in
+            guard let id = config["id"] as? String else { return nil }
+            return DeviceActivityName("com.eagle.pausenow.timelimit.\(id)")
+        }
+        activityCenter.stopMonitoring(allActivities)
+
+        for config in configs {
+            guard let id = config["id"] as? String,
+                  let limitMinutes = config["limitMinutes"] as? Int,
+                  let isActive = config["isActive"] as? Bool,
+                  isActive
+            else { continue }
+
+            startTimeLimitMonitoring(configId: id, limitMinutes: limitMinutes)
+        }
+    }
+    
 
 }

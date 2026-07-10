@@ -289,6 +289,7 @@ class BlockActivity : AppCompatActivity() {
         }
     }
 
+
     private fun getAppName(packageName: String): String {
         return try {
             val pm = packageManager

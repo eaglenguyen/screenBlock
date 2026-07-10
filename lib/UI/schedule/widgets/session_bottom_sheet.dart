@@ -16,6 +16,7 @@ import '../../../../providers/blocking_service_provider.dart';
 import '../../../../providers/premium_provider.dart';
 import '../../../../services/schedule_checker.dart';
 
+import '../../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../home/home_viewmodel.dart';
 import '../../home/widgets/app_list_sheet.dart';
 import '../schedule_viewmodel.dart';
@@ -775,7 +776,6 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
 
     // 👇 check for overlapping schedules
     final conflict = _findConflict(startMinutes, endMinutes);
-    // conflict dialog
     if (conflict != null) {
       if (mounted) {
         showDialog(
@@ -842,6 +842,74 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
         );
       }
       return;
+    }
+
+    // 👇 new — check for conflicts against existing time-limit configs, per app
+    // 👇 check for conflicts against existing time-limit configs, per app
+    final allApps = {..._blockedApps, ..._allowedApps};
+    for (final packageName in allApps) {
+      final timeLimitConflict = ref.read(timeLimitViewModelProvider.notifier).findAppLimitConflict(
+        packageName: packageName,
+        selectedDays: _selectedDays,
+      );
+      if (timeLimitConflict != null) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              backgroundColor: AppColors.backgroundCard(context),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text(
+                'Conflict Found',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: AppColors.textPrimary(context),
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('⚠️', style: TextStyle(fontSize: 40)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'One of the apps in this schedule already has a time limit set under "${timeLimitConflict.name}"',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Please remove that app or choose different days.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary(context),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.gold(context),
+                      foregroundColor: AppColors.goldText(context),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: const StadiumBorder(),
+                    ),
+                    child: const Text('Got it'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return;
+      }
     }
 
     await ref.read(scheduleViewModelProvider.notifier).saveSchedule(

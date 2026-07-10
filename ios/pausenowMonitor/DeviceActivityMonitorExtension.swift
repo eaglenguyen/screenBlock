@@ -65,4 +65,58 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         sharedDefaults?.set("reshieldApps_success", forKey: "extensionLastEvent")
         sharedDefaults?.synchronize()
     }
+    
+    
+    override func eventDidReachThreshold(_ event: DeviceActivityEvent.Name, activity: DeviceActivityName) {
+        super.eventDidReachThreshold(event, activity: activity)
+
+        sharedDefaults?.set("eventDidReachThreshold", forKey: "extensionLastEvent")
+        sharedDefaults?.set(activity.rawValue, forKey: "extensionLastActivity")
+        sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")
+        sharedDefaults?.synchronize()
+
+        // activity name format: "com.eagle.pausenow.timelimit.<configId>"
+        guard activity.rawValue.hasPrefix("com.eagle.pausenow.timelimit.") else { return }
+        let configId = activity.rawValue.replacingOccurrences(
+            of: "com.eagle.pausenow.timelimit.", with: ""
+        )
+
+        guard isConfigActiveToday(configId: configId) else {
+            os_log("⏭ time-limit threshold hit but not active today, skipping shield", log: logger, type: .fault)
+            return
+        }
+
+        shieldTimeLimitApps(configId: configId)
+    }
+
+    private func isConfigActiveToday(configId: String) -> Bool {
+        guard let daysJson = sharedDefaults?.string(forKey: "timeLimitDays_\(configId)"),
+              let data = daysJson.data(using: .utf8),
+              let days = try? JSONDecoder().decode([Int].self, from: data)
+        else { return true } // fail open — if we can't read days, don't block the shield
+
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: Date())
+        // Calendar: Sunday=1...Saturday=7 → convert to Mon=0...Sun=6
+        let dayIndex = weekday == 1 ? 6 : weekday - 2
+
+        return days.contains(dayIndex)
+    }
+
+    private func shieldTimeLimitApps(configId: String) {
+        let saveKey = "timeLimitApps_\(configId)"
+        guard let data = sharedDefaults?.data(forKey: saveKey),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else {
+            return
+        }
+
+        // 👇 merge with whatever's already shielded, don't overwrite existing shields
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.formUnion(selection.applicationTokens)
+        store.shield.applications = currentlyShielded
+
+        os_log("🛡 time-limit shield applied for config %{public}@, %d apps",
+               log: logger, type: .fault, configId, selection.applicationTokens.count)
+    }
 }
