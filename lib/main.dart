@@ -21,6 +21,7 @@ import 'data/models/block_session.dart';
 import 'data/models/blocked_app.dart';
 import 'data/models/schedule.dart';
 import 'data/models/streak.dart';
+import 'data/models/time_limit_config.dart';
 import 'data/models/timer_config.dart';
 import 'data/models/usage_log.dart';
 
@@ -46,6 +47,7 @@ void main() async {
   Hive.registerAdapter(StreakAdapter());
   Hive.registerAdapter(ScheduleAdapter());
   Hive.registerAdapter(BlockSessionAdapter());
+  Hive.registerAdapter(TimeLimitConfigAdapter());
 
 
   // open boxes
@@ -56,6 +58,7 @@ void main() async {
   await Hive.openBox(HiveBoxNames.settings);
   await Hive.openBox<Schedule>(HiveBoxNames.schedules);
   await Hive.openBox<BlockSession>(HiveBoxNames.blockSessions);
+  await Hive.openBox<TimeLimitConfig>(HiveBoxNames.timeLimitConfigs);
 
   final settingsBox = Hive.box(HiveBoxNames.settings);
   if (settingsBox.get('installDate') == null) {

@@ -5,8 +5,10 @@ import 'package:pausenow/data/repositoryImpl/UsageStreakRepo.dart';
 import '../data/repositories/BlockingRepo.dart';
 import '../data/repositories/ScheduleRepo.dart';
 import '../data/repositories/SettingsRepo.dart';
+import '../data/repositories/TimeLimitRepo.dart';
 import '../data/repositoryImpl/ScheduleRepoImpl.dart';
 import '../data/repositoryImpl/SettingsRepoImpl.dart';
+import '../data/repositoryImpl/TimeLimitRepoImpl.dart';
 import '../data/repositoryImpl/block_session_repository.dart';
 
 
@@ -31,4 +33,8 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
 
 final scheduleRepositoryProvider = Provider<ScheduleRepository>((ref) {
   return ScheduleRepositoryImpl();
+});
+
+final timeLimitRepositoryProvider = Provider<TimeLimitRepository>((ref) {
+  return TimeLimitRepositoryImpl();
 });

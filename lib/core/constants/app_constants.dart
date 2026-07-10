@@ -16,9 +16,9 @@ class AppConstants {
   static const int blockedAppTypeId   = 1;
   static const int usageLogTypeId     = 2;
   static const int streakTypeId       = 3;
-
-  // app_constants.dart — add
   static const int scheduleTypeId = 4;
+  static const int timeLimitConfigTypeId = 5; // 👈 confirm this number is actually unused
+
 
 // blocking types
   static const String blockingTypeAllApps      = 'all_apps';

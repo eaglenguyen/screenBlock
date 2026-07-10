@@ -9,5 +9,7 @@ class HiveBoxNames {
   static const String schedules = 'schedules';
   static const String blockSessions = 'block_sessions';
   static const String blockingGoalHours = 'blockingGoalHours';
+  static const String timeLimitConfigs = 'timeLimitConfigs';
+
 
 }
