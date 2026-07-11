@@ -95,16 +95,6 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Scheduled Session',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary(context),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
             _buildNameRow(context),
             const SizedBox(height: 8),
             _buildAllDayToggle(context),

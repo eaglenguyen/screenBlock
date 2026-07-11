@@ -13,6 +13,7 @@ import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/permission_dialogs.dart';
+import '../../featuress/timelimit/widget/time_limit_bottom_sheet.dart';
 import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
 import 'cards/active_blocking_card.dart';
@@ -162,6 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       blockedTime: state.formattedBlockedTime,
                       shouldAnimate: state.shouldAnimateBlockedTime,
                       isScheduleActive: state.isScheduleActive,
+                      isAppLimitActiveToday: state.isAppLimitActiveToday,
                       onPomodoroTapped: _onPomodoroTapped,
                       isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
                       onTutorialTap: () {
@@ -174,7 +176,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             opacity: anim,
                             child: child,
                           ),
-                            pageBuilder: (dialogContext, __, ___) => Scaffold( // 👈 wrap in Scaffold
+                            pageBuilder: (dialogContext, __, ___) => Scaffold(
                               backgroundColor: const Color(0xFF16162A),
                               body: ManualBlockingTutorial(
                                 onComplete: () => Navigator.of(dialogContext).pop(),
@@ -228,11 +230,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
           ),
-
         ],
       ),
     );
   }
+
+
 
   void _onPomodoroTapped() {
     PomodoroSheet.show(

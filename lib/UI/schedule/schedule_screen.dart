@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:pausenow/UI/schedule/schedule_viewmodel.dart';
 import 'package:pausenow/UI/schedule/widgets/pause_sheet.dart';
 import 'package:pausenow/UI/schedule/widgets/presets_section.dart';
 import 'package:pausenow/UI/schedule/widgets/session_bottom_sheet.dart';
 import 'package:pausenow/UI/schedule/widgets/session_card.dart';
+import 'package:pausenow/UI/schedule/widgets/session_mode_picker_sheet.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/schedule.dart';
@@ -15,6 +15,9 @@ import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
+import '../../featuress/timelimit/time_limit_viewmodel.dart';
+import '../../featuress/timelimit/widget/time_limit_bottom_sheet.dart';
+import '../../featuress/timelimit/widget/time_limit_card.dart';
 import '../home/home_state.dart';
 import '../home/home_viewmodel.dart';
 
@@ -24,6 +27,7 @@ class ScheduleScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(scheduleViewModelProvider);
+    final timeLimitState = ref.watch(timeLimitViewModelProvider);
     final isPremium = ref.watch(isPremiumProvider);
     final isManualBlocking = ref.watch(homeViewModelProvider).phase == BlockingPhase.active;
     final isPaused = ref.watch(homeViewModelProvider).phase == BlockingPhase.onBreak;
@@ -144,6 +148,47 @@ class ScheduleScreen extends ConsumerWidget {
                     _buildEmptyState(context),
                   ],
 
+
+                  // 👇 NEW — time-limit section
+                  if (timeLimitState.configs.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      'Time Limits',
+                      style: AppTextStyles.headlineSmall.copyWith(
+                        color: AppColors.textPrimary(context),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...timeLimitState.configs.map((config) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Opacity(
+                          opacity: isManualBlocking || isPaused ? 0.4 : 1.0,
+                          child: IgnorePointer(
+                            ignoring: isManualBlocking || isPaused,
+                            child: TimeLimitCard(
+                              config: config,
+                              onTap: isManualBlocking || isPaused
+                                  ? null
+                                  : () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  useRootNavigator: true,
+                                  builder: (_) => TimeLimitBottomSheet(existingConfig: config),
+                                );
+                              },
+                              onToggle: () => ref
+                                  .read(timeLimitViewModelProvider.notifier)
+                                  .toggleConfig(config.id),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+
                   const SizedBox(height: 16),
                   const PresetsSection(), // 👈 add this
 
@@ -243,26 +288,40 @@ class ScheduleScreen extends ConsumerWidget {
 
   void _openCreateSession(BuildContext context, WidgetRef ref) {
     _checkAccessibilityAndProceed(context, ref, () {
-      final isPremium = ref.read(isPremiumProvider);
-      final scheduleCount = ref.read(scheduleViewModelProvider).schedules.length;
+      SessionModePickerSheet.show(
+        context,
+        onScheduleTap: () {
+          final isPremium = ref.read(isPremiumProvider);
+          final scheduleCount = ref.read(scheduleViewModelProvider).schedules.length;
 
-      if (!isPremium && scheduleCount >= 1) {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          useRootNavigator: true,
-          builder: (_) => const FeaturePaywallScreen(source: 'multiple_schedules'),
-        );
-        return;
-      }
+          if (!isPremium && scheduleCount >= 1) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              useRootNavigator: true,
+              builder: (_) => const FeaturePaywallScreen(source: 'multiple_schedules'),
+            );
+            return;
+          }
 
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        useRootNavigator: true,
-        builder: (_) => const SessionBottomSheet(),
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            useRootNavigator: true,
+            builder: (_) => const SessionBottomSheet(),
+          );
+        },
+        onTimeLimitTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            useRootNavigator: true,
+            builder: (_) => const TimeLimitBottomSheet(),
+          );
+        },
       );
     });
   }

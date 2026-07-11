@@ -41,6 +41,7 @@ class HomeState {
   final bool isScheduleActive;
   final bool isSchedulePaused;
   final int schedulePauseRemainingSeconds;
+  final bool isAppLimitActiveToday;
 
   final PomodoroConfig pomodoroConfig;
   final int pomodoroRoundCount;
@@ -71,6 +72,7 @@ class HomeState {
     this.isScheduleActive = false,
     this.isSchedulePaused = false,
     this.schedulePauseRemainingSeconds = 0,
+    this.isAppLimitActiveToday = false,
 
     this.pomodoroConfig = const PomodoroConfig(),
     this.pomodoroRoundCount = 0,
@@ -104,6 +106,7 @@ class HomeState {
     bool? isScheduleActive,
     bool? isSchedulePaused,
     int? schedulePauseRemainingSeconds,
+    bool? isAppLimitActiveToday,
     PomodoroConfig? pomodoroConfig,
     int? pomodoroRoundCount,
 
@@ -132,6 +135,7 @@ class HomeState {
       isScheduleActive: isScheduleActive ?? this.isScheduleActive,
       isSchedulePaused: isSchedulePaused ?? this.isSchedulePaused,
       schedulePauseRemainingSeconds: schedulePauseRemainingSeconds ?? this.schedulePauseRemainingSeconds,
+      isAppLimitActiveToday: isAppLimitActiveToday ?? this.isAppLimitActiveToday,
       pomodoroConfig: pomodoroConfig ?? this.pomodoroConfig,
       pomodoroRoundCount: pomodoroRoundCount ?? this.pomodoroRoundCount,
 

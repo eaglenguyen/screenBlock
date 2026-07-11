@@ -304,19 +304,40 @@ class AppBlockAccessibilityService : AccessibilityService() {
             calendar.set(java.util.Calendar.MILLISECOND, 0)
             val startTime = calendar.timeInMillis
 
-            val stats = usageStatsManager.queryUsageStats(
-                android.app.usage.UsageStatsManager.INTERVAL_DAILY,
-                startTime,
-                endTime
-            )
+            val events = usageStatsManager.queryEvents(startTime, endTime)
+            var totalMs = 0L
+            var lastForegroundTime = 0L
+            var inForeground = false
 
-            val appStats = stats?.find { it.packageName == packageName }
-            val totalMs = appStats?.totalTimeInForeground ?: return null
+            val event = android.app.usage.UsageEvents.Event()
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                if (event.packageName != packageName) continue
+
+                when (event.eventType) {
+                    android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND -> {
+                        lastForegroundTime = event.timeStamp
+                        inForeground = true
+                    }
+                    android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND -> {
+                        if (inForeground) {
+                            totalMs += (event.timeStamp - lastForegroundTime)
+                            inForeground = false
+                        }
+                    }
+                }
+            }
+
+            // 👇 if still in foreground right now (hasn't backgrounded yet),
+            // count time up to this very moment
+            if (inForeground) {
+                totalMs += (endTime - lastForegroundTime)
+            }
+
             if (totalMs == 0L) return null
-
             (totalMs / 1000 / 60).toInt()
         } catch (e: Exception) {
-            android.util.Log.e("pausenow", "❌ usage stats error: $e")
+            android.util.Log.e("pausenow", "❌ usage events error: $e")
             null
         }
     }

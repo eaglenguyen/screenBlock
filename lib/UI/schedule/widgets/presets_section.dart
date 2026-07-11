@@ -23,7 +23,7 @@ class PresetsSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 8, 0, 12),
           child: Text(
-            'Schedules',
+            'Presets',
             style: AppTextStyles.headlineSmall.copyWith(
               color: AppColors.textPrimary(context),
             ),

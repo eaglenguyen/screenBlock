@@ -17,6 +17,7 @@ class TimerCard extends StatefulWidget {
   final VoidCallback? onAnimationStarted;
   final VoidCallback onTutorialTap;
   final bool isScheduleActive;
+  final bool isAppLimitActiveToday;
   final VoidCallback onPomodoroTapped;
   final bool isPomodoroMode;
 
@@ -35,6 +36,7 @@ class TimerCard extends StatefulWidget {
     required this.onAnimationStarted,
     required this.onTutorialTap,
     this.isScheduleActive = false,
+    this.isAppLimitActiveToday = false,
     required this.onPomodoroTapped,
     this.isPomodoroMode = false,
 
@@ -269,7 +271,7 @@ class _TimerCardState extends State<TimerCard>
     );
   }
   Widget _buildBlockNowButton() {
-    final isDisabled = widget.isScheduleActive;
+    final isDisabled = widget.isScheduleActive || widget.isAppLimitActiveToday;
 
     return Row(
       children: [

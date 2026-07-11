@@ -23,6 +23,7 @@ import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
+import '../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../providers/premium_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/schedule_checker.dart';
@@ -119,6 +120,7 @@ class HomeViewModel extends _$HomeViewModel {
 
     _setupScheduleChecker();
     _setupPremiumListener();
+    _setupAppLimitListener(); // 👈 new
 
     ScheduleChecker.instance.start(_blockingService);
     _restoreSession();
@@ -194,11 +196,27 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   void _setupPremiumListener() {
+
     ref.listen(isPremiumProvider, (previous, next) {
       if (previous == true && next == false) {
         _onPremiumLost();
       }
     });
+  }
+
+  void _setupAppLimitListener() {
+    // initial check
+    _refreshAppLimitActiveToday();
+
+    // re-check whenever time-limit configs change
+    ref.listen(timeLimitViewModelProvider, (previous, next) {
+      _refreshAppLimitActiveToday();
+    });
+  }
+
+  void _refreshAppLimitActiveToday() {
+    final hasActiveLimit = ref.read(timeLimitViewModelProvider.notifier).hasActiveAppLimitToday();
+    state = state.copyWith(isAppLimitActiveToday: hasActiveLimit);
   }
 
   // ── Premium Logic───────────────────────────────────────

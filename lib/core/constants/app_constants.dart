@@ -17,7 +17,8 @@ class AppConstants {
   static const int usageLogTypeId     = 2;
   static const int streakTypeId       = 3;
   static const int scheduleTypeId = 4;
-  static const int timeLimitConfigTypeId = 5; // 👈 confirm this number is actually unused
+  static const int blockSessionTypeId    = 5; // 👈 newly documented — matches BlockSession's existing hardcoded typeId
+  static const int timeLimitConfigTypeId = 6; // 👈 confirm this number is actually unused
 
 
 // blocking types

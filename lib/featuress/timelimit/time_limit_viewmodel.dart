@@ -141,4 +141,14 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
 
     return null;
   }
+
+  bool hasActiveAppLimitToday() {
+    final today = _todayIndex();
+    return state.configs.any((c) => c.isActive && c.days.contains(today));
+  }
+
+  int _todayIndex() {
+    // DateTime.weekday: Monday=1...Sunday=7 → convert to Mon=0...Sun=6
+    return DateTime.now().weekday - 1;
+  }
 }

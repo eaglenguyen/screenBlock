@@ -1,8 +1,10 @@
 import 'package:hive/hive.dart';
 
+import '../../core/constants/app_constants.dart';
+
 part 'block_session.g.dart';
 
-@HiveType(typeId: 5)
+@HiveType(typeId: AppConstants.blockSessionTypeId)
 class BlockSession extends HiveObject {
   @HiveField(0)
   DateTime startTime;
