@@ -192,10 +192,10 @@ class _TimeLimitOptionsSheetState extends State<TimeLimitOptionsSheet>
               SizedBox(
                 width: double.infinity,
                 child: HoldToConfirmButton(
-                  color: AppColors.error(context),
-                  fillColor: Color.lerp(AppColors.error(context), Colors.black, 0.3)!,
+                  color: AppColors.textSecondary(context).withValues(alpha: 0.4),
+                  fillColor: Color.lerp(AppColors.textSecondary(context), Colors.black, 0.3)!,
                   textColor: Colors.white,
-                  label: 'Hold to delete limit',
+                  label: 'Hold to delete',
                   holdingLabel: 'Keep holding...',
                   doneLabel: 'Deleted',
                   onConfirmed: () {

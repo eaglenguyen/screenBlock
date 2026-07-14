@@ -52,6 +52,29 @@ class MainActivity : FlutterActivity() {
             METHOD_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "getAppIcon" -> {
+                    val packageName = call.argument<String>("packageName") ?: ""
+                    try {
+                        val drawable = packageManager.getApplicationIcon(packageName)
+                        val bitmap = if (drawable is android.graphics.drawable.BitmapDrawable) {
+                            drawable.bitmap
+                        } else {
+                            val bmp = android.graphics.Bitmap.createBitmap(
+                                drawable.intrinsicWidth, drawable.intrinsicHeight,
+                                android.graphics.Bitmap.Config.ARGB_8888
+                            )
+                            val canvas = android.graphics.Canvas(bmp)
+                            drawable.setBounds(0, 0, canvas.width, canvas.height)
+                            drawable.draw(canvas)
+                            bmp
+                        }
+                        val stream = java.io.ByteArrayOutputStream()
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, stream)
+                        result.success(stream.toByteArray())
+                    } catch (e: Exception) {
+                        result.success(null)
+                    }
+                }
                 "isAccessibilityEnabled" -> {
                     result.success(isAccessibilityEnabled())
                 }

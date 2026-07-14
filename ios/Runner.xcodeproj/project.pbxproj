@@ -29,6 +29,8 @@
 		74E1311E2FC0EADB00D45757 /* ShieldActionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 74E131152FC0EADB00D45757 /* ShieldActionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74E1319B2FC0EC3E00D45757 /* DeviceActivityReportExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 74E1318F2FC0EC3E00D45757 /* DeviceActivityReportExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74EC2F6330031AE10024CD2F /* ScreenTimeReportPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */; };
+		74EC30363006BF9B0024CD2F /* AppIconStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC30353006BF9B0024CD2F /* AppIconStackView.swift */; };
+		74EC30383006C12D0024CD2F /* AppIconStackPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */; };
 		74FD88B42FEC78BE002FD59F /* ScreenTimeReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74FD88B32FEC78B2002FD59F /* ScreenTimeReportView.swift */; };
 		7A369D4117568EF01D0A08E8 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C151D7586AD0E237EC90142 /* Pods_Runner.framework */; };
 		88ED09AE44EEC3942DE0FC97 /* Pods_ShieldConfigurationExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E756916DFDC830333D80625 /* Pods_ShieldConfigurationExtension.framework */; };
@@ -149,6 +151,8 @@
 		74E131572FC0EBA900D45757 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		74E1318F2FC0EC3E00D45757 /* DeviceActivityReportExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = DeviceActivityReportExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeReportPlatformView.swift; sourceTree = "<group>"; };
+		74EC30353006BF9B0024CD2F /* AppIconStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconStackView.swift; sourceTree = "<group>"; };
+		74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconStackPlatformView.swift; sourceTree = "<group>"; };
 		74FD88B32FEC78B2002FD59F /* ScreenTimeReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeReportView.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7E756916DFDC830333D80625 /* Pods_ShieldConfigurationExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShieldConfigurationExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -389,6 +393,8 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				74BFE9F62FE31FE30028C86B /* Products.storekit */,
 				74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */,
+				74EC30353006BF9B0024CD2F /* AppIconStackView.swift */,
+				74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -901,7 +907,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				74EC2F6330031AE10024CD2F /* ScreenTimeReportPlatformView.swift in Sources */,
+				74EC30383006C12D0024CD2F /* AppIconStackPlatformView.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				74EC30363006BF9B0024CD2F /* AppIconStackView.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				74FD88B42FEC78BE002FD59F /* ScreenTimeReportView.swift in Sources */,
 				74E130A42FC0E7BA00D45757 /* FamilyActivityPickerViewController.swift in Sources */,

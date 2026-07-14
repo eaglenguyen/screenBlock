@@ -1,32 +1,35 @@
 import 'package:hive/hive.dart';
 
 import '../../core/constants/app_constants.dart';
+part 'time_limit_config.g.dart'; // 👈 confirm this line exists, exact filename match
 
-part 'time_limit_config.g.dart';
 
-@HiveType(typeId: AppConstants.timeLimitConfigTypeId) // new typeId, pick next unused number
+@HiveType(typeId: AppConstants.timeLimitConfigTypeId)
 class TimeLimitConfig extends HiveObject {
 
   @HiveField(0)
   late String id;
 
   @HiveField(1)
-  late String name; // user-facing label, e.g. "Social Media Cap" — same pattern as Schedule.name
+  late String name;
 
   @HiveField(2)
-  late List<String> packageNames; // multiple apps sharing this same limit
+  late List<String> packageNames;
 
   @HiveField(3)
-  late int limitMinutes; // 1 to 240 (4h), shared across all apps in this config
+  late int limitMinutes;
 
   @HiveField(4)
-  late List<int> days; // 0=Mon ... 6=Sun, matches Schedule's day convention
+  late List<int> days;
 
   @HiveField(5)
   late bool isActive;
 
   @HiveField(6)
   late DateTime createdAt;
+
+  @HiveField(7)
+  late DateTime updatedAt; // 👈 new
 
   TimeLimitConfig({
     required this.id,
@@ -36,7 +39,9 @@ class TimeLimitConfig extends HiveObject {
     required this.days,
     this.isActive = true,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   TimeLimitConfig copyWith({
     String? id,
@@ -46,6 +51,7 @@ class TimeLimitConfig extends HiveObject {
     List<int>? days,
     bool? isActive,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return TimeLimitConfig(
       id: id ?? this.id,
@@ -55,6 +61,7 @@ class TimeLimitConfig extends HiveObject {
       days: days ?? this.days,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? DateTime.now(), // 👈 defaults to "now" unless explicitly overridden
     );
   }
 }

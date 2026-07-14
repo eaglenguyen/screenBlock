@@ -9,7 +9,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../data/models/time_limit_config.dart';
 import '../../../providers/repository_providers.dart';
 import '../../data/repositories/TimeLimitRepo.dart';
-import 'data/app_limit_conflict.dart';
 import 'time_limit_state.dart';
 
 part 'time_limit_viewmodel.g.dart';
@@ -51,6 +50,8 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
         packageNames: packageNames,
         limitMinutes: limitMinutes,
         days: days,
+        updatedAt: DateTime.now(), // 👈 new — every save counts as an update
+
       );
 
       await _repo.saveConfig(config);
@@ -82,30 +83,9 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
     loadConfigs();
   }
 
-  Future<void> toggleConfig(String id) async {
-    final config = _repo.getConfig(id);
-    if (config == null) return;
-    final updated = config.copyWith(isActive: !config.isActive);
-    await _repo.saveConfig(updated);
-    await _syncToNative();
-
-    // 👇 if we just turned it OFF, check if apps need unblocking
-    if (!updated.isActive) {
-      await _unblockIfUnclaimed(updated.packageNames);
-    }
-
-    loadConfigs();
-  }
 
   Future<void> _unblockIfUnclaimed(List<String> packageNames) async {
     for (final packageName in packageNames) {
-      // still claimed by another active config or a schedule? leave it blocked.
-      final stillClaimed = findAppLimitConflict(
-        packageName: packageName,
-        selectedDays: [DateTime.now().weekday - 1], // today only
-      ) != null;
-
-      if (!stillClaimed) {
         if (Platform.isAndroid) {
           await const MethodChannel('com.eagle.pausenow/accessibility')
               .invokeMethod('unblockApp', {'packageName': packageName});
@@ -113,7 +93,6 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
           await const MethodChannel('com.eagle.pausenow/ios_blocking')
               .invokeMethod('unshieldApp', {/* need token, see note below */});
         }
-      }
     }
   }
 
@@ -151,32 +130,7 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
     }
   }
 
-  AppLimitConflict? findAppLimitConflict({
-    required String packageName,
-    required List<int> selectedDays,
-    String? excludeConfigId,
-  }) {
-    // check against schedules
-    final schedules = ref.read(scheduleRepositoryProvider).getAllSchedules();
-    for (final schedule in schedules) {
-      final scheduleApps = {...schedule.blockedApps, ...schedule.allowedApps};
-      if (!scheduleApps.contains(packageName)) continue;
-      if (schedule.days.any((d) => selectedDays.contains(d))) {
-        return AppLimitConflict(name: schedule.name, source: 'schedule');
-      }
-    }
 
-    // check against other time-limit configs
-    final existingConfigs = _repo.getConfigsContainingApp(packageName);
-    for (final config in existingConfigs) {
-      if (config.id == excludeConfigId) continue;
-      if (config.days.any((d) => selectedDays.contains(d))) {
-        return AppLimitConflict(name: config.name, source: 'time_limit');
-      }
-    }
-
-    return null;
-  }
 
   bool hasActiveAppLimitToday() {
     final today = _todayIndex();

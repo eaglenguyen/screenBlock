@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/schedule.dart';
+import '../../../core/constants/app_constants.dart';
+import 'app_icon_stack.dart';
 
 class SessionCard extends StatelessWidget {
   const SessionCard({
@@ -32,6 +34,11 @@ class SessionCard extends StatelessWidget {
     }
     return '${s}s';
   }
+
+  List<String> get _relevantApps => schedule.blockingType == AppConstants.blockingTypeSpecificApps
+      ? schedule.blockedApps
+      : schedule.allowedApps;
+
 
 
   @override
@@ -76,6 +83,14 @@ class SessionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
+                AppIconStack(
+                  packageNames: _relevantApps,
+                  iosStorageKey: 'schedule_${schedule.id}_${schedule.blockingType}',
+                  refreshToken: schedule.updatedAt.millisecondsSinceEpoch,
+                  size: 36,
+                ),
+                const SizedBox(width: 12),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

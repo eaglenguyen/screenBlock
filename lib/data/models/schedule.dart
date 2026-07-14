@@ -36,6 +36,9 @@ class Schedule extends HiveObject {
   @HiveField(9)
   late DateTime createdAt;
 
+  @HiveField(10)
+  late DateTime updatedAt; // 👈 new — next available field index
+
   Schedule({
     required this.id,
     required this.name,
@@ -47,9 +50,15 @@ class Schedule extends HiveObject {
     List<String>? allowedApps,
     this.isActive = true,
     DateTime? createdAt,
+    DateTime? updatedAt,
+
   })  : blockedApps = blockedApps ?? [],
         allowedApps = allowedApps ?? [],
-        createdAt = createdAt ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
+
+
+
 
   // display helpers
   String get timeRange {
@@ -94,6 +103,8 @@ class Schedule extends HiveObject {
     List<String>? allowedApps,
     bool? isActive,
     DateTime? createdAt,
+    DateTime? updatedAt,
+
   }) {
     return Schedule(
       id: id ?? this.id,
@@ -106,6 +117,8 @@ class Schedule extends HiveObject {
       allowedApps: allowedApps ?? this.allowedApps,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? DateTime.now(), // 👈 defaults to "now" on every copyWith call
+
     );
   }
 }

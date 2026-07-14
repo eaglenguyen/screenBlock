@@ -39,6 +39,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             } else {
                 NSLog("❌ Failed to get plugin registrar for ScreenTimeReportPlugin")
             }
+            
+            // 👇 new
+              if let iconRegistrar = engine.registrar(forPlugin: "AppIconStackPlugin") {
+                  iconRegistrar.register(
+                      AppIconStackPlatformViewFactory(),
+                      withId: "com.eagle.pausenow/app_icon_stack_view"
+                  )
+              } else {
+                  NSLog("❌ Failed to get plugin registrar for AppIconStackPlugin")
+              }
         }
 
 

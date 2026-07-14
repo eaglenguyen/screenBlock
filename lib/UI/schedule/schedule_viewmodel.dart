@@ -83,6 +83,8 @@ class ScheduleViewModel extends _$ScheduleViewModel {
         blockingType: blockingType,
         blockedApps: blockedApps,
         allowedApps: allowedApps,
+        updatedAt: DateTime.now(), // 👈 new — every save counts as an update
+
       );
 
       await _repo.saveSchedule(schedule); // 👈 was _box.put(schedule.id, schedule)

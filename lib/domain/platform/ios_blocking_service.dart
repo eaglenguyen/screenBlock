@@ -111,8 +111,7 @@ class IOSBlockingService implements BlockingService {
       'blockingMode': blockingMode,
       'limitMinutes': limitMinutes,
       'sessionType': sessionType,
-      'scheduleId': ?scheduleId,
-
+      if (scheduleId != null) 'scheduleId': scheduleId, // 👈 fixed
     });
   }
 
