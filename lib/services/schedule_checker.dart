@@ -240,7 +240,7 @@ class ScheduleChecker {
     if (Platform.isIOS) {
       // 👇 pass sessionType directly instead of separate persistSessionType call
       await (_blockingService as IOSBlockingService)
-          .startMonitoring('ios_apps', 999, 'schedule', schedule.blockingType);
+          .startMonitoring('ios_apps', 999, sessionType: 'schedule', blockingMode: schedule.blockingType, scheduleId: schedule.id); // 👈 add scheduleId
     } else {
       final allApps = schedule.blockingType ==
           AppConstants.blockingTypeSpecificApps

@@ -82,7 +82,7 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
           const SizedBox(height: 8),
           Text(
             widget.isPaused
-                ? 'Blocking is currently paused'
+                ? 'Resume Blocking?'
                 : 'How long do you want to pause?',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),
@@ -103,14 +103,7 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'blocking will resume automatically',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.35),
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(height: 28),
+
 
             // slider
             SliderTheme(
@@ -176,7 +169,7 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
                   widget.onResume();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEDB82A),
+                  backgroundColor: const Color(0xFF6666A3),
                   foregroundColor: const Color(0xFF1A1208),
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: const StadiumBorder(),
@@ -185,7 +178,7 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                child: const Text('Resume Blocking'),
+                child: const Text('Yes, Block My Apps'),
               ),
             ),
           ],

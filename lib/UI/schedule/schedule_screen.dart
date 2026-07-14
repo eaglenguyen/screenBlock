@@ -15,9 +15,11 @@ import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
+import '../../data/models/time_limit_config.dart';
 import '../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../featuress/timelimit/widget/time_limit_bottom_sheet.dart';
 import '../../featuress/timelimit/widget/time_limit_card.dart';
+import '../../featuress/timelimit/widget/time_limit_option_sheet.dart';
 import '../home/home_state.dart';
 import '../home/home_viewmodel.dart';
 
@@ -170,18 +172,21 @@ class ScheduleScreen extends ConsumerWidget {
                               config: config,
                               onTap: isManualBlocking || isPaused
                                   ? null
-                                  : () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  useRootNavigator: true,
-                                  builder: (_) => TimeLimitBottomSheet(existingConfig: config),
-                                );
-                              },
-                              onToggle: () => ref
-                                  .read(timeLimitViewModelProvider.notifier)
-                                  .toggleConfig(config.id),
+                                  : () => TimeLimitOptionsSheet.show(
+                                context,
+                                config: config,
+                                isLimitReached: false, // 👈 needs real data, see note below
+                                onEdit: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    useRootNavigator: true,
+                                    builder: (_) => TimeLimitBottomSheet(existingConfig: config),
+                                  );
+                                },
+                                onDelete: () => ref.read(timeLimitViewModelProvider.notifier).deleteConfig(config.id),
+                              ),
                             ),
                           ),
                         ),
@@ -540,5 +545,8 @@ Future<void> _checkAccessibilityAndProceed(
     ),
   );
 }
+
+
+
 //
 

@@ -29,7 +29,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         if #available(iOS 16.0, *) {
             setupChannel(engine: engine)
+
+            // 👇 register platform view for inline screen time report
+            if let registrar = engine.registrar(forPlugin: "ScreenTimeReportPlugin") {
+                registrar.register(
+                    ScreenTimeReportPlatformViewFactory(),
+                    withId: "com.eagle.pausenow/screen_time_report_view"
+                )
+            } else {
+                NSLog("❌ Failed to get plugin registrar for ScreenTimeReportPlugin")
+            }
         }
+
 
         let flutterVC = FlutterViewController(
             engine: engine,
@@ -269,6 +280,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+            
+        case "showSchedulePicker":
+            if let args = call.arguments as? [String: Any],
+               let scheduleId = args["scheduleId"] as? String,
+               let blockingMode = args["blockingMode"] as? String {
+                await showSchedulePicker(scheduleId: scheduleId, blockingMode: blockingMode, result: result)
+            } else {
+                result(FlutterError(code: "BAD_ARGS", message: "scheduleId and blockingMode required", details: nil))
+            }
+        case "unshieldConfigApps":
+            if let args = call.arguments as? [String: Any],
+               let configId = args["configId"] as? String {
+                service.unshieldConfigApps(configId: configId)
+            }
+            result(nil)
         case "saveTimeLimitDays":
             if let args = call.arguments as? [String: Any],
                let configId = args["configId"] as? String,
@@ -421,11 +447,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 break
             }
             let sessionType = args["sessionType"] as? String ?? "manual"
+            let scheduleId = args["scheduleId"] as? String // 👈 must be inside this same scope, after the guard
+
             service.startBlocking(
                 packageNames: packageNames,
                 blockingMode: blockingMode,
                 limitMinutes: limitMinutes,
-                sessionType: sessionType
+                sessionType: sessionType,
+                scheduleId: scheduleId
+
             )
             result(nil)
 
@@ -554,6 +584,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             }
         }
     }
+    
+    
 
     @available(iOS 16.0, *)
     @MainActor
@@ -632,6 +664,81 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
                 } else {
                     // decode failed — picker dismissed without saving, restore backup
+                    if let backup = sharedDefaults?.data(forKey: backupKey) {
+                        sharedDefaults?.set(backup, forKey: saveKey)
+                    }
+                    sharedDefaults?.removeObject(forKey: backupKey)
+                    sharedDefaults?.synchronize()
+                    result(0)
+                }
+            },
+            saveKey: saveKey
+        )
+        rootVC.present(picker, animated: true)
+    }
+    
+    @available(iOS 16.0, *)
+    @MainActor
+    private func showSchedulePicker(
+        scheduleId: String,
+        blockingMode: String,
+        result: @escaping FlutterResult
+    ) async {
+        guard let windowScene = UIApplication.shared
+            .connectedScenes
+            .first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?.rootViewController
+        else {
+            result(FlutterError(code: "NO_VIEW", message: "No view controller", details: nil))
+            return
+        }
+
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        // 👇 per-schedule, per-mode key — no longer a shared global key
+        let saveKey = "schedule_\(scheduleId)_\(blockingMode)"
+        let backupKey = "\(saveKey)_backup"
+
+        if let existing = sharedDefaults?.data(forKey: saveKey) {
+            sharedDefaults?.set(existing, forKey: backupKey)
+        } else {
+            sharedDefaults?.removeObject(forKey: backupKey)
+        }
+        sharedDefaults?.synchronize()
+
+        let picker = FamilyActivityPickerViewController(
+            service: IOSBlockingService.shared,
+            onDismiss: {
+                if let data = sharedDefaults?.data(forKey: saveKey),
+                   let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
+                    let count = selection.applicationTokens.count
+
+                    if count == 0 {
+                        sharedDefaults?.removeObject(forKey: saveKey)
+                        sharedDefaults?.removeObject(forKey: backupKey)
+                        sharedDefaults?.synchronize()
+                        result(0)
+                        return
+                    }
+
+                    let isPremium = sharedDefaults?.bool(forKey: "isPremium") ?? false
+                    let freeLimit = 3
+
+                    if !isPremium && blockingMode == "specific_apps" && count > freeLimit {
+                        if let backup = sharedDefaults?.data(forKey: backupKey) {
+                            sharedDefaults?.set(backup, forKey: saveKey)
+                        } else {
+                            sharedDefaults?.removeObject(forKey: saveKey)
+                        }
+                        sharedDefaults?.removeObject(forKey: backupKey)
+                        sharedDefaults?.synchronize()
+                        result(freeLimit + 1)
+                        return
+                    }
+
+                    sharedDefaults?.removeObject(forKey: backupKey)
+                    sharedDefaults?.synchronize()
+                    result(count)
+                } else {
                     if let backup = sharedDefaults?.data(forKey: backupKey) {
                         sharedDefaults?.set(backup, forKey: saveKey)
                     }

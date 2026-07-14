@@ -41,9 +41,9 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
     required List<String> packageNames,
     required int limitMinutes,
     required List<int> days,
+    bool isNew = false,
   }) async {
     try {
-      final isNewConfig = existingId == null;
 
       final config = TimeLimitConfig(
         id: existingId ?? const Uuid().v4(),
@@ -55,7 +55,7 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
 
       await _repo.saveConfig(config);
 
-      if (isNewConfig) {
+      if (isNew) {
         await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstBlockCreated);
       }
 
@@ -67,8 +67,18 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
   }
 
   Future<void> deleteConfig(String id) async {
+    final config = _repo.getConfig(id);
     await _repo.deleteConfig(id);
-    await _syncToNative(); // 👈 new
+    await _syncToNative();
+
+
+    if (config != null && Platform.isIOS) {
+      // 👇 unshield using the config's own stored tokens, before they're orphaned
+      await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod('unshieldConfigApps', {'configId': id});
+    } else if (config != null && Platform.isAndroid) {
+      await _unblockIfUnclaimed(config.packageNames); // Android path unchanged
+    }
     loadConfigs();
   }
 
@@ -77,8 +87,34 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
     if (config == null) return;
     final updated = config.copyWith(isActive: !config.isActive);
     await _repo.saveConfig(updated);
-    await _syncToNative(); // 👈 new
+    await _syncToNative();
+
+    // 👇 if we just turned it OFF, check if apps need unblocking
+    if (!updated.isActive) {
+      await _unblockIfUnclaimed(updated.packageNames);
+    }
+
     loadConfigs();
+  }
+
+  Future<void> _unblockIfUnclaimed(List<String> packageNames) async {
+    for (final packageName in packageNames) {
+      // still claimed by another active config or a schedule? leave it blocked.
+      final stillClaimed = findAppLimitConflict(
+        packageName: packageName,
+        selectedDays: [DateTime.now().weekday - 1], // today only
+      ) != null;
+
+      if (!stillClaimed) {
+        if (Platform.isAndroid) {
+          await const MethodChannel('com.eagle.pausenow/accessibility')
+              .invokeMethod('unblockApp', {'packageName': packageName});
+        } else if (Platform.isIOS) {
+          await const MethodChannel('com.eagle.pausenow/ios_blocking')
+              .invokeMethod('unshieldApp', {/* need token, see note below */});
+        }
+      }
+    }
   }
 
   // 👇 new — pushes current config list to native SharedPreferences (Android)

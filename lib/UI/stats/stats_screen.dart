@@ -8,7 +8,6 @@ import 'package:pausenow/UI/stats/widgets/usage_gauge.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'dart:io';
-import 'package:flutter/services.dart';
 
 
 class StatsScreen extends ConsumerStatefulWidget {
@@ -83,39 +82,18 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center, // 👈 add this
-                  children: [
-                    Text(
-                      'Screen Time Data',
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.textPrimary(context),
-                      ),
-                    ),
-                  ],
+                  mainAxisAlignment: MainAxisAlignment.center,
+
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
+          // 👇 replaced the button+sheet with an inline embedded report
           SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                await const MethodChannel('com.eagle.pausenow/ios_blocking')
-                    .invokeMethod('showScreenTimeReport');
-                if (mounted) {
-                  ref.read(statsViewModelProvider.notifier).loadStats();
-                }
-              },
-              icon: const Icon(Icons.bar_chart_rounded),
-              label: const Text('View Screen Time →'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: const StadiumBorder(),
-                textStyle: AppTextStyles.labelMedium,
-              ),
+            height: 500, // 👈 adjust to taste
+            child: UiKitView(
+              viewType: 'com.eagle.pausenow/screen_time_report_view',
             ),
           ),
         ],

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:pausenow/UI/schedule/widgets/schedule_presets.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/hivebox_names.dart';
@@ -46,8 +47,11 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
   late List<String> _blockedApps;
   late List<String> _allowedApps;
 
+
   bool get isEditing => widget.existingSchedule != null;
   bool _isAllDay = false;
+  late final String _configId;
+
 
   @override
   void initState() {
@@ -63,6 +67,9 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
     _blockedApps = List.from(s?.blockedApps ?? []);
     _allowedApps = List.from(s?.allowedApps ?? []);
     _isAllDay = _startTime == '00:00' && _endTime == '23:59';
+
+    _configId = s?.id ?? const Uuid().v4(); // 👈 new
+
   }
 
   @override
@@ -436,7 +443,8 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
   Future<void> _showIOSAppPicker(bool isAllApps) async {
     try {
       final service = ref.read(blockingServiceProvider) as IOSBlockingService;
-      final count = await service.showAppPicker(
+      final count = await service.showSchedulePicker( // 👈 was showAppPicker
+        scheduleId: _configId, // 👈 new — needs the stable id from initState
         blockingMode: isAllApps
             ? AppConstants.blockingTypeAllApps
             : AppConstants.blockingTypeSpecificApps,
@@ -834,76 +842,9 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
       return;
     }
 
-    // 👇 new — check for conflicts against existing time-limit configs, per app
-    // 👇 check for conflicts against existing time-limit configs, per app
-    final allApps = {..._blockedApps, ..._allowedApps};
-    for (final packageName in allApps) {
-      final timeLimitConflict = ref.read(timeLimitViewModelProvider.notifier).findAppLimitConflict(
-        packageName: packageName,
-        selectedDays: _selectedDays,
-      );
-      if (timeLimitConflict != null) {
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              backgroundColor: AppColors.backgroundCard(context),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              title: Text(
-                'Conflict Found',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.headlineSmall.copyWith(
-                  color: AppColors.textPrimary(context),
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('⚠️', style: TextStyle(fontSize: 40)),
-                  const SizedBox(height: 12),
-                  Text(
-                    'One of the apps in this schedule already has a time limit set under "${timeLimitConflict.name}"',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary(context),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Please remove that app or choose different days.',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary(context),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.gold(context),
-                      foregroundColor: AppColors.goldText(context),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: const Text('Got it'),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        return;
-      }
-    }
 
     await ref.read(scheduleViewModelProvider.notifier).saveSchedule(
-      existingId: widget.existingSchedule?.id,
+      existingId: _configId, // 👈 was widget.existingSchedule?.id
       name: _nameController.text.trim(),
       startTime: _startTime,
       endTime: _endTime,

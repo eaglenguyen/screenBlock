@@ -46,7 +46,8 @@ class IOSBlockingService: NSObject {
         packageNames: [String],
         blockingMode: String,
         limitMinutes: Int,
-        sessionType: String = "manual"
+        sessionType: String = "manual",
+        scheduleId: String? = nil // 👈 new
     ) {
         // 👇 use sharedDefaults? directly — not sharedDefaults.standard
         sharedDefaults?.set(true, forKey: "isBlocking")
@@ -54,10 +55,15 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
         sharedDefaults?.set(limitMinutes, forKey: "sessionMinutes")
         sharedDefaults?.set(sessionType, forKey: "sessionType")
+        // 👇 persist which schedule is active, or clear it for manual/pomodoro
+        if let scheduleId = scheduleId {
+            sharedDefaults?.set(scheduleId, forKey: "activeScheduleId")
+        } else {
+            sharedDefaults?.removeObject(forKey: "activeScheduleId")
+        }
         sharedDefaults?.synchronize()
-        NSLog("🔄 startBlocking: sessionType=\(sessionType) minutes=\(limitMinutes)")
 
-        applyShield(mode: blockingMode)
+        applyShield(mode: blockingMode, scheduleId: scheduleId) // 👈 pass through
 
     }
 
@@ -172,6 +178,8 @@ class IOSBlockingService: NSObject {
     func resumeBlocking() {
 
         let currentSessionType = sharedDefaults?.string(forKey: "sessionType") ?? "manual"
+        let scheduleId = sharedDefaults?.string(forKey: "activeScheduleId") // 👈 new
+
 
         sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
@@ -182,7 +190,7 @@ class IOSBlockingService: NSObject {
         cancelPauseNotification()
 
         let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
-        applyShield(mode: blockingMode)
+        applyShield(mode: blockingMode, scheduleId: scheduleId) // 👈 pass through
 
         // 👇 only notify Flutter for manual sessions
         if currentSessionType == "manual" {
@@ -284,29 +292,35 @@ class IOSBlockingService: NSObject {
     }
 
         // MARK - Shield
-    func applyShield(mode: String) {
+    func applyShield(mode: String, scheduleId: String? = nil) {
         store.clearAllSettings()
 
         switch mode {
-
         case "specific_apps":
-            let tokens = getStoredAppTokens(mode: "specific_apps")
+            let tokens: Set<ApplicationToken>
+            if let scheduleId = scheduleId {
+                tokens = getScheduleTokens(scheduleId: scheduleId, blockingMode: "specific_apps") // 👈 per-schedule
+            } else {
+                tokens = getStoredAppTokens(mode: "specific_apps") // 👈 manual blocking, unchanged, global key
+            }
             guard !tokens.isEmpty else {
                 NSLog("❌ applyShield: no blocked app tokens found")
                 return
             }
             store.shield.applications = tokens
-            NSLog("🛡 shielding \(tokens.count) specific apps")
+            NSLog("🛡 shielding \(tokens.count) specific apps (schedule: \(scheduleId ?? "manual"))")
 
         case "all_apps":
-            let allowedTokens = getStoredAppTokens(mode: "all_apps_except")
+            let allowedTokens: Set<ApplicationToken>
+            if let scheduleId = scheduleId {
+                allowedTokens = getScheduleTokens(scheduleId: scheduleId, blockingMode: "all_apps_except")
+            } else {
+                allowedTokens = getStoredAppTokens(mode: "all_apps_except")
+            }
             if allowedTokens.isEmpty {
-                // no allowed app picked — shield everything
                 store.shield.applicationCategories = .all()
-                NSLog("🛡 shielding ALL categories (no exemptions)")
             } else {
                 store.shield.applicationCategories = .all(except: allowedTokens)
-                NSLog("🛡 shielding ALL categories except \(allowedTokens.count) apps")
             }
 
         default:
@@ -378,6 +392,30 @@ class IOSBlockingService: NSObject {
 
             startTimeLimitMonitoring(configId: id, limitMinutes: limitMinutes)
         }
+    }
+    
+    func unshieldConfigApps(configId: String) {
+        let saveKey = "timeLimitApps_\(configId)"
+        guard let data = sharedDefaults?.data(forKey: saveKey),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else {
+            NSLog("⚠️ unshieldConfigApps: no tokens found for config \(configId)")
+            return
+        }
+
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.subtract(selection.applicationTokens)
+        store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+
+        NSLog("✅ unshielded \(selection.applicationTokens.count) apps for config \(configId)")
+    }
+    
+    func getScheduleTokens(scheduleId: String, blockingMode: String) -> Set<ApplicationToken> {
+        let saveKey = "schedule_\(scheduleId)_\(blockingMode)"
+        guard let data = sharedDefaults?.data(forKey: saveKey),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else { return [] }
+        return selection.applicationTokens
     }
     
 

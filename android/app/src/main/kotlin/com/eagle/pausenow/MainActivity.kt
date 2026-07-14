@@ -55,6 +55,13 @@ class MainActivity : FlutterActivity() {
                 "isAccessibilityEnabled" -> {
                     result.success(isAccessibilityEnabled())
                 }
+                "unblockApp" -> {
+                    val packageName = call.argument<String>("packageName") ?: ""
+                    AppBlockAccessibilityService.isOverlayShowing = false
+                    // send broadcast to dismiss BlockActivity if it's currently showing for this package
+                    sendBroadcast(Intent("com.eagle.pausenow.DISMISS_BLOCK"))
+                    result.success(null)
+                }
                 "isSystemApp" -> {
                     val packageName = call.argument<String>("packageName") ?: ""
                     try {
@@ -166,6 +173,7 @@ class MainActivity : FlutterActivity() {
         ).also { channel ->
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
+
                     "showBlockScreen" -> {
                         val packageName = call.argument<String>("packageName") ?: ""
                         BlockActivity.start(this, packageName)

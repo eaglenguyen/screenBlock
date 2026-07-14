@@ -74,6 +74,21 @@ class IOSBlockingService implements BlockingService {
     return count;
   }
 
+  Future<int?> showSchedulePicker({
+    required String scheduleId,
+    required String blockingMode,
+  }) async {
+    await _channel.invokeMethod<void>('saveBlockingMode', {
+      'mode': blockingMode,
+    });
+    final count = await _channel.invokeMethod<int>('showSchedulePicker', {
+      'scheduleId': scheduleId,
+      'blockingMode': blockingMode,
+    });
+    debugPrint('🔵 iOS schedule picker returned: $count apps saved');
+    return count;
+  }
+
   Future<int?> showTimeLimitAppPicker({required String configId}) async {
     final count = await _channel.invokeMethod<int>('showTimeLimitAppPicker', {
       'configId': configId,
@@ -86,15 +101,18 @@ class IOSBlockingService implements BlockingService {
   @override
   Future<void> startMonitoring(
       String packageName,
-      int limitMinutes, [
-      String sessionType = 'manual',
-      String blockingMode = 'specific_apps',
-      ]) async {
+      int limitMinutes, {
+        String sessionType = 'manual',
+        String blockingMode = 'specific_apps',
+        String? scheduleId,
+      }) async {
     await _channel.invokeMethod('startBlocking', {
       'packageNames': [packageName],
       'blockingMode': blockingMode,
       'limitMinutes': limitMinutes,
       'sessionType': sessionType,
+      'scheduleId': ?scheduleId,
+
     });
   }
 

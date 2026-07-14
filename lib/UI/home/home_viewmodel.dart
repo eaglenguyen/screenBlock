@@ -487,8 +487,8 @@ class HomeViewModel extends _$HomeViewModel {
       await iosService.startMonitoring(
         'ios_apps',
         state.selectedMinutes,
-        'manual',
-        state.blockingType,
+        sessionType: 'manual',
+        blockingMode: state.blockingType,
       );
     } else {
       final apps = state.blockingType == AppConstants.blockingTypeSpecificApps
@@ -850,8 +850,8 @@ class HomeViewModel extends _$HomeViewModel {
       await iosService.startMonitoring(
         'ios_apps',
         state.pomodoroConfig.workMinutes,
-        'manual',
-        state.blockingType,
+        sessionType: 'manual',
+        blockingMode: state.blockingType,
       );
     } else {
       final apps = state.blockingType == AppConstants.blockingTypeSpecificApps

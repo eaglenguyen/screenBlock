@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -9,7 +10,9 @@ import '../../../../data/models/time_limit_config.dart';
 import '../../../../domain/platform/ios_blocking_service.dart';
 import '../../../../providers/blocking_service_provider.dart';
 import '../../../UI/home/widgets/app_list_sheet.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../featuress/timelimit/time_limit_viewmodel.dart';
+import '../../../paywall/feature_paywall_screen.dart';
 
 class TimeLimitBottomSheet extends ConsumerStatefulWidget {
   const TimeLimitBottomSheet({
@@ -30,6 +33,8 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
   late int _limitMinutes;
   late List<int> _selectedDays;
   late List<String> _packageNames;
+  late final String _configId;
+
 
   bool get isEditing => widget.existingConfig != null;
 
@@ -42,6 +47,9 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
     _limitMinutes = c?.limitMinutes ?? 30;
     _selectedDays = List.from(c?.days ?? [0, 1, 2, 3, 4]);
     _packageNames = List.from(c?.packageNames ?? []);
+
+    _configId = c?.id ?? const Uuid().v4();
+
   }
 
   @override
@@ -150,10 +158,8 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
           Row(
             children: [
               Text(
-                'Daily limit per app',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.textPrimary(context),
-                ),
+                'Daily limit',
+                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context)),
               ),
               const Spacer(),
               Text(
@@ -165,7 +171,18 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          // 👇 new — preset row
+          Row(
+            children: [
+              Expanded(child: _presetChip(context, label: '30m', minutes: 30)),
+              const SizedBox(width: 8),
+              Expanded(child: _presetChip(context, label: '1h', minutes: 60)),
+              const SizedBox(width: 8),
+              Expanded(child: _presetChip(context, label: '2h', minutes: 120)),
+            ],
+          ),
+          const SizedBox(height: 12),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: AppColors.gold(context),
@@ -191,6 +208,34 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _presetChip(BuildContext context, {required String label, required int minutes}) {
+    final isSelected = _limitMinutes == minutes;
+    return GestureDetector(
+      onTap: () => setState(() => _limitMinutes = minutes),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.gold(context) : AppColors.backgroundCard(context),
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: isSelected ? AppColors.gold(context) : AppColors.border(context),
+            width: isSelected ? 0 : 0.5,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: isSelected ? AppColors.goldText(context) : AppColors.textPrimary(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -225,11 +270,8 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
 
   Future<void> _showIOSAppPicker() async {
     try {
-      // 👇 uses a config id so iOS can store this picker's selection under
-      // its own key — for a brand-new config, generate a temp id up front
-      final configId = widget.existingConfig?.id ?? _tempIOSConfigId;
       final service = ref.read(blockingServiceProvider) as IOSBlockingService;
-      final count = await service.showTimeLimitAppPicker(configId: configId);
+      final count = await service.showTimeLimitAppPicker(configId: _configId);
 
       if (!mounted) return;
 
@@ -240,11 +282,6 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       debugPrint('❌ iOS time-limit app picker error: $e');
     }
   }
-
-  // 👇 stable temp id for a new config's iOS token storage, reused across
-  // picker taps until the config is actually saved with its real UUID
-  String get _tempIOSConfigId => widget.existingConfig?.id ?? _generatedTempId;
-  late final String _generatedTempId = DateTime.now().millisecondsSinceEpoch.toString();
 
   Widget _buildAppListRow(BuildContext context) {
     final count = _packageNames.length;
@@ -507,84 +544,24 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       return;
     }
 
-    final notifier = ref.read(timeLimitViewModelProvider.notifier);
-    for (final packageName in _packageNames) {
-      final conflict = notifier.findAppLimitConflict(
-        packageName: packageName,
-        selectedDays: _selectedDays,
-        excludeConfigId: widget.existingConfig?.id,
-      );
-      if (conflict != null) {
-        if (mounted) {
-          _showConflictDialog(conflict.name, conflict.source); // 👈 pass source too
-        }
-        return;
-      }
-    }
-
-    await notifier.saveConfig(
-      existingId: widget.existingConfig?.id,
+    await ref.read(timeLimitViewModelProvider.notifier).saveConfig(
+      existingId: _configId,
       name: _nameController.text.trim(),
       packageNames: _packageNames,
       limitMinutes: _limitMinutes,
       days: _selectedDays,
+      isNew: !isEditing,
     );
     if (mounted) Navigator.pop(context);
   }
 
-  void _showConflictDialog(String conflictName, String source) {
-    final sourceLabel = source == 'schedule' ? 'schedule' : 'time limit';
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.backgroundCard(context),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Conflict Found',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('⚠️', style: TextStyle(fontSize: 40)),
-            const SizedBox(height: 12),
-            Text(
-              'One of these apps is already claimed by the "$conflictName" $sourceLabel',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Please remove that app or choose different days.',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
-            ),
-          ],
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: const StadiumBorder(),
-              ),
-              child: const Text('Got it'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _onDelete() async {
     if (widget.existingConfig == null) return;
     await ref.read(timeLimitViewModelProvider.notifier).deleteConfig(widget.existingConfig!.id);
     if (mounted) Navigator.pop(context);
   }
+
+
 }
