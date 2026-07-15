@@ -49,6 +49,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
               } else {
                   NSLog("❌ Failed to get plugin registrar for AppIconStackPlugin")
               }
+            
+            if let triggerRegistrar = engine.registrar(forPlugin: "WeeklyDataTriggerPlugin") {
+                triggerRegistrar.register(
+                    WeeklyDataTriggerPlatformViewFactory(),
+                    withId: "com.eagle.pausenow/weekly_data_trigger_view"
+                )
+            } else {
+                NSLog("❌ Failed to get plugin registrar for WeeklyDataTriggerPlugin")
+            }
         }
 
 
@@ -257,7 +266,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
         }
 
-        let reportView = ScreenTimeReportView(id: UUID())
+        let reportView = ScreenTimeReportView(id: UUID(), targetDate: Date())
         let reportVC = UIHostingController(rootView: reportView)
         reportVC.modalPresentationStyle = .pageSheet
 
@@ -290,7 +299,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
-            
+        case "getWeeklyScreenTime":
+            let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            let dates = sharedDefaults?.array(forKey: "screenTimeWeekDates") as? [String] ?? []
+            var weekData: [String: Double] = [:]
+            for date in dates {
+                weekData[date] = sharedDefaults?.double(forKey: "screenTime_\(date)") ?? 0
+            }
+            result(weekData)
         case "showSchedulePicker":
             if let args = call.arguments as? [String: Any],
                let scheduleId = args["scheduleId"] as? String,

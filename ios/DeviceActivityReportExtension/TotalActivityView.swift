@@ -19,12 +19,12 @@ struct TotalActivityView: View {
                     Text("Total Screen Time Today")
                         .font(.system(size: 13))
                         .foregroundColor(Color(
-                            red: 112/255, green: 112/255, blue: 160/255
+                            red: 160/255, green: 160/255, blue: 160/255 // 👈 was navy-tinted 112/112/160
                         ))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
-                .background(Color(red: 30/255, green: 30/255, blue: 53/255))
+                .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255)) // 👈 was navy 30/30/53 — now a lighter gray than the 0x25 base
                 .cornerRadius(20)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -34,11 +34,11 @@ struct TotalActivityView: View {
                         Image(systemName: "chart.bar.xaxis")
                             .font(.system(size: 40))
                             .foregroundColor(Color(
-                                red: 112/255, green: 112/255, blue: 160/255
+                                red: 160/255, green: 160/255, blue: 160/255
                             ))
                         Text("No usage data yet")
                             .foregroundColor(Color(
-                                red: 112/255, green: 112/255, blue: 160/255
+                                red: 160/255, green: 160/255, blue: 160/255
                             ))
                             .font(.system(size: 15))
                     }
@@ -57,20 +57,20 @@ struct TotalActivityView: View {
                             if index < min(configuration.appUsages.count, 15) - 1 {
                                 Divider()
                                     .background(Color(
-                                        red: 42/255, green: 42/255, blue: 72/255
+                                        red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255 // 👈 was navy 42/42/72
                                     ))
                                     .padding(.leading, 64)
                             }
                         }
                     }
-                    .background(Color(red: 30/255, green: 30/255, blue: 53/255))
+                    .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255)) // 👈 was navy 30/30/53
                     .cornerRadius(20)
                     .padding(.horizontal, 16)
                 }
             }
             .padding(.bottom, 40)
         }
-        .background(Color(red: 22/255, green: 22/255, blue: 42/255))
+        .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
     }
 }
 
@@ -96,7 +96,6 @@ struct AppUsageRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // app icon
             appIconView
                 .frame(width: 40, height: 40)
 
@@ -110,16 +109,15 @@ struct AppUsageRow: View {
                     Text(app.formattedDuration)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(Color(
-                            red: 237/255, green: 184/255, blue: 42/255
+                            red: 237/255, green: 184/255, blue: 42/255 // gold — unchanged, no navy here
                         ))
                 }
 
-                // progress bar
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: 3)
                             .fill(Color(
-                                red: 42/255, green: 42/255, blue: 72/255
+                                red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255 // 👈 was navy 42/42/72
                             ))
                             .frame(height: 4)
                         RoundedRectangle(cornerRadius: 3)

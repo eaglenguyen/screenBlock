@@ -37,6 +37,7 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late List<Animation<double>> _cardAnims;
+  late Animation<double> _dividerAnim; // 👈 new
 
   static const int _cardCount = 3;
 
@@ -49,7 +50,7 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
     );
 
     _cardAnims = List.generate(_cardCount, (i) {
-      final start = (i * 0.3).clamp(0.0, 0.7); // 👈 stagger step per card
+      final start = (i * 0.3).clamp(0.0, 0.7);
       final end = (start + 0.45).clamp(0.0, 1.0);
       return CurvedAnimation(
         parent: _controller,
@@ -57,12 +58,16 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
       );
     });
 
-    // 👇 wait for the modal's own entrance animation to finish first
+    // 👇 new — divider animates between card 0's start and card 1's start,
+    // so it feels like it's bridging the two rather than appearing separately
+    _dividerAnim = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.15, 0.55, curve: Curves.easeOutCubic),
+    );
+
     Future.delayed(const Duration(milliseconds: 350), () {
       if (mounted) _controller.forward();
     });
-
-    _controller.forward();
   }
 
   @override
@@ -78,13 +83,29 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
       builder: (_, c) => Opacity(
         opacity: anim.value,
         child: Transform.translate(
-          offset: Offset(0, 30 * (1 - anim.value)), // 👈 slides up from below
+          offset: Offset(0, 30 * (1 - anim.value)),
           child: c,
         ),
       ),
       child: child,
     );
   }
+
+  // 👇 new — same fade+slide pattern, reused for the divider
+  Widget _animatedDivider(Widget child) {
+    return AnimatedBuilder(
+      animation: _dividerAnim,
+      builder: (_, c) => Opacity(
+        opacity: _dividerAnim.value,
+        child: Transform.translate(
+          offset: Offset(0, 30 * (1 - _dividerAnim.value)),
+          child: c,
+        ),
+      ),
+      child: child,
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +121,7 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // 👈 was crossAxisAlignment: CrossAxisAlignment.stretch
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
@@ -114,10 +135,12 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
             ),
           ),
           const SizedBox(height: 20),
+          // 👇 header — now right-aligned
           Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             child: Text(
               'Create a Session',
+              textAlign: TextAlign.right,
               style: AppTextStyles.headlineSmall.copyWith(
                 color: AppColors.textPrimary(context),
               ),
@@ -125,9 +148,10 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
           ),
           const SizedBox(height: 4),
           Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             child: Text(
               'Choose how you want to block apps',
+              textAlign: TextAlign.right,
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary(context),
               ),
@@ -135,7 +159,7 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
           ),
           const SizedBox(height: 20),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch, // 👈 was .start — makes all children match height
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: _animatedCard(
@@ -149,6 +173,15 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
                       widget.onScheduleTap();
                     },
                   ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              _animatedDivider( // 👈 wrap the divider
+                Container(
+                  width: 1,
+                  height: 88,
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  color: AppColors.gold(context).withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(width: 10),
@@ -181,8 +214,7 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
             ],
           ),
 
-          const SizedBox(height: 60), // 👈 add this — adjust the number to taste
-
+          const SizedBox(height: 60),
         ],
       ),
     );
@@ -199,20 +231,20 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 100, // 👈 explicit fixed height — guarantees identical size across all three cards
+        height: 100,
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
         decoration: BoxDecoration(
           color: AppColors.backgroundSubtle(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.gold(context).withValues(alpha: 0.8), // 👈 same for every card, no longer affected by Opacity
+            color: AppColors.gold(context).withValues(alpha: 0.8),
             width: 1,
           ),
         ),
         child: Opacity(
-          opacity: isDisabled ? 0.4 : 1.0, // 👈 only the inner content fades now, not the border/background
+          opacity: isDisabled ? 0.4 : 1.0,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // 👈 centers content within the fixed height
+            mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(

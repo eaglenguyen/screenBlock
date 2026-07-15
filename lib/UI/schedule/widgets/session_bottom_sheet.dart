@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -737,12 +738,93 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
     return 'Custom';
   }
 
+
+  Future<String?> _pickTimeIOS(BuildContext context, TimeOfDay initial) async {
+    DateTime tempPicked = DateTime(2024, 1, 1, initial.hour, initial.minute);
+    DateTime? confirmed;
+
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => Container(
+        height: 280,
+        color: AppColors.backgroundCard(context),
+        child: Column(
+          children: [
+            Container(
+              height: 44,
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: AppColors.border(context), width: 0.5),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: AppColors.textSecondary(context)),
+                    ),
+                  ),
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    onPressed: () {
+                      confirmed = tempPicked;
+                      Navigator.pop(ctx);
+                    },
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        color: AppColors.gold(context),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoTheme(
+                data: CupertinoThemeData(
+                  brightness: Brightness.dark, // adjust if you support light mode too
+                  textTheme: CupertinoTextThemeData(
+                    dateTimePickerTextStyle: TextStyle(
+                      color: AppColors.textPrimary(context),
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.time,
+                  initialDateTime: tempPicked,
+                  use24hFormat: false,
+                  onDateTimeChanged: (dt) => tempPicked = dt,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == null) return null;
+    return '${confirmed!.hour.toString().padLeft(2, '0')}:${confirmed!.minute.toString().padLeft(2, '0')}';
+  }
+
   Future<String?> _pickTime(BuildContext context, String current) async {
     final parts = current.split(':');
     final initial = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+
+    if (Platform.isIOS) {
+      return _pickTimeIOS(context, initial);
+    }
+
     final picked = await showTimePicker(
       context: context,
       initialTime: initial,
+      initialEntryMode: TimePickerEntryMode.input,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.dark(

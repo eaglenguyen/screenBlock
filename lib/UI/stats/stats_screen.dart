@@ -5,6 +5,7 @@ import 'package:pausenow/UI/stats/stats_viewmodel.dart';
 import 'package:pausenow/UI/stats/widgets/app_usage_list.dart';
 import 'package:pausenow/UI/stats/widgets/stats_header.dart';
 import 'package:pausenow/UI/stats/widgets/usage_gauge.dart';
+import 'package:pausenow/UI/stats/widgets/weekly_screen_time_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'dart:io';
@@ -52,51 +53,10 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   }
 
   Widget _buildScreenTimeCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border(context), width: 0.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySubtle(context),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.phone_iphone_rounded,
-                  color: AppColors.gold(context),
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // 👇 replaced the button+sheet with an inline embedded report
-          SizedBox(
-            height: 500, // 👈 adjust to taste
-            child: UiKitView(
-              viewType: 'com.eagle.pausenow/screen_time_report_view',
-            ),
-          ),
-        ],
+    return SizedBox(
+      height: 500,
+      child: UiKitView(
+        viewType: 'com.eagle.pausenow/screen_time_report_view',
       ),
     );
   }
@@ -113,8 +73,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           children: [
             UsageGauge(state: state),
             const SizedBox(height: 12),
-            if (Platform.isIOS)
-              _buildScreenTimeCard(context),
+            if (Platform.isIOS)...[
+              const WeeklyScreenTimeCard(), // 👈 new
+            ],
             if (!Platform.isIOS)
               AppUsageList(stats: state.appStats),
           ],

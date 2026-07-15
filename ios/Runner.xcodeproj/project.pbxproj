@@ -13,6 +13,8 @@
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74365F022FD9F0D8008C1DEC /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74E130AB2FC0E84E00D45757 /* DeviceActivity.framework */; };
+		7470385630080E7D00F67387 /* WeeklyDataTriggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7470385530080E7D00F67387 /* WeeklyDataTriggerView.swift */; };
+		7470385830080EB000F67387 /* WeeklyDataTriggerPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		74A56F1D2FF62CD500D0D988 /* ShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */; };
 		74A56F1E2FF62CD500D0D988 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A56F1B2FF62CD500D0D988 /* ShieldConfigurationExtension.swift */; };
@@ -132,6 +134,8 @@
 		5223F10B06D9E23DC294EE6A /* Pods-DeviceActivityReportExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DeviceActivityReportExtension.debug.xcconfig"; path = "Target Support Files/Pods-DeviceActivityReportExtension/Pods-DeviceActivityReportExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		5F25B40D2453561A9A23BFDD /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74365F012FD9F0D8008C1DEC /* pausenowMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = pausenowMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7470385530080E7D00F67387 /* WeeklyDataTriggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyDataTriggerView.swift; sourceTree = "<group>"; };
+		7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyDataTriggerPlatformView.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionExtension.swift; sourceTree = "<group>"; };
@@ -395,6 +399,8 @@
 				74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */,
 				74EC30353006BF9B0024CD2F /* AppIconStackView.swift */,
 				74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */,
+				7470385530080E7D00F67387 /* WeeklyDataTriggerView.swift */,
+				7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -909,11 +915,13 @@
 				74EC2F6330031AE10024CD2F /* ScreenTimeReportPlatformView.swift in Sources */,
 				74EC30383006C12D0024CD2F /* AppIconStackPlatformView.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				7470385830080EB000F67387 /* WeeklyDataTriggerPlatformView.swift in Sources */,
 				74EC30363006BF9B0024CD2F /* AppIconStackView.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				74FD88B42FEC78BE002FD59F /* ScreenTimeReportView.swift in Sources */,
 				74E130A42FC0E7BA00D45757 /* FamilyActivityPickerViewController.swift in Sources */,
 				74E130A52FC0E7BA00D45757 /* IOSBlockingService.swift in Sources */,
+				7470385630080E7D00F67387 /* WeeklyDataTriggerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
