@@ -60,14 +60,13 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   double getDailyBlockGoal() {
-    return _box.get('dailyBlockGoal', defaultValue: 1.0) as double;
+    return _box.get(HiveBoxNames.blockingGoalHours, defaultValue: 1.0) as double; // 👈 was 'dailyBlockGoal'
   }
 
   @override
   Future<void> saveDailyBlockGoal(double hours) async {
-    await _box.put('dailyBlockGoal', hours);
+    await _box.put(HiveBoxNames.blockingGoalHours, hours); // 👈 was 'dailyBlockGoal'
   }
-
   // ── Review prompt tracking ───────────────────────
   @override
   DateTime? getInstallDate() {

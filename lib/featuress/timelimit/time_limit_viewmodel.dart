@@ -85,14 +85,10 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
 
 
   Future<void> _unblockIfUnclaimed(List<String> packageNames) async {
+    // Android only — iOS unshielding happens via unshieldConfigApps in deleteConfig directly
     for (final packageName in packageNames) {
-        if (Platform.isAndroid) {
-          await const MethodChannel('com.eagle.pausenow/accessibility')
-              .invokeMethod('unblockApp', {'packageName': packageName});
-        } else if (Platform.isIOS) {
-          await const MethodChannel('com.eagle.pausenow/ios_blocking')
-              .invokeMethod('unshieldApp', {/* need token, see note below */});
-        }
+      await const MethodChannel('com.eagle.pausenow/accessibility')
+          .invokeMethod('unblockApp', {'packageName': packageName});
     }
   }
 

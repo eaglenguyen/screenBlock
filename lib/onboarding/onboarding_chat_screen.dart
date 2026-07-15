@@ -457,7 +457,7 @@ class _OnboardingChatScreenState
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  child: const Text('continue'),
+                  child: const Text('Confirm'),
                 ),
               ),
             ],

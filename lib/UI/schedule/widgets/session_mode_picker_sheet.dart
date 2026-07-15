@@ -135,7 +135,7 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
           ),
           const SizedBox(height: 20),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch, // 👈 was .start — makes all children match height
             children: [
               Expanded(
                 child: _animatedCard(
@@ -196,20 +196,23 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
       }) {
     final isDisabled = onTap == null;
 
-    return Opacity(
-      opacity: isDisabled ? 0.4 : 1.0,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundSubtle(context),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.gold(context).withValues(alpha: 0.8), // 👈 was AppColors.border(context)
-              width: 1, // 👈 slightly thicker than the default 0.5, to make the gold actually read
-            ),          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 100, // 👈 explicit fixed height — guarantees identical size across all three cards
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSubtle(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.gold(context).withValues(alpha: 0.8), // 👈 same for every card, no longer affected by Opacity
+            width: 1,
+          ),
+        ),
+        child: Opacity(
+          opacity: isDisabled ? 0.4 : 1.0, // 👈 only the inner content fades now, not the border/background
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, // 👈 centers content within the fixed height
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(

@@ -17,8 +17,6 @@ abstract class SettingsRepository {
   // ── Screen time / block goals ────────────────────
   double getDailyScreenTimeGoal();
   Future<void> saveDailyScreenTimeGoal(double hours);
-  double getDailyBlockGoal();
-  Future<void> saveDailyBlockGoal(double hours);
 
   // ── Review prompt tracking ───────────────────────
   DateTime? getInstallDate();

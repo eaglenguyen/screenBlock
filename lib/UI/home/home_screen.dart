@@ -104,7 +104,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               child: Column(
                 children: [
                   // ── Schedule banner ─────────────────────────
-                  if (state.isScheduleActive)
+                  if (state.isScheduleActive || state.isAppLimitActiveToday) // 👈 was just state.isScheduleActive
                     Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.symmetric(

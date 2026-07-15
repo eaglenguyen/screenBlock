@@ -640,6 +640,8 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
     );
   }
 }
+
+
 class OnboardingScreenTimeGoalScreen extends StatefulWidget {
   final Function(int hours) onSelected;
 
@@ -659,7 +661,7 @@ class _OnboardingScreenTimeGoalScreenState
 
   final List<Map<String, dynamic>> _options = [
     {'hours': 1, 'label': '1 hour blocked', 'sub': 'A solid start', 'emoji': '🌱'},
-    {'hours': 2, 'label': '2 hours blocked', 'sub': 'Building momentum', 'emoji': '📈'},
+    {'hours': 2, 'label': '2 hours blocked', 'sub': 'Building momentum', 'emoji': '📈', 'recommended': true}, // 👈 new
     {'hours': 3, 'label': '3 hours blocked', 'sub': 'Serious focus', 'emoji': '🎯'},
     {'hours': 4, 'label': '4 hours blocked', 'sub': 'Deep work mode', 'emoji': '⚡'},
     {'hours': 5, 'label': '5 hours blocked', 'sub': 'Maximum discipline', 'emoji': '🏆'},
@@ -773,29 +775,50 @@ class _OnboardingScreenTimeGoalScreenState
                             ),
                             child: Row(
                               children: [
-                                Text(opt['emoji'],
-                                    style: const TextStyle(fontSize: 24)),
+                                Text(opt['emoji'], style: const TextStyle(fontSize: 24)),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        opt['label'],
-                                        style: GoogleFonts.poppins(
-                                          color: isSelected
-                                              ? const Color(0xFFEDB82A)
-                                              : Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            opt['label'],
+                                            style: GoogleFonts.poppins(
+                                              color: isSelected ? const Color(0xFFEDB82A) : Colors.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          if (opt['recommended'] == true) ...[ // 👈 new
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                                                borderRadius: BorderRadius.circular(20),
+                                                border: Border.all(
+                                                  color: const Color(0xFFEDB82A).withValues(alpha: 0.4),
+                                                  width: 0.5,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Recommended',
+                                                style: GoogleFonts.poppins(
+                                                  color: const Color(0xFFEDB82A),
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                       Text(
                                         opt['sub'],
                                         style: GoogleFonts.poppins(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.4),
+                                          color: Colors.white.withValues(alpha: 0.4),
                                           fontSize: 12,
                                         ),
                                       ),

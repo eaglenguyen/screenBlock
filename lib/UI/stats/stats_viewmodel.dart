@@ -4,9 +4,7 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_usage/app_usage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../core/constants/hivebox_names.dart';
 import '../../providers/repository_providers.dart';
 import 'stats_state.dart';
 

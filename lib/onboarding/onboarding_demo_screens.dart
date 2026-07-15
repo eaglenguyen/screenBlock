@@ -870,7 +870,7 @@ class _DemoScheduleTabScreen extends StatelessWidget {
           ),
 
           const Spacer(),
-          _DemoButton(label: 'Got it 👍', onTap: onNext),
+          _DemoButton(label: 'Continue', onTap: onNext),
         ],
       ),
     );
@@ -919,7 +919,7 @@ class _DemoBlockingScreen extends StatelessWidget {
           ),
 
           const Spacer(),
-          _DemoButton(label: 'Continue', onTap: onNext),
+          _DemoButton(label: 'Got it 👍', onTap: onNext),
         ],
       ),
     );

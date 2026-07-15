@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
+import 'package:pausenow/onboarding/widgets/mascot_character.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../core/analytics/analytics_events.dart';
 import '../core/analytics/analytics_service.dart';
@@ -400,19 +401,6 @@ class _OnboardingWelcomeFlowState
           level: _commitmentLevel,
           onNext: _nextStep,
         );
-      case OnboardingSteps.snapshot:
-        return OnboardingSnapshotScreen(
-          key: const ValueKey('snapshot'),
-          userName: _userName,
-          age: _userAge,
-          currentDailyHours: _userHours, // 👈 new
-          screenTimeGoalHours: Hive.box(HiveBoxNames.settings)
-              .get('dailyScreenTimeGoal', defaultValue: _userHours) as double,
-          selectedGoals: _selectedGoals,
-          futureVision: _selectedFuture,
-          isHighCommitment: _isHighCommitment,
-          onNext: _nextStep,
-        );
       case OnboardingSteps.screenTimeGoal:
         return OnboardingScreenTimeGoalScreen(
           key: const ValueKey('screenTimeGoal'),
@@ -426,6 +414,19 @@ class _OnboardingWelcomeFlowState
         return OnboardingLoadingPlanScreen(
           key: const ValueKey('loadingPlan'),
           onComplete: _nextStep,
+        );
+      case OnboardingSteps.snapshot:
+        return OnboardingSnapshotScreen(
+          key: const ValueKey('snapshot'),
+          userName: _userName,
+          age: _userAge,
+          currentDailyHours: _userHours, // 👈 new
+          screenTimeGoalHours: Hive.box(HiveBoxNames.settings)
+              .get('dailyScreenTimeGoal', defaultValue: _userHours) as double,
+          selectedGoals: _selectedGoals,
+          futureVision: _selectedFuture,
+          isHighCommitment: _isHighCommitment,
+          onNext: _nextStep,
         );
       case OnboardingSteps.reflection:
         return OnboardingProductivityScreen(
@@ -483,6 +484,8 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
       duration: const Duration(milliseconds: 700),
     );
     _slideAnim = CurvedAnimation(parent: _slideCtrl, curve: Curves.easeInOutCubic);
+
+
   }
 
   @override
@@ -501,6 +504,7 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
         _slideCtrl.value = 0;
       });
     } else {
+      _slideCtrl.stop();
       widget.onGetStarted();
       return;
     }
@@ -632,8 +636,16 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
                     ),
 
                     const Spacer(flex: 3),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500), // 👈 bumped up from 300 for a more visible, less abrupt cross-fade
+                    switchInCurve: const Interval(0.5, 1.0, curve: Curves.easeIn), // 👈 new content only starts fading in after old one's mostly gone
+                    switchOutCurve: const Interval(0.0, 0.5, curve: Curves.easeOut), // 👈 old content fades out first
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
                       child: isLast
                           ? SizedBox(
                         key: const ValueKey('btn'),
@@ -685,7 +697,8 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
                         ),
                       ),
                     ),
-                  ],
+                        ),
+                ]
                 ),
               ),
             ),

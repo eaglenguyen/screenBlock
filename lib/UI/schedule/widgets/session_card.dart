@@ -83,13 +83,15 @@ class SessionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
+
                 AppIconStack(
                   packageNames: _relevantApps,
                   iosStorageKey: 'schedule_${schedule.id}_${schedule.blockingType}',
                   refreshToken: schedule.updatedAt.millisecondsSinceEpoch,
-                  size: 36,
+                  size: 40,
                 ),
-                const SizedBox(width: 12),
+
+                const SizedBox(width: 10),
 
                 Expanded(
                   child: Column(

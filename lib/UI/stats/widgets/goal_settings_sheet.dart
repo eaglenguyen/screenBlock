@@ -114,7 +114,7 @@ class _GoalMenuSheet extends StatelessWidget {
         divisions: 15,
         accentColor: const Color(0xFF4ECDC4),
         textColor: const Color(0xFF0A2A29),
-        hiveKey: 'dailyBlockGoal',
+        hiveKey: HiveBoxNames.blockingGoalHours, // 👈 was the raw string 'dailyBlockGoal'
         ref: ref,
       ),
     );

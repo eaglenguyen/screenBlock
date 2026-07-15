@@ -33,6 +33,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     _FeatureItem(label: 'Unlimited schedules', free: false, pro: true),
     _FeatureItem(label: 'Unlimited apps per session', free: false, pro: true),
     _FeatureItem(label: '\'Block All Apps\' Mode', free: false, pro: true),
+    _FeatureItem(label: 'Time & Open Limits', free: false, pro: true),
     _FeatureItem(label: 'Pomodoro Mode 🍅', free: false, pro: true),
   ];
 
@@ -353,19 +354,24 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   Widget _buildComparisonTable() {
     return Column(
       children: [
-        // rows
-        ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFEDB82A).withValues(alpha: 0.2), // 👈 subtle gold border around the whole table
+              width: 1,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias, // 👈 replaces ClipRRect — clips children to the rounded border
           child: Column(
             children: [
-              // 👇 header row inside the chart
+              // header row — unchanged
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 color: const Color(0xFF141428),
                 child: Row(
                   children: [
                     Expanded(
-                      // Unlock these Features text
                       child: Text(
                         '',
                         style: GoogleFonts.poppins(
@@ -409,7 +415,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                 ),
               ),
 
-              // feature rows
+              // feature rows — unchanged
               ...List.generate(_features.length, (i) {
                 final f = _features[i];
                 final isLast = i == _features.length - 1;

@@ -524,10 +524,8 @@ class _OnboardingSnapshotScreenState
                               4,
                               Row(
                                 children: [
-                                  const Text('🎨', style: TextStyle(fontSize: 13)),
-                                  const SizedBox(width: 7),
                                   Text(
-                                    'Choose your look',
+                                    'Choose your theme',
                                     style: GoogleFonts.poppins(
                                       color: AppColors.textSecondary(context),
                                       fontSize: 12.5,
