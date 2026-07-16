@@ -48,10 +48,8 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
     try {
       final result = await const MethodChannel('com.eagle.pausenow/ios_blocking')
           .invokeMethod<Map>('getWeeklyScreenTime');
-      final parsed = result?.map((k, v) => MapEntry(k as String, (v as num).toDouble())) ?? {};
-      debugPrint('📊 weekly data received: $parsed'); // 👈 add this
       setState(() {
-        _weekData = parsed;
+        _weekData = result?.map((k, v) => MapEntry(k as String, (v as num).toDouble())) ?? {};
         _isLoading = false;
       });
     } catch (e) {
@@ -97,157 +95,146 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
     const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     return Stack(
-        children: [
-    Container(
-    padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-    color: AppColors.backgroundCard(context),
-    borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('This Week', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textPrimary(context))),
-          const SizedBox(height: 16),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundCard(context),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('This Week', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textPrimary(context))),
+              const SizedBox(height: 16),
 
-          // day chips
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (i) {
-              final day = _weekDays[i];
-              final isSelected = _isSameDay(day, _selectedDay);
-              final isFuture = _isFuture(day);
+              // day chips
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(7, (i) {
+                  final day = _weekDays[i];
+                  final isSelected = _isSameDay(day, _selectedDay);
+                  final isFuture = _isFuture(day);
 
-              return GestureDetector(
-                onTap: isFuture
-                    ? null
-                    : () => setState(() => _selectedDay = day),
-                child: Column(
-                  children: [
-                    Text(
-                      dayLabels[i],
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected
-                            ? AppColors.gold(context)
-                            : AppColors.textSecondary(context).withValues(alpha: isFuture ? 0.3 : 0.7),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isSelected
-                            ? AppColors.gold(context)
-                            : AppColors.backgroundSubtle(context),
-                        border: isFuture
-                            ? Border.all(color: AppColors.border(context), width: 1)
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${day.day}',
+                  return GestureDetector(
+                    onTap: isFuture
+                        ? null
+                        : () => setState(() => _selectedDay = day),
+                    child: Column(
+                      children: [
+                        Text(
+                          dayLabels[i],
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                            fontSize: 10,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                             color: isSelected
-                                ? AppColors.goldText(context)
+                                ? AppColors.gold(context)
                                 : AppColors.textSecondary(context).withValues(alpha: isFuture ? 0.3 : 0.7),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 6),
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isSelected
+                                ? AppColors.gold(context)
+                                : AppColors.backgroundSubtle(context),
+                            border: isFuture
+                                ? Border.all(color: AppColors.border(context), width: 1)
+                                : null,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${day.day}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                                color: isSelected
+                                    ? AppColors.goldText(context)
+                                    : AppColors.textSecondary(context).withValues(alpha: isFuture ? 0.3 : 0.7),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+
+              // bar chart
+              // SizedBox(
+              //   height: 80,
+              //   child: Row(
+              //     crossAxisAlignment: CrossAxisAlignment.end,
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     children: List.generate(7, (i) {
+              //       final day = _weekDays[i];
+              //       final isSelected = _isSameDay(day, _selectedDay);
+              //       final isFuture = _isFuture(day);
+              //       final seconds = _secondsFor(day);
+              //       final heightFraction = maxSeconds > 0 ? (seconds / maxSeconds).clamp(0.05, 1.0) : 0.05;
+              //
+              //       return AnimatedContainer(
+              //         duration: const Duration(milliseconds: 200),
+              //         width: 20,
+              //         height: 80 * (isFuture ? 0.05 : heightFraction),
+              //         decoration: BoxDecoration(
+              //           color: isSelected
+              //               ? AppColors.gold(context)
+              //               : AppColors.backgroundSubtle(context),
+              //           borderRadius: BorderRadius.circular(4),
+              //         ),
+              //       );
+              //     }),
+              //   ),
+              // ),
+
+              const SizedBox(height: 20),
+              Divider(color: AppColors.border(context), height: 1),
+              const SizedBox(height: 20),
+
+              // selected day total
+              Center(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatSelectedDayLabel(),
+                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
                     ),
                   ],
                 ),
-              );
-            }),
-          ),
+              ),
 
-          const SizedBox(height: 20),
-
-          // bar chart
-          SizedBox(
-            height: 80,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(7, (i) {
-                final day = _weekDays[i];
-                final isSelected = _isSameDay(day, _selectedDay);
-                final isFuture = _isFuture(day);
-                final seconds = _secondsFor(day);
-                final heightFraction = maxSeconds > 0 ? (seconds / maxSeconds).clamp(0.05, 1.0) : 0.05;
-
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 20,
-                  height: 80 * (isFuture ? 0.05 : heightFraction),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.gold(context)
-                        : AppColors.backgroundSubtle(context),
-                    borderRadius: BorderRadius.circular(4),
+              const SizedBox(height: 12),
+              Center(
+                child: GestureDetector(
+                  onTap: () => _openDetailForSelectedDay(context),
+                  child: Text(
+                    'See screentime breakdown →',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.gold(context),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                );
-              }),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-          Divider(color: AppColors.border(context), height: 1),
-          const SizedBox(height: 20),
-
-          // selected day total
-          Center(
-            child: Column(
-              children: [
-                Text(
-                  _formatDuration(_secondsFor(_selectedDay)),
-                  style: AppTextStyles.displayMedium.copyWith(
-                    color: AppColors.textPrimary(context),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 38,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatSelectedDayLabel(),
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-          Center(
-            child: GestureDetector(
-              onTap: () => _openDetailForSelectedDay(context),
-              child: Text(
-                'See app breakdown →',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.gold(context),
-                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    ),
-          const SizedBox(
-            width: 1,
-            height: 1,
-            child: UiKitView(
-              viewType: 'com.eagle.pausenow/weekly_data_trigger_view',
-            ),
+        ),
+        const SizedBox(
+          width: 1,
+          height: 1,
+          child: UiKitView(
+            viewType: 'com.eagle.pausenow/weekly_data_trigger_view',
           ),
-        ],
+        ),
+      ],
     );
   }
-
 
   String _formatSelectedDayLabel() {
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];

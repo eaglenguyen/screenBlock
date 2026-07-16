@@ -3,9 +3,12 @@ import DeviceActivity
 import ManagedSettings
 import FamilyControls
 
-
 struct TotalActivityView: View {
     let configuration: ActivityConfiguration
+
+    private var isEmpty: Bool {
+        configuration.totalDuration == 0 && configuration.appUsages.isEmpty
+    }
 
     var body: some View {
         ScrollView {
@@ -13,18 +16,18 @@ struct TotalActivityView: View {
 
                 // ── Total header card ─────────────────────
                 VStack(spacing: 6) {
-                    Text(configuration.formattedTotal)
-                        .font(.system(size: 42, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("Total Screen Time Today")
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(
-                            red: 160/255, green: 160/255, blue: 160/255 // 👈 was navy-tinted 112/112/160
-                        ))
+                    Text(isEmpty ? "Try again later" : configuration.formattedTotal)
+                        .font(.system(size: isEmpty ? 24 : 42, weight: .bold))
+                        .foregroundColor(isEmpty ? Color(red: 160/255, green: 160/255, blue: 160/255) : .white)
+                    if !isEmpty {
+                        Text("Total Screen Time Today")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
-                .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255)) // 👈 was navy 30/30/53 — now a lighter gray than the 0x25 base
+                .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255))
                 .cornerRadius(20)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -33,18 +36,13 @@ struct TotalActivityView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "chart.bar.xaxis")
                             .font(.system(size: 40))
-                            .foregroundColor(Color(
-                                red: 160/255, green: 160/255, blue: 160/255
-                            ))
+                            .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
                         Text("No usage data yet")
-                            .foregroundColor(Color(
-                                red: 160/255, green: 160/255, blue: 160/255
-                            ))
+                            .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
                             .font(.system(size: 15))
                     }
                     .padding(.top, 60)
                 } else {
-                    // ── App list card ─────────────────────
                     VStack(spacing: 0) {
                         ForEach(
                             Array(configuration.appUsages.prefix(15).enumerated()),
@@ -56,14 +54,12 @@ struct TotalActivityView: View {
                             )
                             if index < min(configuration.appUsages.count, 15) - 1 {
                                 Divider()
-                                    .background(Color(
-                                        red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255 // 👈 was navy 42/42/72
-                                    ))
+                                    .background(Color(red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255))
                                     .padding(.leading, 64)
                             }
                         }
                     }
-                    .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255)) // 👈 was navy 30/30/53
+                    .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255))
                     .cornerRadius(20)
                     .padding(.horizontal, 16)
                 }
@@ -73,6 +69,7 @@ struct TotalActivityView: View {
         .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
     }
 }
+
 
 struct AppUsageRow: View {
     let app: AppUsageData

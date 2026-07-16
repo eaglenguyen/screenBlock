@@ -1,12 +1,3 @@
-//
-//  ScreenTimeReportPlatformView.swift
-//  Runner
-//
-//  Created by Egor on 7/11/26.
-//
-
-import Foundation
-import Flutter
 import UIKit
 import SwiftUI
 

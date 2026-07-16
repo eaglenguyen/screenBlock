@@ -5,14 +5,13 @@ import DeviceActivity
 @available(iOS 16.0, *)
 struct ScreenTimeReportView: View {
     let id: UUID
-    let targetDate: Date // 👈 new — which day this report should show
+    let targetDate: Date
 
-    @State private var reportId = UUID() // 👈 internal state to force reload
+    @State private var reportId = UUID() // 👈 restored
 
     private var filter: DeviceActivityFilter {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: targetDate)
-        // 👇 if targetDate is today, end at "now"; otherwise end at the day's midnight boundary
         let isToday = calendar.isDateInToday(targetDate)
         let endOfInterval = isToday ? Date() : calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
@@ -24,15 +23,14 @@ struct ScreenTimeReportView: View {
             devices: .init([.iPhone])
         )
     }
+
     var body: some View {
-            DeviceActivityReport(.init("Total Activity"), filter: filter)
-                .id(reportId) // 👈 use internal state id
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .onAppear {
-                    // 👇 force fresh reload every time view appears
-                    reportId = UUID()
-                }
-        }
-        .background(Color(red: 22/255, green: 22/255, blue: 42/255))
+        DeviceActivityReport(.init("Total Activity"), filter: filter)
+            .id(reportId)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onAppear {
+                reportId = UUID()
+            }
+            .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
     }
 }

@@ -12,7 +12,7 @@ struct AppUsageData: Identifiable {
     let id = UUID()
     let name: String
     let duration: TimeInterval
-    let token: ApplicationToken? // 👈 add token for real icon
+    let token: ApplicationToken?
 
     var formattedDuration: String {
         let hours = Int(duration) / 3600
@@ -48,21 +48,14 @@ struct TotalActivityReport: DeviceActivityReportScene {
     ) async -> ActivityConfiguration {
         var appUsages: [AppUsageData] = []
         var totalDuration: TimeInterval = 0
-        var perDayTotals: [String: TimeInterval] = [:] // 👈 new — date string → total seconds
-
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withFullDate]
 
         for await activityData in data {
             for await segment in activityData.activitySegments {
-                var segmentTotal: TimeInterval = 0
-
                 for await category in segment.categories {
                     for await app in category.applications {
                         let duration = app.totalActivityDuration
                         guard duration > 0 else { continue }
                         totalDuration += duration
-                        segmentTotal += duration
                         appUsages.append(AppUsageData(
                             name: app.application.localizedDisplayName ?? "Unknown",
                             duration: duration,
@@ -70,24 +63,10 @@ struct TotalActivityReport: DeviceActivityReportScene {
                         ))
                     }
                 }
-
-                // 👇 key each day's total by its actual date
-                let dayKey = dateFormatter.string(from: segment.dateInterval.start)
-                perDayTotals[dayKey, default: 0] += segmentTotal
             }
         }
 
         appUsages.sort { $0.duration > $1.duration }
-
-        // 👇 write per-day totals out, one key per date — Flutter can read all 7
-        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
-        for (day, total) in perDayTotals {
-            sharedDefaults?.set(total, forKey: "screenTime_\(day)")
-        }
-        sharedDefaults?.set(Array(perDayTotals.keys), forKey: "screenTimeWeekDates")
-        sharedDefaults?.synchronize()
-
-        NSLog("📊 wrote \(perDayTotals.count) daily totals for the week")
 
         return ActivityConfiguration(
             appUsages: appUsages,
