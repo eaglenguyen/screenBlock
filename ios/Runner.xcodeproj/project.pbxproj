@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -33,6 +33,9 @@
 		74EC2F6330031AE10024CD2F /* ScreenTimeReportPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */; };
 		74EC30363006BF9B0024CD2F /* AppIconStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC30353006BF9B0024CD2F /* AppIconStackView.swift */; };
 		74EC30383006C12D0024CD2F /* AppIconStackPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */; };
+		74EF0487300916F500157C22 /* CompactScreenTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF0486300916F500157C22 /* CompactScreenTimeView.swift */; };
+		74EF04893009173B00157C22 /* CompactScreenTimePlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF04883009173B00157C22 /* CompactScreenTimePlatformView.swift */; };
+		74EF04DA3009212B00157C22 /* CompactActivityDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF04D630091EFD00157C22 /* CompactActivityDisplay.swift */; };
 		74FD88B42FEC78BE002FD59F /* ScreenTimeReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74FD88B32FEC78B2002FD59F /* ScreenTimeReportView.swift */; };
 		7A369D4117568EF01D0A08E8 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C151D7586AD0E237EC90142 /* Pods_Runner.framework */; };
 		88ED09AE44EEC3942DE0FC97 /* Pods_ShieldConfigurationExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E756916DFDC830333D80625 /* Pods_ShieldConfigurationExtension.framework */; };
@@ -157,6 +160,9 @@
 		74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeReportPlatformView.swift; sourceTree = "<group>"; };
 		74EC30353006BF9B0024CD2F /* AppIconStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconStackView.swift; sourceTree = "<group>"; };
 		74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconStackPlatformView.swift; sourceTree = "<group>"; };
+		74EF0486300916F500157C22 /* CompactScreenTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactScreenTimeView.swift; sourceTree = "<group>"; };
+		74EF04883009173B00157C22 /* CompactScreenTimePlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactScreenTimePlatformView.swift; sourceTree = "<group>"; };
+		74EF04D630091EFD00157C22 /* CompactActivityDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactActivityDisplay.swift; sourceTree = "<group>"; };
 		74FD88B32FEC78B2002FD59F /* ScreenTimeReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeReportView.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7E756916DFDC830333D80625 /* Pods_ShieldConfigurationExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShieldConfigurationExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -401,6 +407,9 @@
 				74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */,
 				7470385530080E7D00F67387 /* WeeklyDataTriggerView.swift */,
 				7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */,
+				74EF0486300916F500157C22 /* CompactScreenTimeView.swift */,
+				74EF04883009173B00157C22 /* CompactScreenTimePlatformView.swift */,
+				74EF04D630091EFD00157C22 /* CompactActivityDisplay.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -905,6 +914,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74EF04DA3009212B00157C22 /* CompactActivityDisplay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -913,8 +923,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				74EC2F6330031AE10024CD2F /* ScreenTimeReportPlatformView.swift in Sources */,
+				74EF0487300916F500157C22 /* CompactScreenTimeView.swift in Sources */,
 				74EC30383006C12D0024CD2F /* AppIconStackPlatformView.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				74EF04893009173B00157C22 /* CompactScreenTimePlatformView.swift in Sources */,
 				7470385830080EB000F67387 /* WeeklyDataTriggerPlatformView.swift in Sources */,
 				74EC30363006BF9B0024CD2F /* AppIconStackView.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,

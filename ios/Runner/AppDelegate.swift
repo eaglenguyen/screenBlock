@@ -58,6 +58,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             } else {
                 NSLog("❌ Failed to get plugin registrar for WeeklyDataTriggerPlugin")
             }
+            
+            if let compactRegistrar = engine.registrar(forPlugin: "CompactScreenTimePlugin") {
+                compactRegistrar.register(
+                    CompactScreenTimePlatformViewFactory(),
+                    withId: "com.eagle.pausenow/compact_screen_time_view"
+                )
+            } else {
+                NSLog("❌ Failed to get plugin registrar for CompactScreenTimePlugin")
+            }
         }
 
 

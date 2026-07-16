@@ -249,4 +249,6 @@ class MainActivity : FlutterActivity() {
             it.setString(enabledServices)
         }.any { it.equals(expectedServiceName, ignoreCase = true) }
     }
+
+
 }

@@ -71,17 +71,6 @@ final List<SchedulePreset> schedulePresets = [
     tip: 'Put the phone down and enjoy your meal. Real connections happen in person.',
   ),
   SchedulePreset(
-    name: 'Weekend Fun',
-    emoji: '🎉',
-    description: 'Enjoy weekends without doom scrolling',
-    startTime: '10:00',
-    endTime: '18:00',
-    days: [5, 6], // Sat–Sun
-    blockingType: AppConstants.blockingTypeSpecificApps,
-    accentColor: const Color(0xFFEDB82A),
-    tip: 'Weekends are for living, not scrolling. Block social media and actually enjoy your time off.',
-  ),
-  SchedulePreset(
     name: 'Refocus',
     emoji: '🎯',
     description: 'Deep work — no exceptions',

@@ -15,7 +15,6 @@ import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
-import '../../data/models/time_limit_config.dart';
 import '../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../featuress/timelimit/widget/time_limit_bottom_sheet.dart';
 import '../../featuress/timelimit/widget/time_limit_card.dart';
@@ -263,7 +262,7 @@ class ScheduleScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Text('Scheduled Sessions', style: AppTextStyles.headlineMedium),
+          Text('Schedules', style: AppTextStyles.headlineMedium),
           const Spacer(),
           GestureDetector(
             onTap: isLocked ? null : () => _openCreateSession(context, ref), // 👈

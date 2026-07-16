@@ -288,7 +288,7 @@ class _TimerCardState extends State<TimerCard>
               size: 30,
             ),
             label: Text(
-              isDisabled ? 'Schedule is Active' : 'Block Now',
+              isDisabled ? '' : 'Block Now',
               style: const TextStyle(fontSize: 19),
             ),
             style: ElevatedButton.styleFrom(

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../providers/premium_provider.dart';
+import '../../../paywall/feature_paywall_screen.dart';
 
-class SessionModePickerSheet extends StatefulWidget {
+class SessionModePickerSheet extends ConsumerStatefulWidget { // 👈 needs to become Consumer to read premium status
   final VoidCallback onScheduleTap;
   final VoidCallback onTimeLimitTap;
 
@@ -30,14 +33,14 @@ class SessionModePickerSheet extends StatefulWidget {
   }
 
   @override
-  State<SessionModePickerSheet> createState() => _SessionModePickerSheetState();
+  ConsumerState<SessionModePickerSheet> createState() => _SessionModePickerSheetState();
 }
 
-class _SessionModePickerSheetState extends State<SessionModePickerSheet>
+class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late List<Animation<double>> _cardAnims;
-  late Animation<double> _dividerAnim; // 👈 new
+  late Animation<double> _dividerAnim;
 
   static const int _cardCount = 3;
 
@@ -58,8 +61,6 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
       );
     });
 
-    // 👇 new — divider animates between card 0's start and card 1's start,
-    // so it feels like it's bridging the two rather than appearing separately
     _dividerAnim = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.15, 0.55, curve: Curves.easeOutCubic),
@@ -91,7 +92,6 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
     );
   }
 
-  // 👇 new — same fade+slide pattern, reused for the divider
   Widget _animatedDivider(Widget child) {
     return AnimatedBuilder(
       animation: _dividerAnim,
@@ -106,9 +106,10 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final isPremium = ref.watch(isPremiumProvider); // 👈 new
+
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 32,
@@ -135,12 +136,10 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
             ),
           ),
           const SizedBox(height: 20),
-          // 👇 header — now right-aligned
           Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: Text(
               'Create a Session',
-              textAlign: TextAlign.right,
               style: AppTextStyles.headlineSmall.copyWith(
                 color: AppColors.textPrimary(context),
               ),
@@ -148,10 +147,9 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
           ),
           const SizedBox(height: 4),
           Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: Text(
               'Choose how you want to block apps',
-              textAlign: TextAlign.right,
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary(context),
               ),
@@ -175,16 +173,16 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              _animatedDivider( // 👈 wrap the divider
+              const SizedBox(width: 8),
+              _animatedDivider(
                 Container(
                   width: 1,
                   height: 88,
-                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   color: AppColors.gold(context).withValues(alpha: 0.5),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: _animatedCard(
                   1,
@@ -192,14 +190,26 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
                     context,
                     title: 'Time Limit',
                     subtitle: 'Daily usage cap',
-                    onTap: () {
+                    isLocked: !isPremium, // 👈 new
+                    onTap: isPremium
+                        ? () {
                       Navigator.pop(context);
                       widget.onTimeLimitTap();
+                    }
+                        : () {
+                      Navigator.pop(context);
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        useRootNavigator: true,
+                        builder: (_) => const FeaturePaywallScreen(source: 'time_limit_mode_card'),
+                      );
                     },
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: _animatedCard(
                   2,
@@ -225,48 +235,86 @@ class _SessionModePickerSheetState extends State<SessionModePickerSheet>
         required String title,
         required String subtitle,
         required VoidCallback? onTap,
+        bool isLocked = false, // 👈 new — distinct from "disabled" (Open Limit)
       }) {
     final isDisabled = onTap == null;
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        height: 100,
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle(context),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.gold(context).withValues(alpha: 0.8),
-            width: 1,
-          ),
-        ),
-        child: Opacity(
-          opacity: isDisabled ? 0.4 : 1.0,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary(context),
-                  fontWeight: FontWeight.w700,
+      child: Stack(
+        children: [
+          // dimmed card content — same treatment whether disabled or locked
+          Opacity(
+            opacity: (isDisabled || isLocked) ? 0.4 : 1.0,
+            child: Container(
+              height: 100,
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundSubtle(context),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.gold(context).withValues(alpha: 0.8),
+                  width: 1,
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary(context),
-                  fontSize: 11,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textPrimary(context),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 👇 lock overlay — only for isLocked (premium-gated), not for isDisabled (Open Limit "coming soon")
+          if (isLocked)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16), // 👈 adjust this to push content down
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.lock_rounded,
+                        color: AppColors.gold(context),
+                        size: 16,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Upgrade to unlock',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.gold(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }

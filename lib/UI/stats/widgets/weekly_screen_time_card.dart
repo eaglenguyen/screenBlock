@@ -16,6 +16,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
   bool _isLoading = true;
   late DateTime _selectedDay;
   late List<DateTime> _weekDays; // Sun -> Sat
+  bool _showScreenTime = false;
 
   @override
   void initState() {
@@ -142,7 +143,10 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                   return GestureDetector(
                     onTap: isFuture
                         ? null
-                        : () => setState(() => _selectedDay = day),
+                        : () => setState(() {
+                      _selectedDay = day;
+                      _showScreenTime = false; // 👈 new — require a fresh tap for the new day
+                    }),
                     child: Column(
                       children: [
                         Text(
@@ -219,6 +223,8 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
               Divider(color: AppColors.border(context), height: 1),
               const SizedBox(height: 20),
 
+              _buildScreenTimeReveal(context),
+
               // selected day total
               Center(
                 child: Column(
@@ -237,7 +243,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                 child: GestureDetector(
                   onTap: () => _openDetailForSelectedDay(context),
                   child: Text(
-                    'Screentime breakdown →',
+                    'Full breakdown →',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.gold(context),
                       fontWeight: FontWeight.w700,
@@ -281,6 +287,53 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
           creationParams: {'date': _dateKey(_selectedDay)}, // 👈 new — tells native which day to show
           creationParamsCodec: const StandardMessageCodec(),
         ),
+      ),
+    );
+  }
+
+  Widget _buildScreenTimeReveal(BuildContext context) {
+    if (!_showScreenTime) {
+      return Center(
+        child: Column(
+          children: [
+            Text(
+              '? ? ?',
+              style: AppTextStyles.displayMedium.copyWith(
+                color: AppColors.textSecondary(context),
+                fontSize: 32,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => setState(() => _showScreenTime = true),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.textSecondary(context).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.textPrimary(context).withValues(alpha: 0.4), width: 0.9),
+                ),
+                child: Text(
+                  "Show screen time",
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 60,
+      child: UiKitView(
+        key: ValueKey(_dateKey(_selectedDay)),
+        viewType: 'com.eagle.pausenow/compact_screen_time_view',
+        creationParams: {'date': _dateKey(_selectedDay)},
+        creationParamsCodec: const StandardMessageCodec(),
       ),
     );
   }

@@ -34,6 +34,9 @@ class StatsState {
   final double dailyGoalHours;
   final double blockGoalHours;
 
+  final List<AppUsageStat> selectedDayAppStats;
+  final bool isLoadingAppList;
+
   const StatsState({
     this.appStats = const [],
     this.totalUsage = Duration.zero,
@@ -42,6 +45,9 @@ class StatsState {
     this.error,
     this.dailyGoalHours = 2.0,
     this.blockGoalHours = 1.0,
+
+    this.selectedDayAppStats = const [],
+    this.isLoadingAppList = false,
   });
 
   static double loadBlockGoalHours() {
@@ -136,7 +142,8 @@ class StatsState {
     String? error,
     double? dailyGoalHours,
     double? blockGoalHours,
-
+    List<AppUsageStat>? selectedDayAppStats,
+    bool? isLoadingAppList,
   }) {
     return StatsState(
       appStats: appStats ?? this.appStats,
@@ -146,7 +153,8 @@ class StatsState {
       error: error ?? this.error,
       dailyGoalHours: dailyGoalHours ?? this.dailyGoalHours,
       blockGoalHours: blockGoalHours ?? this.blockGoalHours,
-
+      selectedDayAppStats: selectedDayAppStats ?? this.selectedDayAppStats,
+      isLoadingAppList: isLoadingAppList ?? this.isLoadingAppList,
     );
   }
 }

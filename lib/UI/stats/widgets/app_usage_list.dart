@@ -18,7 +18,6 @@ class AppUsageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (stats.isEmpty) {
-      // 👇 only show Android empty state now
       if (Platform.isAndroid) {
         return Container(
           padding: const EdgeInsets.all(32),
@@ -29,42 +28,80 @@ class AppUsageList extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              'No usage data for today yet',
+              'No usage data for this day',
               style: AppTextStyles.bodyMedium,
             ),
           ),
         );
       }
-      return const SizedBox.shrink(); // 👈 iOS returns nothing
+      return const SizedBox.shrink();
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.border(context),
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        children: List.generate(stats.length, (index) {
-          final stat = stats[index];
-          final isLast = index == stats.length - 1;
-          return Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 👇 new header row
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _AppUsageRow(stat: stat),
-              if (!isLast)
-                 Divider(
-                  height: 0.5,
-                  thickness: 0.5,
-                  color: AppColors.border(context),
-                  indent: 60,
+              Text(
+                'Most Used',
+                style: AppTextStyles.headlineSmall.copyWith( // 👈 was labelMedium+fontSize:20 — now headlineSmall (18)
+                  color: AppColors.textPrimary(context),
                 ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.gold(context).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.gold(context).withValues(alpha: 0.4),
+                    width: 0.5,
+                  ),
+                ),
+                child: Text(
+                  'Screen Time',
+                  style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall+fontSize:12 — now bodyMedium (13)
+                    color: AppColors.gold(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ],
-          );
-        }),
-      ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.backgroundCard(context),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.border(context),
+              width: 0.5,
+            ),
+          ),
+          child: Column(
+            children: List.generate(stats.length, (index) {
+              final stat = stats[index];
+              final isLast = index == stats.length - 1;
+              return Column(
+                children: [
+                  _AppUsageRow(stat: stat),
+                  if (!isLast)
+                    Divider(
+                      height: 0.5,
+                      thickness: 0.5,
+                      color: AppColors.border(context),
+                      indent: 60,
+                    ),
+                ],
+              );
+            }),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -121,7 +158,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: 14,
+        horizontal: 16,
         vertical: 12,
       ),
       child: Column(
@@ -129,7 +166,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
           Row(
             children: [
               _buildIcon(),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   widget.stat.appName,
@@ -150,7 +187,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           AnimatedBuilder(
             animation: _widthAnimation,
             builder: (context, _) {

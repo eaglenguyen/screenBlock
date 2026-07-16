@@ -18,6 +18,68 @@ class StatsViewModel extends _$StatsViewModel {
     return const StatsState(isLoading: true);
   }
 
+  Future<double> getTotalSecondsForDay(DateTime day) async {
+    final startOfDay = DateTime(day.year, day.month, day.day);
+    final endOfDay = _isSameDay(day, DateTime.now())
+        ? DateTime.now()
+        : DateTime(day.year, day.month, day.day, 23, 59, 59);
+
+    final usageList = await AppUsage().getAppUsage(startOfDay, endOfDay);
+
+    final filtered = usageList.where((u) =>
+    u.usage.inMinutes > 0 &&
+        u.usage.inHours < 24 &&
+        !_isSystemApp(u.packageName));
+
+    final total = filtered.fold(Duration.zero, (sum, u) => sum + u.usage);
+    return total.inSeconds.toDouble();
+  }
+
+  Future<void> loadAppUsageForDay(DateTime day) async {
+    if (!Platform.isAndroid) return;
+
+    state = state.copyWith(isLoadingAppList: true); // 👈 new field, see state update below
+
+    try {
+      final startOfDay = DateTime(day.year, day.month, day.day);
+      final endOfDay = _isSameDay(day, DateTime.now())
+          ? DateTime.now() // today — cap at "now"
+          : DateTime(day.year, day.month, day.day, 23, 59, 59); // past day — full day
+
+      final usageList = await AppUsage().getAppUsage(startOfDay, endOfDay);
+
+      final filtered = usageList.where((u) =>
+      u.usage.inMinutes > 0 &&
+          u.usage.inHours < 24 &&
+          !_isSystemApp(u.packageName)).toList();
+
+      filtered.sort((a, b) => b.usage.compareTo(a.usage));
+
+      final total = filtered.fold(Duration.zero, (sum, u) => sum + u.usage);
+
+      final stats = filtered.map((u) {
+        final proportion = total.inSeconds > 0 ? u.usage.inSeconds / total.inSeconds : 0.0;
+        return AppUsageStat(
+          packageName: u.packageName,
+          appName: _formatAppName(u.appName),
+          usage: u.usage,
+          proportion: proportion,
+        );
+      }).toList();
+
+      state = state.copyWith(
+        selectedDayAppStats: stats, // 👈 new field, separate from appStats (today's default)
+        isLoadingAppList: false,
+      );
+    } catch (e) {
+      debugPrint('❌ loadAppUsageForDay error: $e');
+      state = state.copyWith(isLoadingAppList: false);
+    }
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
   Future<void> loadStats() async {
     final goalHours = StatsState.loadGoalHours();
     final blockGoalHours = StatsState.loadBlockGoalHours();

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../stats_state.dart';
 
 class UsageGauge extends StatefulWidget {
@@ -163,24 +164,20 @@ class _UsageGaugeState extends State<UsageGauge>
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Text('❤️', style: TextStyle(fontSize: 36)),
+                                  const Text('❤️', style: TextStyle(fontSize: 36)), // 👈 kept as-is — an emoji, not text hierarchy
                                   const SizedBox(height: 12),
                                   Text(
-                                    'Screen Time Ring',
-                                    style: TextStyle(
+                                    'ScreenTime Ring',
+                                    style: AppTextStyles.headlineSmall.copyWith( // 👈 was fontSize:17 — now 18
                                       color: AppColors.textPrimary(context),
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 8),
                                   Text(
                                     'Coming soon to iOS!',
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyMedium.copyWith( // 👈 was fontSize:13 — already matches, just switched to named style
                                       color: AppColors.textSecondary(context),
-                                      fontSize: 13,
-                                      height: 1.5,
                                     ),
                                   ),
                                 ],
@@ -207,7 +204,7 @@ class _UsageGaugeState extends State<UsageGauge>
                         child: Container(
                           width: 22,
                           height: 22,
-                          margin: const EdgeInsets.only(left: 6),
+                          margin: const EdgeInsets.only(left: 8),
                           decoration: BoxDecoration(
                             color: AppColors.backgroundSubtle(context),
                             shape: BoxShape.circle,
@@ -225,12 +222,12 @@ class _UsageGaugeState extends State<UsageGauge>
                       ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Container(
                   height: 0.5,
                   color: Colors.white.withValues(alpha: 0.08),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
 
                 // blocked time stat
                 _statRow(
@@ -264,45 +261,38 @@ class _UsageGaugeState extends State<UsageGauge>
       children: [
         Text(
           label,
-          style: GoogleFonts.poppins(
+          style: AppTextStyles.bodySmall.copyWith( // 👈 was GoogleFonts.poppins fontSize:11 — now bodySmall (11), same value, now using named style
             color: Colors.white.withValues(alpha: 0.45),
-            fontSize: 11,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         RichText(
           text: TextSpan(
             children: [
               TextSpan(
                 text: value,
-                style: GoogleFonts.poppins(
+                style: AppTextStyles.displayMedium.copyWith( // 👈 was fontSize:26 — now 32
                   color: color,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 32,
                   letterSpacing: -1,
                 ),
               ),
               TextSpan(
                 text: ' / ${goal.replaceAll(' goal', '')}',
-                style: GoogleFonts.poppins(
+                style: AppTextStyles.bodyMedium.copyWith( // 👈 was fontSize:14 — now 13
                   color: Colors.white.withValues(alpha: 0.35),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         Text(
           suffix,
-          style: GoogleFonts.poppins(
-            color: isOverGoal
-                ? const Color(0xFFE74C3C)
-                : color.withValues(alpha: 0.7),
-            fontSize: 11,
+          style: AppTextStyles.bodySmall.copyWith( // already 11, matches
+            color: isOverGoal ? const Color(0xFFE74C3C) : color.withValues(alpha: 0.7),
             fontWeight: FontWeight.w500,
           ),
         ),

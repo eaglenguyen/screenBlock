@@ -6,6 +6,7 @@ import 'package:pausenow/UI/stats/widgets/app_usage_list.dart';
 import 'package:pausenow/UI/stats/widgets/stats_header.dart';
 import 'package:pausenow/UI/stats/widgets/usage_gauge.dart';
 import 'package:pausenow/UI/stats/widgets/weekly_screen_time_card.dart';
+import 'package:pausenow/UI/stats/widgets/weekly_screen_time_card_android.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'dart:io';
@@ -52,14 +53,6 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  Widget _buildScreenTimeCard(BuildContext context) {
-    return SizedBox(
-      height: 500,
-      child: UiKitView(
-        viewType: 'com.eagle.pausenow/screen_time_report_view',
-      ),
-    );
-  }
 
   Widget _buildContent(StatsState state) {
     return RefreshIndicator(
@@ -73,11 +66,18 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           children: [
             UsageGauge(state: state),
             const SizedBox(height: 12),
-            if (Platform.isIOS)...[
-              const WeeklyScreenTimeCard(), // 👈 new
+            if (Platform.isIOS) ...[
+              const WeeklyScreenTimeCard(),
             ],
             if (!Platform.isIOS)
-              AppUsageList(stats: state.appStats),
+              WeeklyScreenTimeCardAndroid(
+                onDaySelected: (day) => ref.read(statsViewModelProvider.notifier).loadAppUsageForDay(day), // 👈 new
+              ),
+            const SizedBox(height: 12),
+            if (state.isLoadingAppList)
+              const Center(child: CircularProgressIndicator())
+            else
+              AppUsageList(stats: !Platform.isIOS ? state.selectedDayAppStats : state.appStats), // 👈 use selected-day stats on Android
           ],
         ),
       ),

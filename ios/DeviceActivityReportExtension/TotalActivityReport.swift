@@ -6,6 +6,7 @@ import ManagedSettings
 
 extension DeviceActivityReport.Context {
     static let totalActivity = Self("Total Activity")
+    static let compactActivity = Self("Compact Activity") // 👈 new
 }
 
 struct AppUsageData: Identifiable {
@@ -67,6 +68,45 @@ struct TotalActivityReport: DeviceActivityReportScene {
         }
 
         appUsages.sort { $0.duration > $1.duration }
+
+        return ActivityConfiguration(
+            appUsages: appUsages,
+            totalDuration: totalDuration
+        )
+    }
+}
+
+// 👇 NEW — separate scene, same data logic, different (compact) display
+struct CompactActivityReport: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .compactActivity
+    let content: (ActivityConfiguration) -> CompactActivityDisplay
+
+    func body(for configuration: ActivityConfiguration) -> CompactActivityDisplay {
+        CompactActivityDisplay(configuration: configuration)
+    }
+
+    func makeConfiguration(
+        representing data: DeviceActivityResults<DeviceActivityData>
+    ) async -> ActivityConfiguration {
+        var appUsages: [AppUsageData] = []
+        var totalDuration: TimeInterval = 0
+
+        for await activityData in data {
+            for await segment in activityData.activitySegments {
+                for await category in segment.categories {
+                    for await app in category.applications {
+                        let duration = app.totalActivityDuration
+                        guard duration > 0 else { continue }
+                        totalDuration += duration
+                        appUsages.append(AppUsageData(
+                            name: app.application.localizedDisplayName ?? "Unknown",
+                            duration: duration,
+                            token: app.application.token
+                        ))
+                    }
+                }
+            }
+        }
 
         return ActivityConfiguration(
             appUsages: appUsages,
