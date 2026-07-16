@@ -105,10 +105,33 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('This Week', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textPrimary(context))),
-              const SizedBox(height: 16),
+            Row(
+              children: [
+                Text('This Week', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textPrimary(context))),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.gold(context).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.gold(context).withValues(alpha: 0.4),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Text(
+                    'Beta',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.gold(context),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
-              // day chips
+            // day chips
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(7, (i) {
@@ -214,7 +237,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                 child: GestureDetector(
                   onTap: () => _openDetailForSelectedDay(context),
                   child: Text(
-                    'See screentime breakdown →',
+                    'Screentime breakdown →',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.gold(context),
                       fontWeight: FontWeight.w700,
@@ -222,7 +245,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                   ),
                 ),
               ),
-            ],
+                    ],
           ),
         ),
         const SizedBox(

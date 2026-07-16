@@ -6,24 +6,18 @@ import FamilyControls
 struct TotalActivityView: View {
     let configuration: ActivityConfiguration
 
-    private var isEmpty: Bool {
-        configuration.totalDuration == 0 && configuration.appUsages.isEmpty
-    }
-
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
 
                 // ── Total header card ─────────────────────
                 VStack(spacing: 6) {
-                    Text(isEmpty ? "Try again later" : configuration.formattedTotal)
-                        .font(.system(size: isEmpty ? 24 : 42, weight: .bold))
-                        .foregroundColor(isEmpty ? Color(red: 160/255, green: 160/255, blue: 160/255) : .white)
-                    if !isEmpty {
-                        Text("Total Screen Time Today")
-                            .font(.system(size: 13))
-                            .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
-                    }
+                    Text(configuration.formattedTotal)
+                        .font(.system(size: 42, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Total Screen Time Today")
+                        .font(.system(size: 13))
+                        .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
@@ -34,10 +28,10 @@ struct TotalActivityView: View {
 
                 if configuration.appUsages.isEmpty {
                     VStack(spacing: 12) {
-                        Image(systemName: "chart.bar.xaxis")
+                        Image(systemName: "checkmark.circle")
                             .font(.system(size: 40))
                             .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
-                        Text("No usage data yet")
+                        Text("No app usage recorded for this day")
                             .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
                             .font(.system(size: 15))
                     }
@@ -69,7 +63,6 @@ struct TotalActivityView: View {
         .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
     }
 }
-
 
 struct AppUsageRow: View {
     let app: AppUsageData

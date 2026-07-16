@@ -31,19 +31,6 @@ class StatsHeader extends ConsumerWidget {
             style: AppTextStyles.headlineSmall.copyWith(fontSize: 18),
           ),
           const Spacer(),
-          if (Platform.isIOS) ...[
-            _iconButton(
-              icon: Icons.access_time_rounded,
-              onTap: () async {
-                await const MethodChannel(
-                  'com.eagle.pausenow/ios_blocking',
-                ).invokeMethod('openScreenTime');
-              },
-                context: context
-
-            ),
-            const SizedBox(width: 8),
-          ],
           _iconButton(
             icon: Icons.timelapse,
             onTap: () => GoalSettingsSheet.show(context, ref),
