@@ -15,6 +15,7 @@ import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
+import '../../data/models/time_limit_config.dart';
 import '../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../featuress/timelimit/widget/time_limit_bottom_sheet.dart';
 import '../../featuress/timelimit/widget/time_limit_card.dart';
@@ -160,30 +161,32 @@ class ScheduleScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    ...timeLimitState.configs.map((config) {
+                    ...timeLimitState.configs.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final config = entry.value;
+                      final isLocked = !isPremium && i >= 1; // 👈 same pattern as schedules
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
-                        child: Opacity(
+                        child: isLocked
+                            ? _LockedTimeLimitCard(config: config)
+                            : Opacity(
                           opacity: isManualBlocking || isPaused ? 0.4 : 1.0,
                           child: IgnorePointer(
                             ignoring: isManualBlocking || isPaused,
                             child: TimeLimitCard(
                               config: config,
-                              onTap: isManualBlocking || isPaused
-                                  ? null
-                                  : () => TimeLimitOptionsSheet.show(
+                              onTap: () => TimeLimitOptionsSheet.show(
                                 context,
                                 config: config,
-                                isLimitReached: false, // 👈 needs real data, see note below
-                                onEdit: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    useRootNavigator: true,
-                                    builder: (_) => TimeLimitBottomSheet(existingConfig: config),
-                                  );
-                                },
+                                isLimitReached: false,
+                                onEdit: () => showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  useRootNavigator: true,
+                                  builder: (_) => TimeLimitBottomSheet(existingConfig: config),
+                                ),
                                 onDelete: () => ref.read(timeLimitViewModelProvider.notifier).deleteConfig(config.id),
                               ),
                             ),
@@ -433,6 +436,87 @@ class _LockedScheduleCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LockedTimeLimitCard extends StatelessWidget {
+  final TimeLimitConfig config;
+
+  const _LockedTimeLimitCard({required this.config});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Opacity(
+          opacity: 0.4,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundCard(context),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border(context), width: 0.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.gold(context).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Center(child: Text('⏱️', style: TextStyle(fontSize: 18))),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(config.name, style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textPrimary(context),
+                        fontWeight: FontWeight.w700,
+                      )),
+                      const SizedBox(height: 4),
+                      Text('${config.limitMinutes}m/day · ${config.packageNames.length} apps',
+                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context))),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              useRootNavigator: true,
+              builder: (_) => const FeaturePaywallScreen(source: 'locked_time_limit_card'),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.lock_rounded, color: AppColors.gold(context), size: 16),
+                  const SizedBox(width: 8),
+                  Text('Upgrade to unlock', style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.gold(context),
+                    fontWeight: FontWeight.w700,
+                  )),
                 ],
               ),
             ),

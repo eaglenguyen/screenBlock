@@ -203,7 +203,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             fontWeight: FontWeight.w700),
                       ),
                       TextSpan(
-                        text: 'users reclaiming their focus.',
+                        text: 'users bettering their lives.',
                         style: GoogleFonts.poppins(
                             color: Colors.white.withValues(alpha: 0.45),
                             fontSize: 14),
@@ -340,8 +340,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         icon: Icons.lock_open_rounded,
         label: 'Today',
         desc: isLifetime
-            ? 'All UI unlocked instantly.'
-            : 'All UI unlocked instantly. No charge.',
+            ? 'All features unlocked instantly.'
+            : 'All features unlocked instantly. No charge.',
         isActive: true,
       ),
       _TimelineItem(

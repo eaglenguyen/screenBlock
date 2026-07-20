@@ -123,7 +123,7 @@ class _ManualStep1HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'The longer your block session,\nthe more xp you gain!',
+            'The longer your block session,\nthe more ⭐️ you gain!',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),

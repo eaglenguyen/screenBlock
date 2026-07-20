@@ -9,6 +9,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../data/models/time_limit_config.dart';
 import '../../../providers/repository_providers.dart';
 import '../../data/repositories/TimeLimitRepo.dart';
+import '../../providers/premium_provider.dart';
 import 'time_limit_state.dart';
 
 part 'time_limit_viewmodel.g.dart';
@@ -94,7 +95,7 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
 
   // 👇 new — pushes current config list to native SharedPreferences (Android)
   Future<void> _syncToNative() async {
-    final configs = _repo.getAllConfigs();
+    final configs = _getUnlockedConfigs(); // 👈 was _repo.getAllConfigs() — now only syncs unlocked configs
 
     if (Platform.isAndroid) {
       final json = jsonEncode(configs.map((c) => {
@@ -126,11 +127,18 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
     }
   }
 
+  List<TimeLimitConfig> _getUnlockedConfigs() {
+    final isPremium = ref.read(isPremiumProvider);
+    if (isPremium) return state.configs;
+    return state.configs.take(1).toList(); // 👈 only the first config counts while free
+  }
+
 
 
   bool hasActiveAppLimitToday() {
     final today = _todayIndex();
-    return state.configs.any((c) => c.isActive && c.days.contains(today));
+    final unlockedConfigs = _getUnlockedConfigs(); // 👈 new
+    return unlockedConfigs.any((c) => c.isActive && c.days.contains(today));
   }
 
   int _todayIndex() {

@@ -903,7 +903,7 @@ class _DemoBlockingScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'can be toggled on & off',
+            'This is where your journey begins!',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),
@@ -1436,7 +1436,7 @@ class _DemoIntroScreenState extends State<_DemoIntroScreen>
                 const SizedBox(height: 8),
                 Text(
                   widget.highlightManual
-                      ? "One step closer to being more productive"
+                      ? "One step closer to a heathier lifestyle"
                       : "We'll walk you through both",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
@@ -1549,7 +1549,7 @@ class _DemoIntroScreenState extends State<_DemoIntroScreen>
                 children: [
                   TextSpan(
                     text: widget.highlightManual
-                        ? "Now let's show you "
+                        ? "This is "
                         : "Let's show you ",
                     style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.55),

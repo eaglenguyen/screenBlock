@@ -267,7 +267,7 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
   final Set<int> _selected = {};
 
   final List<Map<String, String>> _goals = [
-    {'emoji': '🧘', 'title': 'Less anxiety', 'sub': 'Be more present in the moment'},
+    {'emoji': '🧘', 'title': 'More Mindful', 'sub': 'Make better decisions'},
     {'emoji': '📵', 'title': 'More time offline', 'sub': 'Disconnect and live more intentionally'},
     {'emoji': '⚡', 'title': 'Be more productive', 'sub': 'Focus deeper and get more done'},
     {'emoji': '📱', 'title': 'Reduce social media', 'sub': 'Break the scroll and reclaim your time'},
@@ -609,11 +609,11 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
   final Set<int> _selected = {};
 
   final List<Map<String, String>> _options = [
-    {'emoji': '😴', 'title': 'Boredom', 'sub': 'I just pick it up without thinking'},
+    {'emoji': '😴', 'title': 'Motivation', 'sub': 'I have no drive to be better'},
     {'emoji': '😰', 'title': 'Stress', 'sub': 'Scrolling helps me decompress'},
     {'emoji': '👀', 'title': 'FOMO', 'sub': 'I don\'t want to miss anything'},
-    {'emoji': '🔁', 'title': 'Habit', 'sub': 'It\'s just automatic at this point'},
-    {'emoji': '😞', 'title': 'Loneliness', 'sub': 'It fills the silence'},
+    {'emoji': '🔁', 'title': 'Time', 'sub': 'Not enough time in the day'},
+    {'emoji': '😞', 'title': 'Bad Discipline', 'sub': 'No routine to follow'},
   ];
 
   @override
@@ -692,7 +692,7 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
   final List<Map<String, String>> _options = [
     {'emoji': '🌀', 'title': 'Anxiety or overthinking', 'sub': 'Mind won\'t stop racing'},
     {'emoji': '🔋', 'title': 'Low motivation', 'sub': 'Feeling stuck and stagnant'},
-    {'emoji': '🫪', 'title': 'Easily Distracted', 'sub': 'Hard time focusing on one thing'},
+    {'emoji': '🫪', 'title': 'ADHD', 'sub': 'Easily distracted and hard time focusing'},
     {'emoji': '⏳', 'title': 'Procrastination', 'sub': 'Always putting things off'},
     {'emoji': '🙅', 'title': 'None of these really apply', 'sub': 'I\'m doing okay here'},
   ];
@@ -955,7 +955,7 @@ class QBSympathyScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'You\'re not alone ❤️ — now you\'ve got\nus working in your corner.',
+            'You\'re not alone ❤️ — you\'re one of\nmillions trying to better their life too.',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),
@@ -968,7 +968,7 @@ class QBSympathyScreen extends StatelessWidget {
 
           _ContinueButton(
             onTap: onNext,
-            label: 'Show me how this works ',
+            label: 'Start my transformation',
           ),
         ],
       ),

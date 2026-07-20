@@ -35,8 +35,9 @@ class OnboardingStatsData {
   String formatYears(double years) {
     if (years < 1) {
       final months = (years * 12).round();
-      return '$months months';
+      return months == 1 ? '1 month' : '$months months';
     }
-    return '${years.toStringAsFixed(1)} years';
+    final rounded = years.round();
+    return rounded == 1 ? '1 year' : '$rounded years';
   }
 }

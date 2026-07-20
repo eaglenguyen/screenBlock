@@ -1318,7 +1318,7 @@ class _OnboardingBadNewsScreenState
         const SizedBox(height: 24),
         FadeTransition(
           opacity: _fades[5], // 👈 button is last
-          child: _GoldButton(label: 'Show me', onTap: widget.onNext),
+          child: _GoldButton(label: 'Show me more..', onTap: widget.onNext),
         ),      ],
     ),
     );
@@ -1679,7 +1679,7 @@ class _OnboardingGoodNewsScreenState
           FadeTransition(
             opacity: _fades[3], // 👈 last to appear
             child: _GoldButton(
-              label: "Let's do it →",
+              label: "Whats next? →",
               onTap: widget.onNext,
             ),
           ),
