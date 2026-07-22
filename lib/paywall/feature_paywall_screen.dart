@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
+import 'package:pausenow/paywall/purchase_success_screen.dart';
+import 'package:pausenow/paywall/widget/all_plans_sheet.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../../providers/premium_provider.dart';
-import 'package:go_router/go_router.dart';
-
 import '../../core/theme/app_colors.dart';
 import '../core/analytics/analytics_events.dart';
 import '../core/analytics/analytics_service.dart';
@@ -49,6 +49,31 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     );
   }
 
+  void _showAllPlansSheet(List<Package> packages) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useRootNavigator: true,
+      builder: (_) => AllPlansSheet(
+        packages: packages,
+        selectedPackage: _selectedPackage,
+        onSelect: (pkg) => setState(() => _selectedPackage = pkg),
+        onPurchase: _purchase,
+        isLoading: _isLoading,
+      ),
+    );
+  }
+
+  String get _renewalText {
+    if (_selectedPackage == null) return '';
+    final type = _selectedPackage!.packageType;
+    final price = _selectedPackage!.storeProduct.priceString;
+    if (type == PackageType.lifetime) return 'One-time payment of $price';
+    if (type == PackageType.annual) return 'Then $price every year';
+    return 'Then $price every month';
+  }
+
   Future<void> _loadOfferings() async {
     try {
       final offerings = await Purchases.getOfferings();
@@ -85,6 +110,9 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
 
         final box = Hive.box(HiveBoxNames.settings);
         await box.put('paywallSeen', true);
+
+        if (mounted) await PurchaseSuccessScreen.show(context); // 👈 new — consistent with the other purchase flows
+
         await Future.delayed(const Duration(milliseconds: 800));
         if (mounted) Navigator.pop(context); // 👈 dismiss the bottom sheet
       }
@@ -108,24 +136,12 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
 
   String get _ctaLabel {
     if (_selectedPackage?.packageType == PackageType.lifetime) return 'Get Lifetime Access';
-    return 'Try for \$0.00';
-  }
-
-  String get _priceSubtitle {
-    if (_selectedPackage == null) return '';
-    final type = _selectedPackage!.packageType;
-    final price = _selectedPackage!.storeProduct.priceString;
-    if (type == PackageType.annual) return '7 days free, then $price/year. Cancel 24 hours before in the app store.';
-    if (type == PackageType.monthly) return '7 days free, then $price/month. Cancel 24 hours before in the app store.';
-    return 'One-time payment of $price. No subscription.';
+    return 'Redeem Your Free Week';
   }
 
   @override
   Widget build(BuildContext context) {
     final packages = _offerings?.current?.availablePackages ?? [];
-    final annual = packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
-    final monthly = packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
-    final lifetime = packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull;
 
     return Scaffold(
       backgroundColor: const Color(0xFF16162A),
@@ -224,72 +240,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                   _buildComparisonTable(),
                   const SizedBox(height: 28),
 
-                  // plan cards
-                  if (packages.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        if (monthly != null)
-                          Expanded(
-                            child: _PlanCard(
-                              label: 'Monthly',
-                              price: monthly.storeProduct.priceString,
-                              period: '/mo',
-                              badge: '7-day free trial',
-                              isSelected: _selectedPackage?.identifier == monthly.identifier,
-                              onTap: () => setState(() => _selectedPackage = monthly),
-                            ),
-                          ),
-                        if (monthly != null && annual != null)
-                          const SizedBox(width: 10),
-                        if (annual != null)
-                          Expanded(
-                            child: _PlanCard(
-                              label: 'Annual',
-                              price: annual.storeProduct.priceString,
-                              period: '/yr',
-                              badge: '7-day free trial',
-                              monthlyEquivalent: _monthlyEquivalent(annual),
-                              isSelected: _selectedPackage?.identifier == annual.identifier,
-                              onTap: () => setState(() => _selectedPackage = annual),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (lifetime != null) ...[
-                      const SizedBox(height: 10),
-                      _PlanCard(
-                        label: 'Lifetime',
-                        price: lifetime.storeProduct.priceString,
-                        period: '  one-time payment',
-                        badge: 'BEST VALUE',
-                        isSelected: _selectedPackage?.identifier == lifetime.identifier,
-                        onTap: () => setState(() => _selectedPackage = lifetime),
-                        fullWidth: true,
-                      ),
-                    ],
-                  ],
-                  const SizedBox(height: 16),
-
-                  // no payment note
-                  if (_selectedPackage?.packageType != PackageType.lifetime)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.check_rounded,
-                            color: Color(0xFFEDB82A), size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          'No payment due now!',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.6),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: 16),
-
+                  
                   // error
                   if (_error != null)
                     Padding(
@@ -306,11 +257,12 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _purchase,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEDB82A),
+                        backgroundColor: AppColors.gold(context),
                         foregroundColor: const Color(0xFF1A1208),
                         padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: const StadiumBorder(),
-                        elevation: 0,
+                        shape: RoundedRectangleBorder( // 👈 was const StadiumBorder()
+                          borderRadius: BorderRadius.circular(12),
+                        ),                                            elevation: 0,
                         textStyle: GoogleFonts.poppins(
                             fontSize: 17, fontWeight: FontWeight.w800),
                       ),
@@ -322,26 +274,36 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                           : Text(_ctaLabel),
                     ),
                   ),
+                  
                   const SizedBox(height: 8),
                   Text(
-                    _priceSubtitle,
+                    _renewalText,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
-                      color: Colors.white.withValues(alpha: 0.25),
+                      color: Colors.white,
                       fontSize: 14,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Text(
-                      'Maybe Later',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 16),
+                  if (packages.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () => _showAllPlansSheet(packages),
+                        child: Text(
+                          'View all plans',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
+                  const SizedBox(height: 8),
+           
                 ],
               ),
             ),

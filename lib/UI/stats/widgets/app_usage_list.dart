@@ -154,6 +154,17 @@ class _AppUsageRowState extends State<_AppUsageRow>
     } catch (_) {}
   }
 
+  // 👇 new — prefer the real PackageManager-resolved name, fall back to
+  // the app_usage package's name only while InstalledApps hasn't loaded yet
+  String get _displayName {
+    final resolvedName = _appInfo?.name; // 👈 no trailing ! — name itself is non-nullable once _appInfo exists
+    if (resolvedName != null && resolvedName.trim().isNotEmpty) {
+      return resolvedName;
+    }
+    return widget.stat.appName;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -169,7 +180,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  widget.stat.appName,
+                  _displayName,
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

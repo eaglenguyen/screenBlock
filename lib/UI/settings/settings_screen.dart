@@ -10,6 +10,7 @@ import 'package:pausenow/UI/settings/settings_viewmodel.dart';
 import 'package:pausenow/UI/settings/widgets/acknowledgements_sheet.dart';
 import 'package:pausenow/UI/settings/widgets/profile_card.dart';
 import 'package:pausenow/UI/settings/widgets/settings_section.dart';
+import 'package:pausenow/UI/settings/widgets/settings_upgrade_card.dart';
 import 'package:pausenow/UI/settings/widgets/support_sheets.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -46,34 +47,11 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
 
                   // Pro in Settings
-                  if (!ref.watch(isPremiumProvider))
-                    SettingsSection(
-                      label: '',
-                      rows: [
-                        SettingsRow(
-                          icon: Icons.bolt_rounded,
-                          iconColor: const Color(0xFF1A1208),
-                          iconBgColor: const Color(0xFFEDB82A),
-                          label: 'Upgrade to Pro',
-                          onTap: () => context.push('/paywall', extra: 'settings_upgrade'), // 👈
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEDB82A),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'PRO',
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF1A1208),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  if (!ref.watch(isPremiumProvider)) ...[
+                    const SettingsUpgradeCard(), // 👈 replaces the old SettingsSection/SettingsRow block
+                    const SizedBox(height: 20),
+                  ],
+
                   if (!ref.watch(isPremiumProvider)) const SizedBox(height: 20),
 
                   // appearance

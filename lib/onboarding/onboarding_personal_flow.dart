@@ -1318,7 +1318,7 @@ class _OnboardingBadNewsScreenState
         const SizedBox(height: 24),
         FadeTransition(
           opacity: _fades[5], // 👈 button is last
-          child: _GoldButton(label: 'Show me more..', onTap: widget.onNext),
+          child: _GoldButton(label: 'Fix This', onTap: widget.onNext),
         ),      ],
     ),
     );
@@ -1660,7 +1660,7 @@ class _OnboardingGoodNewsScreenState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'of your life back',
+                    'of your life free from distractions\nand doing more productive activities.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.5),
@@ -1679,7 +1679,7 @@ class _OnboardingGoodNewsScreenState
           FadeTransition(
             opacity: _fades[3], // 👈 last to appear
             child: _GoldButton(
-              label: "Whats next? →",
+              label: "Get Years Back",
               onTap: widget.onNext,
             ),
           ),

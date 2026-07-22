@@ -46,7 +46,7 @@ class _OnboardingSnapshotScreenState
   late final List<Animation<double>> _blockAnims;
 
   final List<Map<String, String>> _allGoals = [
-    {'emoji': '🧘', 'title': 'Less anxiety'},
+    {'emoji': '🧘', 'title': 'More Mindful'},
     {'emoji': '📵', 'title': 'More time offline'},
     {'emoji': '⚡', 'title': 'Be more productive'},
     {'emoji': '📱', 'title': 'Reduce social media'},

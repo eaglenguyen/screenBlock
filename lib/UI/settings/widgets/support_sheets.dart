@@ -419,7 +419,7 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
 
               // feedback text field
               Text(
-                'Tell us more',
+                'Ideas for new features? Tell us more',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textPrimary(context),
                   fontWeight: FontWeight.w600,

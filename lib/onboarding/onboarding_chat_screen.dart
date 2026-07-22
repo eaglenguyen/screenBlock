@@ -976,7 +976,7 @@ class _OnboardingGoalsConfirmScreenState
   late List<Animation<double>> _itemAnims;
 
   final List<Map<String, String>> _allGoals = [
-    {'emoji': '🧘', 'title': 'Less anxiety', 'sub': 'Be more present in the moment'},
+    {'emoji': '🧘', 'title': 'More Mindful', 'sub': 'Make better decisions'},
     {'emoji': '📵', 'title': 'More time offline', 'sub': 'Disconnect and live more intentionally'},
     {'emoji': '⚡', 'title': 'Be more productive', 'sub': 'Focus deeper and get more done'},
     {'emoji': '📱', 'title': 'Reduce social media', 'sub': 'Break the scroll and reclaim your time'},
@@ -1074,7 +1074,7 @@ class _OnboardingGoalsConfirmScreenState
                         children: List.generate(widget.selectedGoals.length, (i) {
                           final title = widget.selectedGoals[i];
                           final emoji = _getEmoji(title) ?? '✅';
-                          final sub = _getSub(title) ?? '';
+                          final sub = _getSub(title) ?? 'Make better decisions';
                           final tilts = [-2.5, 1.8, -1.5, 2.2, -2.0];
                           final tilt = tilts[i % tilts.length] * (3.14159 / 180);
 
