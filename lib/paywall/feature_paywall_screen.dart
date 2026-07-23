@@ -163,7 +163,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 60),
+                  SizedBox(height: 40),
 
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
@@ -305,6 +305,24 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                   const SizedBox(height: 8),
            
                 ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 36,
+            right: 24,
+            child: SafeArea(
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                ),
               ),
             ),
           ),

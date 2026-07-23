@@ -81,17 +81,22 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── the card itself ──
+        // ── the card, orange gradient ──
         Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: AppColors.backgroundCard(context),
-            border: Border.all(
-              color: AppColors.gold(context).withValues(alpha: 0.25),
-              width: 1,
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFE8623D), // deep coral-orange
+                Color(0xFFF2A340), // warm orange
+                Color(0xFFF7C948), // golden yellow
+              ],
+              stops: [0.0, 0.55, 1.0],
             ),
           ),
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -118,7 +123,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                   Text(
                     'Try Pause Now Pro',
                     style: GoogleFonts.poppins(
-                      color: AppColors.textPrimary(context),
+                      color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -129,7 +134,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
               Text(
                 'Includes 1 week of pause now Pro - unlocking every feature for you to try, for free!',
                 style: GoogleFonts.poppins(
-                  color: AppColors.textSecondary(context),
+                  color: Colors.white,
                   fontSize: 13,
                   height: 1.4,
                 ),
@@ -141,7 +146,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _startAnnualTrial,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold(context),
+                    backgroundColor: Colors.black54,
                     foregroundColor: AppColors.goldText(context),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder( // 👈 was const StadiumBorder()
@@ -159,7 +164,14 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                       strokeWidth: 2,
                     ),
                   )
-                      : const Text('Redeem Your Free Week'),
+                      : Text(
+                    'Redeem Your Free Week',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: 0.9), // 👈 change this to whatever color you want
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -171,7 +183,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                       ? 'Then ${_annualPackage!.storeProduct.priceString} every year'
                       : 'Then billed annually',
                   style: GoogleFonts.poppins(
-                    color: AppColors.textSecondary(context),
+                    color: Colors.white,
                     fontSize: 12.5,
                   ),
                 ),

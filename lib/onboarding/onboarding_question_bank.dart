@@ -292,12 +292,12 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
                 height: 1.2,
               ),
               children: [
-                const TextSpan(text: 'let\'s start with your '),
+                const TextSpan(text: 'What are your '),
                 TextSpan(
                   text: 'goals',
                   style: const TextStyle(color: Color(0xFFEDB82A)),
                 ),
-                const TextSpan(text: ' for pause now'),
+                const TextSpan(text: ' using pause now'),
               ],
             ),
           ),
@@ -629,7 +629,7 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
                 color: const Color(0xFFEDB82A), fontSize: 14, fontWeight: FontWeight.w600,
               )),
           const SizedBox(height: 8),
-          Text('What\'s the main thing\ngetting in the way\nof a better habit?',
+          Text('What\'s the main thing\nin the way of living a healthier lifestyle?',
               style: GoogleFonts.poppins(
                 color: Colors.white, fontSize: 30,
                 fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.2,
@@ -673,11 +673,11 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
   }
 }
 
-// ── QB6 — Deep Struggles (multi-select) ───────────────
+// ── QB6 — What You'd Rather Be Doing (multi-select) ───────────────
 
 class QBStrugglesScreen extends StatefulWidget {
   final Function(List<String> answers) onNext;
-  final VoidCallback? onBack;   // 👈 add
+  final VoidCallback? onBack;
   final double progress;
 
   const QBStrugglesScreen({super.key, required this.onNext, this.onBack, required this.progress});
@@ -690,11 +690,11 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
   final Set<int> _selected = {};
 
   final List<Map<String, String>> _options = [
-    {'emoji': '🌀', 'title': 'Anxiety or overthinking', 'sub': 'Mind won\'t stop racing'},
-    {'emoji': '🔋', 'title': 'Low motivation', 'sub': 'Feeling stuck and stagnant'},
-    {'emoji': '🫪', 'title': 'ADHD', 'sub': 'Easily distracted and hard time focusing'},
-    {'emoji': '⏳', 'title': 'Procrastination', 'sub': 'Always putting things off'},
-    {'emoji': '🙅', 'title': 'None of these really apply', 'sub': 'I\'m doing okay here'},
+    {'emoji': '📚', 'title': 'Reading or learning', 'sub': 'Books, courses, new skills'},
+    {'emoji': '💪', 'title': 'Exercise or movement', 'sub': 'Getting active, feeling better'},
+    {'emoji': '👥', 'title': 'Time with people', 'sub': 'Friends, family, real conversations'},
+    {'emoji': '🎯', 'title': 'Working on my goals', 'sub': 'Projects that actually matter to me'},
+    {'emoji': '😴', 'title': 'Just resting', 'sub': 'Sleeping more, actually relaxing'},
   ];
 
   @override
@@ -717,14 +717,14 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
               ),
               children: [
                 const TextSpan(
-                  text: 'deep ',
+                  text: 'if you stopped ',
                 ),
                 TextSpan(
-                  text: 'rooted issues',
+                  text: 'doom scrolling',
                   style: const TextStyle(color: Color(0xFFEDB82A)),
                 ),
                 const TextSpan(
-                  text: ' can\nget in the way, does any\nof this apply to you?',
+                  text: ', what would you spend more time doing?',
                 ),
               ],
             ),
@@ -744,13 +744,7 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     setState(() {
-                      if (i == 4) {
-                        _selected.clear();
-                        _selected.add(4);
-                      } else {
-                        _selected.remove(4);
-                        _selected.contains(i) ? _selected.remove(i) : _selected.add(i);
-                      }
+                      _selected.contains(i) ? _selected.remove(i) : _selected.add(i);
                     });
                   },
                 );
@@ -768,7 +762,6 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
     );
   }
 }
-
 // ── Commitment Screen ─────────────────────────────────
 
 class QBCommitmentScreen extends StatefulWidget {

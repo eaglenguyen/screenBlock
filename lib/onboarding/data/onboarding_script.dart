@@ -39,7 +39,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
     ],
     userResponses: [
       'honestly can\'t remember 😅',
-      'that sounds uncomfortable',
       'does sleeping count?',
     ],
   ),
@@ -47,14 +46,14 @@ List<ChatStep> getOnboardingSteps(String name) => [
   // Screen 2 — The Reality
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'that discomfort you just felt'),
-      ChatMessage(type: MessageType.bot, text: 'reading that question'),
-      ChatMessage(type: MessageType.bot, text: 'that\'s the problem'),
-      ChatMessage(type: MessageType.bot, text: 'we\'ve been trained to fill every second'),
-      ChatMessage(type: MessageType.bot, text: 'waiting in line → phone out'),
-      ChatMessage(type: MessageType.bot, text: 'ad break → phone out'),
-      ChatMessage(type: MessageType.bot, text: 'waking up → phone out'),
-      ChatMessage(type: MessageType.bot, text: 'silence feels wrong now'),
+      ChatMessage(type: MessageType.bot, text: 'have you ever used your phone...'),
+      ChatMessage(type: MessageType.bot, text: 'for \"just five minutes\"'),
+      ChatMessage(type: MessageType.bot, text: 'then look up'),
+      ChatMessage(type: MessageType.bot, text: 'and 45 minutes disappeared?'),
+      ChatMessage(type: MessageType.bot, text: 'we all been there.'),
+      ChatMessage(type: MessageType.bot, text: 'the hardest part isnt putting the phone down.'),
+      ChatMessage(type: MessageType.bot, text: 'its remembering'),
+      ChatMessage(type: MessageType.bot, text: 'what you rather be doing'),
     ],
     userResponses: [
       'ok that\'s too real 😬',
@@ -66,43 +65,42 @@ List<ChatStep> getOnboardingSteps(String name) => [
   // Screen 3 — The Reframe
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'but here\'s what nobody talks about'),
-      ChatMessage(type: MessageType.bot, text: 'the most focused people alive'),
-      ChatMessage(type: MessageType.bot, text: 'don\'t have more willpower than you'),
-      ChatMessage(type: MessageType.bot, text: 'they just built a different relationship'),
-      ChatMessage(type: MessageType.bot, text: 'with their attention'),
+      ChatMessage(type: MessageType.bot, text: 'imagine getting'),
+      ChatMessage(type: MessageType.bot, text: 'those hours back'),
+      ChatMessage(type: MessageType.bot, text: 'what would you do?'),
+      ChatMessage(type: MessageType.bot, text: 'finally start that project, read that book?'),
+      ChatMessage(type: MessageType.bot, text: 'work out, do something new?'),
       ChatMessage(
         type: MessageType.bot,
-        text: 'they choose when to engage.',
+        text: 'At the end of the day, we choose what we want to do',
         textColor: Color(0xFF4CAF50),
       ),
       ChatMessage(
         type: MessageType.bot,
-        text: 'instead of reacting.',
+        text: 'So lets start by making better decisions',
         textColor: Color(0xFF4CAF50),
       ),
     ],
     userResponses: [
       'i want that',
       'how do i get there?',
-      'that makes sense',
     ],
   ),
 
   // Screen 4 — The Science
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'your brain is incredibly adaptable'),
-      ChatMessage(type: MessageType.bot, text: 'every time you pause before opening an app'),
-      ChatMessage(type: MessageType.bot, text: 'you\'re rewiring something'),
-      ChatMessage(type: MessageType.bot, text: 'a tiny signal that says'),
+      ChatMessage(type: MessageType.bot, text: 'heres the secret...'),
+      ChatMessage(type: MessageType.bot, text: 'people who live intentionally'),
+      ChatMessage(type: MessageType.bot, text: 'dont have more motivation.'),
+      ChatMessage(type: MessageType.bot, text: 'they simply protect'),
       ChatMessage(
         type: MessageType.bot,
-        text: 'I am in control here.',
+        text: 'what matters most',
         textColor: Color(0xFFEDB82A),
       ),
-      ChatMessage(type: MessageType.bot, text: 'do that enough times'),
-      ChatMessage(type: MessageType.bot, text: 'and it becomes who you are'),
+      ChatMessage(type: MessageType.bot, text: 'rather than doomscrolling'),
+      ChatMessage(type: MessageType.bot, text: 'they choose to do something more productive'),
     ],
     userResponses: [
       'ok I\'m convinced 🧠',
@@ -115,20 +113,20 @@ List<ChatStep> getOnboardingSteps(String name) => [
   ChatStep(
     botMessages: [
       ChatMessage(type: MessageType.bot, text: 'that\'s exactly what Pause Now is for'),
-      ChatMessage(type: MessageType.bot, text: 'not to punish you'),
-      ChatMessage(type: MessageType.bot, text: 'not to restrict you forever'),
-      ChatMessage(type: MessageType.bot, text: 'but to create space'),
-      ChatMessage(type: MessageType.bot, text: 'between the urge'),
-      ChatMessage(type: MessageType.bot, text: 'and the action'),
+      ChatMessage(type: MessageType.bot, text: 'not to make your phone the enemy.'),
+      ChatMessage(type: MessageType.bot, text: 'not to shame you for scrolling.'),
+      ChatMessage(type: MessageType.bot, text: 'but to create'),
+      ChatMessage(type: MessageType.bot, text: 'small moments in life'),
+      ChatMessage(type: MessageType.bot, text: 'where you can ask yourself...'),
       ChatMessage(
         type: MessageType.bot,
-        text: 'that space is where discipline lives.',
+        text: 'is this how i want to spend my time?',
         textColor: Color(0xFFEDB82A),
       ),
     ],
     userResponses: [
-      'i want this!',
-      'ok I get it now',
+      'thats powerful',
+      'help me get there!',
     ],
   ),
 
@@ -146,11 +144,11 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
       ChatMessage(
         type: MessageType.review,
-        text: '★★★★★\n"It\'s not about blocking apps, it\'s about reclaiming yourself"\n— Marcus, 29',
+        text: '★★★★★\n"It\'s not about blocking apps, it\'s about bettering yourself"\n— Marcus, 29',
       ),
-      ChatMessage(type: MessageType.bot, text: 'ready to take control of your life?'),
+      ChatMessage(type: MessageType.bot, text: 'Ready to start a healthier lifestyle and block these distractions?'),
     ],
-    userResponses: ['Yes!'],
+    userResponses: ['Begin my journey'],
   ),
 
   // Screen 7 — Demo intro
@@ -161,6 +159,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
         text: 'let\'s get to know you a bit more!',
       ),
     ],
-    userResponses: ['Sure'],
+    userResponses: ['ok!'],
   ),
 ];

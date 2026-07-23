@@ -525,13 +525,13 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
           height: 1.2,
         ),
         children: const [
-          TextSpan(text: '66 days.', style: TextStyle(color: Color(0xFFEDB82A))),
-          TextSpan(text: " That's how long it takes to build a new habit."),
+          TextSpan(text: 'Congratulations', style: TextStyle(color: Color(0xFFEDB82A))),
+          TextSpan(text: " You're on the way to a healthier lifestyle."),
         ],
       ),
     ),
     Text(
-      'The secret? Pausing and being present in the moment.',
+      'The person you want to become is built by the choices you make every day.',
       style: GoogleFonts.poppins(
         color: Colors.white,
         fontSize: 32,
@@ -541,7 +541,7 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
       ),
     ),
     Text(
-      'Pause Now turns that discipline into a lifestyle. Starting today.',
+      'Stop scrolling and achieve your goals. Starting today',
       style: GoogleFonts.poppins(
         color: Colors.white,
         fontSize: 32,

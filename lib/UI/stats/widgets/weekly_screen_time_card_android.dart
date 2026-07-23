@@ -16,6 +16,7 @@ class WeeklyScreenTimeCardAndroid extends ConsumerStatefulWidget {
 class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCardAndroid> {
   Map<String, double> _weekData = {};
   bool _isLoading = true;
+  bool _hasPermission = true; // 👈 new
   late DateTime _selectedDay;
   late List<DateTime> _weekDays;
 
@@ -41,8 +42,20 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
 
   Future<void> _fetchWeek() async {
     final notifier = ref.read(statsViewModelProvider.notifier);
-    final Map<String, double> result = {};
 
+    // check permission once, up front — don't let 7 individual calls each discover it's missing
+    final hasPermission = await notifier.hasUsagePermission();
+    if (!hasPermission) {
+      if (mounted) {
+        setState(() {
+          _hasPermission = false;
+          _isLoading = false;
+        });
+      }
+      return; // bail — don't loop through 7 days that would all fail the same way
+    }
+
+    final Map<String, double> result = {};
     for (final day in _weekDays) {
       if (_isFuture(day)) continue;
       final seconds = await notifier.getTotalSecondsForDay(day);
@@ -91,6 +104,50 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
         padding: const EdgeInsets.all(24),
         alignment: Alignment.center,
         child: CircularProgressIndicator(color: AppColors.gold(context)),
+      );
+    }
+
+    // New
+    if (!_hasPermission) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundCard(context),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.lock_outline_rounded, color: AppColors.textSecondary(context), size: 36),
+            const SizedBox(height: 12),
+            Text(
+              'Usage access required',
+              style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Grant usage access to see your weekly screen time',
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                await ref.read(statsViewModelProvider.notifier).requestUsagePermission();
+                // re-check once they return from Settings
+                setState(() => _isLoading = true);
+                _fetchWeek();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.gold(context),
+                foregroundColor: AppColors.goldText(context),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text('Grant Permission'),
+            ),
+          ],
+        ),
       );
     }
 

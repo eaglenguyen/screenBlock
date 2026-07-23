@@ -18,6 +18,16 @@ class StatsViewModel extends _$StatsViewModel {
     return const StatsState(isLoading: true);
   }
 
+  Future<bool> hasUsagePermission() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      return await const MethodChannel('com.eagle.pausenow/accessibility')
+          .invokeMethod<bool>('hasUsageStatsPermission') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<double> getTotalSecondsForDay(DateTime day) async {
     final startOfDay = DateTime(day.year, day.month, day.day);
     final endOfDay = _isSameDay(day, DateTime.now())
@@ -37,6 +47,13 @@ class StatsViewModel extends _$StatsViewModel {
 
   Future<void> loadAppUsageForDay(DateTime day) async {
     if (!Platform.isAndroid) return;
+
+    // 👇 NEW — same guard here
+    final hasPermission = await hasUsagePermission();
+    if (!hasPermission) {
+      state = state.copyWith(isLoadingAppList: false);
+      return; // silently skip — StatsScreen's own top-level permission gate already handles messaging
+    }
 
     state = state.copyWith(isLoadingAppList: true); // 👈 new field, see state update below
 
@@ -120,6 +137,17 @@ class StatsViewModel extends _$StatsViewModel {
     }
 
     state = state.copyWith(isLoading: true, error: null);
+
+
+    // 👇 NEW — check permission before ever touching AppUsage()
+    final hasPermission = await hasUsagePermission();
+    if (!hasPermission) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'permission denied', // 👈 reuses your existing _buildError permission-gate UI
+      );
+      return;
+    }
 
     try {
       final now = DateTime.now();

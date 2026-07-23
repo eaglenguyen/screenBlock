@@ -308,6 +308,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+        case "saveThemePreference":
+            if let args = call.arguments as? [String: Any],
+               let isDark = args["isDark"] as? Bool {
+                let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+                defaults?.set(isDark, forKey: "appIsDarkMode")
+                defaults?.synchronize()
+            }
+            result(nil)
         case "getWeeklyScreenTime":
             let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let dates = sharedDefaults?.array(forKey: "screenTimeWeekDates") as? [String] ?? []

@@ -166,7 +166,7 @@ class LastChanceOfferSheet extends StatelessWidget {
                 elevation: 0,
                 textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
               ),
-              child: const Text('Get Lifetime Access'),
+              child: const Text('Begin your health journey'),
             ),
           ),
           const SizedBox(height: 16),
@@ -175,12 +175,11 @@ class LastChanceOfferSheet extends StatelessWidget {
             child: GestureDetector(
               onTap: onDecline,
               child: Text(
-                'No thanks →',
+                'Not now, thanks',
                 style: GoogleFonts.poppins(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  decoration: TextDecoration.underline,
                   decorationColor: Colors.white.withValues(alpha: 0.3),
                 ),
               ),

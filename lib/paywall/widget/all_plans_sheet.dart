@@ -36,12 +36,10 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
   @override
   void initState() {
     super.initState();
-    _localSelected = widget.selectedPackage; // 👈 seed from parent once
-    if (_localSelected?.packageType == PackageType.lifetime) {
-      _tabIndex = 1;
-    }
+    _localSelected = widget.selectedPackage;
+    _tabIndex = 0; // 👈 always default to One-Time, regardless of incoming selection
+    _selectDefaultForTab(_tabIndex);
   }
-
   @override
   Widget build(BuildContext context) {
     final annual = widget.packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
@@ -69,8 +67,14 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                   ),
                   borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                 ),
-                child: const Center(
-                  child: Text('🛡️', style: TextStyle(fontSize: 64)),
+                child: ClipRRect( // 👈 new — keeps the image's corners rounded to match the container
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  child: Image.asset(
+                    'assets/images/squareman.png',
+                    fit: BoxFit.cover, // fills the whole 220-height area, cropping if needed
+                    width: double.infinity,
+                    height: 220,
+                  ),
                 ),
               ),
               Positioned(
@@ -82,7 +86,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Colors.black.withValues(alpha: 0.45), // 👈 was Colors.white.withValues(alpha: 0.15)
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
@@ -106,14 +110,14 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                     ),
                     child: Row(
                       children: [
-                        Expanded(child: _tabButton('Subscription', 0)),
-                        Expanded(child: _tabButton('One-Time', 1)),
+                        Expanded(child: _tabButton('One-Time', 0)), // 👈 was 'Subscriptions', now index 0
+                        Expanded(child: _tabButton('Subscriptions', 1)), //
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  if (_tabIndex == 0) ...[
+                  if (_tabIndex == 1) ...[
                     if (annual != null)
                       _PlanOptionRow(
                         label: 'Annual',
@@ -137,7 +141,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                       ),
                   ],
 
-                  if (_tabIndex == 1) ...[
+                  if (_tabIndex == 0) ...[
                     if (lifetime != null)
                       _PlanOptionRow(
                         label: 'Lifetime Unlock',
@@ -186,7 +190,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                   textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
                 ),
                 child: Text(
-                  _tabIndex == 1
+                  _tabIndex == 0
                       ? 'Get Lifetime Access'
                       : 'Redeem Your Free Week',
                 ),
@@ -232,15 +236,15 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
     final monthly = widget.packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
     final lifetime = widget.packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull;
 
-    if (tabIndex == 0) {
-      // switching to Subscriptions — if current selection isn't Monthly or Annual, default to Annual
+    if (tabIndex == 1) {
+      // Subscriptions
       final isAlreadyValid = _localSelected?.packageType == PackageType.annual ||
           _localSelected?.packageType == PackageType.monthly;
       if (!isAlreadyValid) {
         _localSelected = annual ?? monthly;
       }
     } else {
-      // switching to One-Time — if current selection isn't Lifetime, default to Lifetime
+      // One-Time
       if (_localSelected?.packageType != PackageType.lifetime) {
         _localSelected = lifetime;
       }

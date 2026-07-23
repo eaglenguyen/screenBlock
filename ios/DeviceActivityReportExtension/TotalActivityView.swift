@@ -5,6 +5,24 @@ import FamilyControls
 
 struct TotalActivityView: View {
     let configuration: ActivityConfiguration
+    
+    private var isDark: Bool {
+        UserDefaults(suiteName: "group.com.eagle.pausenow")?.bool(forKey: "appIsDarkMode") ?? true
+    }
+
+    private var bgColor: Color {
+        isDark ? Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255) : Color.white
+    }
+    private var cardColor: Color {
+        isDark ? Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255) : Color(red: 0xF2/255, green: 0xF2/255, blue: 0xF2/255)
+    }
+    private var textPrimary: Color {
+        isDark ? .white : Color(red: 0x17/255, green: 0x17/255, blue: 0x1A/255)
+    }
+    private var textSecondary: Color {
+        isDark ? Color(red: 160/255, green: 160/255, blue: 160/255) : Color(red: 0x55/255, green: 0x55/255, blue: 0x5A/255)
+    }
+
 
     var body: some View {
         ScrollView {
@@ -14,14 +32,14 @@ struct TotalActivityView: View {
                 VStack(spacing: 6) {
                     Text(configuration.formattedTotal)
                         .font(.system(size: 42, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(textPrimary) // 👈 was hardcoded .white
                     Text("Total Screen Time Today")
                         .font(.system(size: 13))
-                        .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
+                        .foregroundColor(textSecondary) // 👈 was hardcoded gray
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
-                .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255))
+                .background(cardColor) // 👈 was hardcoded 0x30
                 .cornerRadius(20)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -60,7 +78,7 @@ struct TotalActivityView: View {
             }
             .padding(.bottom, 40)
         }
-        .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
+        .background(bgColor) // 👈 was hardcoded 0x25
     }
 }
 
