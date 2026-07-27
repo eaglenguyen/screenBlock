@@ -30,10 +30,6 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         let goldText = UIColor(red: 26/255, green: 18/255, blue: 8/255, alpha: 1.0)
         let mutedWhite = UIColor(white: 1.0, alpha: 0.5)
 
-        // ── Session complete screen ───────────────────
-
-
-        // ── Active blocking screen ────────────────────
         return ShieldConfiguration(
             backgroundBlurStyle: nil,
             backgroundColor: navyBg,
@@ -47,10 +43,14 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 color: mutedWhite
             ),
             primaryButtonLabel: ShieldConfiguration.Label(
-                text: "Got it",
+                text: "Exit",
                 color: goldText
             ),
-            primaryButtonBackgroundColor: gold
+            primaryButtonBackgroundColor: gold,
+            secondaryButtonLabel: ShieldConfiguration.Label( // 👈 new
+                text: "Unblock App",
+                color: .white
+            )
         )
     }
 }

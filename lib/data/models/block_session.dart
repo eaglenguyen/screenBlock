@@ -31,7 +31,18 @@ class BlockSession extends HiveObject {
 
   Duration get duration {
     final end = endTime ?? DateTime.now();
-    return end.difference(startTime);
+    final elapsed = end.difference(startTime);
+
+    if (completed) {
+      // 👇 a completed session's real duration is exactly its configured length —
+      // never more, even if endSession() was called late (e.g. app was
+      // backgrounded past the timer's actual expiry)
+      final configured = Duration(minutes: selectedMinutes);
+      return elapsed < configured ? elapsed : configured;
+    }
+
+    // gave up early — real elapsed time is meaningful here, keep as-is
+    return elapsed;
   }
 
   bool get isToday {

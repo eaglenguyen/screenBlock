@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:hive/hive.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:pausenow/UI/home/timer/pomodoro_sheet.dart';
@@ -17,8 +16,7 @@ import '../../../providers/blocking_service_provider.dart';
 import '../../core/analytics/analytics_events.dart';
 import '../../core/analytics/analytics_service.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/constants/hivebox_names.dart';
-import '../../data/models/schedule.dart';
+
 import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';

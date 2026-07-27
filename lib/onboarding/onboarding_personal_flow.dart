@@ -1212,117 +1212,122 @@ class _OnboardingBadNewsScreenState
   // ── Stats UI ──────────────────────────────────────
   Widget _buildStatsPhase(OnboardingStatsData d, int yearsLost) {
     return SingleChildScrollView(
-     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 80),
-
-        FadeTransition(
-          opacity: _fades[0],
-          child: Text(
-            "That's a lot of time ${widget.userName}...",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.6),
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        FadeTransition(
-          opacity: _fades[1],
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: d.hoursPerDay.toStringAsFixed(1),
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFFEDB82A),
-                    fontSize: 64,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -2,
-                  ),
-                ),
-                TextSpan(
-                  text: ' hrs/day',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white.withValues(alpha: 0.5),
-                    fontSize: 22,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 32),
-
-        FadeTransition(
-          opacity: _fades[2],
-          child: _statRow(
-            label: 'Hours per year',
-            value: '${(d.hoursPerDay * 365).round()} hrs',
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 12),
-        FadeTransition(
-          opacity: _fades[3],
-          child: _statRow(
-            label: 'Days per year',
-            value: '${(d.hoursPerDay * 365 / 24).toStringAsFixed(1)} days',
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 12),
-        FadeTransition(
-          opacity: _fades[4],
-          child: _statRow(
-            label: 'Years lost by age 80',
-            value: '$yearsLost years',
-            color: const Color(0xFFE74C3C),
-            large: true,
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        FadeTransition(
-          opacity: _fades[4],
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE74C3C).withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: const Color(0xFFE74C3C).withValues(alpha: 0.25),
-                width: 0.5,
-              ),
-            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 80),
+          FadeTransition(
+            opacity: _fades[0],
             child: Text(
-              'Based on an average lifespan of 80 years, '
-                  'you will spend $yearsLost years of your life '
-                  'staring at a screen.',
+              "That's a lot of time ${widget.userName}, you spent",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 14,
-                height: 1.5,
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
-        ),
+          const SizedBox(height: 16),
 
-        const SizedBox(height: 24),
-        FadeTransition(
-          opacity: _fades[5], // 👈 button is last
-          child: _GoldButton(label: 'Fix This', onTap: widget.onNext),
-        ),      ],
-    ),
+          // 👇 now the hero number — "years lost by age 80"
+          FadeTransition(
+            opacity: _fades[1],
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$yearsLost years',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFFE74C3C),
+                      fontSize: 64,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          FadeTransition(
+            opacity: _fades[1],
+            child: Text(
+              'of your life looking at your phone.\nYup, you read that right.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // 👇 hrs/day now demoted to a regular stat row
+          FadeTransition(
+            opacity: _fades[2],
+            child: _statRow(
+              label: 'Hours per day',
+              value: '${d.hoursPerDay.toStringAsFixed(1)} hrs',
+              color: const Color(0xFFEDB82A),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FadeTransition(
+            opacity: _fades[3],
+            child: _statRow(
+              label: 'Hours per year',
+              value: '${(d.hoursPerDay * 365).round()} hrs',
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FadeTransition(
+            opacity: _fades[4],
+            child: _statRow(
+              label: 'Days per year',
+              value: '${(d.hoursPerDay * 365 / 24).toStringAsFixed(1)} days',
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          FadeTransition(
+            opacity: _fades[4],
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE74C3C).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFFE74C3C).withValues(alpha: 0.25),
+                  width: 0.5,
+                ),
+              ),
+              child: Text(
+                'Based on an average lifespan of 80 years, '
+                    'you are losing $yearsLost years of your life 😬',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          FadeTransition(
+            opacity: _fades[5],
+            child: _GoldButton(label: 'Show my chart', onTap: widget.onNext),
+          ),
+        ],
+      ),
     );
   }
+
 
   Widget _statRow({
     required String label,
@@ -1429,7 +1434,7 @@ class _OnboardingLifeGridScreenState
           const SizedBox(height: 24),
 
           Text(
-            'Your life is important',
+            'Your Life Is Important',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -1481,7 +1486,7 @@ class _OnboardingLifeGridScreenState
                 ),
               ),
               child: Text(
-                '$yearsLost years of your life lost to scrolling',
+                'Thats $yearsLost years of your life lost to scrolling',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   color: const Color(0xFFE74C3C),
@@ -1498,7 +1503,7 @@ class _OnboardingLifeGridScreenState
             opacity: _animationDone ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 600),
             child: _GoldButton(
-              label: 'Show me the good news →',
+              label: 'Fix this  →',
               onTap: widget.onNext,
             ),
           ),
