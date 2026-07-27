@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../providers/blocking_service_provider.dart';
+import '../home/checkIn/check_in_slider_screen.dart';
+import '../home/home_viewmodel.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({
@@ -15,8 +18,30 @@ class ShellScreen extends ConsumerStatefulWidget {
   ConsumerState<ShellScreen> createState() => _ShellScreenState();
 }
 
-class _ShellScreenState extends ConsumerState<ShellScreen> {
+class _ShellScreenState extends ConsumerState<ShellScreen>
+    with WidgetsBindingObserver { // 👈 new
+
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(homeViewModelProvider.notifier).onAppResumed();
+      ref.read(blockingServiceProvider).resetOverlayState();
+    }
+  }
 
   int _getIndexFromLocation(String location) {
     if (location.startsWith('/home')) return 0;
@@ -44,6 +69,14 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     _selectedIndex = _getIndexFromLocation(
       GoRouterState.of(context).uri.toString(),
     );
+
+    ref.listen(homeViewModelProvider, (previous, next) {
+      if (next.pendingCheckIn && !(previous?.pendingCheckIn ?? false)) {
+        CheckInFlow.show(context, onComplete: () {
+          ref.read(homeViewModelProvider.notifier).clearPendingCheckIn();
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background(context),

@@ -45,7 +45,7 @@ class HomeState {
 
   final PomodoroConfig pomodoroConfig;
   final int pomodoroRoundCount;
-
+  final bool pendingCheckIn;
 
 
 
@@ -76,8 +76,7 @@ class HomeState {
 
     this.pomodoroConfig = const PomodoroConfig(),
     this.pomodoroRoundCount = 0,
-
-
+    this.pendingCheckIn = false
   });
 
 
@@ -109,6 +108,7 @@ class HomeState {
     bool? isAppLimitActiveToday,
     PomodoroConfig? pomodoroConfig,
     int? pomodoroRoundCount,
+    bool? pendingCheckIn, // 👈 new
 
   }) {
     return HomeState(
@@ -138,6 +138,7 @@ class HomeState {
       isAppLimitActiveToday: isAppLimitActiveToday ?? this.isAppLimitActiveToday,
       pomodoroConfig: pomodoroConfig ?? this.pomodoroConfig,
       pomodoroRoundCount: pomodoroRoundCount ?? this.pomodoroRoundCount,
+      pendingCheckIn: pendingCheckIn ?? this.pendingCheckIn, // 👈 new
 
 
     );

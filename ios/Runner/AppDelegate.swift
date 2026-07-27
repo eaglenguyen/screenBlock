@@ -153,6 +153,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if response.notification.request.identifier == "scheduleResume" {
             handleScheduleResume()
         }
+
+        if response.notification.request.identifier == "com.eagle.pausenow.unblockNudge" {
+            NSLog("🔔 unblock nudge notification tapped — setting pending check-in flag")
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            defaults?.set(true, forKey: "pendingCheckInFlow")
+            defaults?.synchronize()
+        }
+        
         if #available(iOS 16.0, *) {
             switch action {
             case "START_BREAK":
@@ -308,6 +316,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+        case "checkAndClearPendingCheckIn":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            let pending = defaults?.bool(forKey: "pendingCheckInFlow") ?? false
+            if pending {
+                defaults?.set(false, forKey: "pendingCheckInFlow")
+                defaults?.synchronize()
+            }
+            result(pending)
         case "saveThemePreference":
             if let args = call.arguments as? [String: Any],
                let isDark = args["isDark"] as? Bool {

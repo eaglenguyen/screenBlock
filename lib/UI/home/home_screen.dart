@@ -17,6 +17,7 @@ import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
 import 'cards/active_blocking_card.dart';
 import 'cards/countdown_card.dart';
+import 'checkIn/check_in_slider_screen.dart';
 import 'widgets/xp_animation.dart';
 import 'cards/claim_xp_card.dart';
 import 'cards/session_completed_card.dart';
@@ -33,14 +34,12 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
-    with WidgetsBindingObserver {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _hasShownXpAnimation = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeViewModelProvider.notifier).init();
     });
@@ -48,17 +47,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ref.read(homeViewModelProvider.notifier).onAppResumed();
-      ref.read(blockingServiceProvider).resetOverlayState();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

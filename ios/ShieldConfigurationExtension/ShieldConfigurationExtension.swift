@@ -30,6 +30,10 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         let goldText = UIColor(red: 26/255, green: 18/255, blue: 8/255, alpha: 1.0)
         let mutedWhite = UIColor(white: 1.0, alpha: 0.5)
 
+        // 👇 test flag — check if the unblock button was already tapped
+        let wasUnblockTapped = sharedDefaults?.bool(forKey: "unblockButtonTapped") ?? false
+        let secondaryLabel = wasUnblockTapped ? "Didn't receive a notification?" : "Unblock App"
+
         return ShieldConfiguration(
             backgroundBlurStyle: nil,
             backgroundColor: navyBg,
@@ -47,8 +51,8 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 color: goldText
             ),
             primaryButtonBackgroundColor: gold,
-            secondaryButtonLabel: ShieldConfiguration.Label( // 👈 new
-                text: "Unblock App",
+            secondaryButtonLabel: ShieldConfiguration.Label(
+                text: secondaryLabel, // 👈 now conditional
                 color: .white
             )
         )

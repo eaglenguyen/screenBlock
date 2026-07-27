@@ -18,7 +18,6 @@ class ShieldActionExtension: ShieldActionDelegate {
                     }
                 }
             case .secondaryButtonPressed:
-                // "Stay Focused" — dismiss shield, keep going
                 completionHandler(.close)
             @unknown default:
                 fatalError()
@@ -29,7 +28,7 @@ class ShieldActionExtension: ShieldActionDelegate {
             case .primaryButtonPressed:
                 completionHandler(.close)
             case .secondaryButtonPressed:
-                completionHandler(.defer)
+                completionHandler(.close)
             @unknown default:
                 fatalError()
             }
@@ -44,3 +43,5 @@ class ShieldActionExtension: ShieldActionDelegate {
         completionHandler(.close)
     }
 }
+
+

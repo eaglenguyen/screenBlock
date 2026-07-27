@@ -14,12 +14,17 @@ class IOSBlockingService implements BlockingService {
     required VoidCallback onNotificationStartBreak, // 👈 add
     required VoidCallback onNotificationStartWork,  // 👈 add
     required VoidCallback onNotificationExtendBreak, // 👈 add
+    required VoidCallback? onShowCheckInFlow, // 👈 new
+
   }) {
     const channel = MethodChannel('com.eagle.pausenow/ios_blocking');
     channel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'onPauseEnded':
           onPauseEnded();
+          break;
+        case 'showCheckInFlow':
+          onShowCheckInFlow?.call();
           break;
         case 'onSessionComplete':
           onSessionComplete();
@@ -36,6 +41,7 @@ class IOSBlockingService implements BlockingService {
       }
     });
   }
+  static VoidCallback? onShowCheckInFlow; // 👈 new
 
 
 

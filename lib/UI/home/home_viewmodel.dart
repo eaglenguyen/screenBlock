@@ -98,7 +98,10 @@ class HomeViewModel extends _$HomeViewModel {
           if (state.phase == BlockingPhase.onBreak) {
             startBreak(5);
           }
-        },
+        },    onShowCheckInFlow: () { // 👈 new
+        debugPrint('🔔 showing check-in flow from unblock nudge');
+        state = state.copyWith(pendingCheckIn: true); // 👈 fixed — was _pendingCheckIn = true
+      },
       );
     }
 
@@ -122,9 +125,19 @@ class HomeViewModel extends _$HomeViewModel {
 
     ScheduleChecker.instance.start(_blockingService);
     _restoreSession();
+    _checkPendingCheckInFlow(); // 👈 new — checked explicitly on cold launch
 
     _requestReviewAfterDays();
 
+  }
+
+  Future<void> _checkPendingCheckInFlow() async {
+    if (!Platform.isIOS) return;
+    final hasPending = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+        .invokeMethod<bool>('checkAndClearPendingCheckIn') ?? false;
+    if (hasPending) {
+      state = state.copyWith(pendingCheckIn: true);
+    }
   }
 
   Future<void> _requestReviewAfterDays() async {
@@ -908,6 +921,8 @@ class HomeViewModel extends _$HomeViewModel {
     debugPrint('🔄 onAppResumed — phase: ${state.phase} isScheduleActive: ${state.isScheduleActive}');
     if (Platform.isIOS) {
       _checkPendingXpClaim();
+      await _checkPendingCheckInFlow(); // 👈 new — reuses the same method from init()
+
     }
     if (state.isSchedulePaused) {
       final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
@@ -1115,6 +1130,10 @@ class HomeViewModel extends _$HomeViewModel {
         state = state.copyWith(remainingSeconds: remaining);
       }
     });
+  }
+
+  void clearPendingCheckIn() {
+    state = state.copyWith(pendingCheckIn: false);
   }
 
   // ── Getters ───────────────────────────────────────
