@@ -258,6 +258,14 @@ class IOSBlockingService implements BlockingService {
     }
   }
 
+  Future<void> syncScheduleMonitoring(List<Map<String, dynamic>> schedules) async {
+    try {
+      await _channel.invokeMethod('syncScheduleMonitoring', {'schedules': schedules});
+    } catch (e) {
+      debugPrint('❌ syncScheduleMonitoring error: $e');
+    }
+  }
+
 
 
   @override

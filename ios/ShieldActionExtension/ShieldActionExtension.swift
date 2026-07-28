@@ -74,7 +74,8 @@ class ShieldActionExtension: ShieldActionDelegate {
     // 👇 new — fires an immediate local notification
     private func sendUnblockNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Take a small break!"
+        content.title = "your apps are currently blocked!"
+        content.body = "take a small break" // 👈 new
         content.sound = .default
 
         // fire essentially immediately

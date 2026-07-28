@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
@@ -9,6 +11,8 @@ import '../../../data/models/schedule.dart';
 import '../../../providers/repository_providers.dart'; // 👈 wherever scheduleRepositoryProvider lives
 import '../../../services/schedule_checker.dart';
 import '../../data/repositories/ScheduleRepo.dart';
+import '../../domain/platform/ios_blocking_service.dart';
+import '../../providers/blocking_service_provider.dart';
 import 'schedule_state.dart';
 
 part 'schedule_viewmodel.g.dart';
@@ -61,6 +65,22 @@ class ScheduleViewModel extends _$ScheduleViewModel {
     box.put('scheduleOrder', schedules.map((s) => s.id).toList());
   }
 
+  Future<void> _syncNativeScheduleMonitoring() async {
+    if (!Platform.isIOS) return;
+    final schedules = _repo.getAllSchedules();
+    final payload = schedules.map((s) => {
+      'id': s.id,
+      'startTime': s.startTime,
+      'endTime': s.endTime,
+      'days': s.days,
+      'blockingType': s.blockingType,
+      'isActive': s.isActive,
+    }).toList();
+
+    await (ref.read(blockingServiceProvider) as IOSBlockingService)
+        .syncScheduleMonitoring(payload);
+  }
+
   Future<void> saveSchedule({
     String? existingId,
     required String name,
@@ -98,6 +118,7 @@ class ScheduleViewModel extends _$ScheduleViewModel {
         await ScheduleChecker.instance.restartActiveSchedule(schedule);
       }
       _saveOrder();
+      await _syncNativeScheduleMonitoring(); // 👈 new
       loadSchedules();
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -106,6 +127,7 @@ class ScheduleViewModel extends _$ScheduleViewModel {
 
   Future<void> deleteSchedule(String id) async {
     await _repo.deleteSchedule(id); // 👈 was _box.delete(id)
+    await _syncNativeScheduleMonitoring(); // 👈 new
     loadSchedules();
   }
 
@@ -115,7 +137,7 @@ class ScheduleViewModel extends _$ScheduleViewModel {
     final updated = schedule.copyWith(isActive: !schedule.isActive); // 👈 was mutate + schedule.save()
     await _repo.saveSchedule(updated);
     //ScheduleChecker.instance.checkNow();
-
+    await _syncNativeScheduleMonitoring(); // 👈 new
     loadSchedules();
   }
 

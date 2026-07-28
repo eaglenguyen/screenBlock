@@ -328,6 +328,89 @@ class IOSBlockingService: NSObject {
         }
     }
     
+    
+    
+    // MARK: - Regular Schedule Monitoring
+
+    func startScheduleMonitoring(scheduleId: String, startTime: String, endTime: String) {
+        let calendar = Calendar.current
+
+        let startParts = startTime.split(separator: ":").compactMap { Int($0) }
+        let endParts = endTime.split(separator: ":").compactMap { Int($0) }
+
+        guard startParts.count == 2, endParts.count == 2 else {
+            NSLog("❌ startScheduleMonitoring: invalid time format for \(scheduleId)")
+            return
+        }
+
+        let startComponents = DateComponents(hour: startParts[0], minute: startParts[1])
+        let endComponents = DateComponents(hour: endParts[0], minute: endParts[1])
+
+        // full-day-spanning schedule, repeats daily —
+        // day-of-week filtering happens in the extension callback (same pattern as time-limit)
+        let schedule = DeviceActivitySchedule(
+            intervalStart: startComponents,
+            intervalEnd: endComponents,
+            repeats: true
+        )
+
+        let activityName = DeviceActivityName("com.eagle.pausenow.schedule.\(scheduleId)")
+
+        do {
+            try activityCenter.startMonitoring(activityName, during: schedule)
+            NSLog("✅ schedule monitoring started for \(scheduleId): \(startTime)-\(endTime)")
+        } catch {
+            NSLog("❌ startScheduleMonitoring error for \(scheduleId): \(error)")
+        }
+    }
+
+    func stopScheduleMonitoring(scheduleId: String) {
+        let activityName = DeviceActivityName("com.eagle.pausenow.schedule.\(scheduleId)")
+        activityCenter.stopMonitoring([activityName])
+        NSLog("🛑 stopped schedule monitoring for \(scheduleId)")
+    }
+
+    func syncScheduleMonitoring(_ schedules: [[String: Any]]) {
+        let allActivities = schedules.compactMap { schedule -> DeviceActivityName? in
+            guard let id = schedule["id"] as? String else { return nil }
+            return DeviceActivityName("com.eagle.pausenow.schedule.\(id)")
+        }
+        activityCenter.stopMonitoring(allActivities)
+
+        for schedule in schedules {
+            guard let id = schedule["id"] as? String,
+                  let startTime = schedule["startTime"] as? String,
+                  let endTime = schedule["endTime"] as? String,
+                  let days = schedule["days"] as? [Int],           // 👈 added
+                  let blockingMode = schedule["blockingType"] as? String, // 👈 added
+                  let isActive = schedule["isActive"] as? Bool,
+                  isActive
+            else { continue }
+
+            // 👇 save days + blockingMode so the extension can check them
+            if let daysData = try? JSONEncoder().encode(days),
+               let daysJson = String(data: daysData, encoding: .utf8) {
+                sharedDefaults?.set(daysJson, forKey: "scheduleDays_\(id)")
+            }
+            sharedDefaults?.set(blockingMode, forKey: "scheduleBlockingMode_\(id)")
+
+            startScheduleMonitoring(scheduleId: id, startTime: startTime, endTime: endTime)
+        }
+    }
+
+    func unshieldScheduleApps(scheduleId: String, blockingMode: String) {
+        let tokens = getScheduleTokens(scheduleId: scheduleId, blockingMode: blockingMode)
+        guard !tokens.isEmpty else {
+            NSLog("⚠️ unshieldScheduleApps: no tokens found for \(scheduleId)")
+            return
+        }
+
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.subtract(tokens)
+        store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+        NSLog("✅ unshielded \(tokens.count) apps for schedule \(scheduleId)")
+    }
+    
     // MARK: - Time Limit Monitoring
 
     func startTimeLimitMonitoring(configId: String, limitMinutes: Int) {

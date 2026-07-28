@@ -316,6 +316,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+        case "syncScheduleMonitoring":
+            if let args = call.arguments as? [String: Any],
+               let schedules = args["schedules"] as? [[String: Any]] {
+                service.syncScheduleMonitoring(schedules)
+            }
+            result(nil)
+        case "stopScheduleMonitoring":
+            if let args = call.arguments as? [String: Any],
+               let scheduleId = args["scheduleId"] as? String {
+                service.stopScheduleMonitoring(scheduleId: scheduleId)
+            }
+            result(nil)
         case "checkAndClearPendingCheckIn":
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             let pending = defaults?.bool(forKey: "pendingCheckInFlow") ?? false

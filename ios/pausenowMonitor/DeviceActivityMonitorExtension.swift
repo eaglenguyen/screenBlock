@@ -16,6 +16,18 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         sharedDefaults?.set(activity.rawValue, forKey: "extensionLastActivity")
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")
         sharedDefaults?.synchronize()
+        
+        // 👇 new — regular schedule start
+        if activity.rawValue.hasPrefix("com.eagle.pausenow.schedule.") {
+            let scheduleId = activity.rawValue.replacingOccurrences(
+                of: "com.eagle.pausenow.schedule.", with: ""
+            )
+            guard isScheduleActiveToday(scheduleId: scheduleId) else {
+                os_log("⏭ schedule interval started but not active today, skipping shield", log: logger, type: .fault)
+                return
+            }
+            shieldScheduleApps(scheduleId: scheduleId)
+        }
     }
     
     override func intervalDidEnd(for activity: DeviceActivityName) {
@@ -30,6 +42,14 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             reshieldApps()
             sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
             sharedDefaults?.synchronize()
+        }
+        
+        // 👇 new — regular schedule end, ALWAYS unshield regardless of day
+        if activity.rawValue.hasPrefix("com.eagle.pausenow.schedule.") {
+            let scheduleId = activity.rawValue.replacingOccurrences(
+                of: "com.eagle.pausenow.schedule.", with: ""
+            )
+            unshieldScheduleAppsInExtension(scheduleId: scheduleId)
         }
         
     }
@@ -128,5 +148,58 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
         os_log("🛡 time-limit shield applied for config %{public}@, %d apps",
                log: logger, type: .fault, configId, selection.applicationTokens.count)
+    }
+    
+    // private helpers for new schedule day-checking + shield/unshield branches
+    
+    private func isScheduleActiveToday(scheduleId: String) -> Bool {
+        guard let daysJson = sharedDefaults?.string(forKey: "scheduleDays_\(scheduleId)"),
+              let data = daysJson.data(using: .utf8),
+              let days = try? JSONDecoder().decode([Int].self, from: data)
+        else { return true } // fail open
+
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: Date())
+        let dayIndex = weekday == 1 ? 6 : weekday - 2 // Sun=1..Sat=7 → Mon=0..Sun=6
+
+        return days.contains(dayIndex)
+    }
+
+    private func shieldScheduleApps(scheduleId: String) {
+        let blockingMode = sharedDefaults?.string(forKey: "scheduleBlockingMode_\(scheduleId)") ?? "specific_apps"
+        let key = "schedule_\(scheduleId)_\(blockingMode)"
+
+        guard let data = sharedDefaults?.data(forKey: key),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else {
+            os_log("❌ shieldScheduleApps: no tokens for %{public}@", log: logger, type: .fault, scheduleId)
+            return
+        }
+
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.formUnion(selection.applicationTokens)
+        store.shield.applications = currentlyShielded
+
+        os_log("🛡 schedule shield applied for %{public}@, %d apps",
+               log: logger, type: .fault, scheduleId, selection.applicationTokens.count)
+    }
+
+    private func unshieldScheduleAppsInExtension(scheduleId: String) {
+        let blockingMode = sharedDefaults?.string(forKey: "scheduleBlockingMode_\(scheduleId)") ?? "specific_apps"
+        let key = "schedule_\(scheduleId)_\(blockingMode)"
+
+        guard let data = sharedDefaults?.data(forKey: key),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else {
+            os_log("⚠️ unshieldScheduleAppsInExtension: no tokens for %{public}@", log: logger, type: .fault, scheduleId)
+            return
+        }
+
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.subtract(selection.applicationTokens)
+        store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+
+        os_log("✅ schedule unshielded for %{public}@, %d apps",
+               log: logger, type: .fault, scheduleId, selection.applicationTokens.count)
     }
 }
