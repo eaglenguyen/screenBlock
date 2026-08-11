@@ -4,6 +4,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/schedule.dart';
 import '../../../core/constants/app_constants.dart';
 import 'app_icon_stack.dart';
+import 'hold_to_confirm.dart';
 
 class SessionCard extends StatelessWidget {
   const SessionCard({
@@ -40,6 +41,73 @@ class SessionCard extends StatelessWidget {
       : schedule.allowedApps;
 
 
+  void _showGiveUpConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundCard(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'You sure you want to unblock?',
+          style: AppTextStyles.headlineSmall.copyWith(
+            color: AppColors.textPrimary(context),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: Text.rich(
+          TextSpan(
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary(context),
+            ),
+            children: [
+              const TextSpan(text: 'Think twice before unblocking, do something more '),
+              TextSpan(
+                text: 'productive',
+                style: TextStyle(color: Colors.green, fontWeight: FontWeight.w800),
+              ),
+              const TextSpan(text: ' or try pausing instead! '),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          SizedBox( // 👈 new — explicit finite width wrapper
+            width: MediaQuery.of(context).size.width * 0.7,
+            child: HoldToConfirmButton(
+              onConfirmed: () {
+                Navigator.pop(ctx);
+                onToggle();
+              },
+              color: AppColors.error(context),
+              fillColor: Color.lerp(AppColors.error(context), Colors.black, 0.3)!,
+              textColor: Colors.white,
+              label: 'Hold to Give Up',
+              holdingLabel: 'Keep holding...',
+              doneLabel: 'Giving up',
+              holdDuration: const Duration(seconds: 7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity, // 👈 this one is fine — plain OutlinedButton, not HoldToConfirmButton
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.textPrimary(context),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: const StadiumBorder(),
+                side: BorderSide(color: AppColors.border(context)),
+              ),
+              child: const Text('No, continue blocking'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,8 +169,10 @@ class SessionCard extends StatelessWidget {
                         children: [
                           Text(
                             schedule.name,
-                            style: AppTextStyles.labelMedium,
-                          ),
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.textPrimary(context),
+                              fontWeight: FontWeight.w600,
+                            ),                          ),
                           if (schedule.isActive) ...[
                             const SizedBox(width: 8),
                             Container(
@@ -149,8 +219,15 @@ class SessionCard extends StatelessWidget {
                 ),
                 // toggle
                 GestureDetector(
-                  onTap: onToggle,
-                  child: AnimatedContainer(
+                  onTap: () {
+                    if (schedule.isActive && isCurrentlyActive) {
+                      // 👇 currently actively blocking — confirm before turning off
+                      _showGiveUpConfirmation(context);
+                    } else {
+                      // not currently active — toggle immediately, no confirmation needed
+                      onToggle();
+                    }
+                  },                  child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     width: 44,
                     height: 24,

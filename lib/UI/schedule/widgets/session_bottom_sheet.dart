@@ -21,6 +21,7 @@ import '../../../../services/schedule_checker.dart';
 import '../../home/home_viewmodel.dart';
 import '../../home/widgets/app_list_sheet.dart';
 import '../schedule_viewmodel.dart';
+import 'hold_to_confirm.dart';
 
 class SessionBottomSheet extends ConsumerStatefulWidget {
   const SessionBottomSheet({
@@ -116,11 +117,8 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
             const SizedBox(height: 8),
             _buildDayPicker(context),
             const SizedBox(height: 16),
-            _buildSaveButton(context),
-            if (isEditing) ...[
-              const SizedBox(height: 10),
-              _buildDeleteButton(context),
-            ],
+            _buildSaveRow(context),
+
           ],
         ),
       ),
@@ -146,7 +144,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                 color: AppColors.textPrimary(context),
               ),
               decoration: InputDecoration(
-                hintText: 'Session name',
+                hintText: 'Enter schedule name',
                 hintStyle: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary(context),
                 ),
@@ -602,36 +600,46 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
 
 
 
-  Widget _buildSaveButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _onSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold(context),
-          foregroundColor: AppColors.goldText(context),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: const StadiumBorder(),
-          textStyle: AppTextStyles.labelLarge,
+  Widget _buildSaveRow(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _onSave,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.gold(context),
+              foregroundColor: AppColors.goldText(context),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const StadiumBorder(),
+              textStyle: AppTextStyles.labelLarge,
+            ),
+            child: const Text('Save'),
+          ),
         ),
-        child: const Text('Save'),
-      ),
-    );
-  }
-
-  Widget _buildDeleteButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: _showDeleteConfirmation,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.error(context),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: const StadiumBorder(),
-          side: BorderSide(color: AppColors.error(context), width: 0.5),
-        ),
-        child: const Text('Delete Session'),
-      ),
+        if (isEditing) ...[
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: _showDeleteConfirmation,
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.error(context).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.error(context).withValues(alpha: 0.3),
+                  width: 0.5,
+                ),
+              ),
+              child: Icon(
+                Icons.delete_outline_outlined,
+                color: AppColors.error(context),
+                size: 22,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -642,83 +650,90 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.backgroundCard(context),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Delete Session', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)), textAlign: TextAlign.center),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Type Delete to confirm:',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '"$confirmWord"',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error(context), fontWeight: FontWeight.w700),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: confirmController,
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context)),
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: 'Type DELETE here',
-                  hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-                  filled: true,
-                  fillColor: AppColors.backgroundSubtle(context),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.error(context))),
-                ),
-                onChanged: (_) => setDialogState(() {}),
-              ),
-            ],
-          ),
-          actions: [
-            Column(
+        builder: (ctx, setDialogState) {
+          final isConfirmed = confirmController.text.trim().toLowerCase() == confirmWord.toLowerCase();
+
+          return AlertDialog(
+            backgroundColor: AppColors.backgroundCard(context),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text(
+              'Are you sure you want to delete?',
+              style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
+              textAlign: TextAlign.center,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: confirmController.text.trim().toLowerCase() == confirmWord.toLowerCase()
-                        ? () { Navigator.pop(ctx); _onDelete(); }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error(context),
-                      disabledBackgroundColor: AppColors.error(context).withValues(alpha: 0.3),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: const Text('Delete'),
-                  ),
+                Text(
+                  'Type delete to confirm:',
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary(context),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: const StadiumBorder(),
-                      side: BorderSide(color: AppColors.border(context)),
-                    ),
-                    child: const Text('Cancel'),
+                TextField(
+                  controller: confirmController,
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context)),
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: '',
+                    hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+                    filled: true,
+                    fillColor: AppColors.backgroundSubtle(context),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.error(context))),
                   ),
+                  onChanged: (_) => setDialogState(() {}),
                 ),
               ],
             ),
-          ],
-        ),
+            actions: [
+              Column(
+                children: [
+                  AbsorbPointer(
+                    absorbing: !isConfirmed,
+                    child: Opacity(
+                      opacity: isConfirmed ? 1.0 : 0.4,
+                      child: SizedBox( // 👈 new — explicit finite width wrapper
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        child: HoldToConfirmButton(
+                          onConfirmed: () {
+                            Navigator.pop(ctx);
+                            _onDelete();
+                          },
+                          color: AppColors.error(context),
+                          fillColor: Color.lerp(AppColors.error(context), Colors.black, 0.3)!,
+                          textColor: Colors.white,
+                          label: 'Hold to Delete',
+                          holdingLabel: 'Keep holding...',
+                          doneLabel: 'Deleting',
+                          holdDuration: const Duration(seconds: 3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary(context),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: const StadiumBorder(),
+                        side: BorderSide(color: AppColors.border(context)),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
-
 
   void _toggleDay(int day) {
     setState(() {
@@ -838,12 +853,76 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
     return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
   }
 
+  void _showValidationDialog(BuildContext context, {required String title, required String message}) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundCard(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.headlineSmall.copyWith(
+            color: AppColors.textPrimary(context),
+          ),
+        ),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary(context),
+          ),
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.gold(context),
+                foregroundColor: AppColors.goldText(context),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: const StadiumBorder(),
+              ),
+              child: const Text('Got it'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _onSave() async {
-    if (_nameController.text.trim().isEmpty) return;
+    final isAllApps = _blockingType == AppConstants.blockingTypeAllApps;
+    final relevantApps = isAllApps ? _allowedApps : _blockedApps;
     final startParts = _startTime.split(':');
     final endParts = _endTime.split(':');
     final startMinutes = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
     final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+
+    if (_nameController.text.trim().isEmpty) {
+      _showValidationDialog(
+        context,
+        title: 'Name Required',
+        message: 'Please enter a name for this session!',
+      );
+      return;
+    }
+
+    if (relevantApps.isEmpty) {
+      _showValidationDialog(
+        context,
+        title: 'No Apps Selected',
+        message: isAllApps
+            ? 'Please pick at least 1 app to add to your allow list!'
+            : 'Please pick at least 1 app to add to block list!',
+      );
+      return;
+    }
+
+
     if (startMinutes == endMinutes) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

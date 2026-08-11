@@ -21,7 +21,7 @@ class AppIconStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Platform.isIOS) {
-      if (iosStorageKey == null) return _placeholder(context);
+      if (iosStorageKey == null || packageNames.isEmpty) return _placeholder(context);
       return SizedBox(
         width: size ,
         height: size ,
@@ -88,6 +88,7 @@ class AppIconStack extends StatelessWidget {
     );
   }
 
+  // 👇 updated — now shows an actual icon instead of an empty box
   Widget _placeholder(BuildContext context) {
     return Container(
       width: size,
@@ -95,6 +96,11 @@ class AppIconStack extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.backgroundSubtle(context),
         borderRadius: BorderRadius.circular(size * 0.27),
+      ),
+      child: Icon(
+        Icons.lock_clock,
+        color: AppColors.textSecondary(context),
+        size: size * 0.5,
       ),
     );
   }

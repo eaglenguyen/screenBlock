@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../providers/blocking_service_provider.dart';
 import 'onboarding_animations.dart';
 
+
 class OnboardingPermissionsScreen extends ConsumerStatefulWidget {
   final VoidCallback onNext;
 
@@ -23,33 +24,30 @@ class OnboardingPermissionsScreen extends ConsumerStatefulWidget {
 
 class _OnboardingPermissionsScreenState
     extends ConsumerState<OnboardingPermissionsScreen>
-    with SingleTickerProviderStateMixin, OnboardingEntranceMixin, WidgetsBindingObserver  {
-
-  // permission states
+    with SingleTickerProviderStateMixin, OnboardingEntranceMixin, WidgetsBindingObserver {
   bool _hasScreenTime = false;
   bool _hasNotifications = false;
   bool _hasAccessibility = false;
   bool _hasOverlay = false;
   bool _hasUsageStats = false;
-
   bool _isCheckingPermissions = false;
+  bool _isRequesting = false; // 👈 new — iOS flow loading state
 
   @override
   void initState() {
     super.initState();
     initEntrance(elementCount: 3);
-    WidgetsBinding.instance.addObserver(this); // 👈 add
+    WidgetsBinding.instance.addObserver(this);
     _checkAllPermissions();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // 👈 add
+    WidgetsBinding.instance.removeObserver(this);
     disposeEntrance();
     super.dispose();
   }
 
-  // 👇 add this method
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -78,7 +76,6 @@ class _OnboardingPermissionsScreenState
         _hasUsageStats = hasUsageStats;
       });
     }
-
     setState(() => _isCheckingPermissions = false);
   }
 
@@ -86,7 +83,8 @@ class _OnboardingPermissionsScreenState
     try {
       final plugin = FlutterLocalNotificationsPlugin();
       final iosPlugin = plugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+          .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
       final result = await iosPlugin?.checkPermissions();
       return result?.isEnabled ?? false;
     } catch (_) {
@@ -98,12 +96,10 @@ class _OnboardingPermissionsScreenState
     try {
       final plugin = FlutterLocalNotificationsPlugin();
       final iosPlugin = plugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+          .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
       await iosPlugin?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+          alert: true, badge: true, sound: true);
       await Future.delayed(const Duration(seconds: 1));
       final granted = await _checkNotificationPermission();
       setState(() => _hasNotifications = granted);
@@ -112,87 +108,77 @@ class _OnboardingPermissionsScreenState
     }
   }
 
+  Future<void> _requestScreenTimePermission() async {
+    setState(() => _isRequesting = true);
+    HapticFeedback.lightImpact();
+    final service = ref.read(blockingServiceProvider);
+    await service.requestAccessibilityPermission();
+    await Future.delayed(const Duration(seconds: 1));
+    final granted = await service.hasAccessibilityPermission();
+    if (mounted) {
+      setState(() {
+        _hasScreenTime = granted;
+        _isRequesting = false;
+      });
+      if (granted) {
+        widget.onNext(); // 👈 new — advance once permission is confirmed
+      }
+    }
+  }
+
   bool get _canContinue {
     if (Platform.isIOS) {
-      return _hasScreenTime; // notifications optional but encouraged
+      return _hasScreenTime;
     } else {
       return _hasAccessibility && _hasOverlay;
     }
   }
 
   List<_PermissionItem> get _permissions {
-    if (Platform.isIOS) {
-      return [
-        _PermissionItem(
-          emoji: '⏱️',
-          title: 'Screen Time',
-          description: 'Required to block distracting apps at the system level',
-          isGranted: _hasScreenTime,
-          isRequired: true,
-          onRequest: () async {
-            final service = ref.read(blockingServiceProvider);
-            await service.requestAccessibilityPermission();
-            await Future.delayed(const Duration(seconds: 1));
-            final granted = await service.hasAccessibilityPermission();
-            setState(() => _hasScreenTime = granted);
-          },
-        ),
-        _PermissionItem(
-          emoji: '🔔',
-          title: 'Notifications',
-          description: 'Get notified when your FREE TRIAL ends!',
-          isGranted: _hasNotifications,
-          isRequired: false,
-          onRequest: _requestNotificationPermission,
-        ),
-      ];
-    } else {
-      return [
-        _PermissionItem(
-          emoji: '♿',
-          title: 'Accessibility',
-          description: 'Required to detect and block apps in the foreground',
-          isGranted: _hasAccessibility,
-          isRequired: true,
-          onRequest: () async {
-            // 👇 show disclosure first — required for Google Play policy compliance
-            final consented = await AccessibilityDisclosureDialog.show(context);
-            if (!consented) return; // user declined — don't open settings
-
-            final service = ref.read(blockingServiceProvider);
-            await service.requestAccessibilityPermission();
-            await Future.delayed(const Duration(seconds: 2));
-            final granted = await service.hasAccessibilityPermission();
-            setState(() => _hasAccessibility = granted);
-          },
-        ),
-        _PermissionItem(
-          emoji: '🔍',
-          title: 'Display Over Apps',
-          description: 'Required to show the block screen over other apps',
-          isGranted: _hasOverlay,
-          isRequired: true,
-          onRequest: () async {
-            final service = ref.read(blockingServiceProvider);
-            await service.requestOverlayPermission();
-          },
-        ),
-        _PermissionItem(
-          emoji: '📊',
-          title: 'Usage Access',
-          description: 'Shows your screen time stats on the block screen',
-          isGranted: _hasUsageStats,
-          isRequired: false,
-          onRequest: () async {
-            final service = ref.read(blockingServiceProvider);
-            await service.requestUsageStatsPermission();
-            await Future.delayed(const Duration(seconds: 2));
-            final granted = await service.hasUsageStatsPermission();
-            setState(() => _hasUsageStats = granted);
-          },
-        ),
-      ];
-    }
+    // ... UNCHANGED, Android list stays exactly as before
+    return [
+      _PermissionItem(
+        emoji: '♿',
+        title: 'Accessibility',
+        description: 'Required to detect and block apps in the foreground',
+        isGranted: _hasAccessibility,
+        isRequired: true,
+        onRequest: () async {
+          final consented = await AccessibilityDisclosureDialog.show(context);
+          if (!consented) return;
+          final service = ref.read(blockingServiceProvider);
+          await service.requestAccessibilityPermission();
+          await Future.delayed(const Duration(seconds: 2));
+          final granted = await service.hasAccessibilityPermission();
+          setState(() => _hasAccessibility = granted);
+        },
+      ),
+      _PermissionItem(
+        emoji: '🔍',
+        title: 'Display Over Apps',
+        description: 'Required to show the block screen over other apps',
+        isGranted: _hasOverlay,
+        isRequired: true,
+        onRequest: () async {
+          final service = ref.read(blockingServiceProvider);
+          await service.requestOverlayPermission();
+        },
+      ),
+      _PermissionItem(
+        emoji: '📊',
+        title: 'Usage Access',
+        description: 'Shows your screen time stats on the block screen',
+        isGranted: _hasUsageStats,
+        isRequired: false,
+        onRequest: () async {
+          final service = ref.read(blockingServiceProvider);
+          await service.requestUsageStatsPermission();
+          await Future.delayed(const Duration(seconds: 2));
+          final granted = await service.hasUsageStatsPermission();
+          setState(() => _hasUsageStats = granted);
+        },
+      ),
+    ];
   }
 
   @override
@@ -204,113 +190,276 @@ class _OnboardingPermissionsScreenState
           _buildGradientBg(),
           _buildCircles(),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // header
-                  staggered(
-                    0,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 16),
-                        Text(
-                          'Before we start...',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -1,
-                            height: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'We needs a few permissions\nto block apps effectively.',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.45),
-                            fontSize: 15,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
+            child: Platform.isIOS ? _buildIOSFlow(context) : _buildAndroidFlow(
+                context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── ANDROID — unchanged from before ──────────────
+
+  Widget _buildAndroidFlow(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          staggered(
+            0,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  'Before we start...',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'We needs a few permissions\nto block apps effectively.',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withValues(alpha: 0.45),
+                    fontSize: 15,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          staggered(
+            1,
+            Column(
+              children: _permissions.map((perm) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _PermissionCard(
+                      item: perm, onRefresh: _checkAllPermissions),
+                );
+              }).toList(),
+            ),
+          ),
+          const Spacer(),
+          staggered(
+            2,
+            Column(
+              children: [
+                if (!_canContinue)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      'Grant required permissions to continue',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white.withValues(alpha: 0.35),
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-
-                  // permission items
-                  staggered(
-                    1,
-                    Column(
-                      children: _permissions.map((perm) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _PermissionCard(
-                            item: perm,
-                            onRefresh: _checkAllPermissions,
-                          ),
-                        );
-                      }).toList(),
+                AnimatedOpacity(
+                  opacity: _canContinue ? 1.0 : 0.4,
+                  duration: const Duration(milliseconds: 300),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _canContinue ? widget.onNext : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEDB82A),
+                        foregroundColor: const Color(0xFF1A1208),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: const StadiumBorder(),
+                        disabledBackgroundColor: const Color(0xFFEDB82A)
+                            .withValues(alpha: 0.4),
+                        textStyle: GoogleFonts.poppins(
+                            fontSize: 17, fontWeight: FontWeight.w800),
+                      ),
+                      child: const Text('Continue →'),
                     ),
                   ),
-
-                  const Spacer(),
-
-                  // continue button
-                  staggered(
-                    2,
-                    Column(
-                      children: [
-                        if (!_canContinue)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Text(
-                              'Grant required permissions to continue',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white.withValues(alpha: 0.35),
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        AnimatedOpacity(
-                          opacity: _canContinue ? 1.0 : 0.4,
-                          duration: const Duration(milliseconds: 300),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _canContinue ? widget.onNext : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFEDB82A),
-                                foregroundColor: const Color(0xFF1A1208),
-                                padding: const EdgeInsets.symmetric(vertical: 18),
-                                shape: const StadiumBorder(),
-                                disabledBackgroundColor:
-                                const Color(0xFFEDB82A).withValues(alpha: 0.4),
-                                textStyle: GoogleFonts.poppins(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              child: const Text('Continue →'),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-}
 
+// ── iOS — new redesigned flow ──────────────────
+
+
+  Widget _buildIOSFlow(BuildContext context) {
+    const headline = 'Connect to Screen Time\nso I can help you scroll less!';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 40, 24, 36),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── mascot + speech bubble ──────────────
+          staggered(
+            0,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Image.asset(
+                  'assets/icons/mascot_face.png',
+                  width: 64,
+                  height: 64,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2F2F7),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      headline,
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF1A1A1A),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 40),
+
+          // ── fake preview card ────────────────────
+          staggered(
+            1,
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2F2F7),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '"pause now" Would Like to\nAccess Screen Time',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFF1A1A1A).withValues(alpha: 0.55),
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Providing "Pause Now" access to Screen Time may allow it to see your activity data, restrict content, and limit the usage of apps and websites.',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFF1A1A1A).withValues(alpha: 0.55),
+                      fontSize: 14.5,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: _isRequesting ? null : _requestScreenTimePermission,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0E0E5),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: _isRequesting
+                                ? const SizedBox(
+                              height: 20,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(color: Color(0xFF1A1A1A), strokeWidth: 2),
+                                ),
+                              ),
+                            )
+                                : Text(
+                              'Continue',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFF1A1A1A),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E0E5),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            'Don\'t Allow',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFF1A1A1A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── tap hint ──────────────────────────────
+          staggered(
+            1,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.arrow_upward_rounded, color: Colors.white.withValues(alpha: 0.4), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  'Tap Continue',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withValues(alpha: 0.4),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+}
 // ── Permission item data ──────────────────────────────
 
 class _PermissionItem {

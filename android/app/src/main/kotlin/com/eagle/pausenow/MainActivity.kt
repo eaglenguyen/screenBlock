@@ -238,7 +238,7 @@ class MainActivity : FlutterActivity() {
         AppBlockAccessibilityService.eventCallback = null
     }
 
-    private fun isAccessibilityEnabled(): BooleaFn {
+    private fun isAccessibilityEnabled(): Boolean {
         val expectedServiceName =
             "$packageName/${AppBlockAccessibilityService::class.java.name}"
         val enabledServices = Settings.Secure.getString(
