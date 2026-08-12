@@ -6,6 +6,8 @@ import '../../../core/theme/app_text_styles.dart';
 import 'app_picker_state.dart';
 import 'app_picker_viewmodel.dart';
 
+// macbookair
+
 class AppPickerScreen extends ConsumerStatefulWidget {
   const AppPickerScreen({
     super.key,
