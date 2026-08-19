@@ -50,6 +50,7 @@ class IOSBlockingService: NSObject {
         scheduleId: String? = nil // 👈 new
     ) {
         // 👇 use sharedDefaults? directly — not sharedDefaults.standard
+        sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset for the fresh session
         sharedDefaults?.set(true, forKey: "isBlocking")
         sharedDefaults?.set(blockingMode, forKey: "blockingMode")
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
@@ -68,6 +69,7 @@ class IOSBlockingService: NSObject {
     }
 
     func stopBlocking() {
+        sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset on pause
         sharedDefaults?.set(false, forKey: "isBlocking")
         sharedDefaults?.removeObject(forKey: "sessionStartTime")
         sharedDefaults?.removeObject(forKey: "sessionType")
@@ -77,6 +79,7 @@ class IOSBlockingService: NSObject {
     }
 
     func stopBlockingCompletely() {
+        sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset on pause
         sharedDefaults?.set(false, forKey: "isBlocking")
         sharedDefaults?.removeObject(forKey: "sessionStartTime")
         sharedDefaults?.removeObject(forKey: "sessionType")
@@ -98,7 +101,7 @@ class IOSBlockingService: NSObject {
 
     func pauseBlocking(forMinutes minutes: Int) {
         NSLog("⏸ pauseBlocking for \(minutes) minutes")
-
+        sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset on pause
         let now = Date()
         let pauseEndsAt = now.addingTimeInterval(TimeInterval(minutes * 60))
 
@@ -176,7 +179,7 @@ class IOSBlockingService: NSObject {
             )
     }
     func resumeBlocking() {
-
+        sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset on pause
         let currentSessionType = sharedDefaults?.string(forKey: "sessionType") ?? "manual"
         let scheduleId = sharedDefaults?.string(forKey: "activeScheduleId") // 👈 new
 

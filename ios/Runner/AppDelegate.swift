@@ -316,6 +316,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
+        case "resetUnblockButtonFlag":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            defaults?.set(false, forKey: "unblockButtonTapped")
+            defaults?.synchronize()
+            result(nil)
         case "syncScheduleMonitoring":
             if let args = call.arguments as? [String: Any],
                let schedules = args["schedules"] as? [[String: Any]] {

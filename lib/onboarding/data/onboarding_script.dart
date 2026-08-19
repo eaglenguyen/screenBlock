@@ -159,6 +159,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
         text: 'let\'s get to know you a bit more!',
       ),
     ],
-    userResponses: ['ok!'],
+    userResponses: ['Okay!'],
   ),
 ];

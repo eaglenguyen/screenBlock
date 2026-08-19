@@ -116,7 +116,7 @@ class _GraphPainter extends CustomPainter {
     // "Start" on the left
     final startTp = TextPainter(
       text: TextSpan(
-        text: 'Start',
+        text: 'Day 1',
         style: GoogleFonts.poppins(
           color: _gold,
           fontSize: 10,
@@ -130,7 +130,7 @@ class _GraphPainter extends CustomPainter {
     // "2 months" on the right
     final endTp = TextPainter(
       text: TextSpan(
-        text: 'in 2 months',
+        text: 'Day 30',
         style: GoogleFonts.poppins(
           color: _gold,
           fontSize: 10,

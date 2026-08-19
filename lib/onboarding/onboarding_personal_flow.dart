@@ -7,6 +7,7 @@ import '../../core/constants/hivebox_names.dart';
 import '../../core/theme/theme.notifier.dart';
 import 'data/onboarding_graph.dart';
 import 'data/onboarding_stats.dart';
+import 'onboarding_question_bank.dart';
 
 
 
@@ -550,16 +551,7 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
               height: 1.15,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            "We'll use this to personalize\nyour results",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 16,
-              height: 1.5,
-            ),
-          ),
+
           const SizedBox(height: 24),
 
           // age input
@@ -625,7 +617,7 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
             opacity: _parsedAge != null ? 1.0 : 0.35,
             duration: const Duration(milliseconds: 200),
             child: _GoldButton(
-              label: 'Continue →',
+              label: 'Continue',
               onTap: _parsedAge != null
                   ? () {
                 HapticFeedback.lightImpact();
@@ -633,6 +625,98 @@ class _OnboardingAgeScreenState extends State<OnboardingAgeScreen> {
                 widget.onSelected(_parsedAge!);
               }
                   : () {},
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OnboardingGenderScreen extends StatefulWidget {
+  final Function(String gender) onSelected;
+  final VoidCallback? onBack;
+
+  const OnboardingGenderScreen({
+    super.key,
+    required this.onSelected,
+    this.onBack,
+  });
+
+  @override
+  State<OnboardingGenderScreen> createState() => _OnboardingGenderScreenState();
+}
+
+class _OnboardingGenderScreenState extends State<OnboardingGenderScreen> {
+  int? _selected;
+  final List<String> _options = ['Male', 'Female', 'Prefer not to say'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF16162A),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: widget.onBack,
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'What is your gender?',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  ...List.generate(_options.length, (i) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: QBChoiceCard(
+                        index: i + 1,
+                        title: _options[i],
+                        isSelected: _selected == i,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          setState(() => _selected = i);
+                          Future.delayed(const Duration(milliseconds: 300),
+                                  () => widget.onSelected(_options[i]));
+                        },
+                      ),
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
         ],
@@ -919,15 +1003,6 @@ class _OnboardingHoursScreenState extends State<OnboardingHoursScreen> {
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Be honest — no judgment here 😅',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 15,
-            ),
-          ),
           const SizedBox(height: 40),
           ..._options.map((opt) {
             final isSelected = _selected == opt['label'];
@@ -1134,15 +1209,7 @@ class _OnboardingBadNewsScreenState
             height: 1.2,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Based on ${widget.data.hoursPerDay.toStringAsFixed(1)} hrs/day · age ${widget.data.age}',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
-            color: Colors.white.withValues(alpha: 0.4),
-            fontSize: 14,
-          ),
-        ),
+
         const SizedBox(height: 48),
 
         // progress bar track
@@ -1469,41 +1536,19 @@ class _OnboardingLifeGridScreenState
           ),
 
 
-          const SizedBox(height: 16),
 
           // caption — shows after animation
-          AnimatedOpacity(
-            opacity: _animationDone ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 600),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE74C3C).withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFFE74C3C).withValues(alpha: 0.25),
-                  width: 0.5,
-                ),
-              ),
-              child: Text(
-                'Thats $yearsLost years of your life lost to scrolling',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  color: const Color(0xFFE74C3C),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
 
           const SizedBox(height: 12),
+
+          const Spacer(), // 👈 new — pushes everything below it to the bottom
+
 
           AnimatedOpacity(
             opacity: _animationDone ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 600),
             child: _GoldButton(
-              label: 'Fix this  →',
+              label: 'Fix this',
               onTap: widget.onNext,
             ),
           ),
@@ -1712,7 +1757,7 @@ class OnboardingProductivityScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 60),
           Text(
-            'Your Plan is Ready',
+            'Pause Now stops you from scrolling',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -1724,7 +1769,7 @@ class OnboardingProductivityScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'based on all of your answers,\nyou will start to see improvement within \n2 months',
+            '89% of users report using their phone less within 1 month.',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),
@@ -1734,9 +1779,9 @@ class OnboardingProductivityScreen extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           const ProductivityGraph(),
-          const SizedBox(height: 40),
+          const Spacer(),
           _GoldButton(
-            label: "Let's get started →",
+            label: "Let's get started",
             onTap: onNext,
           ),
         ],
@@ -1837,7 +1882,7 @@ class _GoldButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 20),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.poppins(
-            fontSize: 17,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
           ),
           elevation: 0,

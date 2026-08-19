@@ -12,9 +12,11 @@ class ShieldActionExtension: ShieldActionDelegate {
     ) {
         switch action {
         case .primaryButtonPressed:
+            markUnblockReset() // 👈 new
             completionHandler(.close)
         case .secondaryButtonPressed:
-            sendUnblockNotification() // 👈 new
+            markUnblockTapped()
+            sendUnblockNotification()
             completionHandler(.defer)
         case .firstSecondarySubmenuItemPressed:
             completionHandler(.close)
@@ -34,9 +36,11 @@ class ShieldActionExtension: ShieldActionDelegate {
     ) {
         switch action {
         case .primaryButtonPressed:
+            markUnblockReset() // 👈 new
             completionHandler(.close)
         case .secondaryButtonPressed:
-            sendUnblockNotification() // 👈 new
+            markUnblockTapped()
+            sendUnblockNotification()
             completionHandler(.defer)
         case .firstSecondarySubmenuItemPressed:
             completionHandler(.close)
@@ -56,9 +60,11 @@ class ShieldActionExtension: ShieldActionDelegate {
     ) {
         switch action {
         case .primaryButtonPressed:
+            markUnblockReset() // 👈 new
             completionHandler(.close)
         case .secondaryButtonPressed:
-            sendUnblockNotification() // 👈 new
+            markUnblockTapped()
+            sendUnblockNotification()
             completionHandler(.defer)
         case .firstSecondarySubmenuItemPressed:
             completionHandler(.close)
@@ -70,22 +76,31 @@ class ShieldActionExtension: ShieldActionDelegate {
             completionHandler(.close)
         }
     }
-    
-    // 👇 new — fires an immediate local notification
+
+    private func markUnblockTapped() {
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        sharedDefaults?.set(true, forKey: "unblockButtonTapped")
+        sharedDefaults?.synchronize()
+    }
+
+    // 👇 new — resets the flag when the user exits the shield
+    private func markUnblockReset() {
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        sharedDefaults?.set(false, forKey: "unblockButtonTapped")
+        sharedDefaults?.synchronize()
+    }
+
     private func sendUnblockNotification() {
         let content = UNMutableNotificationContent()
         content.title = "your apps are currently blocked!"
-        content.body = "take a small break" // 👈 new
+        content.body = "take a small break"
         content.sound = .default
-
-        // fire essentially immediately
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.5, repeats: false)
         let request = UNNotificationRequest(
             identifier: "com.eagle.pausenow.unblockNudge",
             content: content,
             trigger: trigger
         )
-
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
                 NSLog("❌ failed to schedule unblock notification: \(error)")
@@ -93,5 +108,3 @@ class ShieldActionExtension: ShieldActionDelegate {
         }
     }
 }
-
-

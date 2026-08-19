@@ -140,6 +140,15 @@ class HomeViewModel extends _$HomeViewModel {
     }
   }
 
+  Future<void> _resetUnblockButtonFlag() async {
+    try {
+      await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod('resetUnblockButtonFlag');
+    } catch (e) {
+      debugPrint('❌ resetUnblockButtonFlag error: $e');
+    }
+  }
+
   Future<void> _requestReviewAfterDays() async {
     final installDate = _settingsRepo.getInstallDate(); // 👈 was reading Hive directly
     if (installDate == null) return;
@@ -922,6 +931,7 @@ class HomeViewModel extends _$HomeViewModel {
     if (Platform.isIOS) {
       _checkPendingXpClaim();
       await _checkPendingCheckInFlow(); // 👈 new — reuses the same method from init()
+      await _resetUnblockButtonFlag(); // 👈 new
 
     }
     if (state.isSchedulePaused) {

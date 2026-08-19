@@ -1,19 +1,22 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pausenow/onboarding/widgets/mascot_character.dart';
 
+import 'onboarding_animations.dart';
+
 // ── Shared shell ──────────────────────────────────────
 
-class _QBShell extends StatelessWidget {
+class QBShell extends StatelessWidget {
   final Widget child;
   final double? progress; // 👈 0.0 to 1.0
   final VoidCallback? onBack; // 👈 optional back handler
 
-  const _QBShell({
+  const QBShell({super.key,
     required this.child,
     this.progress,
     this.onBack
@@ -130,10 +133,10 @@ class _QBShell extends StatelessWidget {
 
 // ── Shared continue button ────────────────────────────
 
-class _ContinueButton extends StatelessWidget {
+class ContinueButton extends StatelessWidget {
   final VoidCallback? onTap;
   final String label;
-  const _ContinueButton({this.onTap, this.label = 'Continue →'});
+  const ContinueButton({super.key, this.onTap, this.label = 'Continue'});
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +153,7 @@ class _ContinueButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 20),
             shape: const StadiumBorder(),
             disabledBackgroundColor: const Color(0xFFEDB82A).withValues(alpha: 0.4),
-            textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
+            textStyle: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w800),
           ),
           child: Text(label),
         ),
@@ -160,16 +163,15 @@ class _ContinueButton extends StatelessWidget {
 }
 
 // ── Shared choice card (matches QBGoalsScreen style) ──
-
-class _QBChoiceCard extends StatelessWidget {
-  final String? emoji;
+class QBChoiceCard extends StatelessWidget {
+  final int? index; // 👈 new — replaces emoji as the leading visual
   final String title;
   final String? sub;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _QBChoiceCard({
-    this.emoji,
+  const QBChoiceCard({
+    this.index, // 👈 new
     required this.title,
     this.sub,
     required this.isSelected,
@@ -197,26 +199,49 @@ class _QBChoiceCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            if (emoji != null) ...[
-              Text(emoji!, style: const TextStyle(fontSize: 22)),
+            if (index != null) ...[ // 👈 was `if (emoji != null)`
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? const Color(0xFFEDB82A)
+                      : Colors.white.withValues(alpha: 0.08),
+                ),
+                child: Center(
+                  child: Text(
+                    '$index',
+                    style: GoogleFonts.poppins(
+                      color: isSelected
+                          ? const Color(0xFF1A1208)
+                          : Colors.white.withValues(alpha: 0.6),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(width: 12),
             ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(title,
                       style: GoogleFonts.poppins(
                         color: isSelected ? const Color(0xFFEDB82A) : Colors.white,
                         fontSize: 15, fontWeight: FontWeight.w700,
                       )),
-                  if (sub != null)
+                  if (sub != null && sub!.isNotEmpty) ... [
+                    const SizedBox(height: 4,),
                     Text(sub!,
-                      style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 12, height: 1.4,
-                      )),
-                ],
+                        style: GoogleFonts.poppins(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          fontSize: 12, height: 1.4,
+                        )),
+                  ],],
               ),
             ),
             AnimatedContainer(
@@ -242,6 +267,7 @@ class _QBChoiceCard extends StatelessWidget {
     );
   }
 }
+
 
 // ── QB1 — Goals Picker ────────────────────────────────
 
@@ -276,7 +302,7 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       progress: widget.progress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -313,8 +339,8 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
                 final goal = _goals[i];
-                return _QBChoiceCard(
-                  emoji: goal['emoji']!,
+                return QBChoiceCard(
+                  index: i + 1, // 👈 was emoji: opt['emoji']!
                   title: goal['title']!,
                   sub: goal['sub']!,
                   isSelected: _selected.contains(i),
@@ -333,7 +359,7 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          _ContinueButton(
+          ContinueButton(
             onTap: _selected.isNotEmpty
                 ? () => widget.onNext(_selected.map((i) => _goals[i]['title']!).toList())
                 : null,
@@ -375,22 +401,33 @@ class _QBFutureVisionScreenState extends State<QBFutureVisionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       progress: widget.progress,
       onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Looking into the future...',
-              style: GoogleFonts.poppins(
-                color: const Color(0xFFEDB82A), fontSize: 14, fontWeight: FontWeight.w600,
-              )),
+
           const SizedBox(height: 8),
-          Text('What does your life\nlook like with less\nphone time?',
+          Text.rich(
+            TextSpan(
               style: GoogleFonts.poppins(
-                color: Colors.white, fontSize: 30,
-                fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.2,
-              )),
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1,
+                height: 1.2,
+              ),
+              children: [
+                const TextSpan(text: 'What does your '),
+                TextSpan(
+                  text: 'future',
+                  style: TextStyle(color: Color(0xFFEDB82A)),
+                ),
+                const TextSpan(text: '\nlook like with less\nphone time?'),
+              ],
+            ),
+          ),
           const SizedBox(height: 28),
           Expanded(
             child: ListView.separated(
@@ -398,8 +435,8 @@ class _QBFutureVisionScreenState extends State<QBFutureVisionScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
                 final opt = _options[i];
-                return _QBChoiceCard(
-                  emoji: opt['emoji']!,
+                return QBChoiceCard(
+                  index: i + 1, // 👈 was emoji: opt['emoji']!
                   title: opt['title']!,
                   sub: opt['sub']!,
                   isSelected: _selected == i,
@@ -423,7 +460,7 @@ class _QBFutureVisionScreenState extends State<QBFutureVisionScreen> {
 
 class QBPhoneUsageScreen extends StatefulWidget {
   final Function(double hours) onNext;
-  final VoidCallback? onBack;   // 👈 add
+  final VoidCallback? onBack;
   final double progress;
 
   const QBPhoneUsageScreen({
@@ -458,18 +495,61 @@ class _QBPhoneUsageScreenState extends State<QBPhoneUsageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       progress: widget.progress,
       onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 8),
-          Text('How much time do\nyou spend on your\nphone daily?',
-              style: GoogleFonts.poppins(
-                color: Colors.white, fontSize: 30,
-                fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.2,
-              )),
+
+          // 👇 mascot + speech bubble, replacing the plain headline
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 14),
+                child: Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  shape: BoxShape.circle,
+                ),
+                clipBehavior: Clip.antiAlias,
+                  child: Transform.scale(
+                    scale: 1.4, // 👈 new — zooms the image in beyond the circle's edge, cropped by clipBehavior
+                    child: Image.asset(
+                      'assets/icons/square_notes_cutout.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+              ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF252542),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    'How much time do you\nspend on your phone daily?',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ),
+
+
+            ],
+          ),
+
           const Spacer(flex: 2),
           Center(
             child: Text(_label,
@@ -514,7 +594,7 @@ class _QBPhoneUsageScreenState extends State<QBPhoneUsageScreen> {
             ),
           ),
           const Spacer(flex: 3),
-          _ContinueButton(onTap: () => widget.onNext(_hours)),
+          ContinueButton(onTap: () => widget.onNext(_hours)),
         ],
       ),
     );
@@ -522,47 +602,79 @@ class _QBPhoneUsageScreenState extends State<QBPhoneUsageScreen> {
 }
 
 // ── QB4 — Social Media Relationship (single choice) ──
-
 class QBSocialMediaRelationshipScreen extends StatefulWidget {
   final Function(String answer) onNext;
-  final VoidCallback? onBack;   // 👈 add
+  final VoidCallback? onBack;
   final double progress;
-
   const QBSocialMediaRelationshipScreen({
     super.key,
     required this.onNext,
     this.onBack,
     required this.progress
   });
-
   @override
   State<QBSocialMediaRelationshipScreen> createState() => _QBSocialMediaRelationshipScreenState();
 }
-
 class _QBSocialMediaRelationshipScreenState extends State<QBSocialMediaRelationshipScreen> {
   int? _selected;
-
   final List<Map<String, String>> _options = [
-    {'emoji': '🤖', 'title': 'It controls me more than I control it', 'sub': 'Hard to put it down once I start'},
-    {'emoji': '🤷', 'title': 'I use it a lot but I can stop when I want', 'sub': 'Not addicted, just... a lot'},
-    {'emoji': '💔', 'title': 'It\'s a love/hate thing', 'sub': 'Enjoy it in the moment, regret it after'},
-    {'emoji': '✅', 'title': 'I\'m pretty healthy about it', 'sub': 'Just looking to fine-tune my habits'},
+    {'emoji': '🤖', 'title': 'It controls me more than I control it'},
+    {'emoji': '🤷', 'title': 'I use it a lot but I can stop when I want'},
+    {'emoji': '💔', 'title': 'It\'s a love/hate thing'},
+    {'emoji': '✅', 'title': 'I\'m pretty healthy about it'},
   ];
-
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       progress: widget.progress,
       onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 8),
-          Text('What\'s your relationship\nwith your phone and\nsocial media?',
-              style: GoogleFonts.poppins(
-                color: Colors.white, fontSize: 30,
-                fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.2,
-              )),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    shape: BoxShape.circle,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Transform.scale(
+                    scale: 1.4,
+                    child: Image.asset(
+                      'assets/icons/square_notes_cutout.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF252542),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    'What\'s your relationship with your phone and social media?',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 28),
           Expanded(
             child: ListView.separated(
@@ -570,10 +682,10 @@ class _QBSocialMediaRelationshipScreenState extends State<QBSocialMediaRelations
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
                 final opt = _options[i];
-                return _QBChoiceCard(
-                  emoji: opt['emoji']!,
+                return QBChoiceCard(
+                  index: i + 1, // 👈 was emoji: opt['emoji']!
                   title: opt['title']!,
-                  sub: opt['sub']!,
+                  sub: opt['sub'], // 👈 no fallback, no `!` — just pass through as nullable
                   isSelected: _selected == i,
                   onTap: () {
                     HapticFeedback.lightImpact();
@@ -592,53 +704,75 @@ class _QBSocialMediaRelationshipScreenState extends State<QBSocialMediaRelations
 }
 
 // ── QB5 — Blockers (multi-select) ────────────────────
-
 class QBBlockersScreen extends StatefulWidget {
   final Function(List<String> answers) onNext;
-  final VoidCallback? onBack;   // 👈 add
+  final VoidCallback? onBack;
   final double progress;
-
-
   const QBBlockersScreen({super.key, required this.onNext, this.onBack, required this.progress});
-
   @override
   State<QBBlockersScreen> createState() => _QBBlockersScreenState();
 }
-
 class _QBBlockersScreenState extends State<QBBlockersScreen> {
   final Set<int> _selected = {};
-
   final List<Map<String, String>> _options = [
-    {'emoji': '😴', 'title': 'Motivation', 'sub': 'I have no drive to be better'},
-    {'emoji': '😰', 'title': 'Stress', 'sub': 'Scrolling helps me decompress'},
-    {'emoji': '👀', 'title': 'FOMO', 'sub': 'I don\'t want to miss anything'},
-    {'emoji': '🔁', 'title': 'Time', 'sub': 'Not enough time in the day'},
-    {'emoji': '😞', 'title': 'Bad Discipline', 'sub': 'No routine to follow'},
+    {'title': 'Addicted', 'sub': 'I love scrolling too much'},
+    {'title': 'Stress', 'sub': 'Scrolling helps me decompress'},
+    {'title': 'FOMO', 'sub': 'I don\'t want to miss anything'},
+    {'title': 'Job', 'sub': 'My job requires me to scroll'},
+    {'title': 'Bad Habit', 'sub': 'I just scroll without thinking'},
   ];
-
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       progress: widget.progress,
       onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Let\'s get to the root',
-              style: GoogleFonts.poppins(
-                color: const Color(0xFFEDB82A), fontSize: 14, fontWeight: FontWeight.w600,
-              )),
           const SizedBox(height: 8),
-          Text('What\'s the main thing\nin the way of living a healthier lifestyle?',
-              style: GoogleFonts.poppins(
-                color: Colors.white, fontSize: 30,
-                fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.2,
-              )),
-          const SizedBox(height: 8),
-          Text('Pick all that apply',
-              style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.45), fontSize: 14,
-              )),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    shape: BoxShape.circle,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Transform.scale(
+                    scale: 1.4,
+                    child: Image.asset(
+                      'assets/icons/square_notes_cutout.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF252542),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    'Why can you not stop scrolling?',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
           Expanded(
             child: ListView.separated(
@@ -646,8 +780,8 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
                 final opt = _options[i];
-                return _QBChoiceCard(
-                  emoji: opt['emoji']!,
+                return QBChoiceCard(
+                  index: i + 1, // 👈 was emoji: opt['emoji']!
                   title: opt['title']!,
                   sub: opt['sub']!,
                   isSelected: _selected.contains(i),
@@ -662,7 +796,7 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          _ContinueButton(
+          ContinueButton(
             onTap: _selected.isNotEmpty
                 ? () => widget.onNext(_selected.map((i) => _options[i]['title']!).toList())
                 : null,
@@ -674,21 +808,16 @@ class _QBBlockersScreenState extends State<QBBlockersScreen> {
 }
 
 // ── QB6 — What You'd Rather Be Doing (multi-select) ───────────────
-
 class QBStrugglesScreen extends StatefulWidget {
   final Function(List<String> answers) onNext;
   final VoidCallback? onBack;
   final double progress;
-
   const QBStrugglesScreen({super.key, required this.onNext, this.onBack, required this.progress});
-
   @override
   State<QBStrugglesScreen> createState() => _QBStrugglesScreenState();
 }
-
 class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
   final Set<int> _selected = {};
-
   final List<Map<String, String>> _options = [
     {'emoji': '📚', 'title': 'Reading or learning', 'sub': 'Books, courses, new skills'},
     {'emoji': '💪', 'title': 'Exercise or movement', 'sub': 'Getting active, feeling better'},
@@ -696,38 +825,66 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
     {'emoji': '🎯', 'title': 'Working on my goals', 'sub': 'Projects that actually matter to me'},
     {'emoji': '😴', 'title': 'Just resting', 'sub': 'Sleeping more, actually relaxing'},
   ];
-
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       progress: widget.progress,
       onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 8),
-          RichText(
-            text: TextSpan(
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -1,
-                height: 1.2,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    shape: BoxShape.circle,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Transform.scale(
+                    scale: 1.4,
+                    child: Image.asset(
+                      'assets/icons/square_notes_cutout.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
-              children: [
-                const TextSpan(
-                  text: 'if you stopped ',
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF252542),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
+                      children: [
+                        const TextSpan(text: 'if you stopped '),
+                        TextSpan(
+                          text: 'doom scrolling',
+                          style: const TextStyle(color: Color(0xFFEDB82A)),
+                        ),
+                        const TextSpan(text: ', what would you spend more time doing?'),
+                      ],
+                    ),
+                  ),
                 ),
-                TextSpan(
-                  text: 'doom scrolling',
-                  style: const TextStyle(color: Color(0xFFEDB82A)),
-                ),
-                const TextSpan(
-                  text: ', what would you spend more time doing?',
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
           Expanded(
@@ -736,8 +893,8 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
                 final opt = _options[i];
-                return _QBChoiceCard(
-                  emoji: opt['emoji']!,
+                return QBChoiceCard(
+                  index: i + 1, // 👈 was emoji: opt['emoji']!
                   title: opt['title']!,
                   sub: opt['sub']!,
                   isSelected: _selected.contains(i),
@@ -752,7 +909,7 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          _ContinueButton(
+          ContinueButton(
             onTap: _selected.isNotEmpty
                 ? () => widget.onNext(_selected.map((i) => _options[i]['title']!).toList())
                 : null,
@@ -762,6 +919,240 @@ class _QBStrugglesScreenState extends State<QBStrugglesScreen> {
     );
   }
 }
+
+
+class QBSingleChoiceScreen extends StatefulWidget {
+  final String question;
+  final List<String> options;
+  final Function(String answer) onSelected;
+  final VoidCallback? onBack;
+  final double progress;
+
+  const QBSingleChoiceScreen({
+    super.key,
+    required this.question,
+    required this.options,
+    required this.onSelected,
+    this.onBack,
+    required this.progress,
+  });
+
+  @override
+  State<QBSingleChoiceScreen> createState() => _QBSingleChoiceScreenState();
+}
+
+class _QBSingleChoiceScreenState extends State<QBSingleChoiceScreen> {
+  int? _selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    shape: BoxShape.circle,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Transform.scale(
+                    scale: 1.4,
+                    child: Image.asset(
+                      'assets/icons/square_notes_cutout.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF252542),
+                    borderRadius: BorderRadius.circular(18),
+
+                  ),
+                  child: Text(
+                    widget.question,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 28),
+          ...List.generate(widget.options.length, (i) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: QBChoiceCard(
+                index: i + 1,
+                title: widget.options[i],
+                isSelected: _selected == i,
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  setState(() => _selected = i);
+                  Future.delayed(const Duration(milliseconds: 300),
+                          () => widget.onSelected(widget.options[i]));
+                },
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class QBInfoScreen extends StatefulWidget {
+  final String imageAsset;
+  final String title;
+  final String subtitle;
+  final VoidCallback onNext;
+  final VoidCallback? onBack;
+
+  const QBInfoScreen({
+    super.key,
+    required this.imageAsset,
+    required this.title,
+    required this.subtitle,
+    required this.onNext,
+    this.onBack,
+  });
+
+  @override
+  State<QBInfoScreen> createState() => _QBInfoScreenState();
+}
+
+class _QBInfoScreenState extends State<QBInfoScreen>
+    with SingleTickerProviderStateMixin, OnboardingEntranceMixin {
+  @override
+  void initState() {
+    super.initState();
+    initEntrance(elementCount: 4, speedMultiplier: 5); // 👈 doubles the duration — 720ms → 1440ms
+  }
+
+  @override
+  void dispose() {
+    disposeEntrance();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF16162A),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: widget.onBack,
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+
+                  // 0 — image
+                  staggered(
+                    0,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        widget.imageAsset,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 1 — title
+                  staggered(
+                    1,
+                    Text(
+                      widget.title,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                        height: 1.25,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 2 — subtitle
+                  staggered(
+                    2,
+                    Text(
+                      widget.subtitle,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+
+                  // 3 — button
+                  staggered(
+                    3,
+                    ContinueButton(onTap: widget.onNext),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Commitment Screen ─────────────────────────────────
 
 class QBCommitmentScreen extends StatefulWidget {
@@ -785,7 +1176,7 @@ class _QBCommitmentScreenState extends State<QBCommitmentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -803,8 +1194,8 @@ class _QBCommitmentScreenState extends State<QBCommitmentScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
                 final level = _levels[i];
-                return _QBChoiceCard(
-                  emoji: level['emoji'] as String,
+                return QBChoiceCard(
+                  index: i + 1, // 👈 was emoji: opt['emoji']!
                   title: level['title'] as String,
                   sub: level['sub'] as String,
                   isSelected: _selected == i,
@@ -833,7 +1224,7 @@ class QBCommitmentHighScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -853,7 +1244,7 @@ class QBCommitmentHighScreen extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.45), fontSize: 15, height: 1.5,
               )),
           const Spacer(flex: 3),
-          _ContinueButton(onTap: onNext, label: 'Let\'s build your plan →'),
+          ContinueButton(onTap: onNext, label: 'Finish Up'),
         ],
       ),
     );
@@ -869,7 +1260,7 @@ class QBCommitmentLowScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -889,7 +1280,179 @@ class QBCommitmentLowScreen extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.45), fontSize: 15, height: 1.5,
               )),
           const Spacer(flex: 3),
-          _ContinueButton(onTap: onNext, label: 'I\'ll give it a shot →'),
+          ContinueButton(onTap: onNext, label: 'I\'ll give it a shot'),
+        ],
+      ),
+    );
+  }
+}
+
+
+// timepicker screens
+
+class QBTimePickerScreen extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final TimeOfDay initialTime;
+  final Function(TimeOfDay time) onContinue;
+  final VoidCallback? onBack;
+  final double progress; // 👈 new
+
+  const QBTimePickerScreen({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.initialTime,
+    required this.onContinue,
+    this.onBack,
+    required this.progress, // 👈 new
+  });
+
+  @override
+  State<QBTimePickerScreen> createState() => _QBTimePickerScreenState();
+}
+
+class _QBTimePickerScreenState extends State<QBTimePickerScreen> {
+  late DateTime _picked;
+
+  @override
+  void initState() {
+    super.initState();
+    _picked = DateTime(2024, 1, 1, widget.initialTime.hour, widget.initialTime.minute);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return QBShell( // 👈 was Scaffold(...Stack(...))
+      progress: widget.progress,
+      onBack: widget.onBack,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 8),
+          Text(
+            widget.title,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              height: 1.25,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            widget.subtitle,
+            style: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.45),
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            height: 216,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E35),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.06),
+                width: 0.5,
+              ),
+            ),
+            child: CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: Brightness.dark,
+                textTheme: CupertinoTextThemeData(
+                  dateTimePickerTextStyle: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                initialDateTime: _picked,
+                use24hFormat: false,
+                onDateTimeChanged: (dt) => _picked = dt,
+              ),
+            ),
+          ),
+          const Spacer(),
+          ContinueButton(
+            onTap: () => widget.onContinue(
+              TimeOfDay(hour: _picked.hour, minute: _picked.minute),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class QBRealisticTargetScreen extends StatelessWidget {
+  final TimeOfDay blockTime;
+  final VoidCallback onNext;
+  final VoidCallback? onBack;
+  final double progress; // 👈 new
+
+  const QBRealisticTargetScreen({
+    super.key,
+    required this.blockTime,
+    required this.onNext,
+    this.onBack,
+    required this.progress, // 👈 new
+  });
+
+  String get _formattedTime {
+    final hour = blockTime.hourOfPeriod == 0 ? 12 : blockTime.hourOfPeriod;
+    final minute = blockTime.minute.toString().padLeft(2, '0');
+    final period = blockTime.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return QBShell( // 👈 was Scaffold(...Stack(...))
+      progress: progress,
+      onBack: onBack,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 8),
+          const Spacer(flex: 2),
+          Text.rich(
+            TextSpan(
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+                height: 1.3,
+              ),
+              children: [
+                const TextSpan(text: 'Blocking your apps at '),
+                TextSpan(
+                  text: _formattedTime,
+                  style: const TextStyle(color: Color(0xFFEDB82A)),
+                ),
+                const TextSpan(text: ' is a realistic target. It\'s not hard at all!'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '90% of users say that they scroll much less after using pause now.',
+            style: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.45),
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          const Spacer(flex: 3),
+          ContinueButton(onTap: onNext),
         ],
       ),
     );
@@ -910,7 +1473,7 @@ class QBSympathyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _QBShell(
+    return QBShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -959,7 +1522,7 @@ class QBSympathyScreen extends StatelessWidget {
 
           const Spacer(flex: 3),
 
-          _ContinueButton(
+          ContinueButton(
             onTap: onNext,
             label: 'Start my transformation',
           ),

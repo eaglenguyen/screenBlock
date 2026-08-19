@@ -1,30 +1,22 @@
 import 'dart:io';
-import 'dart:math';
-import 'package:confetti/confetti.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:pausenow/onboarding/widgets/bouncing_arrow.dart';
 import 'package:pausenow/onboarding/widgets/mascot_character.dart';
-import 'package:pausenow/onboarding/widgets/pulsing_icon.dart';
-import '../../core/constants/app_constants.dart';
-import '../../domain/platform/ios_blocking_service.dart';
-import '../../providers/blocking_service_provider.dart';
-import '../UI/home/home_viewmodel.dart';
+
 import '../UI/home/widgets/app_list_sheet.dart';
 import '../UI/schedule/schedule_viewmodel.dart';
-import 'manual_blocking_tutorial.dart';
-import 'mockups/onboarding_mockups.dart';
+import '../core/constants/app_constants.dart';
+import '../domain/platform/ios_blocking_service.dart';
+import '../providers/blocking_service_provider.dart';
+import 'onboarding_question_bank.dart';
 
-// ── Pre Demo screen  ────────────────────────────
-
-
-class _DemoExplainerScreen extends StatelessWidget {
+// ── Demo Explainer Screen ─────────────────────────────
+class DemoExplainerScreen extends StatelessWidget {
   final VoidCallback onNext;
-
-  const _DemoExplainerScreen({super.key, required this.onNext});
+  const DemoExplainerScreen({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +45,8 @@ class _DemoExplainerScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Spacer(flex: 3),
-
-                  // mascot
                   const MascotCharacter(size: 100),
                   const SizedBox(height: 24),
-
-                  // headline
                   Text(
                     'Almost there!',
                     style: GoogleFonts.poppins(
@@ -78,8 +66,6 @@ class _DemoExplainerScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 36),
-
-                  // steps
                   _buildStep(
                     number: '1',
                     title: 'schedule your blocks',
@@ -94,10 +80,7 @@ class _DemoExplainerScreen extends StatelessWidget {
                     number: '3',
                     title: 'apps unlock when session ends',
                   ),
-
                   const Spacer(flex: 3),
-
-                  // button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -112,11 +95,11 @@ class _DemoExplainerScreen extends StatelessWidget {
                         shape: const StadiumBorder(),
                         elevation: 0,
                         textStyle: GoogleFonts.poppins(
-                          fontSize: 17,
+                          fontSize: 20,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      child: const Text('Show me →'),
+                      child: const Text('Create Schedule'),
                     ),
                   ),
                 ],
@@ -135,7 +118,6 @@ class _DemoExplainerScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // number circle
         Container(
           width: 36,
           height: 36,
@@ -179,869 +161,61 @@ class _DemoExplainerScreen extends StatelessWidget {
   }
 }
 
-// ── Demo screens container ────────────────────────────
+// Day Picker
 
-class OnboardingDemoFlow extends ConsumerStatefulWidget {
-  final VoidCallback onComplete;
+class DemoDaysScreen extends StatefulWidget {
+  final List<int> initialDays;
+  final Function(List<int> days) onContinue;
+  final VoidCallback? onBack;
+  final double progress;
 
-  const OnboardingDemoFlow({super.key, required this.onComplete});
-
-  @override
-  ConsumerState<OnboardingDemoFlow> createState() =>
-      _OnboardingDemoFlowState();
-}
-
-class _OnboardingDemoFlowState
-    extends ConsumerState<OnboardingDemoFlow> {
-  int _step = 0;
-  String _selectedDisconnectTime = '';
-  bool _scheduleCreated = false;
-
-  void _next() {
-    HapticFeedback.lightImpact();
-    setState(() => _step++);
-  }
-
-  void _onDisconnectSelected(String time) {
-    setState(() {
-      _selectedDisconnectTime = time;
-      _step++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 350),
-      transitionBuilder: (child, animation) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          )),
-          child: FadeTransition(opacity: animation, child: child),
-        );
-      },
-      child: _buildStep(),
-    );
-  }
-  Widget _buildStep() {
-    switch (_step) {
-      case 0:
-        return _DemoExplainerScreen(
-          key: const ValueKey('explainer'),
-          onNext: _next,
-        );
-      case 1:
-        return _DemoIntroScreen(
-          key: const ValueKey('intro'),
-          onNext: _next,
-          highlightManual: false,
-        );
-      case 2:
-        return _DemoPickAppScreen(
-          key: const ValueKey('demo1'),
-          onNext: _next,
-        );
-      case 3:
-        return _DemoBoldStatementScreen(
-          key: const ValueKey('demo2'),
-          onNext: _next,
-        );
-      case 4:
-        return _DemoDisconnectScreen(
-          key: const ValueKey('demo3'),
-          onSelected: _onDisconnectSelected,
-        );
-      case 5:
-        return _DemoSchedulePreviewScreen(
-          key: const ValueKey('demo4'),
-          disconnectTime: _selectedDisconnectTime,
-          onNext: (created) {
-            setState(() => _scheduleCreated = created);
-            _next();
-          },
-        );
-      case 6:
-        return _DemoScheduleTabScreen(
-          key: const ValueKey('demo5'),
-          onNext: _next,
-        );
-      case 7:
-        return _DemoBlockingScreen(
-          key: const ValueKey('demo6'),
-          onNext: _next,
-        );
-      case 8:
-        return _DemoIntroScreen(
-          key: const ValueKey('bridge'),
-          onNext: _next,
-          highlightManual: true,
-        );
-      case 9:
-        return ManualBlockingTutorial(
-          key: const ValueKey('manual'),
-          onComplete: _next, // 👈 was widget.onComplete
-          showSkip: false,
-        );
-      case 10:
-        return _DemoXpScreen(
-          key: const ValueKey('demo7'),
-          onNext: () {
-            widget.onComplete(); // 👈 just continue, no review prompt
-          },
-        );
-      default:
-        widget.onComplete();
-        return const SizedBox.shrink();
-    }
-  }
-}
-
-
-
-
-// ── Demo Screen 1 — Pick distracting app ─────────────
-
-class _DemoPickAppScreen extends ConsumerWidget {
-  final VoidCallback onNext;
-
-  const _DemoPickAppScreen({super.key, required this.onNext});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return _DemoShell(
-      child: Column(
-        children: [
-          const Spacer(flex: 2),
-          const SizedBox(height: 32),
-          Text(
-            'Pick your most\ndistracting app',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.15,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "We'll help you limit it",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 17,
-              height: 1.5,
-            ),
-          ),
-          const Spacer(flex: 3),
-          _DemoButton(
-            icon: Icons.add_circle_outline_rounded,
-            label: 'Choose an App',
-            onTap: () => _openAppPicker(context, ref),
-          ),
-          const SizedBox(height: 16),
-          // 👇 add skip option
-          GestureDetector(
-            onTap: onNext,
-            child: Text(
-              'Skip for now',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.3),
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _openAppPicker(BuildContext context, WidgetRef ref) {
-    if (Platform.isIOS) {
-      _showIOSPicker(context, ref);
-    } else {
-      _showAndroidPicker(context, ref);
-    }
-  }
-
-  void _showIOSPicker(BuildContext context, WidgetRef ref) async {
-    try {
-      final service = ref.read(blockingServiceProvider)
-      as IOSBlockingService;
-      final count = await service.showAppPicker(
-        blockingMode: AppConstants.blockingTypeSpecificApps,
-      );
-      if ((count ?? 0) > 0) {
-        final placeholders = List.generate(count!, (i) => 'ios_app_$i');
-        ref.read(homeViewModelProvider.notifier)
-            .setBlockedApps(placeholders);
-        onNext(); // 👈 advance after picking
-      }
-    } catch (e) {
-      debugPrint('❌ iOS app picker error: $e');
-    }
-  }
-
-  void _showAndroidPicker(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (_) => AppListSheet(
-        isBlockList: true,
-        initialApps: const [],
-        onSave: (apps) {
-          ref.read(homeViewModelProvider.notifier)
-              .setBlockedApps(apps);
-          onNext(); // 👈 advance after saving
-        },
-      ),
-    );
-  }
-}
-
-// ── Demo Screen 2 — Bold statement ───────────────────
-
-class _DemoBoldStatementScreen extends StatelessWidget {
-  final VoidCallback onNext;
-
-  const _DemoBoldStatementScreen({super.key, required this.onNext});
-
-  @override
-  Widget build(BuildContext context) {
-    return _DemoShell(
-      child: Column(
-        children: [
-          const Spacer(flex: 2),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.8,
-                height: 1.25,
-              ),
-              children: [
-                const TextSpan(text: "Let's pick a peak\nfocus time to block "),
-                TextSpan(
-                  text: 'ALL',
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFFEDB82A),
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                const TextSpan(text: '* of\nyour apps.'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            '*Except for the productive ones 🧡',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: const Color(0xFFEDB82A).withValues(alpha: 0.8),
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          const Spacer(flex: 3),
-          _DemoButton(
-            label: 'Continue',
-            onTap: onNext,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Demo Screen 3 — When to disconnect ───────────────
-
-class _DemoDisconnectScreen extends StatefulWidget {
-  final Function(String time) onSelected;
-
-  const _DemoDisconnectScreen({super.key, required this.onSelected});
-
-  @override
-  State<_DemoDisconnectScreen> createState() => _DemoDisconnectScreenState();
-}
-
-class _DemoDisconnectScreenState extends State<_DemoDisconnectScreen> {
-  String? _selected;
-
-  final List<Map<String, String>> _options = [
-    {'emoji': '🌅', 'label': 'In the morning', 'time': 'morning'},
-    {'emoji': '🛌', 'label': 'Before bed', 'time': 'bed'},
-    {'emoji': '💼', 'label': 'At work', 'time': 'work'},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return _DemoShell(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 60),
-          Text(
-            'When do you want\nto disconnect?',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 40),
-          ..._options.map((opt) {
-            final isSelected = _selected == opt['time'];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  setState(() => _selected = opt['time']);
-                  Future.delayed(
-                    const Duration(milliseconds: 300),
-                    () => widget.onSelected(opt['time']!),
-                  );
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFFEDB82A).withValues(alpha: 0.1)
-                        : const Color(0xFF1E1E35),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFFEDB82A).withValues(alpha: 0.6)
-                          : const Color(0xFF2A2A48),
-                      width: isSelected ? 1.5 : 0.5,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        opt['emoji']!,
-                        style: const TextStyle(fontSize: 24),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        opt['label']!,
-                        style: GoogleFonts.poppins(
-                          color: isSelected
-                              ? const Color(0xFFEDB82A)
-                              : Colors.white,
-                          fontSize: 17,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (isSelected)
-                        Container(
-                          width: 22,
-                          height: 22,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEDB82A),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: Color(0xFF1A1208),
-                            size: 14,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }),
-          const Spacer(),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Demo Screen 4 — Schedule preview ─────────────────
-
-class _DemoSchedulePreviewScreen extends ConsumerWidget {
-  final String disconnectTime;
-  final Function(bool created) onNext;
-
-  const _DemoSchedulePreviewScreen({
+  const DemoDaysScreen({
     super.key,
-    required this.disconnectTime,
-    required this.onNext,
+    required this.initialDays,
+    required this.onContinue,
+    this.onBack,
+    required this.progress,
   });
 
-  String get _scheduleName {
-    switch (disconnectTime) {
-      case 'morning': return 'Morning Focus';
-      case 'bed': return 'Night Mode';
-      case 'work': return 'Work Hours';
-      default: return 'Focus Time';
-    }
-  }
-
-  String get _emoji {
-    switch (disconnectTime) {
-      case 'morning': return '🌅';
-      case 'bed': return '🌙';
-      case 'work': return '💼';
-      default: return '⏰';
-    }
-  }
-
-  String get _startTime {
-    switch (disconnectTime) {
-      case 'morning': return '06:00';
-      case 'bed': return '22:00';
-      case 'work': return '09:00';
-      default: return '09:00';
-    }
-  }
-
-  String get _endTime {
-    switch (disconnectTime) {
-      case 'morning': return '09:00';
-      case 'bed': return '05:00';
-      case 'work': return '17:00';
-      default: return '17:00';
-    }
-  }
-
-  String get _startDisplay {
-    switch (disconnectTime) {
-      case 'morning': return '6:00 AM';
-      case 'bed': return '10:00 PM';
-      case 'work': return '9:00 AM';
-      default: return '9:00 AM';
-    }
-  }
-
-  String get _endDisplay {
-    switch (disconnectTime) {
-      case 'morning': return '9:00 AM';
-      case 'bed': return '5:00 AM';
-      case 'work': return '5:00 PM';
-      default: return '5:00 PM';
-    }
-  }
-
-  List<int> get _days {
-    switch (disconnectTime) {
-      case 'morning': return [0, 1, 2, 3, 4, 5, 6];
-      case 'bed': return [0, 1, 2, 3, 4, 5, 6];
-      case 'work': return [0, 1, 2, 3, 4];
-      default: return [0, 1, 2, 3, 4];
-    }
-  }
-
-  Future<void> _createSchedule(WidgetRef ref) async {
-    try {
-      await ref
-          .read(scheduleViewModelProvider.notifier)
-          .saveSchedule(
-        name: _scheduleName,
-        startTime: _startTime,
-        endTime: _endTime,
-        days: _days,
-        blockingType: AppConstants.blockingTypeSpecificApps,
-        blockedApps: ref.read(homeViewModelProvider).blockedApps,
-        allowedApps: const [],
-      );
-      debugPrint('📅 Demo schedule created: $_scheduleName');
-    } catch (e) {
-      debugPrint('❌ Demo schedule creation error: $e');
-    }
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
-    return _DemoShell(
-      child: Column(
-        children: [
-          const SizedBox(height: 48),
-          Text(
-            "Here's your\nscheduled session",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 32),
-
-          // schedule card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E35),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0xFFEDB82A).withValues(alpha: 0.3),
-                width: 0.5,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // schedule name
-                Row(
-                  children: [
-                    Text(_emoji, style: const TextStyle(fontSize: 22)),
-                    const SizedBox(width: 10),
-                    Text(
-                      _scheduleName,
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(color: Color(0xFF2A2A48), thickness: 0.5),
-                const SizedBox(height: 16),
-
-                // start/end times
-                _timeRow('Starts', _startDisplay),
-                const SizedBox(height: 12),
-                _timeRow('Ends', _endDisplay),
-                const SizedBox(height: 20),
-
-                // days
-                Text(
-                  'Days Active',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white.withValues(alpha: 0.5),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(7, (i) {
-                    final isActive = _days.contains(i);
-                    return Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? const Color(0xFFEDB82A)
-                            : const Color(0xFF252542),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isActive
-                              ? const Color(0xFFEDB82A)
-                              : const Color(0xFF2A2A48),
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          dayLabels[i],
-                          style: GoogleFonts.poppins(
-                            color: isActive
-                                ? const Color(0xFF1A1208)
-                                : Colors.white.withValues(alpha: 0.4),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ),
-
-          const Spacer(),
-
-          // continue — creates real schedule
-          _DemoButton(
-            label: 'Add Schedule',
-            onTap: () async {
-              await _createSchedule(ref);
-              onNext(true);
-            },
-          ),
-          const SizedBox(height: 14),
-          GestureDetector(
-            onTap: () => onNext(false),
-            child: Text(
-              'Do this later',
-              style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.4),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Widget _timeRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontSize: 15,
-          ),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            color: const Color(0xFFEDB82A),
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
+  State<DemoDaysScreen> createState() => _DemoDaysScreenState();
 }
 
-// ── Demo Screen 5 — Schedule tab mockup ──────────────
-
-class _DemoScheduleTabScreen extends StatelessWidget {
-  final VoidCallback onNext;
-
-  const _DemoScheduleTabScreen({super.key, required this.onNext});
-
-  @override
-  Widget build(BuildContext context) {
-    return _DemoShell(
-      child: Column(
-        children: [
-          const SizedBox(height: 40),
-          Text(
-            'You can edit this in\nthe schedule tab',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.8,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 32),
-
-          // phone mockup showing schedule screen
-          PhoneMockup(
-            child: ScheduleScreenMockup(),
-          ),
-
-          const Spacer(),
-          _DemoButton(label: 'Continue', onTap: onNext),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Demo Screen 6 — Blocking preview ─────────────────
-
-class _DemoBlockingScreen extends StatelessWidget {
-  final VoidCallback onNext;
-
-  const _DemoBlockingScreen({super.key, required this.onNext});
-
-  @override
-  Widget build(BuildContext context) {
-    return _DemoShell(
-      child: Column(
-        children: [
-          const SizedBox(height: 40),
-          Text(
-            'Your apps will be blocked\nduring your session',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.8,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'This is where your journey begins!',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          const SizedBox(height: 32),
-
-          // phone mockup showing active blocking
-          PhoneMockup(
-            child: ActiveBlockingMockup(),
-          ),
-
-          const Spacer(),
-          _DemoButton(label: 'Got it 👍', onTap: onNext),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Demo XP Screen ────────────────────────────────────
-class _DemoXpScreen extends StatefulWidget {
-  final VoidCallback onNext;
-  const _DemoXpScreen({super.key, required this.onNext});
-
-  @override
-  State<_DemoXpScreen> createState() => _DemoXpScreenState();
-}
-
-class _DemoXpScreenState extends State<_DemoXpScreen>
-    with SingleTickerProviderStateMixin {
-
-  late ConfettiController _confettiCtrl;
-  late AnimationController _bounceCtrl;
-  late Animation<double> _bounceAnim;
-  late AudioPlayer _successPlayer;
-
-  static const int _demoXpEarned = 30;
-  static const int _demoTotalXp = 0; // 👈 starts at 0
-
-  bool _claiming = false;
-  bool _claimed = false;
-  int _displayXp = 0;
-  int _displayTotal = _demoTotalXp;
+class _DemoDaysScreenState extends State<DemoDaysScreen> {
+  late Set<int> _selected;
+  static const _dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   @override
   void initState() {
     super.initState();
-    _confettiCtrl = ConfettiController(
-        duration: const Duration(seconds: 3));
-    _bounceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _bounceAnim = CurvedAnimation(
-        parent: _bounceCtrl, curve: Curves.elasticOut);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _bounceCtrl.forward();
-      HapticFeedback.heavyImpact();
-    });
-
-    _successPlayer = AudioPlayer();
-
-
-
+    _selected = Set.from(widget.initialDays);
   }
 
-  @override
-  void dispose() {
-    _successPlayer.dispose();
-    _confettiCtrl.dispose();
-    _bounceCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _playSuccessSound() async {
-    try {
-      await _successPlayer.setAsset('assets/sounds/confetti.mp3');
-      await _successPlayer.setVolume(0.8);
-      await _successPlayer.play();
-    } catch (e) {
-      debugPrint('❌ success sound error: $e');
-    }
-  }
-  Future<void> _onClaimTapped() async {
-    if (_claiming || _claimed) return;
-    setState(() => _claiming = true);
-    HapticFeedback.mediumImpact();
-    _confettiCtrl.play();
-    _playSuccessSound();
-
-
-    const steps = 20;
-    const interval = Duration(milliseconds: 90);
-    for (int i = 1; i <= steps; i++) {
-      await Future.delayed(interval);
-      if (!mounted) return;
-      setState(() {
-        _displayXp = ((_demoXpEarned * i) / steps).round();
-        _displayTotal = _demoTotalXp + _displayXp;
-      });
-      HapticFeedback.lightImpact();
-    }
-
-
-
-    const floatDuration = Duration(milliseconds: 1200);
-    const floatSteps = 20;
-    for (int i = 1; i <= floatSteps; i++) {
-      await Future.delayed(Duration(
-          milliseconds: floatDuration.inMilliseconds ~/ floatSteps));
-      if (!mounted) return;
-
-    }
-
+  void _toggleDay(int day) {
+    HapticFeedback.selectionClick();
     setState(() {
-      _claiming = false;
-      _claimed = true;
+      if (_selected.contains(day)) {
+        _selected.remove(day);
+      } else {
+        _selected.add(day);
+      }
     });
-
-    HapticFeedback.heavyImpact();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _DemoShell(
-        child: SingleChildScrollView( // 👈 add only here
-        child: Column(
+    return QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           Text(
-            'Earn ⭐️ after every\nsession you block',
-            textAlign: TextAlign.center,
+            'Which days should\nthis schedule run?',
             style: GoogleFonts.poppins(
               color: Colors.white,
-              fontSize: 28,
+              fontSize: 30,
               fontWeight: FontWeight.w800,
               letterSpacing: -1,
               height: 1.2,
@@ -1049,347 +223,372 @@ class _DemoXpScreenState extends State<_DemoXpScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap claim to see it in action 👇',
-            textAlign: TextAlign.center,
+            'Select at least one day',
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),
               fontSize: 14,
             ),
           ),
-          const SizedBox(height: 24),
-
-          // phone mockup
-          Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              TutorialPhoneMockup(
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    // confetti inside mockup
-                    ConfettiWidget(
-                      confettiController: _confettiCtrl,
-                      blastDirectionality: BlastDirectionality.explosive,
-                      numberOfParticles: 15,
-                      gravity: 0.3,
-                      emissionFrequency: 0.05,
-                      blastDirection: pi / 2,
-                      colors: const [
-                        Color(0xFFEDB82A),
-                        Color(0xFFFF6B6B),
-                        Color(0xFF4ECDC4),
-                      ],
-                    ),
-
-                    // mockup content
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 12),
-
-                          // bolt icon
-                          ScaleTransition(
-                            scale: _bounceAnim,
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  width: 52,
-                                  height: 52,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFEDB82A),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.bolt_rounded,
-                                      color: Color(0xFF1A1208), size: 28),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          Text('Session Complete!',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                              )),
-                          const SizedBox(height: 12),
-
-                          // stat cards
-                          Row(
-                            children: [
-                              Expanded( // 👈 already there
-                                child: _mockupStatCard(
-                                  label: '⭐️ earned',
-                                  value: '$_displayXp',
-                                  highlight: _claiming,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded( // 👈 make sure this wraps the Stack too
-                                child: Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    // 👇 make the stat card fill the full width
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: _mockupStatCard(
-                                        label: 'Total ⭐️\'s',
-                                        value: '$_displayTotal',
-                                        highlight: _claiming,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          if (!_claiming && !_claimed)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: BouncingArrow(),
-                            ),
-
-
-                          // claim button inside mockup
-                          GestureDetector(
-                            onTap: _onClaimTapped,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 18),
-                              decoration: BoxDecoration(
-                                color: _claimed
-                                    ? const Color(0xFF4CAF50)
-                                    : _claiming
-                                    ? const Color(0xFF252542)
-                                    : const Color(0xFFEDB82A),
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    _claimed
-                                        ? Icons.check_rounded
-                                        : Icons.star,
-                                    color: _claimed
-                                        ? Colors.white
-                                        : const Color(0xFF1A1208),
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _claimed
-                                        ? '⭐️ Claimed!'
-                                        : _claiming
-                                        ? 'Claiming...'
-                                        : 'Claim $_demoXpEarned ⭐️',
-                                    style: GoogleFonts.poppins(
-                                      color: _claimed
-                                          ? Colors.white
-                                          : _claiming
-                                          ? Colors.white38
-                                          : const Color(0xFF1A1208),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+          const SizedBox(height: 28),
+          Expanded(
+            child: ListView.separated(
+              itemCount: _dayNames.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (_, i) {
+                final isSelected = _selected.contains(i);
+                return GestureDetector(
+                  onTap: () => _toggleDay(i),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFEDB82A).withValues(alpha: 0.1)
+                          : const Color(0xFF1E1E35),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFFEDB82A).withValues(alpha: 0.6)
+                            : const Color(0xFF2A2A48),
+                        width: isSelected ? 1.5 : 0.5,
                       ),
                     ),
-                  ],
+                    child: Row(
+                      children: [
+                        Text(
+                          _dayNames[i],
+                          style: GoogleFonts.poppins(
+                            color: isSelected ? const Color(0xFFEDB82A) : Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: isSelected ? const Color(0xFFEDB82A) : Colors.transparent,
+                            border: Border.all(
+                              color: isSelected ? const Color(0xFFEDB82A) : Colors.white.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: isSelected
+                              ? const Icon(Icons.check_rounded, color: Color(0xFF1A1208), size: 16)
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+          _ContinueButton(
+            onTap: _selected.isNotEmpty
+                ? () => widget.onContinue(_selected.toList()..sort())
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// App Picker
+
+class DemoAppPickerScreen extends ConsumerStatefulWidget {
+  final Function(List<String> apps) onAppsSelected;
+  final VoidCallback? onBack;
+  final double progress;
+
+  const DemoAppPickerScreen({
+    super.key,
+    required this.onAppsSelected,
+    this.onBack,
+    required this.progress,
+  });
+
+  @override
+  ConsumerState<DemoAppPickerScreen> createState() => _DemoAppPickerScreenState();
+}
+
+class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
+  bool _isPicking = false;
+
+  Future<void> _openRealPicker() async {
+    setState(() => _isPicking = true);
+    try {
+      if (Platform.isIOS) {
+        final service = ref.read(blockingServiceProvider) as IOSBlockingService;
+        final count = await service.showAppPicker(
+          blockingMode: AppConstants.blockingTypeSpecificApps,
+        );
+        final selectedCount = count ?? 0;
+
+        if (selectedCount == 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Please select at least 1 app to block')),
+            );
+          }
+          return;
+        }
+
+        // 👇 cap at 3, even if the picker somehow returned more
+        final cappedCount = selectedCount > 3 ? 3 : selectedCount;
+        final placeholders = List.generate(cappedCount, (i) => 'ios_app_$i');
+        widget.onAppsSelected(placeholders);
+      } else {
+        if (!mounted) return;
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          useRootNavigator: true,
+          builder: (_) => AppListSheet(
+            isBlockList: true,
+            initialApps: const [],
+            onSave: (apps) {
+              if (apps.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please select at least 1 app to block')),
+                );
+                return;
+              }
+              final capped = apps.length > 3 ? apps.sublist(0, 3) : apps;
+              widget.onAppsSelected(capped);
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ demo app picker error: $e');
+    } finally {
+      if (mounted) setState(() => _isPicking = false);
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 8),
+          Text(
+            'Which apps do you\nwant to block?',
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Pick the apps for this schedule',
+            style: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.45),
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 28),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1C1C1E),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.06), width: 0.5),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Select Apps',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: _isPicking ? null : _openRealPicker,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: _isPicking
+                                ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                                : Text(
+                              'Add',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(color: Colors.white.withValues(alpha: 0.06), height: 0.5),
+                  Expanded(
+                    child: ListView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _fakeRow('📚', 'All Apps & Categories'),
+                        _fakeRow('💬', 'Social'),
+                        _fakeRow('🎮', 'Games'),
+                        _fakeRow('🍿', 'Entertainment'),
+                        _fakeRow('🎨', 'Creativity'),
+                        _fakeRow('🌍', 'Education'),
+                        _fakeRow('🚴', 'Health & Fitness'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.arrow_upward_rounded, color: Colors.white.withValues(alpha: 0.4), size: 16),
+              const SizedBox(width: 6),
+              Text(
+                'Tap Add',
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 24),
-          if (_claimed)
-            _DemoButton(label: 'Next →', onTap: widget.onNext),
-        ],
-      ),
-    ));
-  }
-
-  Widget _mockupStatCard({
-    required String label,
-    required String value,
-    bool highlight = false,
-  }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: highlight
-            ? const Color(0xFFEDB82A).withValues(alpha: 0.1)
-            : const Color(0xFF252542),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: highlight
-              ? const Color(0xFFEDB82A).withValues(alpha: 0.3)
-              : const Color(0xFF2A2A48),
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.45),
-                fontSize: 9,
-              )),
-          const SizedBox(height: 4),
-          Text(value,
-              style: GoogleFonts.poppins(
-                color: highlight
-                    ? const Color(0xFFEDB82A)
-                    : Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-              )),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-// ── Shared button widgets ─────────────────────────────
-
-class _DemoButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  final IconData? icon;
-
-  const _DemoButton({
-    required this.label,
-    required this.onTap,
-    this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFEDB82A),
-          foregroundColor: const Color(0xFF1A1208),
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          shape: const StadiumBorder(),
-          textStyle: GoogleFonts.poppins(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
+          const SizedBox(height: 12), // 👈 new
+          Center( // 👈 new
+            child: GestureDetector(
+              onTap: () => widget.onAppsSelected([]), // 👈 skip — proceeds with empty list, no validation
+              child: Text(
+                'Skip for now (debug)',
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  fontSize: 13,
+                ),
+              ),
+            ),
           ),
-          elevation: 0,
-        ),
-        child: icon != null
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 20),
-                  const SizedBox(width: 8),
-                  Text(label),
-                ],
-              )
-            : Text(label),
+
+        ],
+      ),
+    );
+  }
+
+  Widget _fakeRow(String emoji, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Text(emoji, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Text(label, style: GoogleFonts.poppins(color: Colors.white, fontSize: 15)),
+        ],
       ),
     );
   }
 }
 
-class _DemoSkipButton extends StatelessWidget {
-  final VoidCallback onTap;
+// Bar chart
 
-  const _DemoSkipButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Text(
-        'Skip for now',
-        style: GoogleFonts.poppins(
-          color: Colors.white.withValues(alpha: 0.35),
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
-
-// ── Intro screen — two ways to block ─────────────────
-class _DemoIntroScreen extends StatefulWidget {
+class DemoComparisonScreen extends ConsumerStatefulWidget {
   final VoidCallback onNext;
-  final bool highlightManual;
+  final VoidCallback? onBack;
+  final double progress;
+  final TimeOfDay scheduleStart;
+  final TimeOfDay scheduleEnd;
+  final List<int> scheduleDays;
+  final List<String> blockedApps;
 
-  const _DemoIntroScreen({
+  const DemoComparisonScreen({
     super.key,
     required this.onNext,
-    this.highlightManual = false,
+    this.onBack,
+    required this.progress,
+    required this.scheduleStart,
+    required this.scheduleEnd,
+    required this.scheduleDays,
+    required this.blockedApps,
   });
 
   @override
-  State<_DemoIntroScreen> createState() => _DemoIntroScreenState();
+  ConsumerState<DemoComparisonScreen> createState() => _DemoComparisonScreenState();
 }
 
-class _DemoIntroScreenState extends State<_DemoIntroScreen>
+class _DemoComparisonScreenState extends ConsumerState<DemoComparisonScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
-  late List<Animation<double>> _fades;
-  late List<Animation<Offset>> _slides;
+  late Animation<double> _titleFade;
+  late Animation<double> _cardFade;
+  late Animation<double> _withoutBarGrow;
+  late Animation<double> _withBarGrow;
+  late Animation<double> _subtitleFade;
+  late Animation<double> _buttonFade;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2800),
+      duration: const Duration(milliseconds: 4000),
     );
-
-    // 4 sections: headline, mode row, "let's show you" text, button
-    _fades = List.generate(4, (i) {
-      final start = i * 0.2;
-      final end = (start + 0.4).clamp(0.0, 1.0);
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: _ctrl,
-          curve: Interval(start, end, curve: Curves.easeOut),
-        ),
-      );
-    });
-
-    _slides = List.generate(4, (i) {
-      final start = i * 0.2;
-      final end = (start + 0.4).clamp(0.0, 1.0);
-      return Tween<Offset>(
-        begin: const Offset(0, 0.15),
-        end: Offset.zero,
-      ).animate(
-        CurvedAnimation(
-          parent: _ctrl,
-          curve: Interval(start, end, curve: Curves.easeOut),
-        ),
-      );
-    });
-
+    _titleFade = _interval(0.0, 0.15);
+    _cardFade = _interval(0.15, 0.3);
+    _withoutBarGrow = _interval(0.35, 0.6);
+    _withBarGrow = _interval(0.55, 0.85);
+    _subtitleFade = _interval(0.8, 0.95);
+    _buttonFade = _interval(0.9, 1.0);
     _ctrl.forward();
+  }
+
+  Animation<double> _interval(double start, double end) {
+    return CurvedAnimation(
+      parent: _ctrl,
+      curve: Interval(start, end, curve: Curves.easeOut),
+    );
   }
 
   @override
@@ -1398,263 +597,215 @@ class _DemoIntroScreenState extends State<_DemoIntroScreen>
     super.dispose();
   }
 
-  Widget _staggered(int index, Widget child) {
-    return FadeTransition(
-      opacity: _fades[index],
-      child: SlideTransition(
-        position: _slides[index],
-        child: child,
-      ),
-    );
+  String _fmt(TimeOfDay t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  Future<void> _createScheduleAndContinue() async {
+    setState(() => _isSaving = true);
+    try {
+      await ref.read(scheduleViewModelProvider.notifier).saveSchedule(
+        name: 'Blocked Apps',
+        startTime: _fmt(widget.scheduleStart),
+        endTime: _fmt(widget.scheduleEnd),
+        days: widget.scheduleDays,
+        blockingType: AppConstants.blockingTypeSpecificApps,
+        blockedApps: widget.blockedApps,
+        allowedApps: const [],
+      );
+    } catch (e) {
+      debugPrint('❌ demo schedule creation error: $e');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+      widget.onNext();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _DemoShell(
-      child: Column(
-        children: [
-          const Spacer(flex: 2),
-
-          // 0 — headline + subtitle
-          _staggered(
-            0,
-            Column(
-              children: [
-                Text(
-                  widget.highlightManual
-                      ? 'Congrats on creating your first schedule!'
-                      : 'Two ways to\nblock apps',
-                  textAlign: TextAlign.center,
+    return QBShell(
+      progress: widget.progress,
+      onBack: widget.onBack,
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, _) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 8),
+              FadeTransition(
+                opacity: _titleFade,
+                child: Text(
+                  'Become 5x more productive with pause now',
                   style: GoogleFonts.poppins(
                     color: Colors.white,
-                    fontSize: 34,
+                    fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: -1,
-                    height: 1.15,
+                    letterSpacing: -0.8,
+                    height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.highlightManual
-                      ? "One step closer to a heathier lifestyle"
-                      : "We'll walk you through both",
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: Transform.scale(
+                  scale: 1.0, // 👈 adjust this one number — 1.0 = current size, 0.75 = 75%, 0.5 = half size, etc.
+                  child: SizedBox(
+                    height: 320, // keep whatever height you were using before scaling
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: FadeTransition(
+                            opacity: _cardFade,
+                            child: _buildCard(
+                              label: 'Without pause now',
+                              heightFraction: 0.2 * _withoutBarGrow.value,
+                              valueLabel: '20%',
+                              filled: false,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: FadeTransition(
+                            opacity: _cardFade,
+                            child: _buildCard(
+                              label: 'With pause now',
+                              heightFraction: 1.0 * _withBarGrow.value,
+                              valueLabel: '5x',
+                              filled: true,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              FadeTransition(
+                opacity: _subtitleFade,
+                child: Text(
+                  'pause now makes it easy and holds you accountable.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     color: Colors.white.withValues(alpha: 0.45),
-                    fontSize: 15,
+                    fontSize: 14,
+                    height: 1.4,
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
+              ),
 
-          // 1 — two modes row
-          _staggered(
-            1,
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      widget.highlightManual
-                          ? Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEDB82A).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Text('📅', style: TextStyle(fontSize: 32)),
-                        ),
-                      )
-                          : PulsingIcon(emoji: '📅'),
-                      const SizedBox(height: 10),
-                      Text('Schedule', style: GoogleFonts.poppins(
-                          color: widget.highlightManual
-                              ? Colors.white.withValues(alpha: 0.4)
-                              : Colors.white,
-                          fontSize: 15, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      Text('Auto-block\nat set times',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              fontSize: 11, height: 1.4)),
-                    ],
-                  ),
-                ),
-                Column(
-                  children: [
-                    Container(width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text('+', style: GoogleFonts.poppins(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          fontSize: 11, fontWeight: FontWeight.w600)),
-                    ),
-                    Container(width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1)),
-                  ],
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      widget.highlightManual
-                          ? PulsingIcon(emoji: '⚡')
-                          : Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEDB82A).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: const Color(0xFFEDB82A).withValues(alpha: 0.25),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Text('⚡', style: TextStyle(fontSize: 32)),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text('Manual', style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 15, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      Text('Block on\ndemand instantly',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              fontSize: 11, height: 1.4)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+              const Spacer(),
 
-          const SizedBox(height: 28),
+              FadeTransition(
+                opacity: _buttonFade,
+                child: _ContinueButton(
+                  onTap: _isSaving ? null : _createScheduleAndContinue,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
-          // 2 — "let's show you" text
-          _staggered(
-            2,
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: widget.highlightManual
-                        ? "This is "
-                        : "Let's show you ",
-                    style: GoogleFonts.poppins(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  TextSpan(
-                    text: widget.highlightManual ? 'Manual Blocking' : 'Scheduling',
-                    style: GoogleFonts.poppins(
-                      color: const Color(0xFFEDB82A),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
+  Widget _buildCard({
+    required String label,
+    required double heightFraction,
+    required String valueLabel,
+    required bool filled,
+  }) {
+    return ClipRRect( // 👈 new — clips the fill to the card's rounded corners when it's flush against the edges
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E35),
+
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding( // 👈 padding now ONLY wraps the label
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+              child: Text(
+                label,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                ),
               ),
             ),
-          ),
-
-          const Spacer(flex: 3),
-
-          // 3 — button loads last
-          _staggered(
-            3,
-            _DemoButton(label: 'Show me', onTap: widget.onNext),
-          ),
-        ],
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final maxHeight = constraints.maxHeight;
+                  return Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      Container(
+                        height: maxHeight * heightFraction.clamp(0.0, 1.0),
+                        width: double.infinity, // 👈 no padding above/around this — fills edge to edge
+                        color: filled
+                            ? const Color(0xFFEDB82A)
+                            : Colors.white.withValues(alpha: 0.12),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: Text(
+                              valueLabel,
+                              style: GoogleFonts.poppins(
+                                color: filled ? const Color(0xFF1A1208) : Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 
-// ── Shared shell ──────────────────────────────────────
 
-class _DemoShell extends StatelessWidget {
-  final Widget child;
 
-  const _DemoShell({required this.child});
+// ── Shared continue button ────────────────────────────
+
+class _ContinueButton extends StatelessWidget {
+  final VoidCallback? onTap;
+  final String label;
+  const _ContinueButton({this.onTap, this.label = 'Continue'});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF16162A),
-      body: Stack(
-        children: [
-          // gradient bg
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1a0a3d),
-                  Color(0xFF16162a),
-                  Color(0xFF0a1a2a),
-                ],
-                stops: [0.0, 0.5, 1.0],
-              ),
-            ),
+    return AnimatedOpacity(
+      opacity: onTap != null ? 1.0 : 0.35,
+      duration: const Duration(milliseconds: 200),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFEDB82A),
+            foregroundColor: const Color(0xFF1A1208),
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            shape: const StadiumBorder(),
+            disabledBackgroundColor: const Color(0xFFEDB82A).withValues(alpha: 0.4),
+            textStyle: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w800),
           ),
-          // floating circles
-          Positioned(
-            top: -40,
-            right: -40,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFEDB82A).withValues(alpha: 0.04),
-                border: Border.all(
-                  color: const Color(0xFFEDB82A).withValues(alpha: 0.07),
-                  width: 0.5,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 100,
-            left: -30,
-            child: Container(
-              width: 130,
-              height: 130,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF4444AA).withValues(alpha: 0.04),
-                border: Border.all(
-                  color: const Color(0xFF4444AA).withValues(alpha: 0.07),
-                  width: 0.5,
-                ),
-              ),
-            ),
-          ),
-          // content
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
-              child: child,
-            ),
-          ),
-        ],
+          child: Text(label),
+        ),
       ),
     );
   }

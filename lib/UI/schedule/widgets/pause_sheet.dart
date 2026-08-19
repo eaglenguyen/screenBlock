@@ -77,13 +77,13 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
           ),
 
           Text(
-            widget.isPaused ? 'Schedule Paused' : 'Pause Blocking',
+            widget.isPaused ? 'Unpause Blocking' : 'Pause Blocking',
             style: AppTextStyles.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
             widget.isPaused
-                ? 'Resume Blocking?'
+                ? 'Reblock Apps?'
                 : 'How long do you want to pause?',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),
@@ -170,8 +170,8 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
                   widget.onResume();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.textSecondary(context).withValues(alpha: 0.4),
-                  foregroundColor: const Color(0xFF1A1208),
+                  backgroundColor: Colors.orange, // 👈 was AppColors.textSecondary(context).withValues(alpha: 0.4)
+                  foregroundColor: Colors.black, // 👈 was const Color(0xFF1A1208)
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: const StadiumBorder(),
                   textStyle: const TextStyle(
@@ -179,7 +179,7 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                child: const Text('Yes, Block My Apps'),
+                child: const Text('Yes, block apps'),
               ),
             ),
           ],

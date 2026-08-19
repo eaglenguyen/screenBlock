@@ -5,12 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pausenow/onboarding/widgets/mascot_character.dart';
+import 'package:pausenow/onboarding/widgets/speech_bubble.dart';
 import '../../data/models/onboarding.dart';
 import 'data/onboarding_script.dart';
 import 'onboarding_viewmodel.dart';
 import 'widgets/typing_dots.dart';
 import 'widgets/onboarding_spotlight_overlay.dart';
-
 class OnboardingChatIntroScreen extends StatefulWidget {
   final VoidCallback onStart;
 
@@ -58,41 +58,46 @@ class _OnboardingChatIntroScreenState
           children: [
             const Spacer(flex: 2),
 
-            // chat bubble
+            // 👇 mascot + speech bubble, side by side
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF252535),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                    bottomLeft: Radius.circular(4),
-                    bottomRight: Radius.circular(20),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center, // 👈 back to centered
+                children: [
+                  SpeechBubbleWithTail(
+                    color: const Color(0xFF252535),
+                    borderColor: Colors.white.withValues(alpha: 0.08),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.72,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF252535),
+                          borderRadius: BorderRadius.circular(20), // 👈 now uniform on all corners
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Text(
+                          'Hello! I\'m Boxy. Let\'s have a quick chat about what\'s going on here!',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 18,
+                            height: 1.55,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    width: 0.5,
-                  ),
-                ),
-                child: Text(
-                  'Howdy! I\'m Boxy. Let\'s have a quick chat about what\'s going on here 👀\n            (yes, this is personal)',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 16,
-                    height: 1.55,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                  const SizedBox(height: 4),
+                  const MascotCharacter(size: 200),
+                ],
               ),
             ),
-
-            const SizedBox(height: 32),
-
-            // bouncing mascot
-            const MascotCharacter(size: 160),
-
 
             const Spacer(flex: 2),
 
@@ -113,11 +118,11 @@ class _OnboardingChatIntroScreenState
                     shape: const StadiumBorder(),
                     elevation: 0,
                     textStyle: GoogleFonts.poppins(
-                      fontSize: 17,
+                      fontSize: 20,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  child: const Text('Chat with Boxy'),
+                  child: const Text('Start Chat'),
                 ),
               ),
             ),
@@ -127,6 +132,7 @@ class _OnboardingChatIntroScreenState
     );
   }
 }
+
 
 class OnboardingChatScreen extends ConsumerStatefulWidget {
   final VoidCallback? onChatComplete;
@@ -151,12 +157,13 @@ class _OnboardingChatScreenState
   bool _isTyping = false;
   bool _userResponded = false;
   String _userName = '';
-  bool _nameCollected = false;
 
   @override
   void initState() {
     super.initState();
-    // chat starts after spotlight dismissed
+    Future.delayed(const Duration(milliseconds: 1000), () { // 👈 new delay before chat begins
+      if (mounted) _startStep(0);
+    });
   }
 
   @override
@@ -184,16 +191,11 @@ class _OnboardingChatScreenState
 
 
   void _onNameCollected(String name) {
-    _userName = name; // set immediately without setState
+    _userName = name;
     ref.read(onboardingViewModelProvider.notifier).setUserName(name);
   }
 
-  void _onSpotlightDismissed() {
-    setState(() => _nameCollected = true);
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) _startStep(0);
-    });
-  }
+
 
   void _startStep(int stepIndex) {
     final steps = getOnboardingSteps(_userName);
@@ -306,46 +308,33 @@ class _OnboardingChatScreenState
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: const Color(0xFF16162A),
-      body: Stack(
+      body: Column( // 👈 was Stack(children: [Column(...), if (!_nameCollected) OnboardingSpotlightOverlay(...)])
         children: [
-          // ── Chat UI ─────────────────────────────────
-          Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
-                  itemCount: _messages.length +
-                      (_isTyping ? 1 : 0) +
-                      (_showingResponses ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index < _messages.length) {
-                      final isLastInGroup = _isLastBotInGroup(index);
-                      return _buildMessageItem(_messages[index], isLastInGroup);
-                    }
-                    if (_isTyping && index == _messages.length) {
-                      return _buildTypingIndicator();
-                    }
-                    if (_showingResponses) {
-                      return _buildResponses();
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ],
-          ),
-
-          // ── Spotlight overlay ────────────────────────
-          if (!_nameCollected)
-            OnboardingSpotlightOverlay(
-              onNameSet: _onNameCollected,
-              onNameSubmitted: _onSpotlightDismissed,
+          _buildHeader(),
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+              itemCount: _messages.length +
+                  (_isTyping ? 1 : 0) +
+                  (_showingResponses ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index < _messages.length) {
+                  final isLastInGroup = _isLastBotInGroup(index);
+                  return _buildMessageItem(_messages[index], isLastInGroup);
+                }
+                if (_isTyping && index == _messages.length) {
+                  return _buildTypingIndicator();
+                }
+                if (_showingResponses) {
+                  return _buildResponses();
+                }
+                return const SizedBox.shrink();
+              },
             ),
+          ),
         ],
       ),
     );
@@ -1237,9 +1226,9 @@ class _OnboardingGoalsConfirmScreenState
                       shape: const StadiumBorder(),
                       elevation: 0,
                       textStyle: GoogleFonts.poppins(
-                          fontSize: 17, fontWeight: FontWeight.w800),
+                          fontSize: 20, fontWeight: FontWeight.w800),
                     ),
-                    child: const Text('continue →'),
+                    child: const Text('Continue'),
                   ),
                 ],
               ),

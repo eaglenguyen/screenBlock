@@ -5,15 +5,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
-import 'package:pausenow/onboarding/widgets/mascot_character.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../core/analytics/analytics_events.dart';
 import '../core/analytics/analytics_service.dart';
 import '../paywall/onboarding_outlook_screen.dart';
+import 'data/onboarding_signature.dart';
 import 'data/onboarding_stats.dart';
 import 'onboarding_permission_screen.dart';
 import 'onboarding_question_bank.dart';
-import 'onboarding_snapshot_screen.dart';
+import 'onboarding_schedule_confirmation.dart';
 import 'widgets/onboarding_animations.dart';
 import 'onboarding_chat_screen.dart';
 import 'onboarding_demo_screens.dart';
@@ -21,34 +21,54 @@ import 'onboarding_personal_flow.dart';
 import 'onboarding_viewmodel.dart';
 
 
+
 class OnboardingSteps {
   static const int welcome = 0;
   static const int chatIntro = 1;
   static const int chat = 2;
   static const int ageQuestion = 3;
-  static const int hoursQuestion = 4;
-  static const int badNewsStats = 5;
-  static const int lifeGrid = 6;
-  static const int goodNews = 7;
-  static const int qbGoals = 8;
-  static const int qbFutureVision = 9;
-  static const int qbGoalsConfirm = 10;
-  static const int qbPhoneUsage = 11;
-  static const int qbSocialMedia = 12;
-  static const int qbBlockers = 13;
-  static const int qbStruggles = 14;
-  static const int qbSympathy = 15;
-  static const int permissions = 16;
-  static const int demo = 17;
-  static const int commitment = 18;
-  static const int commitmentResult = 19;
-  static const int screenTimeGoal = 20;
-  static const int loadingPlan = 21;
-  static const int snapshot = 22;   // 👈 moved here
-  static const int reflection = 23;
-  static const int outlook = 24;
-  static const int trialReminder = 25;
-  static const int paywall = 26;
+  static const int genderQuestion = 4;
+  static const int hoursQuestion = 5;
+  static const int badNewsStats = 6;
+  static const int lifeGrid = 7;
+  static const int goodNews = 8;
+  static const int reflection = 9;
+  static const int qbGoals = 10;
+  static const int qbFutureVision = 11;
+  static const int qbGoalsConfirm = 12;
+  static const int qbPhoneUsage = 13;
+  static const int screenTimeGoal = 14;      // 👈 moved here
+  static const int qbSocialMedia = 15;       // 👈 was 14
+  static const int qbBlockers = 16;          // 👈 was 15
+  static const int qbStruggles = 17;         // 👈 was 16
+  static const int qbDistractingApps = 18;   // 👈 was 17
+  static const int qbTrust = 19;             // 👈 was 18
+  static const int qbTriedOthers = 20;       // 👈 was 19
+  static const int qbPresentFeeling = 21;    // 👈 was 20
+  static const int qbMorningRoutine = 22;    // 👈 was 21
+  static const int qbSympathy = 23;          // 👈 was 22
+  static const int qbScrollStartTime = 24;   // 👈 was 23
+  static const int qbBlockTime = 25;         // 👈 was 24
+  static const int qbRealisticTarget = 26;   // 👈 was 25
+  static const int qbPhoneFeeling = 27;      // 👈 was 26
+  static const int qbPassTime = 28;          // 👈 was 27
+  static const int infoDopamine = 29;        // 👈 was 28
+  static const int infoScheduleIntro = 30;   // 👈 was 29
+  static const int permissions = 31;         // 👈 was 30
+  static const int demoExplainer = 32;       // 👈 was 31
+  static const int demoStartTime = 33;       // 👈 was 32
+  static const int demoEndTime = 34;         // 👈 was 33
+  static const int demoDays = 35;            // 👈 was 34
+  static const int demoPickApps = 36;        // 👈 was 35
+  static const int demoComparison = 37;      // 👈 was 36
+  static const int commitment = 38;          // 👈 was 37
+  static const int commitmentResult = 39;    // 👈 was 38
+  static const int commitmentSignature = 40; // 👈 was 39
+  static const int loadingPlan = 41;         // 👈 was 41 (screenTimeGoal's old slot removed, this collapses down)
+  static const int scheduleConfirmation = 42; // 👈 was 42
+  static const int outlook = 43;             // 👈 unchanged
+  static const int trialReminder = 44;       // 👈 unchanged
+  static const int paywall = 45;             // 👈 unchanged
 }
 
 class OnboardingStepNames {
@@ -57,6 +77,7 @@ class OnboardingStepNames {
     OnboardingSteps.chatIntro: 'chat_intro',
     OnboardingSteps.chat: 'chat',
     OnboardingSteps.ageQuestion: 'age_question',
+    OnboardingSteps.genderQuestion: 'gender_question', // 👈 new
     OnboardingSteps.hoursQuestion: 'hours_question',
     OnboardingSteps.badNewsStats: 'bad_news_stats',
     OnboardingSteps.lifeGrid: 'life_grid',
@@ -68,14 +89,32 @@ class OnboardingStepNames {
     OnboardingSteps.qbSocialMedia: 'qb_social_media',
     OnboardingSteps.qbBlockers: 'qb_blockers',
     OnboardingSteps.qbStruggles: 'qb_struggles',
+    OnboardingSteps.qbDistractingApps: 'qb_distracting_apps', // 👈 new
+    OnboardingSteps.qbTrust: 'qb_trust',                       // 👈 new
+    OnboardingSteps.qbTriedOthers: 'qb_tried_others',          // 👈 new
+    OnboardingSteps.qbPresentFeeling: 'qb_present_feeling',    // 👈 new
+    OnboardingSteps.qbMorningRoutine: 'qb_morning_routine',    // 👈 new
     OnboardingSteps.qbSympathy: 'qb_sympathy',
+    OnboardingSteps.qbScrollStartTime: 'qb_scroll_start_time',
+    OnboardingSteps.qbBlockTime: 'qb_block_time',
+    OnboardingSteps.qbRealisticTarget: 'qb_realistic_target',
+    OnboardingSteps.qbPhoneFeeling: 'qb_phone_feeling',
+    OnboardingSteps.qbPassTime: 'qb_pass_time',
+    OnboardingSteps.infoDopamine: 'info_dopamine',           // 👈 new
+    OnboardingSteps.infoScheduleIntro: 'info_schedule_intro', // 👈 new
     OnboardingSteps.permissions: 'permissions',
-    OnboardingSteps.demo: 'demo',
+    OnboardingSteps.demoExplainer: 'demo_explainer',
+    OnboardingSteps.demoStartTime: 'demo_start_time',
+    OnboardingSteps.demoEndTime: 'demo_end_time',
+    OnboardingSteps.demoDays: 'demo_days',
+    OnboardingSteps.demoPickApps: 'demo_pick_apps',
+    OnboardingSteps.demoComparison: 'demo_comparison',
     OnboardingSteps.commitment: 'commitment',
     OnboardingSteps.commitmentResult: 'commitment_result',
+    OnboardingSteps.commitmentSignature: 'commitment_signature',
     OnboardingSteps.screenTimeGoal: 'screen_time_goal',
     OnboardingSteps.loadingPlan: 'loading_plan',
-    OnboardingSteps.snapshot: 'snapshot',
+    OnboardingSteps.scheduleConfirmation: 'schedule_confirmation',
     OnboardingSteps.reflection: 'reflection',
     OnboardingSteps.outlook: 'outlook',
     OnboardingSteps.trialReminder: 'trial_reminder',
@@ -104,7 +143,13 @@ class _OnboardingWelcomeFlowState
   String _commitmentLevel = '';
   bool _isHighCommitment = false;
   bool _isNavigating = false;
-
+  String _userGender = '';
+  TimeOfDay _scrollStartTime = const TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay _blockTime = const TimeOfDay(hour: 7, minute: 0);
+  TimeOfDay _demoScheduleStart = const TimeOfDay(hour: 7, minute: 0);
+  TimeOfDay _demoScheduleEnd = const TimeOfDay(hour: 17, minute: 0);
+  List<int> _demoScheduleDays = [0, 1, 2, 3, 4];
+  List<String> _demoBlockedApps = [];
 
   double _getProgress() {
     // define which steps are QB steps
@@ -116,6 +161,21 @@ class _OnboardingWelcomeFlowState
       OnboardingSteps.qbSocialMedia,
       OnboardingSteps.qbBlockers,
       OnboardingSteps.qbStruggles,
+      OnboardingSteps.qbDistractingApps, // 👈 new
+      OnboardingSteps.qbTrust,           // 👈 new
+      OnboardingSteps.qbTriedOthers,     // 👈 new
+      OnboardingSteps.qbPresentFeeling,  // 👈 new
+      OnboardingSteps.qbMorningRoutine,  // 👈 new
+      OnboardingSteps.qbScrollStartTime, // 👈 new
+      OnboardingSteps.qbBlockTime,       // 👈 new
+      OnboardingSteps.qbRealisticTarget, // 👈 new
+      OnboardingSteps.qbPhoneFeeling,    // 👈 new
+      OnboardingSteps.qbPassTime,        // 👈 new
+      OnboardingSteps.demoStartTime,
+      OnboardingSteps.demoEndTime,
+      OnboardingSteps.demoDays,
+      OnboardingSteps.demoPickApps,
+      OnboardingSteps.demoComparison,
     ];
     final index = qbSteps.indexOf(_currentStep);
     if (index == -1) return 0.0;
@@ -164,11 +224,15 @@ class _OnboardingWelcomeFlowState
     final box = Hive.box(HiveBoxNames.settings);
     box.put('onboardingStep', step);
     box.put('onboardingAge', _userAge);
+    box.put('onboardingGender', _userGender); // 👈 new
     box.put('onboardingHours', _userHours);
     box.put('onboardingGoals', _selectedGoals);
     box.put('onboardingFuture', _selectedFuture);
     box.put('onboardingCommitment', _commitmentLevel);
     box.put('onboardingHighCommitment', _isHighCommitment);
+
+    box.put('onboardingScrollStartTime', _scrollStartTime.hour * 60 + _scrollStartTime.minute);
+    box.put('onboardingBlockTime', _blockTime.hour * 60 + _blockTime.minute);
   }
 
   void _loadProgress() {
@@ -185,12 +249,21 @@ class _OnboardingWelcomeFlowState
     // 👇 set directly, no setState — widget isn't mounted yet
     _currentStep = savedStep;
     _userAge = box.get('onboardingAge', defaultValue: 21) as int;
+    _userGender = box.get('onboardingGender', defaultValue: '') as String; // 👈 new
     _userHours = box.get('onboardingHours', defaultValue: 3.5) as double;
     _selectedGoals = List<String>.from(
         box.get('onboardingGoals', defaultValue: <String>[]));
     _selectedFuture = box.get('onboardingFuture', defaultValue: '') as String;
     _commitmentLevel = box.get('onboardingCommitment', defaultValue: '') as String;
     _isHighCommitment = box.get('onboardingHighCommitment', defaultValue: false) as bool;
+
+
+    // 👇 new — reconstruct TimeOfDay from stored minutes, defaulting to 8:00 AM / 10:00 PM
+    final scrollMinutes = box.get('onboardingScrollStartTime', defaultValue: 8 * 60) as int;
+    _scrollStartTime = TimeOfDay(hour: scrollMinutes ~/ 60, minute: scrollMinutes % 60);
+
+    final blockMinutes = box.get('onboardingBlockTime', defaultValue: 7 * 60) as int;
+    _blockTime = TimeOfDay(hour: blockMinutes ~/ 60, minute: blockMinutes % 60);
   }
 
 
@@ -273,6 +346,15 @@ class _OnboardingWelcomeFlowState
             _nextStep();
           },
         );
+      case OnboardingSteps.genderQuestion: // 👈 new
+        return OnboardingGenderScreen(
+          key: const ValueKey('gender'),
+          onBack: _previousStep,
+          onSelected: (gender) {
+            setState(() => _userGender = gender);
+            _nextStep();
+          },
+        );
       case OnboardingSteps.hoursQuestion:
         return OnboardingHoursScreen(
           key: const ValueKey('hours'),
@@ -303,7 +385,11 @@ class _OnboardingWelcomeFlowState
           onNext: _nextStep,
           data: _statsData,
           userName: _userName,
-
+        );
+      case OnboardingSteps.reflection:
+        return OnboardingProductivityScreen(
+          key: const ValueKey('productivity'),
+          onNext: _nextStep,
         );
       case OnboardingSteps.qbGoals:
         return QBGoalsScreen(
@@ -339,6 +425,15 @@ class _OnboardingWelcomeFlowState
           onBack: _previousStep,
           onNext: (_) => _nextStep(),
         );
+      case OnboardingSteps.screenTimeGoal:
+        return OnboardingScreenTimeGoalScreen(
+          key: const ValueKey('screenTimeGoal'),
+          onSelected: (hours) {
+            final box = Hive.box(HiveBoxNames.settings);
+            box.put('dailyScreenTimeGoal', hours.toDouble());
+            _nextStep();
+          },
+        );
       case OnboardingSteps.qbSocialMedia:
         return QBSocialMediaRelationshipScreen(
           key: const ValueKey('qbSocial'),
@@ -360,10 +455,125 @@ class _OnboardingWelcomeFlowState
           onBack: _previousStep,
           onNext: (_) => _nextStep(),
         );
+      case OnboardingSteps.qbDistractingApps: // 👈 new
+        return QBSingleChoiceScreen(
+          key: const ValueKey('qbDistractingApps'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          question: 'How many distracting\napps do you use?',
+          options: const ['Just one', '2 or 3', '4 or more'],
+          onSelected: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbTrust: // 👈 new
+        return QBSingleChoiceScreen(
+          key: const ValueKey('qbTrust'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          question: 'Do you trust yourself to\nkeep your apps blocked\nonce you set up a schedule?',
+          options: const ['Yes, of course', 'Sometimes, depends on my mood', 'No, never'],
+          onSelected: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbTriedOthers: // 👈 new
+        return QBSingleChoiceScreen(
+          key: const ValueKey('qbTriedOthers'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          question: 'Have you tried other screen\nblocking apps before but\ngo back to doom scrolling?',
+          options: const ['Yes, they never worked for me', 'Sometimes', 'No, never'],
+          onSelected: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbPresentFeeling: // 👈 new
+        return QBSingleChoiceScreen(
+          key: const ValueKey('qbPresentFeeling'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          question: 'How do you feel when you\'re\npresent in the moment and\nnot using your phone?',
+          options: const ['Anxious about something', 'Antsy, need to be doing something', 'Neutral', 'Bored'],
+          onSelected: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbMorningRoutine: // 👈 new
+        return QBSingleChoiceScreen(
+          key: const ValueKey('qbMorningRoutine'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          question: 'When you wake up in\nthe morning, what is the\nfirst thing you do?',
+          options: const ['Scroll on my phone', 'Go back to sleep', 'Get up and start the day'],
+          onSelected: (_) => _nextStep(),
+        );
       case OnboardingSteps.qbSympathy: // 👈 new
         return QBSympathyScreen(
           key: const ValueKey('qbSympathy'),
           userName: _userName,
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.qbScrollStartTime:
+        return QBTimePickerScreen(
+          key: const ValueKey('qbScrollStartTime'),
+          progress: _getProgress(), // 👈 new
+          onBack: _previousStep,
+          title: 'What time do you usually start scrolling?',
+          subtitle: 'Be honest, we won\'t judge',
+          initialTime: _scrollStartTime,
+          onContinue: (time) {
+            setState(() => _scrollStartTime = time);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.qbBlockTime:
+        return QBTimePickerScreen(
+          key: const ValueKey('qbBlockTime'),
+          progress: _getProgress(), // 👈 new
+          onBack: _previousStep,
+          title: 'What time would you\nlike to block your apps?',
+          subtitle: 'The time you want to start being productive',
+          initialTime: _blockTime,
+          onContinue: (time) {
+            setState(() => _blockTime = time);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.qbRealisticTarget:
+        return QBRealisticTargetScreen(
+          key: const ValueKey('qbRealisticTarget'),
+          progress: _getProgress(), // 👈 new
+          onBack: _previousStep,
+          blockTime: _blockTime,
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.qbPhoneFeeling:
+        return QBSingleChoiceScreen(
+          key: const ValueKey('qbPhoneFeeling'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          question: 'How do you feel after\nusing your phone and\nscrolling for a long time?',
+          options: const ['Tired', 'Happy', 'Unmotivated', 'Anxious or stressed', 'None of the above'],
+          onSelected: (_) => _nextStep(),
+        );
+      case OnboardingSteps.qbPassTime:
+        return QBSingleChoiceScreen(
+          key: const ValueKey('qbPassTime'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          question: 'What do you currently rely\non to pass the time besides\nusing your phone?',
+          options: const ['Stay present, meditate', 'Go outside', 'Read', 'Something else'],
+          onSelected: (_) => _nextStep(),
+        );
+      case OnboardingSteps.infoDopamine:
+        return QBInfoScreen(
+          key: const ValueKey('infoDopamine'),
+          onBack: _previousStep,
+          imageAsset: 'assets/images/gimp_mascot_bike.png', // 👈 swap to your real asset
+          title: 'Stay productive and\nstay off your phone',
+          subtitle: 'Continuous scrolling can deplete your dopamine receptors (reward & pleasure chemicals). Limit your screen time with other activities!',
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.infoScheduleIntro:
+        return QBInfoScreen(
+          key: const ValueKey('infoScheduleIntro'),
+          onBack: _previousStep,
+          imageAsset: 'assets/images/mascot_flex.png', // 👈 swap to your real asset
+          title: 'Let\'s create your first\nblocking schedule',
+          subtitle: 'We will now calibrate pause now to your physical ability and screen time patterns.',
           onNext: _nextStep,
         );
       case OnboardingSteps.permissions:
@@ -371,12 +581,68 @@ class _OnboardingWelcomeFlowState
           key: const ValueKey('permissions'),
           onNext: _nextStep,
         );
-      case OnboardingSteps.demo:
-        return KeyedSubtree(
-          key: const ValueKey('demo'),
-          child: OnboardingDemoFlow(
-            onComplete: _nextStep,
-          ),
+      case OnboardingSteps.demoExplainer:
+        return DemoExplainerScreen(
+          key: const ValueKey('demoExplainer'),
+          onNext: _nextStep,
+        );
+      case OnboardingSteps.demoStartTime:
+        return QBTimePickerScreen(
+          key: const ValueKey('demoStartTime'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          title: 'Let\'s create your\nfirst schedule',
+          subtitle: 'Earlier, you identified ${_formatTimeOfDay(_blockTime)} as your ideal block time. Let\'s set your first schedule for this time.',
+          initialTime: _blockTime,
+          onContinue: (time) {
+            setState(() => _demoScheduleStart = time);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.demoEndTime:
+        return QBTimePickerScreen(
+          key: const ValueKey('demoEndTime'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          title: 'When should\n your blocking end?',
+          subtitle: 'Pick a time your session wraps up',
+          initialTime: _demoScheduleEnd,
+          onContinue: (time) {
+            setState(() => _demoScheduleEnd = time);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.demoDays:
+        return DemoDaysScreen(
+          key: const ValueKey('demoDays'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          initialDays: _demoScheduleDays,
+          onContinue: (days) {
+            setState(() => _demoScheduleDays = days);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.demoPickApps:
+        return DemoAppPickerScreen(
+          key: const ValueKey('demoPickApps'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          onAppsSelected: (apps) {
+            setState(() => _demoBlockedApps = apps);
+            _nextStep();
+          },
+        );
+      case OnboardingSteps.demoComparison:
+        return DemoComparisonScreen(
+          key: const ValueKey('demoComparison'),
+          progress: _getProgress(),
+          onBack: _previousStep,
+          scheduleStart: _demoScheduleStart,
+          scheduleEnd: _demoScheduleEnd,
+          scheduleDays: _demoScheduleDays,
+          blockedApps: _demoBlockedApps,
+          onNext: _nextStep,
         );
       case OnboardingSteps.commitment:
         return QBCommitmentScreen(
@@ -401,36 +667,24 @@ class _OnboardingWelcomeFlowState
           level: _commitmentLevel,
           onNext: _nextStep,
         );
-      case OnboardingSteps.screenTimeGoal:
-        return OnboardingScreenTimeGoalScreen(
-          key: const ValueKey('screenTimeGoal'),
-          onSelected: (hours) {
-            final box = Hive.box(HiveBoxNames.settings);
-            box.put('dailyScreenTimeGoal', hours.toDouble());
-            _nextStep();
-          },
+      case OnboardingSteps.commitmentSignature:
+        return CommitmentSignatureScreen(
+          key: const ValueKey('commitmentSignature'),
+          scheduleStartTime: _formatTimeOfDay(_demoScheduleStart),
+          onNext: _nextStep,
         );
+
       case OnboardingSteps.loadingPlan:
         return OnboardingLoadingPlanScreen(
           key: const ValueKey('loadingPlan'),
           onComplete: _nextStep,
         );
-      case OnboardingSteps.snapshot:
-        return OnboardingSnapshotScreen(
-          key: const ValueKey('snapshot'),
-          userName: _userName,
-          age: _userAge,
-          currentDailyHours: _userHours, // 👈 new
-          screenTimeGoalHours: Hive.box(HiveBoxNames.settings)
-              .get('dailyScreenTimeGoal', defaultValue: _userHours) as double,
-          selectedGoals: _selectedGoals,
-          futureVision: _selectedFuture,
-          isHighCommitment: _isHighCommitment,
-          onNext: _nextStep,
-        );
-      case OnboardingSteps.reflection:
-        return OnboardingProductivityScreen(
-          key: const ValueKey('productivity'),
+      case OnboardingSteps.scheduleConfirmation:
+        return ScheduleConfirmationScreen(
+          key: const ValueKey('scheduleConfirmation'),
+          startTime: _demoScheduleStart,
+          activeDays: _demoScheduleDays,
+          onBack: _previousStep,
           onNext: _nextStep,
         );
       case OnboardingSteps.outlook:
@@ -577,6 +831,7 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final isLast = _slide == 2;
@@ -1191,3 +1446,10 @@ Widget _buildProgressBar({required int step, required int total}) {
   );
 }
 
+
+String _formatTimeOfDay(TimeOfDay time) {
+  final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+  final minute = time.minute.toString().padLeft(2, '0');
+  final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+  return '$hour:$minute $period';
+}

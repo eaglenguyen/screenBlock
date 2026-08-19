@@ -16,11 +16,12 @@ mixin OnboardingEntranceMixin<T extends StatefulWidget>
   late List<Animation<Offset>> slideAnims;
 
   // call in initState with how many elements to stagger
-  void initEntrance({int elementCount = 4}) {
+  void initEntrance({int elementCount = 4, double speedMultiplier = 1.0}) { // 👈 new param
     entranceController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 400 + (elementCount * 80)),
-    );
+      duration: Duration(
+        milliseconds: ((400 + (elementCount * 80)) * speedMultiplier).round(), // 👈 scaled by multiplier
+      ),    );
 
     fadeAnims = List.generate(elementCount, (i) {
       final start = i * 0.12;

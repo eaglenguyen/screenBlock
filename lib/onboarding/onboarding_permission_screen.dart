@@ -36,7 +36,7 @@ class _OnboardingPermissionsScreenState
   @override
   void initState() {
     super.initState();
-    initEntrance(elementCount: 3);
+    initEntrance(elementCount: 3, speedMultiplier: 6.0); // 👈 add speedMultiplier here too
     WidgetsBinding.instance.addObserver(this);
     _checkAllPermissions();
   }
@@ -187,8 +187,6 @@ class _OnboardingPermissionsScreenState
       backgroundColor: const Color(0xFF16162A),
       body: Stack(
         children: [
-          _buildGradientBg(),
-          _buildCircles(),
           SafeArea(
             child: Platform.isIOS ? _buildIOSFlow(context) : _buildAndroidFlow(
                 context),
@@ -295,7 +293,6 @@ class _OnboardingPermissionsScreenState
 
 // ── iOS — new redesigned flow ──────────────────
 
-
   Widget _buildIOSFlow(BuildContext context) {
     const headline = 'Connect to Screen Time\nso I can help you scroll less!';
 
@@ -308,25 +305,41 @@ class _OnboardingPermissionsScreenState
           staggered(
             0,
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center, // 👈 was .start
               children: [
-                Image.asset(
-                  'assets/icons/mascot_face.png',
-                  width: 64,
-                  height: 64,
-                ),
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.06),
+                      shape: BoxShape.circle,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Transform.scale(
+                      scale: 1.4,
+                      child: Image.asset(
+                        'assets/icons/square_notes_cutout.png', // 👈 was mascot_face.png — now matches the QB screens' asset
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+
                 const SizedBox(width: 12),
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2F2F7),
-                      borderRadius: BorderRadius.circular(18),
+                      color: const Color(0xFF1E1E35), // 👈 warm dark gray, matches the gradient's undertone
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.06),
+                        width: 0.5,
+                      ),
                     ),
                     child: Text(
                       headline,
                       style: GoogleFonts.poppins(
-                        color: const Color(0xFF1A1A1A),
+                        color: Colors.white, // 👈 was Color(0xFF1A1A1A) — now white text to contrast against the dark bubble
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         height: 1.4,
@@ -337,7 +350,6 @@ class _OnboardingPermissionsScreenState
               ],
             ),
           ),
-
           const SizedBox(height: 40),
 
           // ── fake preview card ────────────────────

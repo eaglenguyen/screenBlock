@@ -1,3 +1,4 @@
+/*
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -285,4 +286,4 @@ class _ArrowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ArrowPainter old) => old.progress != progress;
-}
+}*/

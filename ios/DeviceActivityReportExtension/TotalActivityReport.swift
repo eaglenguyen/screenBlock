@@ -107,6 +107,8 @@ struct CompactActivityReport: DeviceActivityReportScene {
                 }
             }
         }
+        
+        
 
         return ActivityConfiguration(
             appUsages: appUsages,

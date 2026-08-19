@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../onboarding/widgets/mascot_character.dart';
 
@@ -198,14 +199,13 @@ class _OnboardingOutlookScreenState extends State<OnboardingOutlookScreen>
                   ),
                 ),
 
+
                 // bottom CTA — mimics the paywall style
                 Container(
-                  padding: EdgeInsets.fromLTRB(
-                    24, 16, 24,
-                    MediaQuery.of(context).padding.bottom + 16,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 16), // 👈 was EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom)
+
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E35),
+                    color: const Color(0xFF0a1a2a),
                     border: Border(
                       top: BorderSide(
                         color: Colors.white.withValues(alpha: 0.08),
@@ -216,57 +216,6 @@ class _OnboardingOutlookScreenState extends State<OnboardingOutlookScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // free trial row
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 18, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF252542),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: const Color(0xFFEDB82A)
-                                .withValues(alpha: 0.4),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Free',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  '7 days free',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white
-                                        .withValues(alpha: 0.5),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Container(
-                              width: 22,
-                              height: 22,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFEDB82A),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.check_rounded,
-                                  color: Color(0xFF1A1208), size: 14),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
 
                       // no payment note
                       Row(
@@ -279,7 +228,7 @@ class _OnboardingOutlookScreenState extends State<OnboardingOutlookScreen>
                             'No Payment Due Now!',
                             style: GoogleFonts.poppins(
                               color: Colors.white.withValues(alpha: 0.6),
-                              fontSize: 12,
+                              fontSize: 15,
                             ),
                           ),
                         ],
@@ -435,10 +384,8 @@ class _WeekCard extends StatelessWidget {
 }
 
 // ── Trial Reminder Screen ─────────────────────────────
-
 class OnboardingTrialReminderScreen extends StatefulWidget {
   final VoidCallback onNext;
-
   const OnboardingTrialReminderScreen({
     super.key,
     required this.onNext,
@@ -451,7 +398,6 @@ class OnboardingTrialReminderScreen extends StatefulWidget {
 
 class _OnboardingTrialReminderScreenState
     extends State<OnboardingTrialReminderScreen> {
-
   Future<void> _requestNotificationAndContinue() async {
     HapticFeedback.lightImpact();
     try {
@@ -474,7 +420,6 @@ class _OnboardingTrialReminderScreenState
     }
     widget.onNext();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -503,99 +448,33 @@ class _OnboardingTrialReminderScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Spacer(flex: 3),
-
+                  // headline
+                  Text(
+                    'We\'ll send you\na reminder before your\nfree trial ends',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      height: 1.3,
+                    ),
+                  ),
                   // bell icon
                   Center(
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        Container(
-                          width: 90,
-                          height: 90,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEDB82A).withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFFEDB82A).withValues(alpha: 0.25),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: const Center(
-                            child: Text('🔔', style: TextStyle(fontSize: 44)),
-                          ),
+                        Lottie.asset(
+                          'assets/lottie/bell.json',
+                          width: 180,
+                          height: 180,
                         ),
-                        // red notification dot
-                        Positioned(
-                          top: 6,
-                          right: 6,
-                          child: Container(
-                            width: 18,
-                            height: 18,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE74C3C),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
 
-                  // headline
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                        height: 1.3,
-                      ),
-                      children: [
-                        const TextSpan(text: 'You\'ll get a reminder '),
-                        TextSpan(
-                          text: '2 day',
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFFEDB82A),
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const TextSpan(text: '\nbefore your trial ends'),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
-                      children: [
-                        const TextSpan(text: 'All features are '),
-                        TextSpan(
-                          text: '7 days free',
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFFEDB82A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            height: 1.5,
-                          ),
-                        ),
-                        const TextSpan(text: ' so\nyou can start improving today'),
-                      ],
-                    ),
-                  ),
-
                   const Spacer(flex: 4),
-
-                  // next button
-                  // no payment note
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -603,21 +482,19 @@ class _OnboardingTrialReminderScreenState
                           color: Color(0xFFEDB82A), size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        'No Payment Due Now!',
+                        'No Payment Due Now',
                         style: GoogleFonts.poppins(
                           color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 12,
+                          fontSize: 15,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-
-// CTA button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _requestNotificationAndContinue, // 👈 replace onNext() call
+                      onPressed: _requestNotificationAndContinue,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEDB82A),
                         foregroundColor: const Color(0xFF1A1208),
@@ -625,11 +502,11 @@ class _OnboardingTrialReminderScreenState
                         shape: const StadiumBorder(),
                         elevation: 0,
                         textStyle: GoogleFonts.poppins(
-                          fontSize: 17,
+                          fontSize: 20,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      child: const Text('continue for FREE'),
+                      child: const Text('Continue for FREE'),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -638,7 +515,7 @@ class _OnboardingTrialReminderScreenState
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.3),
-                      fontSize: 11,
+                      fontSize: 12,
                     ),
                   ),
                 ],
