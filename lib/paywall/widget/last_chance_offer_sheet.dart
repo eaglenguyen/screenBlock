@@ -166,7 +166,7 @@ class LastChanceOfferSheet extends StatelessWidget {
                 elevation: 0,
                 textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
               ),
-              child: const Text('Begin your health journey'),
+              child: const Text('Start Today'),
             ),
           ),
           const SizedBox(height: 16),

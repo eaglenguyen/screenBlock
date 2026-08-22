@@ -7,14 +7,12 @@ class ScheduleConfirmationScreen extends StatelessWidget {
   final TimeOfDay startTime;
   final List<int> activeDays;
   final VoidCallback onNext;
-  final VoidCallback? onBack;
 
   const ScheduleConfirmationScreen({
     super.key,
     required this.startTime,
     required this.activeDays,
     required this.onNext,
-    this.onBack,
   });
 
   String get _formattedTime {
@@ -38,30 +36,6 @@ class ScheduleConfirmationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: onBack,
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              width: 0.5,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 40),
                   Center(
                     child: Text(

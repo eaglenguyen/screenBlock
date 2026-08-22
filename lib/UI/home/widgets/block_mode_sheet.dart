@@ -204,7 +204,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
   // ── App list row ─────────────────────────────────
   Widget _buildAppListRow() {
     final isAllApps = _isAllApps;
-    final title = isAllApps ? 'Allowed Apps' : 'Blocked Apps';
+    final title = isAllApps ? 'Allowed Apps List' : 'Blocked Apps List';
     final subtitle = isAllApps
         ? 'All apps except these will be blocked'
         : 'Only these apps will be blocked';

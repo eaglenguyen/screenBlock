@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../core/analytics/analytics_events.dart';
 import '../core/analytics/analytics_service.dart';
@@ -19,7 +20,6 @@ import 'onboarding_chat_screen.dart';
 import 'onboarding_demo_screens.dart';
 import 'onboarding_personal_flow.dart';
 import 'onboarding_viewmodel.dart';
-
 
 
 class OnboardingSteps {
@@ -37,38 +37,38 @@ class OnboardingSteps {
   static const int qbFutureVision = 11;
   static const int qbGoalsConfirm = 12;
   static const int qbPhoneUsage = 13;
-  static const int screenTimeGoal = 14;      // 👈 moved here
-  static const int qbSocialMedia = 15;       // 👈 was 14
-  static const int qbBlockers = 16;          // 👈 was 15
-  static const int qbStruggles = 17;         // 👈 was 16
-  static const int qbDistractingApps = 18;   // 👈 was 17
-  static const int qbTrust = 19;             // 👈 was 18
-  static const int qbTriedOthers = 20;       // 👈 was 19
-  static const int qbPresentFeeling = 21;    // 👈 was 20
-  static const int qbMorningRoutine = 22;    // 👈 was 21
-  static const int qbSympathy = 23;          // 👈 was 22
-  static const int qbScrollStartTime = 24;   // 👈 was 23
-  static const int qbBlockTime = 25;         // 👈 was 24
-  static const int qbRealisticTarget = 26;   // 👈 was 25
-  static const int qbPhoneFeeling = 27;      // 👈 was 26
-  static const int qbPassTime = 28;          // 👈 was 27
-  static const int infoDopamine = 29;        // 👈 was 28
-  static const int infoScheduleIntro = 30;   // 👈 was 29
-  static const int permissions = 31;         // 👈 was 30
-  static const int demoExplainer = 32;       // 👈 was 31
-  static const int demoStartTime = 33;       // 👈 was 32
-  static const int demoEndTime = 34;         // 👈 was 33
-  static const int demoDays = 35;            // 👈 was 34
-  static const int demoPickApps = 36;        // 👈 was 35
+  static const int qbSocialMedia = 14;       // 👈 was 15
+  static const int qbBlockers = 15;          // 👈 was 16
+  static const int qbStruggles = 16;         // 👈 was 17
+  static const int qbDistractingApps = 17;   // 👈 was 18
+  static const int qbTrust = 18;             // 👈 was 19
+  static const int qbTriedOthers = 19;       // 👈 was 20
+  static const int qbPresentFeeling = 20;    // 👈 was 21
+  static const int qbMorningRoutine = 21;    // 👈 was 22
+  static const int qbSympathy = 22;          // 👈 was 23
+  static const int qbScrollStartTime = 23;   // 👈 was 24
+  static const int qbBlockTime = 24;         // 👈 was 25
+  static const int qbRealisticTarget = 25;   // 👈 was 26
+  static const int qbPhoneFeeling = 26;      // 👈 was 27
+  static const int qbPassTime = 27;          // 👈 was 28
+  static const int infoDopamine = 28;        // 👈 was 29
+  static const int infoScheduleIntro = 29;   // 👈 was 30
+  static const int permissions = 30;         // 👈 was 31
+  static const int demoExplainer = 31;       // 👈 was 32
+  static const int demoStartTime = 32;       // 👈 was 33
+  static const int demoEndTime = 33;         // 👈 was 34
+  static const int demoDays = 34;            // 👈 was 35
+  static const int demoPickApps = 35; // (using your most recent numbering from earlier)
+  static const int setMultipleSchedules = 36; // 👈 new
   static const int demoComparison = 37;      // 👈 was 36
   static const int commitment = 38;          // 👈 was 37
   static const int commitmentResult = 39;    // 👈 was 38
   static const int commitmentSignature = 40; // 👈 was 39
-  static const int loadingPlan = 41;         // 👈 was 41 (screenTimeGoal's old slot removed, this collapses down)
-  static const int scheduleConfirmation = 42; // 👈 was 42
-  static const int outlook = 43;             // 👈 unchanged
-  static const int trialReminder = 44;       // 👈 unchanged
-  static const int paywall = 45;             // 👈 unchanged
+  static const int loadingPlan = 41;         // 👈 was 40
+  static const int scheduleConfirmation = 42; // 👈 was 41
+  static const int outlook = 43;             // 👈 was 42
+  static const int trialReminder = 44;       // 👈 was 43
+  static const int paywall = 45;         // 👈 was 45
 }
 
 class OnboardingStepNames {
@@ -108,11 +108,11 @@ class OnboardingStepNames {
     OnboardingSteps.demoEndTime: 'demo_end_time',
     OnboardingSteps.demoDays: 'demo_days',
     OnboardingSteps.demoPickApps: 'demo_pick_apps',
+    OnboardingSteps.setMultipleSchedules: 'set_multiple_schedules',
     OnboardingSteps.demoComparison: 'demo_comparison',
     OnboardingSteps.commitment: 'commitment',
     OnboardingSteps.commitmentResult: 'commitment_result',
     OnboardingSteps.commitmentSignature: 'commitment_signature',
-    OnboardingSteps.screenTimeGoal: 'screen_time_goal',
     OnboardingSteps.loadingPlan: 'loading_plan',
     OnboardingSteps.scheduleConfirmation: 'schedule_confirmation',
     OnboardingSteps.reflection: 'reflection',
@@ -150,6 +150,7 @@ class _OnboardingWelcomeFlowState
   TimeOfDay _demoScheduleEnd = const TimeOfDay(hour: 17, minute: 0);
   List<int> _demoScheduleDays = [0, 1, 2, 3, 4];
   List<String> _demoBlockedApps = [];
+  late final String _demoScheduleId = const Uuid().v4();
 
   double _getProgress() {
     // define which steps are QB steps
@@ -425,15 +426,7 @@ class _OnboardingWelcomeFlowState
           onBack: _previousStep,
           onNext: (_) => _nextStep(),
         );
-      case OnboardingSteps.screenTimeGoal:
-        return OnboardingScreenTimeGoalScreen(
-          key: const ValueKey('screenTimeGoal'),
-          onSelected: (hours) {
-            final box = Hive.box(HiveBoxNames.settings);
-            box.put('dailyScreenTimeGoal', hours.toDouble());
-            _nextStep();
-          },
-        );
+
       case OnboardingSteps.qbSocialMedia:
         return QBSocialMediaRelationshipScreen(
           key: const ValueKey('qbSocial'),
@@ -626,6 +619,7 @@ class _OnboardingWelcomeFlowState
       case OnboardingSteps.demoPickApps:
         return DemoAppPickerScreen(
           key: const ValueKey('demoPickApps'),
+          scheduleId: _demoScheduleId, // 👈 new
           progress: _getProgress(),
           onBack: _previousStep,
           onAppsSelected: (apps) {
@@ -633,9 +627,16 @@ class _OnboardingWelcomeFlowState
             _nextStep();
           },
         );
+      case OnboardingSteps.setMultipleSchedules: // 👈 new
+        return SetMultipleSchedulesScreen(
+          key: const ValueKey('setMultipleSchedules'),
+          onBack: _previousStep,
+          onNext: _nextStep,
+        );
       case OnboardingSteps.demoComparison:
         return DemoComparisonScreen(
           key: const ValueKey('demoComparison'),
+          scheduleId: _demoScheduleId, // 👈 new
           progress: _getProgress(),
           onBack: _previousStep,
           scheduleStart: _demoScheduleStart,
@@ -684,7 +685,6 @@ class _OnboardingWelcomeFlowState
           key: const ValueKey('scheduleConfirmation'),
           startTime: _demoScheduleStart,
           activeDays: _demoScheduleDays,
-          onBack: _previousStep,
           onNext: _nextStep,
         );
       case OnboardingSteps.outlook:

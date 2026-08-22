@@ -958,11 +958,9 @@ class _OnboardingScreenTimeGoalScreenState
   }
 }
 // ── Screen 2 — Hours Question ─────────────────────────
-
 class OnboardingHoursScreen extends StatefulWidget {
   final VoidCallback onBack;
   final Function(double hours) onSelected;
-
   const OnboardingHoursScreen({
     super.key,
     required this.onBack,
@@ -976,13 +974,16 @@ class OnboardingHoursScreen extends StatefulWidget {
 
 class _OnboardingHoursScreenState extends State<OnboardingHoursScreen> {
   String? _selected;
+  double _customHours = 7.0; // 👈 new — default within the 8-24 range
 
   final List<Map<String, dynamic>> _options = [
-    {'label': '1 – 2 hours', 'hours': 1.5},
-    {'label': '3 – 4 hours', 'hours': 3.5},
-    {'label': '5 – 6 hours', 'hours': 5.5},
-    {'label': '7+ hours', 'hours': 8.0},
+    {'label': '2 hours', 'hours': 2.0},
+    {'label': '4 hours', 'hours': 4.0},
+    {'label': '6 hours', 'hours': 6.0},
+    {'label': '7 or more hours', 'hours': null}, // 👈 null signals "needs custom input"
   ];
+
+  bool get _isCustomSelected => _selected == '7+ hours';
 
   @override
   Widget build(BuildContext context) {
@@ -993,7 +994,7 @@ class _OnboardingHoursScreenState extends State<OnboardingHoursScreen> {
         children: [
           const SizedBox(height: 48),
           Text(
-            'How many hours do you spend on your phone daily?',
+            'What is your current daily screen time?',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -1005,52 +1006,143 @@ class _OnboardingHoursScreenState extends State<OnboardingHoursScreen> {
           ),
           const SizedBox(height: 40),
           ..._options.map((opt) {
-            final isSelected = _selected == opt['label'];
+            final label = opt['label'] as String;
+            final isSelected = _selected == label;
+            final isCustomOption = opt['hours'] == null;
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  setState(() => _selected = opt['label'] as String);
-                  Future.delayed(const Duration(milliseconds: 250), () {
-                    widget.onSelected(opt['hours'] as double);
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 20,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFFEDB82A).withValues(alpha: 0.12)
-                        : const Color(0xFF1E1E35),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFFEDB82A).withValues(alpha: 0.6)
-                          : const Color(0xFF2A2A48),
-                      width: isSelected ? 1.5 : 0.5,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        opt['label'] as String,
-                        style: GoogleFonts.poppins(
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _selected = label);
+                      if (!isCustomOption) {
+                        // regular option — advance immediately, same as before
+                        Future.delayed(const Duration(milliseconds: 250), () {
+                          widget.onSelected(opt['hours'] as double);
+                        });
+                      }
+                      // custom option — don't advance yet, wait for slider confirmation
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFFEDB82A).withValues(alpha: 0.12)
+                            : const Color(0xFF1E1E35),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
                           color: isSelected
-                              ? const Color(0xFFEDB82A)
-                              : Colors.white,
-                          fontSize: 17,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                              ? const Color(0xFFEDB82A).withValues(alpha: 0.6)
+                              : const Color(0xFF2A2A48),
+                          width: isSelected ? 1.5 : 0.5,
                         ),
                       ),
-                      if (isSelected) _AnimatedCheck(),
-                    ],
+                      child: Row(
+                        children: [
+                          Text(
+                            label,
+                            style: GoogleFonts.poppins(
+                              color: isSelected
+                                  ? const Color(0xFFEDB82A)
+                                  : Colors.white,
+                              fontSize: 17,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          if (isSelected) _AnimatedCheck(),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  // 👇 new — inline slider, only shown when "7+ hours" is selected
+                  if (isCustomOption && isSelected) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E35),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFFEDB82A).withValues(alpha: 0.3),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '${_customHours.round()} hours',
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFFEDB82A),
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              activeTrackColor: const Color(0xFFEDB82A),
+                              inactiveTrackColor: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                              thumbColor: const Color(0xFFEDB82A),
+                              overlayColor: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
+                              trackHeight: 4,
+                            ),
+                            child: Slider(
+                              value: _customHours,
+                              min: 7,
+                              max: 24,
+                              divisions: 17,
+                              onChanged: (val) {
+                                HapticFeedback.selectionClick();
+                                setState(() => _customHours = val);
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('7h', style: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.3), fontSize: 12)),
+                                Text('24h', style: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.3), fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Center( // 👈 new — centers the now-narrower button
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.4, // 👈 was double.infinity — roughly half the screen width, adjusted for the container's own padding
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  widget.onSelected(_customHours);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFEDB82A),
+                                  foregroundColor: const Color(0xFF1A1208),
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  shape: const StadiumBorder(),
+                                  textStyle: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700),
+                                ),
+                                child: const Text('Continue'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
               ),
             );
           }),
@@ -1494,14 +1586,12 @@ class _OnboardingLifeGridScreenState
   @override
   Widget build(BuildContext context) {
     final yearsLost = widget.data.yearsLostTotal.round().clamp(1, 40);
-
     return _StatsShell(
       child: Column(
         children: [
           const SizedBox(height: 24),
-
           Text(
-            'Your Life Is Important',
+            'Your Time Is Important',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -1510,9 +1600,7 @@ class _OnboardingLifeGridScreenState
               letterSpacing: -0.5,
             ),
           ),
-
           const SizedBox(height: 24),
-
           // 8×10 grid
           AspectRatio(
             aspectRatio: 8 / 10,
@@ -1534,16 +1622,18 @@ class _OnboardingLifeGridScreenState
               },
             ),
           ),
-
-
-
-          // caption — shows after animation
-
+          const SizedBox(height: 16), // 👈 new
+          // 👇 new — legend row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _legendItem(color: const Color(0xFF3B82F6), label: 'Age'),
+              const SizedBox(width: 20),
+              _legendItem(color: const Color(0xFFE74C3C), label: 'Years Lost'),
+            ],
+          ),
           const SizedBox(height: 12),
-
-          const Spacer(), // 👈 new — pushes everything below it to the bottom
-
-
+          const Spacer(),
           AnimatedOpacity(
             opacity: _animationDone ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 600),
@@ -1558,6 +1648,24 @@ class _OnboardingLifeGridScreenState
     );
   }
 
+// 👇 new helper method
+  Widget _legendItem({required Color color, required String label}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.person_rounded, color: color, size: 16),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 // ── Person icon widget ────────────────────────────────

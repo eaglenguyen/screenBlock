@@ -158,9 +158,7 @@ class _TimerCardState extends State<TimerCard>
         borderRadius: BorderRadius.circular(50),
       ),
       child: Text(
-        _displayTime == '00:00:00'
-            ? 'No sessions today yet'
-            : "Today's blocked time",
+        "Today's blocked time",
         style: AppTextStyles.bodySmall.copyWith(fontSize: 15),
       ),
     );
@@ -251,8 +249,8 @@ class _TimerCardState extends State<TimerCard>
       children: [
         Expanded(
           child: _selectorPill(
-            icon: '🛡️',
-            label: isAllApps ? 'All Apps' : 'Specific Apps',
+            icon: '',
+            label: isAllApps ? 'All Apps' : 'Blocked Apps',
             onTap: widget.onBlockModeTapped,
           ),
         ),

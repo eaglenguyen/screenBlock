@@ -15,7 +15,6 @@ import 'widget/all_plans_sheet.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   final String source;
-
   const PaywallScreen({super.key, required this.source});
 
   @override
@@ -31,24 +30,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void _handleClosePressed(BuildContext context) {
     final packages = _offerings?.current?.availablePackages ?? [];
     final lifetime = packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull;
-
     if (lifetime == null) {
-      // no lifetime package available — just close normally
       _markPaywallSeen(context, ref);
       return;
     }
-
     LastChanceOfferSheet.show(
       context,
       lifetimePackage: lifetime,
       onAccept: () {
-        Navigator.pop(context); // close the offer sheet
+        Navigator.pop(context);
         setState(() => _selectedPackage = lifetime);
         _purchase();
       },
       onDecline: () {
-        Navigator.pop(context); // close the offer sheet
-        _markPaywallSeen(context, ref); // then actually leave the paywall
+        Navigator.pop(context);
+        _markPaywallSeen(context, ref);
       },
     );
   }
@@ -57,13 +53,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void initState() {
     super.initState();
     _loadOfferings();
-
     AnalyticsService.instance.capture(
       AnalyticsEvents.paywallViewed,
       {AnalyticsProps.source: widget.source},
     );
   }
-
 
   void _showAllPlansSheet(BuildContext context, List<Package> packages) {
     showModalBottomSheet(
@@ -86,7 +80,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       final offerings = await Purchases.getOfferings();
       setState(() {
         _offerings = offerings;
-        _selectedPackage = offerings.current?.annual; // default to annual
+        _selectedPackage = offerings.current?.annual;
       });
     } catch (e) {
       debugPrint('❌ offerings error: $e');
@@ -118,7 +112,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           .containsKey('pause now Premium');
       if (isPremium && mounted) {
         ref.invalidate(premiumProvider);
-
         await AnalyticsService.instance.capture(
           AnalyticsEvents.purchaseCompleted,
           {
@@ -126,8 +119,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             AnalyticsProps.plan: _selectedPackage!.packageType.name,
           },
         );
-
-        if (mounted) await PurchaseSuccessScreen.show(context); // 👈 new
+        if (mounted) await PurchaseSuccessScreen.show(context);
         await _markPaywallSeen(context, ref, purchased: true);
       }
     } catch (e) {
@@ -141,21 +133,18 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
-  String get _ctaLabel => ' Start My Free Trial';
+  String get _ctaLabel => 'Start My 7-Day Free Trial';
 
-  String? _monthlyEquivalent(Package pkg) {
-    if (pkg.packageType != PackageType.annual) return null;
-    final annualPrice = pkg.storeProduct.price;
-    final monthly = annualPrice / 12;
-    final symbol = pkg.storeProduct.priceString.replaceAll(RegExp(r'[\d.,\s]'), '');
-    return '$symbol${monthly.toStringAsFixed(2)}/month';
+  String get _billingDate {
+    final date = DateTime.now().add(const Duration(days: 7));
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
-  String? _annualDailyLine(Package? annual) {
-    if (annual == null) return null;
-    final daily = annual.storeProduct.price / 365;
-    final symbol = annual.storeProduct.priceString.replaceAll(RegExp(r'[\d.,\s]'), '');
-    return 'Then $symbol${daily.toStringAsFixed(2)}/day (${annual.storeProduct.priceString}/year)';
+  String _monthlyEquivalent(Package pkg) {
+    final monthly = pkg.storeProduct.price / 12;
+    final symbol = pkg.storeProduct.priceString.replaceAll(RegExp(r'[\d.,\s]'), '');
+    return '$symbol${monthly.toStringAsFixed(2)}/mo';
   }
 
   @override
@@ -163,12 +152,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final packages = _offerings?.current?.availablePackages ?? [];
     final annual = packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
     final monthly = packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
+    final isAnnualSelected = _selectedPackage?.packageType == PackageType.annual;
 
     return Scaffold(
       backgroundColor: const Color(0xFF16162A),
       body: Stack(
         children: [
-          // gradient bg
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -183,7 +172,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ),
             ),
           ),
-
           SafeArea(
             child: Column(
               children: [
@@ -193,11 +181,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // close button
                         Align(
                           alignment: Alignment.centerLeft,
                           child: GestureDetector(
-                            onTap: () => _handleClosePressed(context), // 👈 was () => _markPaywallSeen(context, ref)
+                            onTap: () => _handleClosePressed(context),
                             child: Container(
                               width: 36,
                               height: 36,
@@ -209,56 +196,27 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
-
-                        // headline
+                        const SizedBox(height: 24),
                         Text(
-                          'Start improving\nyour life today',
+                          'Start your 7-day FREE\ntrial to continue.',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
-                            fontSize: 28,
+                            fontSize: 30,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.5,
                             height: 1.2,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        RichText(
-                          text: TextSpan(children: [
-                            TextSpan(
-                              text: 'Join ',
-                              style: GoogleFonts.poppins(
-                                  color: Colors.white.withValues(alpha: 0.45),
-                                  fontSize: 14),
-                            ),
-                            TextSpan(
-                              text: '1,000+ ',
-                              style: GoogleFonts.poppins(
-                                  color: const Color(0xFFEDB82A),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700),
-                            ),
-                            TextSpan(
-                              text: 'users bettering their lives.',
-                              style: GoogleFonts.poppins(
-                                  color: Colors.white.withValues(alpha: 0.45),
-                                  fontSize: 14),
-                            ),
-                          ]),
-                        ),
                         const SizedBox(height: 28),
-
-                        // vertical timeline — unchanged
                         _buildTimeline(),
                       ],
                     ),
                   ),
                 ),
-
-                // ── NEW — bottom sheet-style pricing card ──
+                // bottom pricing card
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                   decoration: const BoxDecoration(
                     color: Color(0xFF1E1E35),
                     borderRadius: BorderRadius.only(
@@ -269,88 +227,56 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // pricing summary line
-                      Column(
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '7 Days for \$0.00',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
+                          if (monthly != null)
+                            Expanded(
+                              child: _PlanCard(
+                                label: 'Monthly',
+                                price: monthly.storeProduct.priceString,
+                                period: '/mo',
+                                isSelected: _selectedPackage?.identifier == monthly.identifier,
+                                onTap: () => setState(() => _selectedPackage = monthly),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
+                          if (monthly != null && annual != null) const SizedBox(width: 12),
                           if (annual != null)
-                            Text(
-                              _annualDailyLine(annual) ?? '',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white.withValues(alpha: 0.5),
-                                fontSize: 13,
+                            Expanded(
+                              child: _PlanCard(
+                                label: 'Yearly',
+                                price: annual.storeProduct.priceString,
+                                period: '/yr',
+                                badge: '7-Days FREE',
+                                isSelected: _selectedPackage?.identifier == annual.identifier,
+                                onTap: () => setState(() => _selectedPackage = annual),
                               ),
                             ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-
-                      // ── Yearly row ──
-                      if (annual != null)
-                        _PlanRow(
-                          label: 'Yearly',
-                          price: '${annual.storeProduct.priceString}/year',
-                          trialText: '7 days free',
-                          badge: '-58%',
-                          isSelected: _selectedPackage?.identifier == annual.identifier,
-                          onTap: () => setState(() => _selectedPackage = annual),
-                        ),
-                      if (annual != null && monthly != null)
-
-                        const SizedBox(height: 10),
-
-                      // ── Monthly row ──
-                      if (monthly != null)
-                        _PlanRow(
-                          label: 'Monthly',
-                          price: '${monthly.storeProduct.priceString}/month',
-                          trialText: '7 days free',
-                          isSelected: _selectedPackage?.identifier == monthly.identifier,
-                          onTap: () => setState(() => _selectedPackage = monthly),
-                        ),
-                      const SizedBox(height: 10),
-
-                      // no commitment row
+                      const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.check_rounded,
-                              color: Color(0xFFEDB82A), size: 14),
+                          const Icon(Icons.check_rounded, color: Color(0xFFEDB82A), size: 14),
                           const SizedBox(width: 4),
                           Text(
-                            'No payment due now, cancel anytime!',
+                            'No Payment Due Now',
                             style: GoogleFonts.poppins(
                               color: Colors.white.withValues(alpha: 0.6),
-                              fontSize: 13,
+                              fontSize: 15,
                             ),
                           ),
                         ],
                       ),
-                      // 👇 new
-
-                      const SizedBox(height: 20),
-
-                      // error
+                      const SizedBox(height: 16),
                       if (_error != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Text(_error!,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                  color: AppColors.error(context), fontSize: 13)),
+                              style: GoogleFonts.poppins(color: AppColors.error(context), fontSize: 13)),
                         ),
-
-                      // CTA
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -361,21 +287,30 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 18),
                             shape: const StadiumBorder(),
                             elevation: 0,
-                            textStyle: GoogleFonts.poppins(
-                                fontSize: 17, fontWeight: FontWeight.w800),
+                            textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
                           ),
                           child: _isLoading
                               ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(
-                                  color: Color(0xFF1A1208), strokeWidth: 2))
+                              child: CircularProgressIndicator(color: Color(0xFF1A1208), strokeWidth: 2))
                               : Text(_ctaLabel),
                         ),
                       ),
-
-                      const SizedBox(height: 14),
-
+                      const SizedBox(height: 10),
+                      Text(
+                        isAnnualSelected && annual != null
+                            ? '7 days free, then ${annual.storeProduct.priceString} per year (${_monthlyEquivalent(annual)})'
+                            : monthly != null
+                            ? '7 days free, then ${monthly.storeProduct.priceString} per month'
+                            : '',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Center(
                         child: GestureDetector(
                           onTap: () => _showAllPlansSheet(context, packages),
@@ -391,7 +326,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ),
                         ),
                       ),
-
                     ],
                   ),
                 ),
@@ -403,48 +337,37 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     );
   }
 
-  // ── Timeline logic — unchanged from your original ──
-
   List<_TimelineItem> get _timelineItems {
-    final isLifetime = _selectedPackage?.packageType == PackageType.lifetime;
-
     return [
       _TimelineItem(
         icon: Icons.lock_open_rounded,
         label: 'Today',
-        desc: isLifetime
-            ? 'All features unlocked instantly.'
-            : 'All features unlocked instantly. No charge.',
-        isActive: true,
+        desc: 'Unlock all the app\'s features instantly.',
+        color: const Color(0xFFEDB82A),
       ),
       _TimelineItem(
         icon: Icons.notifications_none_rounded,
-        label: isLifetime ? 'Today' : 'Day 5',
-        desc: isLifetime
-            ? "We won't send you a reminder since you chose Lifetime."
-            : "We'll remind you 2 days before trial ends.",
-        isActive: false,
+        label: 'In 2 Days - Reminder',
+        desc: 'We\'ll send you a reminder that your trial is ending soon.',
+        color: const Color(0xFFEDB82A),
       ),
       _TimelineItem(
-        icon: Icons.bolt_rounded,
-        label: isLifetime ? 'Today' : 'Day 7',
-        desc: isLifetime
-            ? 'You will be charged immediately.'
-            : 'Cancel 24 hours before in the app store.',
-        isActive: false,
+        icon: Icons.workspace_premium_rounded,
+        label: 'In 7 Days - Billing Starts',
+        desc: 'You\'ll be charged on $_billingDate unless you cancel anytime before.',
+        color: Colors.white.withValues(alpha: 0.15),
+        iconColor: Colors.white.withValues(alpha: 0.4),
       ),
     ];
   }
 
   Widget _buildTimeline() {
     final items = _timelineItems;
-
     return Column(
       children: items.asMap().entries.map((entry) {
         final i = entry.key;
         final item = entry.value;
         final isLast = i == items.length - 1;
-
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -454,47 +377,34 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: item.isActive
-                        ? const Color(0xFFEDB82A).withValues(alpha: 0.15)
-                        : const Color(0xFF1E1E35),
+                    color: item.color,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: item.isActive
-                          ? const Color(0xFFEDB82A)
-                          : Colors.white.withValues(alpha: 0.15),
-                      width: 1.5,
-                    ),
                   ),
                   child: Icon(
                     item.icon,
-                    color: item.isActive
-                        ? const Color(0xFFEDB82A)
-                        : Colors.white.withValues(alpha: 0.3),
+                    color: item.iconColor ?? const Color(0xFF1A1208),
                     size: 16,
                   ),
                 ),
-                if (!isLast)
-                  Container(
-                    width: 1.5,
-                    height: 32,
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
+                Container(
+                  width: 10,
+                  height: isLast ? 30 : 80,
+                  color: const Color(0xFFEDB82A).withValues(alpha: 0.3),
+                ),
               ],
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(top: 6, bottom: 24),
+                padding: EdgeInsets.only(top: 6, bottom: isLast ? 0 : 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       item.label,
                       style: GoogleFonts.poppins(
-                        color: item.isActive
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.6),
-                        fontSize: 14,
+                        color: Colors.white,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -503,7 +413,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       item.desc,
                       style: GoogleFonts.poppins(
                         color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 12,
+                        fontSize: 15,
                         height: 1.4,
                       ),
                     ),
@@ -522,32 +432,29 @@ class _TimelineItem {
   final IconData icon;
   final String label;
   final String desc;
-  final bool isActive;
-
+  final Color color;
+  final Color? iconColor;
   const _TimelineItem({
     required this.icon,
     required this.label,
     required this.desc,
-    required this.isActive,
+    required this.color,
+    this.iconColor,
   });
 }
 
-// ── New plan row — matches the screenshot's Yearly/Monthly rows ──
-
-class _PlanRow extends StatelessWidget {
+class _PlanCard extends StatelessWidget {
   final String label;
   final String price;
-  final String? monthlyEquivalent;
-  final String trialText;
+  final String period;
   final String? badge;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _PlanRow({
+  const _PlanCard({
     required this.label,
     required this.price,
-    this.monthlyEquivalent,
-    required this.trialText,
+    required this.period,
     this.badge,
     required this.isSelected,
     required this.onTap,
@@ -557,78 +464,81 @@ class _PlanRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: const Color(0xFF16162A),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected
-                    ? const Color(0xFFEDB82A)
-                    : Colors.white.withValues(alpha: 0.12),
-                width: isSelected ? 1.5 : 0.5,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      monthlyEquivalent ?? price,
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      monthlyEquivalent != null ? price : trialText,
-                      style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (badge != null)
-            Positioned(
-              top: -10,
-              right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.gold(context),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  badge!,
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF16162A),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                  ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF16162A),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected ? const Color(0xFFEDB82A) : Colors.white.withValues(alpha: 0.12),
+                  width: isSelected ? 1.5 : 0.5,
                 ),
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: price,
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        TextSpan(
+                          text: period,
+                          style: GoogleFonts.poppins(
+                            color: Colors.white.withValues(alpha: 0.4),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-        ],
-      ),
+            if (badge != null)
+              Positioned(
+                top: -14,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDB82A),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      badge!,
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF1A1208),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
     );
   }
 }

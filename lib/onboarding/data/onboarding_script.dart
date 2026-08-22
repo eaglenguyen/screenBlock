@@ -56,7 +56,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ChatMessage(type: MessageType.bot, text: 'what you rather be doing'),
     ],
     userResponses: [
-      'ok that\'s too real 😬',
       'i never noticed that',
       'yep that\'s me',
     ],
@@ -82,7 +81,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
     ],
     userResponses: [
-      'i want that',
       'how do i get there?',
     ],
   ),
@@ -103,7 +101,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ChatMessage(type: MessageType.bot, text: 'they choose to do something more productive'),
     ],
     userResponses: [
-      'ok I\'m convinced 🧠',
       'that actually makes sense',
       'so how does pause now help?',
     ],

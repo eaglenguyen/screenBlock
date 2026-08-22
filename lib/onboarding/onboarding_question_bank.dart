@@ -480,7 +480,7 @@ class _QBPhoneUsageScreenState extends State<QBPhoneUsageScreen> {
   String get _label {
     final h = _hours.floor();
     final m = ((_hours - h) * 60).round();
-    if (m == 0) return '${h}h';
+    if (m == 0) return '${h}h+';
     if (h == 0) return '${m}m';
     return '${h}h ${m}m';
   }
@@ -589,7 +589,7 @@ class _QBPhoneUsageScreenState extends State<QBPhoneUsageScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('0h', style: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.3), fontSize: 12)),
-                Text('8h', style: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.3), fontSize: 12)),
+                Text('8h+', style: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.3), fontSize: 12)),
               ],
             ),
           ),

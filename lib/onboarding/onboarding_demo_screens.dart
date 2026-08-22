@@ -302,12 +302,14 @@ class _DemoDaysScreenState extends State<DemoDaysScreen> {
 // App Picker
 
 class DemoAppPickerScreen extends ConsumerStatefulWidget {
+  final String scheduleId; // 👈 new
   final Function(List<String> apps) onAppsSelected;
   final VoidCallback? onBack;
   final double progress;
 
   const DemoAppPickerScreen({
     super.key,
+    required this.scheduleId, // 👈 new
     required this.onAppsSelected,
     this.onBack,
     required this.progress,
@@ -325,11 +327,11 @@ class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
     try {
       if (Platform.isIOS) {
         final service = ref.read(blockingServiceProvider) as IOSBlockingService;
-        final count = await service.showAppPicker(
+        final count = await service.showSchedulePicker( // 👈 was showAppPicker
+          scheduleId: widget.scheduleId, // 👈 new — writes to the correct per-schedule key
           blockingMode: AppConstants.blockingTypeSpecificApps,
         );
         final selectedCount = count ?? 0;
-
         if (selectedCount == 0) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -338,12 +340,11 @@ class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
           }
           return;
         }
-
-        // 👇 cap at 3, even if the picker somehow returned more
         final cappedCount = selectedCount > 3 ? 3 : selectedCount;
         final placeholders = List.generate(cappedCount, (i) => 'ios_app_$i');
         widget.onAppsSelected(placeholders);
       } else {
+        // Android unchanged — real package names already stored correctly on the Schedule model
         if (!mounted) return;
         showModalBottomSheet(
           context: context,
@@ -491,7 +492,7 @@ class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
             child: GestureDetector(
               onTap: () => widget.onAppsSelected([]), // 👈 skip — proceeds with empty list, no validation
               child: Text(
-                'Skip for now (debug)',
+                '(debug)',
                 style: GoogleFonts.poppins(
                   color: Colors.white.withValues(alpha: 0.3),
                   fontSize: 13,
@@ -531,9 +532,247 @@ class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
   }
 }
 
+// Set schedule mockup
+
+class SetMultipleSchedulesScreen extends StatefulWidget {
+  final VoidCallback onNext;
+  final VoidCallback? onBack;
+
+  const SetMultipleSchedulesScreen({
+    super.key,
+    required this.onNext,
+    this.onBack,
+  });
+
+  @override
+  State<SetMultipleSchedulesScreen> createState() => _SetMultipleSchedulesScreenState();
+}
+
+class _SetMultipleSchedulesScreenState extends State<SetMultipleSchedulesScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late List<Animation<double>> _rowFades;
+  late List<Animation<Offset>> _rowSlides;
+  late Animation<double> _checkFade;
+  late Animation<double> _checkScale;
+
+  final List<Map<String, String>> _mockSchedules = [
+    {'name': 'Schedule 1', 'time': '6AM - 5PM'},
+    {'name': 'Schedule 2', 'time': '10AM - 5PM'},
+    {'name': 'Schedule 3', 'time': '9AM - 9PM'},
+    {'name': 'Schedule 4', 'time': '11AM - 3PM'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    );
+
+    _rowFades = List.generate(4, (i) {
+      final start = i * 0.15;
+      final end = (start + 0.35).clamp(0.0, 1.0);
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _ctrl, curve: Interval(start, end, curve: Curves.easeOut)),
+      );
+    });
+    _rowSlides = List.generate(4, (i) {
+      final start = i * 0.15;
+      final end = (start + 0.35).clamp(0.0, 1.0);
+      return Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+        CurvedAnimation(parent: _ctrl, curve: Interval(start, end, curve: Curves.easeOutCubic)),
+      );
+    });
+
+    _checkFade = CurvedAnimation(
+      parent: _ctrl,
+      curve: const Interval(0.75, 1.0, curve: Curves.easeOut),
+    );
+    _checkScale = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.75, 1.0, curve: Curves.elasticOut)),
+    );
+
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF16162A),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: widget.onBack,
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Set Multiple Schedules',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  // ── mockup card, width-constrained with floating overlapping checkmark ──
+                  Center(
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E1E35),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.08),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ...List.generate(_mockSchedules.length, (i) {
+                                  final schedule = _mockSchedules[i];
+                                  return FadeTransition(
+                                    opacity: _rowFades[i],
+                                    child: SlideTransition(
+                                      position: _rowSlides[i],
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(bottom: 12),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    schedule['name']!,
+                                                    style: GoogleFonts.poppins(
+                                                      color: Colors.white.withValues(alpha: 0.5),
+                                                      fontSize: 11,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    schedule['time']!,
+                                                    style: GoogleFonts.poppins(
+                                                      color: Colors.white,
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Transform.scale(
+                                              scale: 0.75,
+                                              child: Switch(
+                                                value: true,
+                                                onChanged: null,
+                                                activeColor: const Color(0xFFEDB82A),
+                                                activeTrackColor: const Color(0xFFEDB82A).withValues(alpha: 0.4),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                          FadeTransition(
+                            opacity: _checkFade,
+                            child: ScaleTransition(
+                              scale: _checkScale,
+                              child: Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF4CAF50),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check_rounded,
+                                  color: Colors.white,
+                                  size: 34,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Set as many blocking schedules & apps as you need. pause now runs them all automatically, exactly when you need it.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: 0.45),
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  _ContinueButton(onTap: widget.onNext),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 // Bar chart
 
 class DemoComparisonScreen extends ConsumerStatefulWidget {
+  final String scheduleId; // 👈 new
   final VoidCallback onNext;
   final VoidCallback? onBack;
   final double progress;
@@ -544,6 +783,7 @@ class DemoComparisonScreen extends ConsumerStatefulWidget {
 
   const DemoComparisonScreen({
     super.key,
+    required this.scheduleId, // 👈 new
     required this.onNext,
     this.onBack,
     required this.progress,
@@ -603,6 +843,7 @@ class _DemoComparisonScreenState extends ConsumerState<DemoComparisonScreen>
     setState(() => _isSaving = true);
     try {
       await ref.read(scheduleViewModelProvider.notifier).saveSchedule(
+        existingId: widget.scheduleId, // 👈 new — pass widget.scheduleId here (add as a constructor param)
         name: 'Blocked Apps',
         startTime: _fmt(widget.scheduleStart),
         endTime: _fmt(widget.scheduleEnd),

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../stats_state.dart';
@@ -11,7 +10,6 @@ class UsageGauge extends StatefulWidget {
     super.key,
     required this.state,
   });
-
   final StatsState state;
 
   @override
@@ -20,7 +18,6 @@ class UsageGauge extends StatefulWidget {
 
 class _UsageGaugeState extends State<UsageGauge>
     with TickerProviderStateMixin {
-
   late AnimationController _outerCtrl;
   late AnimationController _innerCtrl;
   late Animation<double> _outerAnim;
@@ -103,6 +100,7 @@ class _UsageGaugeState extends State<UsageGauge>
         border: Border.all(color: AppColors.border(context), width: 0.5),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // 👈 new
         children: [
           // ── Rings (left side) ──────────────────────
           SizedBox(
@@ -117,121 +115,44 @@ class _UsageGaugeState extends State<UsageGauge>
                     outerValue: _outerAnim.value,
                     innerValue: _innerAnim.value,
                     isOverGoal: widget.state.isOverGoal,
+                    showOuterRing: !Platform.isIOS,
                   ),
                 );
               },
             ),
           ),
-
           const SizedBox(width: 20),
-
           // ── Stats (right side) ────────────────────
-          Expanded(
+          Flexible( // 👈 was Expanded — Flexible lets it shrink-to-fit instead of forcing full remaining width
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // 👈 new
               children: [
-                // screen time stat
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: _statRow(
-                        label: 'Screen Time',
-                        value: widget.state.totalUsage > Duration.zero
-                            ? widget.state.formattedTotal
-                            : '--',
-                        goal: widget.state.formattedGoal,
-                        color: _outerColor,
-                        suffix: widget.state.totalUsage > Duration.zero
-                            ? widget.state.isOverGoal
-                            ? '+${_formatOverage()} over'
-                            : '${widget.state.percentLeft}% left'
-                            : '0% of goal',
-                        isOverGoal: widget.state.isOverGoal,
-                      ),
-                    ),
-                    if (Platform.isIOS) // 👈 only show on iOS
-                      GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              backgroundColor: AppColors.backgroundCard(context),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text('❤️', style: TextStyle(fontSize: 36)), // 👈 kept as-is — an emoji, not text hierarchy
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'ScreenTime Ring',
-                                    style: AppTextStyles.headlineSmall.copyWith( // 👈 was fontSize:17 — now 18
-                                      color: AppColors.textPrimary(context),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Coming soon to iOS!',
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyles.bodyMedium.copyWith( // 👈 was fontSize:13 — already matches, just switched to named style
-                                      color: AppColors.textSecondary(context),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () => Navigator.pop(ctx),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.gold(context),
-                                      foregroundColor: AppColors.goldText(context),
-                                      shape: const StadiumBorder(),
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                    ),
-                                    child: const Text('Got it',
-                                        style: TextStyle(fontWeight: FontWeight.w700)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 22,
-                          height: 22,
-                          margin: const EdgeInsets.only(left: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundSubtle(context),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.border(context),
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.question_mark_rounded,
-                            color: AppColors.textSecondary(context),
-                            size: 12,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  height: 0.5,
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
-                const SizedBox(height: 8),
-
-                // blocked time stat
+                if (!Platform.isIOS) ...[
+                  _statRow(
+                    label: 'Screen Time',
+                    value: widget.state.totalUsage > Duration.zero
+                        ? widget.state.formattedTotal
+                        : '--',
+                    goal: widget.state.formattedGoal,
+                    color: _outerColor,
+                    suffix: widget.state.totalUsage > Duration.zero
+                        ? widget.state.isOverGoal
+                        ? '+${_formatOverage()} over'
+                        : '${widget.state.percentLeft}% left'
+                        : '0% of goal',
+                    isOverGoal: widget.state.isOverGoal,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 0.5,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 _statRow(
-                  label: 'Blocked',
+                  label: 'Block Time',
                   value: widget.state.formattedBlocked,
                   goal: widget.state.formattedBlockGoal,
                   color: const Color(0xFF4ECDC4),
@@ -248,6 +169,7 @@ class _UsageGaugeState extends State<UsageGauge>
     );
   }
 
+
   Widget _statRow({
     required String label,
     required String value,
@@ -261,7 +183,7 @@ class _UsageGaugeState extends State<UsageGauge>
       children: [
         Text(
           label,
-          style: AppTextStyles.bodySmall.copyWith( // 👈 was GoogleFonts.poppins fontSize:11 — now bodySmall (11), same value, now using named style
+          style: AppTextStyles.bodySmall.copyWith(
             color: Colors.white.withValues(alpha: 0.45),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,
@@ -273,7 +195,7 @@ class _UsageGaugeState extends State<UsageGauge>
             children: [
               TextSpan(
                 text: value,
-                style: AppTextStyles.displayMedium.copyWith( // 👈 was fontSize:26 — now 32
+                style: AppTextStyles.displayMedium.copyWith(
                   color: color,
                   fontSize: 32,
                   letterSpacing: -1,
@@ -281,7 +203,7 @@ class _UsageGaugeState extends State<UsageGauge>
               ),
               TextSpan(
                 text: ' / ${goal.replaceAll(' goal', '')}',
-                style: AppTextStyles.bodyMedium.copyWith( // 👈 was fontSize:14 — now 13
+                style: AppTextStyles.bodyMedium.copyWith(
                   color: Colors.white.withValues(alpha: 0.35),
                 ),
               ),
@@ -291,7 +213,7 @@ class _UsageGaugeState extends State<UsageGauge>
         const SizedBox(height: 4),
         Text(
           suffix,
-          style: AppTextStyles.bodySmall.copyWith( // already 11, matches
+          style: AppTextStyles.bodySmall.copyWith(
             color: isOverGoal ? const Color(0xFFE74C3C) : color.withValues(alpha: 0.7),
             fontWeight: FontWeight.w500,
           ),
@@ -306,11 +228,12 @@ class _DualRingPainter extends CustomPainter {
     required this.outerValue,
     required this.innerValue,
     required this.isOverGoal,
+    this.showOuterRing = true, // 👈 new — defaults to true so Android's behavior is unchanged
   });
-
   final double outerValue;
   final double innerValue;
   final bool isOverGoal;
+  final bool showOuterRing; // 👈 new
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -319,7 +242,6 @@ class _DualRingPainter extends CustomPainter {
     const fullSweep = 2 * pi;
     const strokeWidth = 16.0;
     const ringGap = 8.0;
-
     final outerRadius = size.width / 2 - strokeWidth / 2 - 2;
     final innerRadius = outerRadius - strokeWidth - ringGap;
 
@@ -331,48 +253,50 @@ class _DualRingPainter extends CustomPainter {
 
     final remainingValue = (1.0 - outerValue).clamp(0.0, 1.0);
 
-    // ── Outer track ───────────────────────────────
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: outerRadius),
-      startAngle, fullSweep, false,
-      Paint()
-        ..color = const Color(0xFF252542)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round,
-    );
-
-    // ── Outer fill (remaining) ────────────────────
-    final outerFillPaint = Paint()
-      ..color = outerColor()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    if (remainingValue > 0) {
+    // ── Outer track + fill — only drawn when showOuterRing is true ──
+    if (showOuterRing) { // 👈 new guard wraps the entire outer-ring block
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: outerRadius),
-        startAngle,
-        fullSweep * remainingValue,
-        false,
-        outerFillPaint,
-      );
-    } else {
-      // red dot at top when over goal
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: outerRadius),
-        startAngle, 0.001, false,
+        startAngle, fullSweep, false,
         Paint()
-          ..color = const Color(0xFFE74C3C)
+          ..color = const Color(0xFF252542)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth
           ..strokeCap = StrokeCap.round,
       );
+
+      final outerFillPaint = Paint()
+        ..color = outerColor()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round;
+
+      if (remainingValue > 0) {
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: outerRadius),
+          startAngle,
+          fullSweep * remainingValue,
+          false,
+          outerFillPaint,
+        );
+      } else {
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: outerRadius),
+          startAngle, 0.001, false,
+          Paint()
+            ..color = const Color(0xFFE74C3C)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeWidth
+            ..strokeCap = StrokeCap.round,
+        );
+      }
     }
 
-    // ── Inner track ───────────────────────────────
+    // ── Inner track + fill (blocked) — always drawn, on both platforms ──
+    final innerDrawRadius = showOuterRing ? innerRadius : outerRadius; // 👈 new — expands to fill the space if the outer ring is hidden
+
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: innerRadius),
+      Rect.fromCircle(center: center, radius: innerDrawRadius),
       startAngle, fullSweep, false,
       Paint()
         ..color = const Color(0xFF252542)
@@ -381,10 +305,9 @@ class _DualRingPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round,
     );
 
-    // ── Inner fill (blocked) ──────────────────────
     if (innerValue > 0) {
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: innerRadius),
+        Rect.fromCircle(center: center, radius: innerDrawRadius),
         startAngle,
         fullSweep * innerValue.clamp(0.0, 1.0),
         false,
@@ -401,5 +324,6 @@ class _DualRingPainter extends CustomPainter {
   bool shouldRepaint(_DualRingPainter old) =>
       old.outerValue != outerValue ||
           old.innerValue != innerValue ||
-          old.isOverGoal != isOverGoal;
+          old.isOverGoal != isOverGoal ||
+          old.showOuterRing != showOuterRing; // 👈 new
 }
