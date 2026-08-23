@@ -4,18 +4,17 @@ import '../../../core/theme/app_text_styles.dart';
 import '../home_state.dart';
 
 class ActiveBlockingCard extends StatelessWidget {
-
-
   final HomeState state;
   final VoidCallback onTakeBreak;
-  final VoidCallback onGiveUp;
+  final VoidCallback onGiveUp; // 👈 now wired to the close icon
   final VoidCallback onEndBreak;
   final VoidCallback onBlockListTapped;
   final bool isPomodoroMode;
   final int pomodoroRound;
-
-
-
+  final bool isPaused; // 👈 new
+  final VoidCallback onPauseToggle; // 👈 new — toggles pause/resume
+  final VoidCallback onRestart; // 👈 new
+  final VoidCallback onSkipRound; // 👈 new
 
   const ActiveBlockingCard({
     super.key,
@@ -26,11 +25,11 @@ class ActiveBlockingCard extends StatelessWidget {
     required this.onBlockListTapped,
     required this.isPomodoroMode,
     this.pomodoroRound = 0,
-
-
-
+    this.isPaused = false,
+    required this.onPauseToggle,
+    required this.onRestart,
+    required this.onSkipRound,
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -45,25 +44,57 @@ class ActiveBlockingCard extends StatelessWidget {
           width: 0.5,
         ),
       ),
-      child: Column(
+      child: Stack(
         children: [
-          _buildSessionIcon(),
-          const SizedBox(height: 10),
-          _buildSessionName(),
-          const SizedBox(height: 12),
-          _buildBlockListPill(context),
-          const SizedBox(height: 20),
-          _buildTimer(context),
-          const SizedBox(height: 12),
-          _buildXpBar(context),
-          const SizedBox(height: 16),
-          _buildTakeBreakButton(context),
-          const SizedBox(height: 10),
-          _buildGiveUpButton(context),
+          Column(
+            children: [
+              const SizedBox(height: 4),
+              _buildSessionIcon(),
+              const SizedBox(height: 10),
+              _buildSessionName(),
+              const SizedBox(height: 12),
+              _buildBlockListPill(context),
+              const SizedBox(height: 20),
+              _buildTimer(context),
+              const SizedBox(height: 12),
+              _buildXpBar(context),
+              const SizedBox(height: 16),
+              if (isPomodoroMode)
+                _buildPomodoroControls(context)
+              else ...[
+                _buildTakeBreakButton(context),
+                const SizedBox(height: 10),
+              ],
+            ],
+          ),
+          // 👇 close icon — position now depends on mode
+          Positioned(
+            top: 0,
+            left: isPomodoroMode ? 0 : null,   // 👈 top-left for Pomodoro
+            right: isPomodoroMode ? null : 0,  // 👈 top-right for manual
+            child: GestureDetector(
+              onTap: onGiveUp,
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundSubtle(context),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.border(context), width: 0.5),
+                ),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 18,
+                  color: AppColors.textSecondary(context),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
+
 
   Widget _buildSessionIcon() {
     if (isPomodoroMode) {
@@ -83,7 +114,6 @@ class ActiveBlockingCard extends StatelessWidget {
         ),
       );
     }
-
     return Container(
       width: 56,
       height: 56,
@@ -110,17 +140,14 @@ class ActiveBlockingCard extends StatelessWidget {
     );
   }
 
-
   Widget _buildBlockListPill(BuildContext context) {
     final label = state.blockingType == 'specific_apps'
         ? 'Specific Apps'
         : 'All Apps';
-
     final isOnBreak = state.phase == BlockingPhase.onBreak;
     final displayRound = isOnBreak
-        ? pomodoroRound       // 👈 during break show previous round
-        : pomodoroRound + 1;  // 👈 during work show current round
-
+        ? pomodoroRound
+        : pomodoroRound + 1;
     return Column(
       children: [
         Container(
@@ -161,7 +188,7 @@ class ActiveBlockingCard extends StatelessWidget {
               }),
               const SizedBox(width: 8),
               Text(
-              'Round $displayRound',
+                'Round $displayRound',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: const Color(0xFFE74C3C).withValues(alpha: 0.8),
                   fontWeight: FontWeight.w600,
@@ -175,18 +202,15 @@ class ActiveBlockingCard extends StatelessWidget {
     );
   }
 
-
   Widget _buildTimer(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
     final seconds = isOnBreak
         ? state.breakRemainingSeconds
         : state.remainingSeconds;
-
     final h = (seconds ~/ 3600).toString().padLeft(2, '0');
     final m = ((seconds % 3600) ~/ 60)
         .toString().padLeft(2, '0');
     final s = (seconds % 60).toString().padLeft(2, '0');
-
     return Column(
       children: [
         if (isOnBreak)
@@ -196,12 +220,25 @@ class ActiveBlockingCard extends StatelessWidget {
               color: AppColors.gold(context),
             ),
           ),
+        if (isPaused) // 👈 new — small "Paused" indicator above the timer
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              'Paused',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         Text(
           '$h:$m:$s',
           style: TextStyle(
             fontSize: 48,
             fontWeight: FontWeight.w900,
-            color: AppColors.textPrimary(context), // 👈 theme-aware
+            color: isPaused
+                ? AppColors.textSecondary(context) // 👈 dimmed when paused
+                : AppColors.textPrimary(context),
             letterSpacing: -1,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
@@ -216,10 +253,7 @@ class ActiveBlockingCard extends StatelessWidget {
     final progress = totalSeconds > 0
         ? (elapsed / totalSeconds).clamp(0.0, 1.0)
         : 0.0;
-
-    // 👇 calculate XP earned so far (5 XP per minute elapsed)
     final xpSoFar = (elapsed / 60).floor() * 5;
-
     return Row(
       children: [
         Expanded(
@@ -244,20 +278,124 @@ class ActiveBlockingCard extends StatelessWidget {
       ],
     );
   }
+
+  // 👇 new — replaces the old Pomodoro take-break-button logic entirely
+  Widget _buildPomodoroControls(BuildContext context) {
+    if (!isPaused) {
+      // ── not paused — single Pause button ──
+      return SizedBox(
+        width: double.infinity,
+        child: TextButton.icon(
+          onPressed: onPauseToggle,
+          icon: Icon(
+            Icons.pause_rounded,
+            color: AppColors.textPrimary(context),
+            size: 20,
+          ),
+          label: Text(
+            'Pause',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: AppColors.textPrimary(context),
+              fontSize: 15,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            backgroundColor: AppColors.backgroundSubtle(context),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: const StadiumBorder(),
+          ),
+        ),
+      );
+    }
+
+    // ── paused — Resume, then Restart + Skip Round side by side ──
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: TextButton.icon(
+            onPressed: onPauseToggle,
+            icon: Icon(
+              Icons.play_arrow_rounded,
+              color: AppColors.gold(context),
+              size: 20,
+            ),
+            label: Text(
+              'Resume',
+              style: AppTextStyles.labelMedium.copyWith(
+                color: AppColors.gold(context),
+                fontSize: 15,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.backgroundSubtle(context),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: const StadiumBorder(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: TextButton.icon(
+                onPressed: onRestart,
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  color: AppColors.textSecondary(context),
+                  size: 18,
+                ),
+                label: Text(
+                  'Restart',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.textSecondary(context),
+                    fontSize: 14,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColors.backgroundSubtle(context),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const StadiumBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextButton.icon(
+                onPressed: onSkipRound,
+                icon: Icon(
+                  Icons.skip_next_rounded,
+                  color: AppColors.textSecondary(context),
+                  size: 18,
+                ),
+                label: Text(
+                  'Skip Round',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.textSecondary(context),
+                    fontSize: 14,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColors.backgroundSubtle(context),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const StadiumBorder(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildTakeBreakButton(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
-
-    if (isPomodoroMode && !isOnBreak) return const SizedBox.shrink();
-
-
     return SizedBox(
       width: double.infinity,
       child: TextButton.icon(
         onPressed: isOnBreak ? onEndBreak : onTakeBreak,
         icon: Icon(
-          isOnBreak
-              ? null
-              : Icons.pause_rounded,
+          isOnBreak ? null : Icons.pause_rounded,
           color: isOnBreak
               ? AppColors.gold(context)
               : AppColors.textPrimary(context),
@@ -276,28 +414,6 @@ class ActiveBlockingCard extends StatelessWidget {
           backgroundColor: AppColors.backgroundSubtle(context),
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: const StadiumBorder(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGiveUpButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: onGiveUp,
-        icon: const Icon(
-          Icons.stop_rounded,
-          color: Colors.white,
-          size: 20,
-        ),
-        label: const Text('Give Up'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.error(context),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: const StadiumBorder(),
-          textStyle: AppTextStyles.labelLarge,
         ),
       ),
     );

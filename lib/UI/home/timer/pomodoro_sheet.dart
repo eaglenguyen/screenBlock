@@ -239,7 +239,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
               _buildDurationRow(
                 context,
                 emoji: '☕',
-                label: 'Short Break',
+                label: 'Rest',
                 minutes: _shortBreakMinutes,
                 min: 3,
                 max: 15,
@@ -250,7 +250,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
               _buildDurationRow(
                 context,
                 emoji: '🧘',
-                label: 'Long Break (4 rounds)',
+                label: 'Long Rest (4 rounds)',
                 minutes: _longBreakMinutes,
                 min: 15,
                 max: 60,

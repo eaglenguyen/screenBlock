@@ -544,6 +544,8 @@ class HomeViewModel extends _$HomeViewModel {
       remainingSeconds: totalSeconds,
       activeSessionKey: sessionKey,
       sessionStartTime: startTime,
+      isPaused: false,       // 👈 new — defensive reset
+      clearPausedAt: true,    // 👈 new — defensive reset
     );
 
     if (state.pomodoroConfig.isPomodoroMode) {
@@ -623,6 +625,8 @@ class HomeViewModel extends _$HomeViewModel {
       remainingSeconds: 0,
       activeSessionKey: null,
       xpEarned: state.selectedMinutes * 5,
+      isPaused: false,       // 👈 new — defensive reset
+      clearPausedAt: true,    // 👈 new — defensive reset
     );
 
     ScheduleChecker.instance.checkNow();
@@ -722,33 +726,30 @@ class HomeViewModel extends _$HomeViewModel {
   Future<void> giveUp() async {
     _sessionTimer?.cancel();
     _breakTimer?.cancel();
-
     await NotificationService.instance.cancelNotification(200);
     await NotificationService.instance.cancelNotification(201);
     await NotificationService.instance.cancelNotification(202);
-
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).stopBlockingCompletely();
     } else {
       await _blockingService.stopAllMonitoring();
     }
-
     if (state.activeSessionKey != null) {
       await _sessionRepo.endSession(
         key: state.activeSessionKey!,
         completed: false,
       );
     }
-
     await Future.delayed(const Duration(milliseconds: 100));
     loadTodayBlockedTime();
-
     if (state.pomodoroConfig.isPomodoroMode && state.xpEarned > 0) {
       state = state.copyWith(
         phase: BlockingPhase.completed,
         remainingSeconds: 0,
         activeSessionKey: null,
         pomodoroRoundCount: 0,
+        isPaused: false,       // 👈 new
+        clearPausedAt: true,    // 👈 new
       );
     } else {
       state = state.copyWith(
@@ -758,12 +759,12 @@ class HomeViewModel extends _$HomeViewModel {
         activeSessionKey: null,
         pomodoroRoundCount: 0,
         xpEarned: 0,
+        isPaused: false,       // 👈 new
+        clearPausedAt: true,    // 👈 new
       );
     }
-
     ScheduleChecker.instance.checkNow();
   }
-
   // ── Break ─────────────────────────────────────────
   Future<void> startBreak(int minutes) async {
     _sessionTimer?.cancel();
@@ -932,6 +933,7 @@ class HomeViewModel extends _$HomeViewModel {
       _checkPendingXpClaim();
       await _checkPendingCheckInFlow(); // 👈 new — reuses the same method from init()
       await _resetUnblockButtonFlag(); // 👈 new
+      await _checkLiveActivityPauseSync(); // 👈 new
 
     }
     if (state.isSchedulePaused) {
@@ -944,6 +946,8 @@ class HomeViewModel extends _$HomeViewModel {
 
     switch (state.phase) {
       case BlockingPhase.active:
+
+        if (state.isPaused) return; // 👈 new — don't touch the timer while paused
         if (state.sessionStartTime == null) return;
         final totalSeconds = state.selectedMinutes * 60;
         final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
@@ -1144,6 +1148,194 @@ class HomeViewModel extends _$HomeViewModel {
 
   void clearPendingCheckIn() {
     state = state.copyWith(pendingCheckIn: false);
+  }
+
+  // New pomodoro additions
+
+  // ── Pause / Resume (Pomodoro) ─────────────────────
+  void togglePause() {
+    if (state.isPaused) {
+      _resumeFromPause();
+    } else {
+      _pauseTimer();
+    }
+  }
+
+  void _pauseTimer() {
+    if (state.phase == BlockingPhase.active) {
+      _sessionTimer?.cancel();
+    } else if (state.phase == BlockingPhase.onBreak) {
+      _breakTimer?.cancel();
+    } else {
+      return; // nothing to pause
+    }
+    state = state.copyWith(isPaused: true, pausedAt: DateTime.now());
+  }
+
+  void _resumeFromPause() {
+    if (state.pausedAt == null) return;
+    final pauseDuration = DateTime.now().difference(state.pausedAt!);
+
+    if (state.phase == BlockingPhase.active) {
+      // shift sessionStartTime forward by however long we were paused,
+      // so the existing elapsed-time math in _sessionTimer stays correct
+      final newStartTime = state.sessionStartTime!.add(pauseDuration);
+      state = state.copyWith(
+        isPaused: false,
+        clearPausedAt: true,
+        sessionStartTime: newStartTime,
+      );
+      final totalSeconds = state.selectedMinutes * 60;
+      _sessionTimer?.cancel();
+      _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
+        final remaining = totalSeconds - elapsed;
+        if (remaining <= 0) {
+          timer.cancel();
+          _onSessionComplete();
+        } else {
+          state = state.copyWith(remainingSeconds: remaining);
+        }
+      });
+    } else if (state.phase == BlockingPhase.onBreak) {
+      final newBreakStartTime = state.breakStartTime!.add(pauseDuration);
+      state = state.copyWith(
+        isPaused: false,
+        clearPausedAt: true,
+        breakStartTime: newBreakStartTime,
+      );
+      _breakTimer?.cancel();
+      _breakTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        final elapsed = DateTime.now().difference(state.breakStartTime!).inSeconds;
+        final remaining = state.originalBreakSeconds - elapsed;
+        if (remaining <= 0) {
+          timer.cancel();
+          _resumeAfterBreak(state.remainingSeconds);
+        } else {
+          state = state.copyWith(breakRemainingSeconds: remaining);
+        }
+      });
+    }
+  }
+
+// ── Restart current round ─────────────────────────
+  void restartRound() {
+    if (state.phase == BlockingPhase.active) {
+      _sessionTimer?.cancel();
+      final totalSeconds = state.selectedMinutes * 60;
+      final newStartTime = DateTime.now();
+      state = state.copyWith(
+        sessionStartTime: newStartTime,
+        remainingSeconds: totalSeconds,
+        isPaused: false,
+        clearPausedAt: true,
+      );
+      _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
+        final remaining = totalSeconds - elapsed;
+        if (remaining <= 0) {
+          timer.cancel();
+          _onSessionComplete();
+        } else {
+          state = state.copyWith(remainingSeconds: remaining);
+        }
+      });
+    } else if (state.phase == BlockingPhase.onBreak) {
+      _breakTimer?.cancel();
+      final newBreakStartTime = DateTime.now();
+      state = state.copyWith(
+        breakStartTime: newBreakStartTime,
+        breakRemainingSeconds: state.originalBreakSeconds,
+        isPaused: false,
+        clearPausedAt: true,
+      );
+      _breakTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        final elapsed = DateTime.now().difference(state.breakStartTime!).inSeconds;
+        final remaining = state.originalBreakSeconds - elapsed;
+        if (remaining <= 0) {
+          timer.cancel();
+          _resumeAfterBreak(state.remainingSeconds);
+        } else {
+          state = state.copyWith(breakRemainingSeconds: remaining);
+        }
+      });
+    }
+  }
+
+// ── Skip to next phase ────────────────────────────
+  void skipRound() {
+    state = state.copyWith(isPaused: false,  clearPausedAt: true, );
+    if (state.phase == BlockingPhase.active) {
+      _sessionTimer?.cancel();
+      _onPomodoroRoundComplete();
+    } else if (state.phase == BlockingPhase.onBreak) {
+      endBreak(); // already correctly routes to _resumeAfterPomodoroBreak
+    }
+  }
+
+  Future<void> _checkLiveActivityPauseSync() async {
+    if (!Platform.isIOS) return;
+    if (!state.pomodoroConfig.isPomodoroMode) return;
+    if (state.phase != BlockingPhase.active && state.phase != BlockingPhase.onBreak) return;
+
+    try {
+      final result = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod<Map>('checkLiveActivityPauseState');
+      if (result == null) return;
+
+      final laIsPaused = result['isPaused'] as bool? ?? false;
+
+      if (laIsPaused && !state.isPaused) {
+        // 👇 Live Activity paused it, Dart doesn't know yet — sync
+        final remaining = result['pausedRemainingSeconds'] as int? ?? 0;
+        _sessionTimer?.cancel();
+        _breakTimer?.cancel();
+        state = state.copyWith(
+          isPaused: true,
+          pausedAt: DateTime.now(),
+          remainingSeconds: state.phase == BlockingPhase.active ? remaining : state.remainingSeconds,
+          breakRemainingSeconds: state.phase == BlockingPhase.onBreak ? remaining : state.breakRemainingSeconds,
+        );
+      } else if (!laIsPaused && state.isPaused) {
+        // 👇 Live Activity resumed it, Dart still thinks it's paused — sync
+        final resumedEndTimeMs = result['resumedEndTime'] as double? ?? 0;
+        if (resumedEndTimeMs > 0) {
+          final resumedEndTime = DateTime.fromMillisecondsSinceEpoch((resumedEndTimeMs * 1000).round());
+          if (state.phase == BlockingPhase.active) {
+            final totalSeconds = state.selectedMinutes * 60;
+            final newStartTime = resumedEndTime.subtract(Duration(seconds: totalSeconds));
+            state = state.copyWith(isPaused: false, clearPausedAt: true, sessionStartTime: newStartTime);
+            _sessionTimer?.cancel();
+            _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+              final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
+              final remaining = totalSeconds - elapsed;
+              if (remaining <= 0) {
+                timer.cancel();
+                _onSessionComplete();
+              } else {
+                state = state.copyWith(remainingSeconds: remaining);
+              }
+            });
+          } else if (state.phase == BlockingPhase.onBreak) {
+            final newBreakStartTime = resumedEndTime.subtract(Duration(seconds: state.originalBreakSeconds));
+            state = state.copyWith(isPaused: false, clearPausedAt: true, breakStartTime: newBreakStartTime);
+            _breakTimer?.cancel();
+            _breakTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+              final elapsed = DateTime.now().difference(state.breakStartTime!).inSeconds;
+              final remaining = state.originalBreakSeconds - elapsed;
+              if (remaining <= 0) {
+                timer.cancel();
+                _resumeAfterBreak(state.remainingSeconds);
+              } else {
+                state = state.copyWith(breakRemainingSeconds: remaining);
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ checkLiveActivityPauseSync error: $e');
+    }
   }
 
   // ── Getters ───────────────────────────────────────

@@ -46,7 +46,8 @@ class HomeState {
   final PomodoroConfig pomodoroConfig;
   final int pomodoroRoundCount;
   final bool pendingCheckIn;
-
+  final bool isPaused;
+  final DateTime? pausedAt;
 
 
   const HomeState({
@@ -76,7 +77,9 @@ class HomeState {
 
     this.pomodoroConfig = const PomodoroConfig(),
     this.pomodoroRoundCount = 0,
-    this.pendingCheckIn = false
+    this.pendingCheckIn = false,
+    this.isPaused = false,      // 👈 new
+    this.pausedAt,
   });
 
 
@@ -109,6 +112,9 @@ class HomeState {
     PomodoroConfig? pomodoroConfig,
     int? pomodoroRoundCount,
     bool? pendingCheckIn, // 👈 new
+    bool? isPaused,               // 👈 new
+    DateTime? pausedAt,
+    bool clearPausedAt = false, // 👈 new
 
   }) {
     return HomeState(
@@ -139,7 +145,8 @@ class HomeState {
       pomodoroConfig: pomodoroConfig ?? this.pomodoroConfig,
       pomodoroRoundCount: pomodoroRoundCount ?? this.pomodoroRoundCount,
       pendingCheckIn: pendingCheckIn ?? this.pendingCheckIn, // 👈 new
-
+      isPaused: isPaused ?? this.isPaused,
+      pausedAt: clearPausedAt ? null : (pausedAt ?? this.pausedAt),
 
     );
   }

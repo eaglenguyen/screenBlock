@@ -194,6 +194,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           onBlockListTapped: _onBlockListTapped,
                           isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
                           pomodoroRound: state.pomodoroRoundCount,
+                          isPaused: state.isPaused,
+                          onPauseToggle: () => ref.read(homeViewModelProvider.notifier).togglePause(),
+                          onRestart: () => ref.read(homeViewModelProvider.notifier).restartRound(),
+                          onSkipRound: () => ref.read(homeViewModelProvider.notifier).skipRound(),
                         ),
                   // Completed
                     BlockingPhase.completed => SessionCompletedCard(

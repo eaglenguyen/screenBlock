@@ -204,35 +204,35 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		74365F0B2FD9F0D8008C1DEC /* Exceptions for "pausenowMonitor" folder in "pausenowMonitor" target */ = {
+		74365F0B2FD9F0D8008C1DEC /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 74365F002FD9F0D8008C1DEC /* pausenowMonitor */;
 		};
-		745DB55B303A4F080045E2D4 /* Exceptions for "PauseNowWidgets" folder in "PauseNowWidgetsExtension" target */ = {
+		745DB55B303A4F080045E2D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 745DB543303A4F060045E2D4 /* PauseNowWidgetsExtension */;
 		};
-		745DB560303A4FB10045E2D4 /* Exceptions for "PauseNowWidgets" folder in "Runner" target */ = {
+		745DB560303A4FB10045E2D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				PauseNowActivityAttributes.swift,
 			);
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 		};
-		74E131222FC0EADB00D45757 /* Exceptions for "ShieldActionExtension" folder in "ShieldActionExtension" target */ = {
+		74E131222FC0EADB00D45757 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 74E131142FC0EADB00D45757 /* ShieldActionExtension */;
 		};
-		74E131A02FC0EC3E00D45757 /* Exceptions for "DeviceActivityReportExtension" folder in "DeviceActivityReportExtension" target */ = {
+		74E131A02FC0EC3E00D45757 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -242,55 +242,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		74365F032FD9F0D8008C1DEC /* pausenowMonitor */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				74365F0B2FD9F0D8008C1DEC /* Exceptions for "pausenowMonitor" folder in "pausenowMonitor" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = pausenowMonitor;
-			sourceTree = "<group>";
-		};
-		745DB549303A4F060045E2D4 /* PauseNowWidgets */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				745DB560303A4FB10045E2D4 /* Exceptions for "PauseNowWidgets" folder in "Runner" target */,
-				745DB55B303A4F080045E2D4 /* Exceptions for "PauseNowWidgets" folder in "PauseNowWidgetsExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = PauseNowWidgets;
-			sourceTree = "<group>";
-		};
-		74E131172FC0EADB00D45757 /* ShieldActionExtension */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				74E131222FC0EADB00D45757 /* Exceptions for "ShieldActionExtension" folder in "ShieldActionExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = ShieldActionExtension;
-			sourceTree = "<group>";
-		};
-		74E131902FC0EC3E00D45757 /* DeviceActivityReportExtension */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				74E131A02FC0EC3E00D45757 /* Exceptions for "DeviceActivityReportExtension" folder in "DeviceActivityReportExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = DeviceActivityReportExtension;
-			sourceTree = "<group>";
-		};
+		74365F032FD9F0D8008C1DEC /* pausenowMonitor */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (74365F0B2FD9F0D8008C1DEC /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = pausenowMonitor; sourceTree = "<group>"; };
+		745DB549303A4F060045E2D4 /* PauseNowWidgets */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (745DB560303A4FB10045E2D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 745DB55B303A4F080045E2D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = PauseNowWidgets; sourceTree = "<group>"; };
+		74E131172FC0EADB00D45757 /* ShieldActionExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (74E131222FC0EADB00D45757 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ShieldActionExtension; sourceTree = "<group>"; };
+		74E131902FC0EC3E00D45757 /* DeviceActivityReportExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (74E131A02FC0EC3E00D45757 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = DeviceActivityReportExtension; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -914,9 +869,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -931,9 +890,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
