@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,9 @@
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74365F022FD9F0D8008C1DEC /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74E130AB2FC0E84E00D45757 /* DeviceActivity.framework */; };
+		745DB546303A4F060045E2D4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 745DB545303A4F060045E2D4 /* WidgetKit.framework */; };
+		745DB548303A4F060045E2D4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 745DB547303A4F060045E2D4 /* SwiftUI.framework */; };
+		745DB557303A4F080045E2D4 /* PauseNowWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 745DB544303A4F060045E2D4 /* PauseNowWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7470385630080E7D00F67387 /* WeeklyDataTriggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7470385530080E7D00F67387 /* WeeklyDataTriggerView.swift */; };
 		7470385830080EB000F67387 /* WeeklyDataTriggerPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
@@ -54,6 +57,13 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
+		745DB555303A4F080045E2D4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 745DB543303A4F060045E2D4;
+			remoteInfo = PauseNowWidgetsExtension;
+		};
 		74BFE2B82FDA03080028C86B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
@@ -91,6 +101,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				745DB557303A4F080045E2D4 /* PauseNowWidgetsExtension.appex in Embed Foundation Extensions */,
 				74BFE2BA2FDA037A0028C86B /* pausenowMonitor.appex in Embed Foundation Extensions */,
 				74BFE73A2FDDE3E30028C86B /* ShieldConfigurationExtension.appex in Embed Foundation Extensions */,
 				74E1311E2FC0EADB00D45757 /* ShieldActionExtension.appex in Embed Foundation Extensions */,
@@ -137,6 +148,9 @@
 		5223F10B06D9E23DC294EE6A /* Pods-DeviceActivityReportExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DeviceActivityReportExtension.debug.xcconfig"; path = "Target Support Files/Pods-DeviceActivityReportExtension/Pods-DeviceActivityReportExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		5F25B40D2453561A9A23BFDD /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74365F012FD9F0D8008C1DEC /* pausenowMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = pausenowMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		745DB544303A4F060045E2D4 /* PauseNowWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PauseNowWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		745DB545303A4F060045E2D4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		745DB547303A4F060045E2D4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		7470385530080E7D00F67387 /* WeeklyDataTriggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyDataTriggerView.swift; sourceTree = "<group>"; };
 		7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyDataTriggerPlatformView.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -197,6 +211,20 @@
 			);
 			target = 74365F002FD9F0D8008C1DEC /* pausenowMonitor */;
 		};
+		745DB55B303A4F080045E2D4 /* Exceptions for "PauseNowWidgets" folder in "PauseNowWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 745DB543303A4F060045E2D4 /* PauseNowWidgetsExtension */;
+		};
+		745DB560303A4FB10045E2D4 /* Exceptions for "PauseNowWidgets" folder in "Runner" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				PauseNowActivityAttributes.swift,
+			);
+			target = 97C146ED1CF9000F007C117D /* Runner */;
+		};
 		74E131222FC0EADB00D45757 /* Exceptions for "ShieldActionExtension" folder in "ShieldActionExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -224,6 +252,19 @@
 			explicitFolders = (
 			);
 			path = pausenowMonitor;
+			sourceTree = "<group>";
+		};
+		745DB549303A4F060045E2D4 /* PauseNowWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				745DB560303A4FB10045E2D4 /* Exceptions for "PauseNowWidgets" folder in "Runner" target */,
+				745DB55B303A4F080045E2D4 /* Exceptions for "PauseNowWidgets" folder in "PauseNowWidgetsExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = PauseNowWidgets;
 			sourceTree = "<group>";
 		};
 		74E131172FC0EADB00D45757 /* ShieldActionExtension */ = {
@@ -267,6 +308,15 @@
 			files = (
 				74365F022FD9F0D8008C1DEC /* DeviceActivity.framework in Frameworks */,
 				1032D8924840EF9E6E47EF31 /* Pods_pausenowMonitor.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		745DB541303A4F060045E2D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				745DB548303A4F060045E2D4 /* SwiftUI.framework in Frameworks */,
+				745DB546303A4F060045E2D4 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,6 +372,8 @@
 				8B0F4E8BBE9A0887AB8E6397 /* Pods_ShieldActionExtension.framework */,
 				7E756916DFDC830333D80625 /* Pods_ShieldConfigurationExtension.framework */,
 				133D1CD08CC9F87A28911562 /* Pods_pausenowMonitor.framework */,
+				745DB545303A4F060045E2D4 /* WidgetKit.framework */,
+				745DB547303A4F060045E2D4 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -365,6 +417,7 @@
 				74E131172FC0EADB00D45757 /* ShieldActionExtension */,
 				74E131902FC0EC3E00D45757 /* DeviceActivityReportExtension */,
 				74365F032FD9F0D8008C1DEC /* pausenowMonitor */,
+				745DB549303A4F060045E2D4 /* PauseNowWidgets */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				A6C95E14380F0FECE5A072D4 /* Pods */,
@@ -382,6 +435,7 @@
 				74E1318F2FC0EC3E00D45757 /* DeviceActivityReportExtension.appex */,
 				74365F012FD9F0D8008C1DEC /* pausenowMonitor.appex */,
 				74BFE72F2FDDE3E30028C86B /* ShieldConfigurationExtension.appex */,
+				745DB544303A4F060045E2D4 /* PauseNowWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -482,6 +536,26 @@
 			productReference = 74365F012FD9F0D8008C1DEC /* pausenowMonitor.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		745DB543303A4F060045E2D4 /* PauseNowWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 745DB55C303A4F080045E2D4 /* Build configuration list for PBXNativeTarget "PauseNowWidgetsExtension" */;
+			buildPhases = (
+				745DB540303A4F060045E2D4 /* Sources */,
+				745DB541303A4F060045E2D4 /* Frameworks */,
+				745DB542303A4F060045E2D4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				745DB549303A4F060045E2D4 /* PauseNowWidgets */,
+			);
+			name = PauseNowWidgetsExtension;
+			productName = PauseNowWidgetsExtension;
+			productReference = 745DB544303A4F060045E2D4 /* PauseNowWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		74BFE72E2FDDE3E30028C86B /* ShieldConfigurationExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 74BFE73C2FDDE3E30028C86B /* Build configuration list for PBXNativeTarget "ShieldConfigurationExtension" */;
@@ -565,6 +639,7 @@
 				74E1311D2FC0EADB00D45757 /* PBXTargetDependency */,
 				74E1319A2FC0EC3E00D45757 /* PBXTargetDependency */,
 				74BFE7392FDDE3E30028C86B /* PBXTargetDependency */,
+				745DB556303A4F080045E2D4 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -578,7 +653,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastSwiftUpdateCheck = 2650;
+				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
@@ -588,6 +663,9 @@
 					};
 					74365F002FD9F0D8008C1DEC = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					745DB543303A4F060045E2D4 = {
+						CreatedOnToolsVersion = 26.6;
 					};
 					74BFE72E2FDDE3E30028C86B = {
 						CreatedOnToolsVersion = 26.5;
@@ -623,6 +701,7 @@
 				74E1318E2FC0EC3E00D45757 /* DeviceActivityReportExtension */,
 				74365F002FD9F0D8008C1DEC /* pausenowMonitor */,
 				74BFE72E2FDDE3E30028C86B /* ShieldConfigurationExtension */,
+				745DB543303A4F060045E2D4 /* PauseNowWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -636,6 +715,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		74365EFF2FD9F0D8008C1DEC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		745DB542303A4F060045E2D4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -894,6 +980,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		745DB540303A4F060045E2D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		74BFE72B2FDDE3E30028C86B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -944,6 +1037,11 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		745DB556303A4F080045E2D4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 745DB543303A4F060045E2D4 /* PauseNowWidgetsExtension */;
+			targetProxy = 745DB555303A4F080045E2D4 /* PBXContainerItemProxy */;
 		};
 		74BFE2B92FDA03080028C86B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1052,6 +1150,7 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "pause now";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1242,6 +1341,135 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Profile;
+		};
+		745DB558303A4F080045E2D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4GUFR796N8;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PauseNowWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PauseNowWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eagle.pausenow.PauseNowWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		745DB559303A4F080045E2D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4GUFR796N8;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PauseNowWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PauseNowWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eagle.pausenow.PauseNowWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		745DB55A303A4F080045E2D4 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4GUFR796N8;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PauseNowWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PauseNowWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eagle.pausenow.PauseNowWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Profile;
 		};
@@ -1747,6 +1975,7 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "pause now";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1778,6 +2007,7 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "pause now";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1814,6 +2044,16 @@
 				74365F0D2FD9F0D8008C1DEC /* Debug */,
 				74365F0E2FD9F0D8008C1DEC /* Release */,
 				74365F0F2FD9F0D8008C1DEC /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		745DB55C303A4F080045E2D4 /* Build configuration list for PBXNativeTarget "PauseNowWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				745DB558303A4F080045E2D4 /* Debug */,
+				745DB559303A4F080045E2D4 /* Release */,
+				745DB55A303A4F080045E2D4 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

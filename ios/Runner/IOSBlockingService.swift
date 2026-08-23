@@ -11,9 +11,60 @@ import DeviceActivity
 import ManagedSettings
 import Combine
 import UserNotifications
+import ActivityKit
+
 
 @available(iOS 16.0, *)
 class IOSBlockingService: NSObject {
+    
+    // Live activity logic
+    private var currentActivity: Any? // 👈 no generic constraint, avoids the availability requirement on the property itself
+
+    func startLiveActivity(endTime: Date) {
+        guard #available(iOS 16.2, *) else { return }
+
+        // end any existing activity first, to avoid duplicates
+        endLiveActivity()
+
+        let attributes = PauseNowActivityAttributes(sessionType: "manual")
+        let initialState = PauseNowActivityAttributes.ContentState(endTime: endTime, isPaused: false)
+
+        do {
+            let activity = try Activity.request(
+                attributes: attributes,
+                content: .init(state: initialState, staleDate: nil),
+                pushType: nil
+            )
+            currentActivity = activity
+            NSLog("✅ Live Activity started")
+        } catch {
+            NSLog("❌ Live Activity start error: \(error)")
+        }
+    }
+    
+    // 👇 new — updates the existing activity's content instead of ending/restarting
+    func updateLiveActivity(endTime: Date, isPaused: Bool) {
+        guard #available(iOS 16.2, *) else { return }
+        Task {
+            for activity in Activity<PauseNowActivityAttributes>.activities {
+                let newState = PauseNowActivityAttributes.ContentState(endTime: endTime, isPaused: isPaused)
+                await activity.update(.init(state: newState, staleDate: nil))
+            }
+        }
+    }
+
+
+    func endLiveActivity() {
+        guard #available(iOS 16.2, *) else { return }
+        Task {
+            for activity in Activity<PauseNowActivityAttributes>.activities {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+            currentActivity = nil
+        }
+    }
+    
+    // Ends here
     
     static let shared = IOSBlockingService()
     
@@ -47,25 +98,27 @@ class IOSBlockingService: NSObject {
         blockingMode: String,
         limitMinutes: Int,
         sessionType: String = "manual",
-        scheduleId: String? = nil // 👈 new
+        scheduleId: String? = nil
     ) {
-        // 👇 use sharedDefaults? directly — not sharedDefaults.standard
-        sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset for the fresh session
+        sharedDefaults?.set(false, forKey: "unblockButtonTapped")
         sharedDefaults?.set(true, forKey: "isBlocking")
         sharedDefaults?.set(blockingMode, forKey: "blockingMode")
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
         sharedDefaults?.set(limitMinutes, forKey: "sessionMinutes")
         sharedDefaults?.set(sessionType, forKey: "sessionType")
-        // 👇 persist which schedule is active, or clear it for manual/pomodoro
         if let scheduleId = scheduleId {
             sharedDefaults?.set(scheduleId, forKey: "activeScheduleId")
         } else {
             sharedDefaults?.removeObject(forKey: "activeScheduleId")
         }
         sharedDefaults?.synchronize()
+        applyShield(mode: blockingMode, scheduleId: scheduleId)
 
-        applyShield(mode: blockingMode, scheduleId: scheduleId) // 👈 pass through
-
+        // 👇 new — start Live Activity only for manual sessions
+        if sessionType == "manual" {
+            let endTime = Date().addingTimeInterval(TimeInterval(limitMinutes * 60))
+            startLiveActivity(endTime: endTime)
+        }
     }
 
     func stopBlocking() {
@@ -76,6 +129,8 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.synchronize()
         store.clearAllSettings()
         activityCenter.stopMonitoring([activityName])
+        endLiveActivity() // 👈 new
+
     }
 
     func stopBlockingCompletely() {
@@ -90,6 +145,7 @@ class IOSBlockingService: NSObject {
         pauseTimer?.invalidate()
         pauseTimer = nil
         cancelPauseNotification()
+        endLiveActivity() // 👈 new
     }
 
     // MARK: - Pause / Break
@@ -104,6 +160,8 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset on pause
         let now = Date()
         let pauseEndsAt = now.addingTimeInterval(TimeInterval(minutes * 60))
+        
+        updateLiveActivity(endTime: pauseEndsAt, isPaused: true)
 
         pauseTimer?.invalidate()
         pauseTimer = Timer.scheduledTimer(
@@ -182,8 +240,6 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.set(false, forKey: "unblockButtonTapped") // 👈 new — reset on pause
         let currentSessionType = sharedDefaults?.string(forKey: "sessionType") ?? "manual"
         let scheduleId = sharedDefaults?.string(forKey: "activeScheduleId") // 👈 new
-
-
         sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
         sharedDefaults?.synchronize()
 
@@ -194,6 +250,16 @@ class IOSBlockingService: NSObject {
 
         let blockingMode = sharedDefaults?.string(forKey: "blockingMode") ?? "specific_apps"
         applyShield(mode: blockingMode, scheduleId: scheduleId) // 👈 pass through
+        
+        // 👇 new — restore the Live Activity to BLOCKING with the original session's remaining time
+        if currentSessionType == "manual" {
+            let sessionStart = sharedDefaults?.double(forKey: "sessionStartTime") ?? 0
+            let sessionMinutes = sharedDefaults?.integer(forKey: "sessionMinutes") ?? 0
+            if sessionStart > 0 {
+                let originalEndTime = Date(timeIntervalSince1970: sessionStart).addingTimeInterval(TimeInterval(sessionMinutes * 60))
+                updateLiveActivity(endTime: originalEndTime, isPaused: false)
+            }
+        }
 
         // 👇 only notify Flutter for manual sessions
         if currentSessionType == "manual" {

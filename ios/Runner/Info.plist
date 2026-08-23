@@ -51,6 +51,8 @@
 		<string>pause now does not access your photo library.</string>
 		<key>NSUserNotificationUsageDescription</key>
 		<string>pause now sends notifications to remind you before your trial ends and when a blocking session completes.</string>
+        <key>NSSupportsLiveActivities</key>
+        <true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
