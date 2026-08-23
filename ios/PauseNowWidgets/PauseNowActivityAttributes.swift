@@ -13,6 +13,8 @@ struct PauseNowActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var endTime: Date
         var isPaused: Bool // 👈 new
+        var pausedRemainingSeconds: Int
+        var isOnBreak: Bool
 
     }
 

@@ -267,7 +267,34 @@ class IOSBlockingService implements BlockingService {
   }
 
 
+  Future<void> updateLiveActivity({
+    DateTime? endTime,
+    required bool isPaused,
+    int pausedRemainingSeconds = 0,
+    bool isOnBreak = false,
+  }) async {
+    try {
+      await const MethodChannel('com.eagle.pausenow/ios_blocking').invokeMethod(
+        'updateLiveActivity',
+        {
+          'endTime': (endTime ?? DateTime.now()).millisecondsSinceEpoch / 1000,
+          'isPaused': isPaused,
+          'pausedRemainingSeconds': pausedRemainingSeconds,
+          'isOnBreak' : isOnBreak,
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ updateLiveActivity error: $e');
+    }
+  }
 
+  Future<void> liftShieldOnly() async {
+    try {
+      await _channel.invokeMethod('liftShieldOnly');
+    } catch (e) {
+      debugPrint('❌ liftShieldOnly error: $e');
+    }
+  }
   @override
   Stream<AppUsageEvent> get usageEvents =>
       _eventController.stream;

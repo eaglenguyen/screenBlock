@@ -314,8 +314,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         result: @escaping FlutterResult
     ) async {
         let service = IOSBlockingService.shared
-
         switch call.method {
+        case "liftShieldOnly":
+            IOSBlockingService.shared.liftShieldOnly()
+            result(nil)
+        case "updateLiveActivity":
+            if #available(iOS 16.2, *), let args = call.arguments as? [String: Any] {
+                let endTimeSeconds = args["endTime"] as? Double ?? 0
+                let isPaused = args["isPaused"] as? Bool ?? false
+                let pausedRemainingSeconds = args["pausedRemainingSeconds"] as? Int ?? 0
+                let isOnBreak = args["isOnBreak"] as? Bool ?? false
+                let endTime = Date(timeIntervalSince1970: endTimeSeconds)
+                IOSBlockingService.shared.updateLiveActivity(
+                    endTime: endTime,
+                    isPaused: isPaused,
+                    pausedRemainingSeconds: pausedRemainingSeconds,
+                    isOnBreak: isOnBreak
+                )
+            }
+            result(nil)
         case "resetUnblockButtonFlag":
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             defaults?.set(false, forKey: "unblockButtonTapped")

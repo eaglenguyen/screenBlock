@@ -20,15 +20,16 @@ class IOSBlockingService: NSObject {
     // Live activity logic
     private var currentActivity: Any? // 👈 no generic constraint, avoids the availability requirement on the property itself
 
-    func startLiveActivity(endTime: Date) {
+    func startLiveActivity(endTime: Date, isOnBreak: Bool = false) {
         guard #available(iOS 16.2, *) else { return }
-
-        // end any existing activity first, to avoid duplicates
         endLiveActivity()
-
         let attributes = PauseNowActivityAttributes(sessionType: "manual")
-        let initialState = PauseNowActivityAttributes.ContentState(endTime: endTime, isPaused: false)
-
+        let initialState = PauseNowActivityAttributes.ContentState(
+            endTime: endTime,
+            isPaused: false,
+            pausedRemainingSeconds: 0,
+            isOnBreak: isOnBreak
+        )
         do {
             let activity = try Activity.request(
                 attributes: attributes,
@@ -41,18 +42,21 @@ class IOSBlockingService: NSObject {
             NSLog("❌ Live Activity start error: \(error)")
         }
     }
-    
-    // 👇 new — updates the existing activity's content instead of ending/restarting
-    func updateLiveActivity(endTime: Date, isPaused: Bool) {
+
+    func updateLiveActivity(endTime: Date, isPaused: Bool, pausedRemainingSeconds: Int = 0, isOnBreak: Bool = false) {
         guard #available(iOS 16.2, *) else { return }
         Task {
             for activity in Activity<PauseNowActivityAttributes>.activities {
-                let newState = PauseNowActivityAttributes.ContentState(endTime: endTime, isPaused: isPaused)
+                let newState = PauseNowActivityAttributes.ContentState(
+                    endTime: endTime,
+                    isPaused: isPaused,
+                    pausedRemainingSeconds: pausedRemainingSeconds,
+                    isOnBreak: isOnBreak
+                )
                 await activity.update(.init(state: newState, staleDate: nil))
             }
         }
     }
-
 
     func endLiveActivity() {
         guard #available(iOS 16.2, *) else { return }
@@ -62,6 +66,14 @@ class IOSBlockingService: NSObject {
             }
             currentActivity = nil
         }
+    }
+    
+    func liftShieldOnly() {
+        store.clearAllSettings()
+        sharedDefaults?.set(false, forKey: "isBlocking")
+        sharedDefaults?.synchronize()
+        activityCenter.stopMonitoring([activityName])
+        // 👈 deliberately no endLiveActivity() call here
     }
     
     // Ends here

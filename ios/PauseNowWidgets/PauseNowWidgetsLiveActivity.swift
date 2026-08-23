@@ -2,29 +2,44 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
+
+
+func formatSeconds(_ seconds: Int) -> String {
+    let m = seconds / 60
+    let s = seconds % 60
+    return String(format: "%02d:%02d", m, s)
+}
+
 struct PauseNowLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PauseNowActivityAttributes.self) { context in
             // ── Lock Screen / banner UI ──
             VStack(alignment: .leading, spacing: 14) {
                 HStack(spacing: 5) {
-                    if context.state.isPaused {
+                    if context.state.isPaused || context.state.isOnBreak {
                         Image(systemName: "pause.fill")
                             .font(.system(size: 11, weight: .bold))
                     }
-                    Text(context.state.isPaused ? "PAUSING" : "BLOCKING")
+                    Text(context.state.isPaused ? "PAUSING" : (context.state.isOnBreak ? "ON BREAK" : "BLOCKING"))
                         .font(.system(size: 14, weight: .bold))
                 }
                 .foregroundColor(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 6)
-                .background(context.state.isPaused ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+                .background((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
                 .clipShape(Capsule())
 
-                Text(timerInterval: Date()...context.state.endTime, countsDown: true)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .monospacedDigit()
+                if context.state.isPaused {
+                    Text(formatSeconds(context.state.pausedRemainingSeconds))
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .monospacedDigit()
+                } else {
+                    Text(timerInterval: Date()...context.state.endTime, countsDown: true)
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .monospacedDigit()
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
@@ -35,28 +50,35 @@ struct PauseNowLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(spacing: 5) {
-                        if context.state.isPaused {
+                        if context.state.isPaused || context.state.isOnBreak {
                             Image(systemName: "pause.fill")
                                 .font(.system(size: 10, weight: .bold))
                         }
-                        Text(context.state.isPaused ? "PAUSING" : "BLOCKING")
+                        Text(context.state.isPaused ? "PAUSING" : (context.state.isOnBreak ? "ON BREAK" : "BLOCKING"))
                             .font(.system(size: 11, weight: .bold))
                     }
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(context.state.isPaused ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+                    .background((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
                     .clipShape(Capsule())
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(timerInterval: Date()...context.state.endTime, countsDown: true)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 237/255, green: 184/255, blue: 42/255))
-                        .monospacedDigit()
+                    if context.state.isPaused {
+                        Text(formatSeconds(context.state.pausedRemainingSeconds))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(Color.orange)
+                            .monospacedDigit()
+                    } else {
+                        Text(timerInterval: Date()...context.state.endTime, countsDown: true)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 237/255, green: 184/255, blue: 42/255))
+                            .monospacedDigit()
+                    }
                 }
             } compactLeading: {
-                if context.state.isPaused {
-                    Image(systemName: "pause.fill") // 👈 was bare icon with no background
+                if context.state.isPaused || context.state.isOnBreak {
+                    Image(systemName: "pause.fill")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.horizontal, 6)
@@ -73,18 +95,26 @@ struct PauseNowLiveActivity: Widget {
                         .clipShape(Capsule())
                 }
             } compactTrailing: {
-                Text(timerInterval: Date()...context.state.endTime, countsDown: true)
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 237/255, green: 184/255, blue: 42/255))
-                    .monospacedDigit()
-                    .frame(maxWidth: 50)
+                if context.state.isPaused {
+                    Text(formatSeconds(context.state.pausedRemainingSeconds))
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.orange)
+                        .monospacedDigit()
+                        .frame(maxWidth: 50)
+                } else {
+                    Text(timerInterval: Date()...context.state.endTime, countsDown: true)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 237/255, green: 184/255, blue: 42/255))
+                        .monospacedDigit()
+                        .frame(maxWidth: 50)
+                }
             } minimal: {
                 Circle()
-                    .fill(context.state.isPaused ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+                    .fill((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
                     .frame(width: 12, height: 12)
             }
             .widgetURL(URL(string: "pausenow://open"))
-            .keylineTint(context.state.isPaused ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+            .keylineTint((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
         }
     }
 }
