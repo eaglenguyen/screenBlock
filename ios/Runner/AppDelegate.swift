@@ -316,13 +316,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let service = IOSBlockingService.shared
 
         switch call.method {
-        case "checkLiveActivityPauseState":
-            if #available(iOS 16.0, *) {
-                let iosService = IOSBlockingService.shared
-                result(iosService.checkLiveActivityPauseState())
-            } else {
-                result(["isPaused": false, "pausedRemainingSeconds": 0, "resumedEndTime": 0])
-            }
         case "resetUnblockButtonFlag":
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             defaults?.set(false, forKey: "unblockButtonTapped")

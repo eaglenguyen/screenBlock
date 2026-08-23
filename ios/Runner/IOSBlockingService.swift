@@ -22,13 +22,13 @@ class IOSBlockingService: NSObject {
 
     func startLiveActivity(endTime: Date) {
         guard #available(iOS 16.2, *) else { return }
+
+        // end any existing activity first, to avoid duplicates
         endLiveActivity()
+
         let attributes = PauseNowActivityAttributes(sessionType: "manual")
-        let initialState = PauseNowActivityAttributes.ContentState(
-            endTime: endTime,
-            isPaused: false,
-            pausedRemainingSeconds: 0
-        )
+        let initialState = PauseNowActivityAttributes.ContentState(endTime: endTime, isPaused: false)
+
         do {
             let activity = try Activity.request(
                 attributes: attributes,
@@ -41,20 +41,18 @@ class IOSBlockingService: NSObject {
             NSLog("❌ Live Activity start error: \(error)")
         }
     }
-
-    func updateLiveActivity(endTime: Date, isPaused: Bool, pausedRemainingSeconds: Int = 0) {
+    
+    // 👇 new — updates the existing activity's content instead of ending/restarting
+    func updateLiveActivity(endTime: Date, isPaused: Bool) {
         guard #available(iOS 16.2, *) else { return }
         Task {
             for activity in Activity<PauseNowActivityAttributes>.activities {
-                let newState = PauseNowActivityAttributes.ContentState(
-                    endTime: endTime,
-                    isPaused: isPaused,
-                    pausedRemainingSeconds: pausedRemainingSeconds
-                )
+                let newState = PauseNowActivityAttributes.ContentState(endTime: endTime, isPaused: isPaused)
                 await activity.update(.init(state: newState, staleDate: nil))
             }
         }
     }
+
 
     func endLiveActivity() {
         guard #available(iOS 16.2, *) else { return }
@@ -64,18 +62,6 @@ class IOSBlockingService: NSObject {
             }
             currentActivity = nil
         }
-    }
-
-    // 👇 new — reads what the AppIntent wrote, so the Dart side can reconcile
-    func checkLiveActivityPauseState() -> [String: Any] {
-        let isPaused = sharedDefaults?.bool(forKey: "liveActivityIsPaused") ?? false
-        let remaining = sharedDefaults?.integer(forKey: "liveActivityPausedRemainingSeconds") ?? 0
-        let resumedEndTime = sharedDefaults?.double(forKey: "liveActivityResumedEndTime") ?? 0
-        return [
-            "isPaused": isPaused,
-            "pausedRemainingSeconds": remaining,
-            "resumedEndTime": resumedEndTime,
-        ]
     }
     
     // Ends here
