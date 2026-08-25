@@ -46,14 +46,14 @@ List<ChatStep> getOnboardingSteps(String name) => [
   // Screen 2 — The Reality
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'have you ever used your phone...'),
-      ChatMessage(type: MessageType.bot, text: 'for \"just five minutes\"'),
+      ChatMessage(type: MessageType.bot, text: 'have you ever opened TikTok or Instagram...'),
+      ChatMessage(type: MessageType.bot, text: 'thinking you\'d scroll for \"just 5 minutes\"'),
       ChatMessage(type: MessageType.bot, text: 'then look up'),
-      ChatMessage(type: MessageType.bot, text: 'and 45 minutes disappeared?'),
+      ChatMessage(type: MessageType.bot, text: 'and 2-3 hours went by?'),
       ChatMessage(type: MessageType.bot, text: 'we all been there.'),
       ChatMessage(type: MessageType.bot, text: 'the hardest part isnt putting the phone down.'),
       ChatMessage(type: MessageType.bot, text: 'its remembering'),
-      ChatMessage(type: MessageType.bot, text: 'what you rather be doing'),
+      ChatMessage(type: MessageType.bot, text: 'what you should be doing'),
     ],
     userResponses: [
       'i never noticed that',
@@ -67,8 +67,8 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ChatMessage(type: MessageType.bot, text: 'imagine getting'),
       ChatMessage(type: MessageType.bot, text: 'those hours back'),
       ChatMessage(type: MessageType.bot, text: 'what would you do?'),
-      ChatMessage(type: MessageType.bot, text: 'finally start that project, read that book?'),
-      ChatMessage(type: MessageType.bot, text: 'work out, do something new?'),
+      ChatMessage(type: MessageType.bot, text: 'finally starting that project, read that new book?'),
+      ChatMessage(type: MessageType.bot, text: 'hit the gym, trying out a new hobby?'),
       ChatMessage(
         type: MessageType.bot,
         text: 'At the end of the day, we choose what we want to do',
@@ -76,7 +76,7 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
       ChatMessage(
         type: MessageType.bot,
-        text: 'So lets start by making better decisions',
+        text: 'So lets start by making better choices',
         textColor: Color(0xFF4CAF50),
       ),
     ],
@@ -94,14 +94,14 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ChatMessage(type: MessageType.bot, text: 'they simply protect'),
       ChatMessage(
         type: MessageType.bot,
-        text: 'what matters most',
+        text: 'whats important',
         textColor: Color(0xFFEDB82A),
       ),
       ChatMessage(type: MessageType.bot, text: 'rather than doomscrolling'),
       ChatMessage(type: MessageType.bot, text: 'they choose to do something more productive'),
     ],
     userResponses: [
-      'that actually makes sense',
+      'that makes sense',
       'so how does pause now help?',
     ],
   ),
@@ -145,7 +145,7 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
       ChatMessage(type: MessageType.bot, text: 'Ready to start a healthier lifestyle and block these distractions?'),
     ],
-    userResponses: ['Begin my journey'],
+    userResponses: ['Begin my journey!'],
   ),
 
   // Screen 7 — Demo intro
@@ -153,9 +153,9 @@ List<ChatStep> getOnboardingSteps(String name) => [
     botMessages: [
       ChatMessage(
         type: MessageType.bot,
-        text: 'let\'s get to know you a bit more!',
+        text: 'Great, let\'s get to know you a bit more!',
       ),
     ],
-    userResponses: ['Okay!'],
+    userResponses: ['Sure'],
   ),
 ];

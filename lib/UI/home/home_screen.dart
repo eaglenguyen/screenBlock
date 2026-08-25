@@ -156,6 +156,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       isAppLimitActiveToday: state.isAppLimitActiveToday,
                       onPomodoroTapped: _onPomodoroTapped,
                       isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
+                      pomodoroRestMinutes: state.pomodoroConfig.shortBreakMinutes, // 👈 new
+
                       onTutorialTap: () {
                         showGeneralDialog(
                           context: context,
@@ -308,20 +310,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _onTimerTapped() {
-    showModalBottomSheet(
+  Future<void> _onTimerTapped() async {
+    final result = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       useRootNavigator: true,
       builder: (_) => TimerPickerSheet(
-        selectedMinutes:
-        ref.read(homeViewModelProvider).selectedMinutes,
-        onSave: (minutes) => ref
-            .read(homeViewModelProvider.notifier)
-            .setSelectedMinutes(minutes),
+        selectedMinutes: ref.read(homeViewModelProvider).selectedMinutes,
       ),
     );
+    if (result != null) {
+      ref.read(homeViewModelProvider.notifier).setSelectedMinutes(result);
+    }
   }
 
   void _onCancelCountdown() {

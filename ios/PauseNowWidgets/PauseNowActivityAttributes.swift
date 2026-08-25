@@ -19,4 +19,6 @@ struct PauseNowActivityAttributes: ActivityAttributes {
     }
 
     var sessionType: String // "manual" — reserved for future use (schedule/pomodoro)
+    var isPomodoro: Bool
+
 }

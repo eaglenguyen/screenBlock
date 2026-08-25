@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,14 +13,12 @@ class PomodoroConfig {
   final int shortBreakMinutes;
   final int longBreakMinutes;
   final bool isPomodoroMode;
-
   const PomodoroConfig({
     this.workMinutes = 25,
     this.shortBreakMinutes = 5,
     this.longBreakMinutes = 30,
     this.isPomodoroMode = false,
   });
-
   PomodoroConfig copyWith({
     int? workMinutes,
     int? shortBreakMinutes,
@@ -38,17 +34,24 @@ class PomodoroConfig {
   }
 }
 
+// ── Duration formatter ────────────────────────────────
+String formatDuration(int minutes) {
+  if (minutes < 60) return '${minutes}m';
+  final hours = minutes ~/ 60;
+  final mins = minutes % 60;
+  if (mins == 0) return '${hours}h';
+  return '${hours}h ${mins}m';
+}
+
 // ── Pomodoro sheet ───────────────────────────────────────────────────────────
 class PomodoroSheet extends ConsumerStatefulWidget {
   final PomodoroConfig config;
   final ValueChanged<PomodoroConfig> onSave;
-
   const PomodoroSheet({
     super.key,
     required this.config,
     required this.onSave,
   });
-
   static void show(
       BuildContext context, {
         required PomodoroConfig config,
@@ -62,7 +65,6 @@ class PomodoroSheet extends ConsumerStatefulWidget {
       builder: (_) => PomodoroSheet(config: config, onSave: onSave),
     );
   }
-
   @override
   ConsumerState<PomodoroSheet> createState() => _PomodoroSheetState();
 }
@@ -72,6 +74,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
   late int _shortBreakMinutes;
   late int _longBreakMinutes;
   late bool _isPomodoroMode;
+  String? _expandedRow; // 👈 new — null means none expanded; otherwise 'work' / 'rest' / 'longRest'
 
   @override
   void initState() {
@@ -85,7 +88,6 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
   @override
   Widget build(BuildContext context) {
     final isPremium = ref.watch(isPremiumProvider);
-
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 32,
@@ -101,7 +103,6 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // handle
           Center(
             child: Container(
               width: 40,
@@ -113,8 +114,6 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // header
           Row(
             children: [
               const Text('🍅', style: TextStyle(fontSize: 24)),
@@ -158,9 +157,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
             ),
           ),
           const SizedBox(height: 20),
-
           if (!isPremium) ...[
-            // locked state
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -220,58 +217,61 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
               ),
             ),
           ] else ...[
-            // toggle
             _buildToggle(context),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             if (_isPomodoroMode) ...[
-              _buildDurationRow(
-                context,
-                emoji: '💼',
+              ExpandablePickerRow(
+                icon: Icons.laptop_mac_rounded,
                 label: 'Work',
-                minutes: _workMinutes,
+                value: _workMinutes,
                 min: 5,
-                max: 60,
-                defaultValue: 25, // 👈
+                max: 480,
+                step: 5,
+                isExpanded: _expandedRow == 'work', // 👈 new
+                onToggle: () => setState(() {
+                  _expandedRow = _expandedRow == 'work' ? null : 'work'; // 👈 tap again to collapse
+                }),
                 onChanged: (v) => setState(() => _workMinutes = v),
               ),
-              const SizedBox(height: 10),
-              _buildDurationRow(
-                context,
-                emoji: '☕',
+              Divider(color: AppColors.border(context), height: 1),
+              ExpandablePickerRow(
+                icon: Icons.local_cafe_rounded,
                 label: 'Rest',
-                minutes: _shortBreakMinutes,
-                min: 3,
-                max: 15,
-                defaultValue: 5, // 👈
+                value: _shortBreakMinutes,
+                min: 5,
+                max: 480,
+                step: 5,
+                isExpanded: _expandedRow == 'rest', // 👈 new
+                onToggle: () => setState(() {
+                  _expandedRow = _expandedRow == 'rest' ? null : 'rest';
+                }),
                 onChanged: (v) => setState(() => _shortBreakMinutes = v),
               ),
-              const SizedBox(height: 10),
-              _buildDurationRow(
-                context,
-                emoji: '🧘',
+              Divider(color: AppColors.border(context), height: 1),
+              ExpandablePickerRow(
+                icon: Icons.self_improvement_rounded,
                 label: 'Long Rest (4 rounds)',
-                minutes: _longBreakMinutes,
-                min: 15,
-                max: 60,
-                defaultValue: 30,
+                value: _longBreakMinutes,
+                min: 5,
+                max: 480,
+                step: 5,
+                isExpanded: _expandedRow == 'longRest', // 👈 new
+                onToggle: () => setState(() {
+                  _expandedRow = _expandedRow == 'longRest' ? null : 'longRest';
+                }),
                 onChanged: (v) => setState(() => _longBreakMinutes = v),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
             ],
-
             // save button
             ElevatedButton(
               onPressed: () async {
                 HapticFeedback.mediumImpact();
-
                 await NotificationService.instance.requestPermission();
-
-                // 👇 exact alarm access only matters if Pomodoro is being enabled
                 if (_isPomodoroMode) {
                   await NotificationService.instance.requestExactAlarmPermission();
                 }
-
                 widget.onSave(PomodoroConfig(
                   workMinutes: _workMinutes,
                   shortBreakMinutes: _shortBreakMinutes,
@@ -357,187 +357,240 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
       ),
     );
   }
-
-  Widget _buildDurationRow(
-      BuildContext context, {
-        required String emoji,
-        required String label,
-        required int minutes,
-        required int min,
-        required int max,
-        required int defaultValue,  // 👈 add this for reset
-        required ValueChanged<int> onChanged,
-      }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle(context),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border(context), width: 0.5),
-      ),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.textPrimary(context),
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              _HoldStepButton(
-                icon: Icons.remove,
-                enabled: minutes > min,
-                onStep: () {
-                  HapticFeedback.lightImpact();
-                  onChanged((minutes - 1).clamp(min, max));
-                },
-                onFastStep: () {
-                  HapticFeedback.selectionClick();
-                  onChanged((minutes - 5).clamp(min, max));
-                },
-              ),
-              SizedBox(
-                width: 48,
-                child: Text(
-                  '${minutes}m',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.gold(context),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              _HoldStepButton(
-                icon: Icons.add,
-                enabled: minutes < max,
-                onStep: () {
-                  HapticFeedback.lightImpact();
-                  onChanged((minutes + 1).clamp(min, max));
-                },
-                onFastStep: () {
-                  HapticFeedback.selectionClick();
-                  onChanged((minutes + 5).clamp(min, max));
-                },
-              ),
-              // 👇 reset button (always visible)
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  onChanged(defaultValue);
-                },
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundCard(context),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.border(context),
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.refresh_rounded,
-                    size: 14,
-                    color: AppColors.textSecondary(context),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
-
-
-
 }
 
-class _HoldStepButton extends StatefulWidget {
+// ── Expandable picker row ─────────────────────────────
+class ExpandablePickerRow extends StatelessWidget { // 👈 was StatefulWidget
   final IconData icon;
-  final bool enabled;
-  final VoidCallback onStep;
-  final VoidCallback onFastStep;
+  final String label;
+  final int value;
+  final int min;
+  final int max;
+  final int step;
+  final bool isExpanded; // 👈 new — controlled by parent
+  final VoidCallback onToggle; // 👈 new — tells parent "I was tapped"
+  final ValueChanged<int> onChanged;
 
-  const _HoldStepButton({
+  const ExpandablePickerRow({
+    super.key,
     required this.icon,
-    required this.enabled,
-    required this.onStep,
-    required this.onFastStep,
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    this.step = 1,
+    required this.isExpanded,
+    required this.onToggle,
+    required this.onChanged,
   });
 
   @override
-  State<_HoldStepButton> createState() => _HoldStepButtonState();
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onToggle(); // 👈 was setState(() => _expanded = !_expanded)
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              children: [
+                Icon(icon, color: AppColors.textSecondary(context), size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textSecondary(context),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  formatDuration(value),
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textPrimary(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0, // 👈 was _expanded
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.textSecondary(context),
+                    size: 22,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 250),
+          crossFadeState: isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond, // 👈 was _expanded
+          firstChild: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: HorizontalRulerPicker(
+              value: value,
+              min: min,
+              max: max,
+              step: step,
+              onChanged: onChanged,
+            ),
+          ),
+          secondChild: const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
 }
 
-class _HoldStepButtonState extends State<_HoldStepButton> {
-  Timer? _holdTimer;
-  int _holdCount = 0;
+// ── Horizontal ruler picker ───────────────────────────
+class HorizontalRulerPicker extends StatefulWidget {
+  final int value;
+  final int min;
+  final int max;
+  final int step;
+  final ValueChanged<int> onChanged;
 
-  void _startHold() {
-    if (!widget.enabled) return;
-    widget.onStep(); // immediate first step
-    _holdCount = 0;
-    _holdTimer = Timer.periodic(const Duration(milliseconds: 150), (_) {
-      if (!widget.enabled) {
-        _stopHold();
-        return;
-      }
-      _holdCount++;
-      // after 5 ticks (~0.75s) switch to fast +5 increments
-      if (_holdCount > 5) {
-        widget.onFastStep();
-      } else {
-        widget.onStep();
-      }
-    });
-  }
+  const HorizontalRulerPicker({
+    super.key,
+    required this.value,
+    required this.min,
+    required this.max,
+    this.step = 1,
+    required this.onChanged,
+  });
 
-  void _stopHold() {
-    _holdTimer?.cancel();
-    _holdTimer = null;
-    _holdCount = 0;
+  @override
+  State<HorizontalRulerPicker> createState() => _HorizontalRulerPickerState();
+}
+
+class _HorizontalRulerPickerState extends State<HorizontalRulerPicker> {
+  late FixedExtentScrollController _controller;
+  late List<int> _values;
+  static const _itemExtent = 16.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _values = [for (int v = widget.min; v <= widget.max; v += widget.step) v];
+    final initialIndex = _values.indexOf(widget.value).clamp(0, _values.length - 1);
+    _controller = FixedExtentScrollController(initialItem: initialIndex);
   }
 
   @override
   void dispose() {
-    _holdTimer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _startHold(),
-      onTapUp: (_) => _stopHold(),
-      onTapCancel: _stopHold,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: AppColors.backgroundCard(context),
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.border(context), width: 0.5),
+    return Column(
+      children: [
+        Text(
+          formatDuration(widget.value),
+          style: AppTextStyles.headlineMedium.copyWith(
+            fontSize: 40,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary(context),
+          ),
         ),
-        child: Icon(
-          widget.icon,
-          size: 16,
-          color: widget.enabled
-              ? AppColors.textPrimary(context)
-              : AppColors.textSecondary(context),
+        const SizedBox(height: 4),
+        SizedBox(
+          height: 20,
+          child: _FlankingLabels(value: widget.value),
         ),
-      ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 50,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              RotatedBox(
+                quarterTurns: -1,
+                child: NotificationListener<ScrollEndNotification>(
+                  onNotification: (notification) {
+                    final index = _controller.selectedItem;
+                    final newValue = _values[index.clamp(0, _values.length - 1)];
+                    HapticFeedback.selectionClick();
+                    widget.onChanged(newValue);
+                    return false;
+                  },
+                  child: ListWheelScrollView.useDelegate(
+                    controller: _controller,
+                    itemExtent: _itemExtent,
+                    physics: const FixedExtentScrollPhysics(),
+                    diameterRatio: 6,
+                    perspective: 0.002,
+                    onSelectedItemChanged: (index) {
+                      HapticFeedback.selectionClick();
+                      widget.onChanged(_values[index]);
+                    },
+                    childDelegate: ListWheelChildBuilderDelegate(
+                      childCount: _values.length,
+                      builder: (context, index) {
+                        final v = _values[index];
+                        final isMajor = v % 30 == 0;
+                        return RotatedBox(
+                          quarterTurns: 1,
+                          child: Center(
+                            child: Container(
+                              width: 1.5,
+                              height: isMajor ? 26 : 14,
+                              color: AppColors.textSecondary(context).withValues(alpha: isMajor ? 0.5 : 0.25),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: 2,
+                height: 34,
+                color: const Color(0xFF3B82F6),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
+class _FlankingLabels extends StatelessWidget {
+  final int value;
+
+  const _FlankingLabels({required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final leftLabel = (value - 30).clamp(5, 480);
+    final rightLabel = (value + 30).clamp(5, 480);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          formatDuration(leftLabel),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary(context).withValues(alpha: 0.6),
+          ),
+        ),
+        Text(
+          formatDuration(rightLabel),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary(context).withValues(alpha: 0.6),
+          ),
+        ),
+      ],
+    );
+  }
+}

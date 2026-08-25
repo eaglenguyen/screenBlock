@@ -19,11 +19,27 @@ class IOSBlockingService: NSObject {
     
     // Live activity logic
     private var currentActivity: Any? // 👈 no generic constraint, avoids the availability requirement on the property itself
+    
+    func getOpenAttemptCount(appName: String) -> Int {
+        let today = Calendar.current.startOfDay(for: Date())
+        let dateKey = "openAttemptCountDate_\(appName)"
+        let countKey = "openAttemptCount_\(appName)"
 
-    func startLiveActivity(endTime: Date, isOnBreak: Bool = false) {
+        let lastCountDate = sharedDefaults?.double(forKey: dateKey) ?? 0
+        let lastCountDay = lastCountDate > 0
+            ? Calendar.current.startOfDay(for: Date(timeIntervalSince1970: lastCountDate))
+            : Date.distantPast
+
+        if lastCountDay != today {
+            return 0
+        }
+        return sharedDefaults?.integer(forKey: countKey) ?? 0
+    }
+    
+    func startLiveActivity(endTime: Date, isOnBreak: Bool = false, isPomodoro: Bool = false) {
         guard #available(iOS 16.2, *) else { return }
         endLiveActivity()
-        let attributes = PauseNowActivityAttributes(sessionType: "manual")
+        let attributes = PauseNowActivityAttributes(sessionType: "manual", isPomodoro: isPomodoro)
         let initialState = PauseNowActivityAttributes.ContentState(
             endTime: endTime,
             isPaused: false,
@@ -37,7 +53,7 @@ class IOSBlockingService: NSObject {
                 pushType: nil
             )
             currentActivity = activity
-            NSLog("✅ Live Activity started")
+            NSLog("✅ Live Activity started (isPomodoro: \(isPomodoro))")
         } catch {
             NSLog("❌ Live Activity start error: \(error)")
         }
@@ -76,6 +92,17 @@ class IOSBlockingService: NSObject {
         // 👈 deliberately no endLiveActivity() call here
     }
     
+    func checkLiveActivityPauseState() -> [String: Any] {
+        let isPaused = sharedDefaults?.bool(forKey: "liveActivityIsPaused") ?? false
+        let remaining = sharedDefaults?.integer(forKey: "liveActivityPausedRemainingSeconds") ?? 0
+        let resumedEndTime = sharedDefaults?.double(forKey: "liveActivityResumedEndTime") ?? 0
+        return [
+            "isPaused": isPaused,
+            "pausedRemainingSeconds": remaining,
+            "resumedEndTime": resumedEndTime,
+        ]
+    }
+    
     // Ends here
     
     static let shared = IOSBlockingService()
@@ -104,13 +131,13 @@ class IOSBlockingService: NSObject {
     }
     
     // MARK: - Blocking
-    
     func startBlocking(
         packageNames: [String],
         blockingMode: String,
         limitMinutes: Int,
         sessionType: String = "manual",
-        scheduleId: String? = nil
+        scheduleId: String? = nil,
+        isPomodoro: Bool = false
     ) {
         sharedDefaults?.set(false, forKey: "unblockButtonTapped")
         sharedDefaults?.set(true, forKey: "isBlocking")
@@ -118,6 +145,7 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
         sharedDefaults?.set(limitMinutes, forKey: "sessionMinutes")
         sharedDefaults?.set(sessionType, forKey: "sessionType")
+
         if let scheduleId = scheduleId {
             sharedDefaults?.set(scheduleId, forKey: "activeScheduleId")
         } else {
@@ -125,11 +153,9 @@ class IOSBlockingService: NSObject {
         }
         sharedDefaults?.synchronize()
         applyShield(mode: blockingMode, scheduleId: scheduleId)
-
-        // 👇 new — start Live Activity only for manual sessions
         if sessionType == "manual" {
             let endTime = Date().addingTimeInterval(TimeInterval(limitMinutes * 60))
-            startLiveActivity(endTime: endTime)
+            startLiveActivity(endTime: endTime, isPomodoro: isPomodoro)
         }
     }
 
@@ -581,6 +607,8 @@ class IOSBlockingService: NSObject {
         else { return [] }
         return selection.applicationTokens
     }
+    
+    
     
 
 }

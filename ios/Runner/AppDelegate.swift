@@ -315,6 +315,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
+        case "getOpenAttemptCount":
+            if let args = call.arguments as? [String: Any], let appName = args["appName"] as? String {
+                result(IOSBlockingService.shared.getOpenAttemptCount(appName: appName))
+            } else {
+                result(0)
+            }
+        case "checkLiveActivityPauseState":
+            if #available(iOS 16.0, *) {
+                result(IOSBlockingService.shared.checkLiveActivityPauseState())
+            } else {
+                result(["isPaused": false, "pausedRemainingSeconds": 0, "resumedEndTime": 0.0])
+            }
         case "liftShieldOnly":
             IOSBlockingService.shared.liftShieldOnly()
             result(nil)
@@ -540,18 +552,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 break
             }
             let sessionType = args["sessionType"] as? String ?? "manual"
-            let scheduleId = args["scheduleId"] as? String // 👈 must be inside this same scope, after the guard
+            let scheduleId = args["scheduleId"] as? String
+            let isPomodoro = args["isPomodoro"] as? Bool ?? false // 👈 new
 
             service.startBlocking(
                 packageNames: packageNames,
                 blockingMode: blockingMode,
                 limitMinutes: limitMinutes,
                 sessionType: sessionType,
-                scheduleId: scheduleId
-
+                scheduleId: scheduleId,
+                isPomodoro: isPomodoro // 👈 new
             )
             result(nil)
-
         case "stopBlocking":
             service.stopBlocking()
             // cancel any pending resume notification

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../home_state.dart';
@@ -59,6 +60,7 @@ class ActiveBlockingCard extends StatelessWidget {
               const SizedBox(height: 12),
               _buildXpBar(context),
               const SizedBox(height: 16),
+
               if (isPomodoroMode)
                 _buildPomodoroControls(context)
               else ...[
@@ -277,6 +279,16 @@ class ActiveBlockingCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<int> getOpenAttemptCount() async {
+    try {
+      final count = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod<int>('getOpenAttemptCount');
+      return count ?? 0;
+    } catch (e) {
+      return 0;
+    }
   }
 
   // 👇 new — replaces the old Pomodoro take-break-button logic entirely

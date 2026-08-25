@@ -495,6 +495,8 @@ class HomeViewModel extends _$HomeViewModel {
         state.selectedMinutes,
         sessionType: 'manual',
         blockingMode: state.blockingType,
+        isPomodoro: state.pomodoroConfig.isPomodoroMode, // 👈 new
+
       );
     } else {
       final apps = state.blockingType == AppConstants.blockingTypeSpecificApps
@@ -1080,15 +1082,86 @@ class HomeViewModel extends _$HomeViewModel {
         isOnBreak: isOnBreak
     );
   }
+
+  Future<void> _checkLiveActivityPauseSync() async {
+    if (!Platform.isIOS) return;
+    if (!state.pomodoroConfig.isPomodoroMode) return;
+    if (state.phase != BlockingPhase.active && state.phase != BlockingPhase.onBreak) return;
+
+    try {
+      final result = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod<Map>('checkLiveActivityPauseState');
+      if (result == null) return;
+
+      final laIsPaused = result['isPaused'] as bool? ?? false;
+
+      if (laIsPaused && !state.isPaused) {
+        // Live Activity was paused via its button — Dart doesn't know yet, sync it
+        final remaining = result['pausedRemainingSeconds'] as int? ?? 0;
+        _sessionTimer?.cancel();
+        _breakTimer?.cancel();
+        state = state.copyWith(
+          isPaused: true,
+          pausedAt: DateTime.now(),
+          remainingSeconds: state.phase == BlockingPhase.active ? remaining : state.remainingSeconds,
+          breakRemainingSeconds: state.phase == BlockingPhase.onBreak ? remaining : state.breakRemainingSeconds,
+        );
+      } else if (!laIsPaused && state.isPaused) {
+        // Live Activity was resumed via its button — Dart still thinks it's paused, sync it
+        final resumedEndTimeMs = result['resumedEndTime'] as double? ?? 0;
+        if (resumedEndTimeMs > 0) {
+          final resumedEndTime = DateTime.fromMillisecondsSinceEpoch((resumedEndTimeMs * 1000).round());
+          if (state.phase == BlockingPhase.active) {
+            final totalSeconds = state.selectedMinutes * 60;
+            final newStartTime = resumedEndTime.subtract(Duration(seconds: totalSeconds));
+            state = state.copyWith(isPaused: false, clearPausedAt: true, sessionStartTime: newStartTime);
+            _sessionTimer?.cancel();
+            _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+              final elapsed = DateTime.now().difference(state.sessionStartTime!).inSeconds;
+              final remaining = totalSeconds - elapsed;
+              if (remaining <= 0) {
+                timer.cancel();
+                _onSessionComplete();
+              } else {
+                state = state.copyWith(remainingSeconds: remaining);
+              }
+            });
+          } else if (state.phase == BlockingPhase.onBreak) {
+            final newBreakStartTime = resumedEndTime.subtract(Duration(seconds: state.originalBreakSeconds));
+            state = state.copyWith(isPaused: false, clearPausedAt: true, breakStartTime: newBreakStartTime);
+            _breakTimer?.cancel();
+            _breakTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+              final elapsed = DateTime.now().difference(state.breakStartTime!).inSeconds;
+              final remaining = state.originalBreakSeconds - elapsed;
+              if (remaining <= 0) {
+                timer.cancel();
+                _resumeAfterBreak(state.remainingSeconds);
+              } else {
+                state = state.copyWith(breakRemainingSeconds: remaining);
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ checkLiveActivityPauseSync error: $e');
+    }
+  }
   // ══════════════════════════════════════════════════
   // APP LIFECYCLE (resume / restore)
   // ══════════════════════════════════════════════════
   void onAppResumed() async {
     debugPrint('🔄 onAppResumed — phase: ${state.phase} isScheduleActive: ${state.isScheduleActive}');
     if (Platform.isIOS) {
+      final debugTapped = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod<bool>('checkDebugPauseTapped');
+      debugPrint('🔍 debugPauseTapped: $debugTapped');
+
       _checkPendingXpClaim();
       await _checkPendingCheckInFlow();
       await _resetUnblockButtonFlag();
+      await _checkLiveActivityPauseSync(); // 👈 new
+
     }
     if (state.isSchedulePaused) {
       final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;

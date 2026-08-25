@@ -204,9 +204,8 @@ class AndroidBlockingService implements BlockingService {
 
   @override
   Future<void> requestOverlayPermission() async {
-    await FlutterOverlayWindow.requestPermission();
+    unawaited(FlutterOverlayWindow.requestPermission());
   }
-
   @override
   Future<int> getUsedMinutesToday(String packageName) async {
     try {

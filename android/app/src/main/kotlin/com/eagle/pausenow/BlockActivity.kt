@@ -302,15 +302,37 @@ class BlockActivity : AppCompatActivity() {
 
     private fun updateTopBar(packageName: String) {
         val topBarText = findViewById<TextView>(R.id.topBarText)
-
-        val minutes = getTodayUsageMinutes(packageName)
         val appName = getAppName(packageName)
+        val attemptCount = incrementAndGetOpenAttemptCount(appName) // 👈 new
 
-        topBarText.text = if (minutes != null && minutes > 0) {
-            "$minutes min${if (minutes == 1) "" else "s"} of $appName today"
+        topBarText.text = "$appName blocked 🔒 · ${attemptCount}x today" // 👈 was minutes-based text
+    }
+
+    private fun incrementAndGetOpenAttemptCount(appName: String): Int {
+        val prefs = getSharedPreferences("pausenow_prefs", Context.MODE_PRIVATE)
+        val countKey = "openAttemptCount_$appName"
+        val dateKey = "openAttemptCountDate_$appName"
+
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        val todayStart = calendar.timeInMillis
+
+        val lastCountDate = prefs.getLong(dateKey, 0L)
+        val currentCount: Int
+        if (lastCountDate < todayStart) {
+            currentCount = 1
+            prefs.edit()
+                .putLong(dateKey, System.currentTimeMillis())
+                .putInt(countKey, currentCount)
+                .apply()
         } else {
-            "Time limit reached"
+            currentCount = prefs.getInt(countKey, 0) + 1
+            prefs.edit().putInt(countKey, currentCount).apply()
         }
+        return currentCount
     }
 
     override fun onBackPressed() {

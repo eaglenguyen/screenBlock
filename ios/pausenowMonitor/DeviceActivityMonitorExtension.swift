@@ -39,7 +39,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         sharedDefaults?.synchronize()
         
         if activity.rawValue == "com.eagle.pausenow.pause" {
-            reshieldApps()
+            if sharedDefaults?.object(forKey: "schedulePauseEndTime") != nil {
+                reshieldApps()
+            } else {
+                os_log("⏭ pause intervalDidEnd fired but no active pause tracked — skipping stray reshield", log: logger, type: .fault)
+            }
             sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
             sharedDefaults?.synchronize()
         }

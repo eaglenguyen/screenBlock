@@ -2,8 +2,6 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
-
-
 func formatSeconds(_ seconds: Int) -> String {
     let m = seconds / 60
     let s = seconds % 60

@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+
 class TimerCard extends StatefulWidget {
   final VoidCallback onBlockNow;
   final ValueChanged<String> onSelectorTapped;
@@ -20,8 +21,7 @@ class TimerCard extends StatefulWidget {
   final bool isAppLimitActiveToday;
   final VoidCallback onPomodoroTapped;
   final bool isPomodoroMode;
-
-
+  final int? pomodoroRestMinutes; // 👈 new
 
   const TimerCard({
     super.key,
@@ -39,7 +39,7 @@ class TimerCard extends StatefulWidget {
     this.isAppLimitActiveToday = false,
     required this.onPomodoroTapped,
     this.isPomodoroMode = false,
-
+    this.pomodoroRestMinutes, // 👈 new
   });
 
   @override
@@ -244,7 +244,6 @@ class _TimerCardState extends State<TimerCard>
   Widget _buildSelectorRow() {
     final isAllApps =
         widget.blockingType == AppConstants.blockingTypeAllApps;
-
     return Row(
       children: [
         Expanded(
@@ -258,9 +257,7 @@ class _TimerCardState extends State<TimerCard>
         Expanded(
           child: _selectorPill(
             icon: '⏱',
-            label: widget.selectedMinutes < 60
-                ? '${widget.selectedMinutes}m'
-                : '${widget.selectedMinutes ~/ 60}h',
+            label: _timerPillLabel(), // 👈 was _formatDuration(widget.selectedMinutes)
             iconColor: AppColors.gold(context),
             onTap: widget.onTimerTapped,
           ),
@@ -268,6 +265,26 @@ class _TimerCardState extends State<TimerCard>
       ],
     );
   }
+
+// 👇 new — combines work + rest when Pomodoro is active
+  String _timerPillLabel() {
+    final workLabel = _formatDuration(widget.selectedMinutes);
+    if (widget.isPomodoroMode && widget.pomodoroRestMinutes != null) {
+      final restLabel = _formatDuration(widget.pomodoroRestMinutes!);
+      return '$workLabel / $restLabel';
+    }
+    return workLabel;
+  }
+
+  String _formatDuration(int minutes) {
+    if (minutes < 60) return '${minutes}m';
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    if (mins == 0) return '${hours}h';
+    return '${hours}h ${mins}m';
+  }
+
+
   Widget _buildBlockNowButton() {
     final isDisabled = widget.isScheduleActive || widget.isAppLimitActiveToday;
 

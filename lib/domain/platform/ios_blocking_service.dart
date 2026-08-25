@@ -111,6 +111,7 @@ class IOSBlockingService implements BlockingService {
         String sessionType = 'manual',
         String blockingMode = 'specific_apps',
         String? scheduleId,
+        bool isPomodoro = false,
       }) async {
     await _channel.invokeMethod('startBlocking', {
       'packageNames': [packageName],
@@ -118,6 +119,8 @@ class IOSBlockingService implements BlockingService {
       'limitMinutes': limitMinutes,
       'sessionType': sessionType,
       if (scheduleId != null) 'scheduleId': scheduleId, // 👈 fixed
+      'isPomodoro': isPomodoro,
+
     });
   }
 
