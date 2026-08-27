@@ -315,7 +315,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
-            
+        case "setUninstallProtectionEnabled":
+            if let args = call.arguments as? [String: Any], let enabled = args["enabled"] as? Bool {
+                UserDefaults(suiteName: "group.com.eagle.pausenow")?.set(enabled, forKey: "uninstallProtectionEnabled")
+                IOSBlockingService.shared.syncUninstallProtection()
+            }
+            result(nil)
+        case "setHardModeEnabled":
+            if let args = call.arguments as? [String: Any], let enabled = args["enabled"] as? Bool {
+                UserDefaults(suiteName: "group.com.eagle.pausenow")?.set(enabled, forKey: "hardModeEnabled")
+            }
+            result(nil)
         case "getOpenAttemptCount":
             if let args = call.arguments as? [String: Any], let appName = args["appName"] as? String {
                 result(IOSBlockingService.shared.getOpenAttemptCount(appName: appName))

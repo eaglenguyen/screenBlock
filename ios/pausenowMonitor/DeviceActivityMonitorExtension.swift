@@ -17,7 +17,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")
         sharedDefaults?.synchronize()
         
-        // 👇 new — regular schedule start
         if activity.rawValue.hasPrefix("com.eagle.pausenow.schedule.") {
             let scheduleId = activity.rawValue.replacingOccurrences(
                 of: "com.eagle.pausenow.schedule.", with: ""
@@ -27,6 +26,17 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
                 return
             }
             shieldScheduleApps(scheduleId: scheduleId)
+
+            // 👇 new — mark schedule as currently active
+            sharedDefaults?.set(true, forKey: "isScheduleCurrentlyActive")
+            sharedDefaults?.synchronize()
+
+            // 👇 new — Uninstall Protection (replaces the old Hard Mode denyAppRemoval block)
+            let uninstallProtectionEnabled = sharedDefaults?.bool(forKey: "uninstallProtectionEnabled") ?? false
+            if uninstallProtectionEnabled {
+                store.application.denyAppRemoval = true
+                os_log("🔒 Uninstall Protection — denyAppRemoval enabled for schedule %{public}@", log: logger, type: .fault, scheduleId)
+            }
         }
     }
     
@@ -48,14 +58,19 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             sharedDefaults?.synchronize()
         }
         
-        // 👇 new — regular schedule end, ALWAYS unshield regardless of day
         if activity.rawValue.hasPrefix("com.eagle.pausenow.schedule.") {
             let scheduleId = activity.rawValue.replacingOccurrences(
                 of: "com.eagle.pausenow.schedule.", with: ""
             )
             unshieldScheduleAppsInExtension(scheduleId: scheduleId)
+
+            // 👇 new — mark schedule as no longer active
+            sharedDefaults?.set(false, forKey: "isScheduleCurrentlyActive")
+            sharedDefaults?.synchronize()
+
+            // 👇 new — lift Uninstall Protection (replaces the old raw denyAppRemoval = false)
+            store.application.denyAppRemoval = false
         }
-        
     }
     
     override func intervalWillEndWarning(for activity: DeviceActivityName) {
@@ -172,7 +187,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private func shieldScheduleApps(scheduleId: String) {
         let blockingMode = sharedDefaults?.string(forKey: "scheduleBlockingMode_\(scheduleId)") ?? "specific_apps"
         let key = "schedule_\(scheduleId)_\(blockingMode)"
-
         guard let data = sharedDefaults?.data(forKey: key),
               let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
         else {
@@ -180,30 +194,43 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             return
         }
 
-        var currentlyShielded = store.shield.applications ?? []
-        currentlyShielded.formUnion(selection.applicationTokens)
-        store.shield.applications = currentlyShielded
-
-        os_log("🛡 schedule shield applied for %{public}@, %d apps",
-               log: logger, type: .fault, scheduleId, selection.applicationTokens.count)
+        if blockingMode == "all_apps" {
+            // 👇 new — shield everything EXCEPT the selected apps
+            if selection.applicationTokens.isEmpty {
+                store.shield.applicationCategories = .all()
+            } else {
+                store.shield.applicationCategories = .all(except: selection.applicationTokens)
+            }
+            os_log("🛡 schedule (all-apps) shield applied for %{public}@, excepting %d apps", log: logger, type: .fault, scheduleId, selection.applicationTokens.count)
+        } else {
+            // 👇 unchanged — specific apps mode
+            var currentlyShielded = store.shield.applications ?? []
+            currentlyShielded.formUnion(selection.applicationTokens)
+            store.shield.applications = currentlyShielded
+            os_log("🛡 schedule shield applied for %{public}@, %d apps", log: logger, type: .fault, scheduleId, selection.applicationTokens.count)
+        }
     }
 
     private func unshieldScheduleAppsInExtension(scheduleId: String) {
         let blockingMode = sharedDefaults?.string(forKey: "scheduleBlockingMode_\(scheduleId)") ?? "specific_apps"
-        let key = "schedule_\(scheduleId)_\(blockingMode)"
 
+        if blockingMode == "all_apps" {
+            // 👇 new — clear the category-based shield entirely
+            store.shield.applicationCategories = nil
+            os_log("✅ schedule (all-apps) unshielded for %{public}@", log: logger, type: .fault, scheduleId)
+            return
+        }
+
+        let key = "schedule_\(scheduleId)_\(blockingMode)"
         guard let data = sharedDefaults?.data(forKey: key),
               let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
         else {
             os_log("⚠️ unshieldScheduleAppsInExtension: no tokens for %{public}@", log: logger, type: .fault, scheduleId)
             return
         }
-
         var currentlyShielded = store.shield.applications ?? []
         currentlyShielded.subtract(selection.applicationTokens)
         store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
-
-        os_log("✅ schedule unshielded for %{public}@, %d apps",
-               log: logger, type: .fault, scheduleId, selection.applicationTokens.count)
+        os_log("✅ schedule unshielded for %{public}@, %d apps", log: logger, type: .fault, scheduleId, selection.applicationTokens.count)
     }
 }

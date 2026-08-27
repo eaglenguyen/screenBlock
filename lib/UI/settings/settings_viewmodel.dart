@@ -28,6 +28,8 @@ class SettingsViewModel extends _$SettingsViewModel {
     Future.microtask(() => _checkPermissions());
     return SettingsState(
       hardModeEnabled: ref.read(settingsRepositoryProvider).getHardModeEnabled(), // 👈 new — load initial value
+      uninstallProtectionEnabled: _settingsRepo.getUninstallProtectionEnabled(), // 👈 new
+
     );
   }
 
@@ -187,5 +189,19 @@ class SettingsViewModel extends _$SettingsViewModel {
   Future<void> setHardMode(bool enabled) async {
     await _settingsRepo.setHardModeEnabled(enabled);
     state = state.copyWith(hardModeEnabled: enabled);
+    try {
+      await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod('setHardModeEnabled', {'enabled': enabled});
+    } catch (_) {}
+  }
+
+
+  Future<void> setUninstallProtection(bool enabled) async {
+    await _settingsRepo.setUninstallProtectionEnabled(enabled);
+    state = state.copyWith(uninstallProtectionEnabled: enabled);
+    try {
+      await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod('setUninstallProtectionEnabled', {'enabled': enabled});
+    } catch (_) {}
   }
 }

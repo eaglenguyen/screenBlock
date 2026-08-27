@@ -103,6 +103,15 @@ class IOSBlockingService: NSObject {
         ]
     }
     
+    func syncUninstallProtection() {
+        let enabled = sharedDefaults?.bool(forKey: "uninstallProtectionEnabled") ?? false
+        let isManualBlocking = sharedDefaults?.bool(forKey: "isBlocking") ?? false
+        let isScheduleActive = sharedDefaults?.bool(forKey: "isScheduleCurrentlyActive") ?? false
+        let shouldRestrict = enabled && (isManualBlocking || isScheduleActive)
+        store.application.denyAppRemoval = shouldRestrict
+        NSLog("🔒 syncUninstallProtection — enabled: \(enabled), manual: \(isManualBlocking), schedule: \(isScheduleActive), restricted: \(shouldRestrict)")
+    }
+    
     // Ends here
     
     static let shared = IOSBlockingService()
@@ -145,7 +154,6 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "sessionStartTime")
         sharedDefaults?.set(limitMinutes, forKey: "sessionMinutes")
         sharedDefaults?.set(sessionType, forKey: "sessionType")
-
         if let scheduleId = scheduleId {
             sharedDefaults?.set(scheduleId, forKey: "activeScheduleId")
         } else {
@@ -153,9 +161,11 @@ class IOSBlockingService: NSObject {
         }
         sharedDefaults?.synchronize()
         applyShield(mode: blockingMode, scheduleId: scheduleId)
+        syncUninstallProtection()
+
         if sessionType == "manual" {
             let endTime = Date().addingTimeInterval(TimeInterval(limitMinutes * 60))
-            startLiveActivity(endTime: endTime, isPomodoro: isPomodoro)
+            startLiveActivity(endTime: endTime, isPomodoro: isPomodoro) // 👈 only one call now
         }
     }
 
@@ -183,7 +193,9 @@ class IOSBlockingService: NSObject {
         pauseTimer?.invalidate()
         pauseTimer = nil
         cancelPauseNotification()
-        endLiveActivity() // 👈 new
+        endLiveActivity()
+        syncUninstallProtection() // 👈 new
+
     }
 
     // MARK: - Pause / Break
@@ -424,7 +436,7 @@ class IOSBlockingService: NSObject {
         case "all_apps":
             let allowedTokens: Set<ApplicationToken>
             if let scheduleId = scheduleId {
-                allowedTokens = getScheduleTokens(scheduleId: scheduleId, blockingMode: "all_apps_except")
+                allowedTokens = getScheduleTokens(scheduleId: scheduleId, blockingMode: "all_apps")
             } else {
                 allowedTokens = getStoredAppTokens(mode: "all_apps_except")
             }
@@ -613,7 +625,10 @@ class IOSBlockingService: NSObject {
     }
     
     
-    
+    func setAppRemovalRestricted(_ restricted: Bool) {
+        store.application.denyAppRemoval = restricted
+        NSLog("🔒 denyAppRemoval set to \(restricted)")
+    }
     
     
 

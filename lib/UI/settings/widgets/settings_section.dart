@@ -29,10 +29,13 @@ class SettingsSection extends StatelessWidget {
     super.key,
     required this.label,
     required this.rows,
+    this.labelFlair, // 👈 new
+
   });
 
   final String label;
   final List<SettingsRow> rows;
+  final String? labelFlair; // 👈 new
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +44,40 @@ class SettingsSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            label.toUpperCase(),
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary(context),
-              letterSpacing: 0.1,
-              fontSize: 14
-            ),
+          child: Row( // 👈 was a bare Text — now a Row so the flair can sit beside it
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary(context),
+                  letterSpacing: 0.1,
+                  fontSize: 14,
+                ),
+              ),
+              if (labelFlair != null) ...[ // 👈 new
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: AppColors.gold(context).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: AppColors.gold(context).withValues(alpha: 0.3),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Text(
+                    labelFlair!.toUpperCase(),
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.gold(context),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         Container(
@@ -65,7 +95,7 @@ class SettingsSection extends StatelessWidget {
               final isLast = index == rows.length - 1;
               return Column(
                 children: [
-                  _buildRow(row,context),
+                  _buildRow(row, context),
                   if (!isLast)
                     Divider(
                       height: 0.5,
@@ -111,7 +141,7 @@ class SettingsSection extends StatelessWidget {
                 ),
               ),
               row.trailing ??
-                   Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
                     color: AppColors.textSecondary(context),
                     size: 20,

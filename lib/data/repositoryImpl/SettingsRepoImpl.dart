@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/hivebox_names.dart';
@@ -94,5 +95,21 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setHardModeEnabled(bool enabled) async {
     await _box.put('hardModeEnabled', enabled);
+    // 👇 new — mirror to shared native storage so Swift can read it too
+    try {
+      await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod('setHardModeEnabled', {'enabled': enabled});
+    } catch (_) {}
+  }
+
+  // ── Uninstall Protection ───────────────────────
+  @override
+  bool getUninstallProtectionEnabled() {
+    return _box.get('uninstallProtectionEnabled', defaultValue: false) as bool;
+  }
+
+  @override
+  Future<void> setUninstallProtectionEnabled(bool enabled) async {
+    await _box.put('uninstallProtectionEnabled', enabled);
   }
 }

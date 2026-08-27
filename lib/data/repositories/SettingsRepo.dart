@@ -27,4 +27,7 @@ abstract class SettingsRepository {
   bool getHardModeEnabled();
   Future<void> setHardModeEnabled(bool enabled);
 
+  // ── Uninstall Protection ───────────────────────
+  bool getUninstallProtectionEnabled();
+  Future<void> setUninstallProtectionEnabled(bool enabled);
 }
