@@ -15,6 +15,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/permission_dialogs.dart';
 import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
+import '../settings/settings_viewmodel.dart';
 import 'cards/active_blocking_card.dart';
 import 'cards/countdown_card.dart';
 import 'checkIn/check_in_slider_screen.dart';
@@ -200,6 +201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           onPauseToggle: () => ref.read(homeViewModelProvider.notifier).togglePause(),
                           onRestart: () => ref.read(homeViewModelProvider.notifier).restartRound(),
                           onSkipRound: () => ref.read(homeViewModelProvider.notifier).skipRound(),
+                            isHardMode: ref.watch(settingsViewModelProvider).hardModeEnabled
                         ),
                   // Completed
                     BlockingPhase.completed => SessionCompletedCard(

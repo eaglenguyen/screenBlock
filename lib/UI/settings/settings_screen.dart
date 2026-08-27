@@ -203,25 +203,13 @@ class SettingsScreen extends ConsumerWidget {
                     rows: [
                       SettingsRow(
                         icon: Icons.shield_moon_rounded,
-                        iconColor: AppColors.error(context), // reads as serious/locked, distinct from the neutral rows around it
+                        iconColor: AppColors.error(context),
                         iconBgColor: AppColors.error(context).withValues(alpha: 0.1),
                         label: 'Hard Mode',
-                        onTap: () {},
+                        onTap: () => _handleHardModeToggle(context, ref, state.hardModeEnabled),
                         trailing: Switch(
-                          value: state.hardModeEnabled, // from wherever you surface the provider in this screen
-                          onChanged: (newValue) async {
-                            if (newValue) {
-                              // turning ON — no gate needed, just enable directly
-                              await notifier.setHardMode(true);
-                            } else {
-                              // turning OFF — require the math gate
-                              final solved = await HardModeMathGate.show(context);
-                              if (solved) {
-                                await notifier.setHardMode(false);
-                              }
-                              // wrong answer → do nothing, toggle visually stays on
-                            }
-                          },
+                          value: state.hardModeEnabled,
+                          onChanged: (_) => _handleHardModeToggle(context, ref, state.hardModeEnabled),
                           activeColor: AppColors.error(context),
                           activeTrackColor: AppColors.error(context).withValues(alpha: 0.3),
                           inactiveThumbColor: AppColors.textSecondary(context),
@@ -438,6 +426,100 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _showHardModeEnableConfirmation(BuildContext context, VoidCallback onConfirm) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.backgroundCard(context),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 32, 28, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Hard Mode',
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: AppColors.textPrimary(context),
+                  fontWeight: FontWeight.w800,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Hard Mode locks manual sessions and schedules — no pausing or editing once a block session starts.',
+                style: AppTextStyles.bodyLarge.copyWith( // 👈 bigger than the title's relative weight, matches reference
+                  color: AppColors.textPrimary(context),
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontSize: 18, // 👈 new
+                          color: AppColors.textSecondary(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        onConfirm();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error(context),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: const StadiumBorder(),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Enable',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontSize: 18, // 👈 new
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleHardModeToggle(BuildContext context, WidgetRef ref, bool currentlyEnabled) async {
+    final notifier = ref.read(settingsViewModelProvider.notifier);
+    if (!currentlyEnabled) {
+      _showHardModeEnableConfirmation(context, () {
+        notifier.setHardMode(true);
+      });
+    } else {
+      final solved = await HardModeMathGate.show(context);
+      if (solved) {
+        await notifier.setHardMode(false);
+      }
+    }
   }
 
   void _showDeleteAccountDialog(BuildContext context) {

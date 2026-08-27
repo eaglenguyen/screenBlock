@@ -24,11 +24,17 @@ class _HardModeMathSheet extends StatefulWidget {
 }
 
 class _HardModeMathSheetState extends State<_HardModeMathSheet> {
+  static const int _maxAttempts = 3; // 👈 new — was hardcoded as 2
+
   late int _a;
   late int _b;
   late String _op;
   late int _answer;
   final _controller = TextEditingController();
+  int _attempts = 0;
+  bool _showError = false;
+
+  int get _attemptsRemaining => _maxAttempts - _attempts; // 👈 new
 
   @override
   void initState() {
@@ -42,16 +48,16 @@ class _HardModeMathSheetState extends State<_HardModeMathSheet> {
     _op = ops[rand.nextInt(ops.length)];
     switch (_op) {
       case '+':
-        _a = rand.nextInt(80) + 10;
-        _b = rand.nextInt(80) + 10;
+        _a = rand.nextInt(20) + 1;
+        _b = rand.nextInt(20) + 1;
         _answer = _a + _b;
       case '-':
-        _a = rand.nextInt(80) + 20;
-        _b = rand.nextInt(_a - 5) + 5; // ensures a positive result
+        _a = rand.nextInt(20) + 1;
+        _b = rand.nextInt(_a) + 1;
         _answer = _a - _b;
       case '×':
-        _a = rand.nextInt(11) + 2;
-        _b = rand.nextInt(11) + 2;
+        _a = rand.nextInt(20) + 1;
+        _b = rand.nextInt(20) + 1;
         _answer = _a * _b;
     }
   }
@@ -60,9 +66,20 @@ class _HardModeMathSheetState extends State<_HardModeMathSheet> {
     final entered = int.tryParse(_controller.text.trim());
     if (entered == _answer) {
       Navigator.pop(context, true);
-    } else {
-      Navigator.pop(context, false); // 👈 wrong answer — dismiss, no retry inline
+      return;
     }
+
+    _attempts++;
+    if (_attempts >= _maxAttempts) {
+      Navigator.pop(context, false);
+      return;
+    }
+
+    setState(() {
+      _showError = true;
+      _controller.clear();
+      _generateProblem();
+    });
   }
 
   @override
@@ -100,14 +117,20 @@ class _HardModeMathSheetState extends State<_HardModeMathSheet> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Solve to turn off Hard Mode',
+            'Turn off Hard Mode',
             style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'A wrong answer cancels — you\'ll need to try again.',
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
+            'Attempts remaining: $_attemptsRemaining',
+            style: AppTextStyles.bodyLarge.copyWith( // 👈 was bodySmall
+              fontSize: 18, // 👈 new — explicit bump
+              color: _attemptsRemaining == 1
+                  ? AppColors.error(context)
+                  : AppColors.textSecondary(context),
+              fontWeight: _attemptsRemaining == 1 ? FontWeight.w700 : FontWeight.w500,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -129,13 +152,19 @@ class _HardModeMathSheetState extends State<_HardModeMathSheet> {
             style: AppTextStyles.headlineMedium.copyWith(color: AppColors.textPrimary(context)),
             decoration: InputDecoration(
               filled: true,
-              fillColor: AppColors.backgroundSubtle(context),
+              fillColor: _showError
+                  ? AppColors.error(context).withValues(alpha: 0.1)
+                  : AppColors.backgroundSubtle(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
+                borderSide: _showError
+                    ? BorderSide(color: AppColors.error(context), width: 1.5)
+                    : BorderSide.none,
               ),
-              hintText: 'Your answer',
             ),
+            onChanged: (_) {
+              if (_showError) setState(() => _showError = false);
+            },
             onSubmitted: (_) => _submit(),
           ),
           const SizedBox(height: 20),
@@ -146,7 +175,7 @@ class _HardModeMathSheetState extends State<_HardModeMathSheet> {
               foregroundColor: AppColors.goldText(context),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: const StadiumBorder(),
-              textStyle: AppTextStyles.labelLarge,
+              textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 20), // 👈 new
             ),
             child: const Text('Submit'),
           ),
