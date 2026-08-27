@@ -22,4 +22,9 @@ abstract class SettingsRepository {
   DateTime? getInstallDate();
   bool hasRequestedReview(String key);
   Future<void> markReviewRequested(String key);
+
+// ── Hard Mode ───────────────────────
+  bool getHardModeEnabled();
+  Future<void> setHardModeEnabled(bool enabled);
+
 }

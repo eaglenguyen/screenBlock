@@ -7,15 +7,16 @@ import '../home_state.dart';
 class ActiveBlockingCard extends StatelessWidget {
   final HomeState state;
   final VoidCallback onTakeBreak;
-  final VoidCallback onGiveUp; // 👈 now wired to the close icon
+  final VoidCallback onGiveUp;
   final VoidCallback onEndBreak;
   final VoidCallback onBlockListTapped;
   final bool isPomodoroMode;
   final int pomodoroRound;
-  final bool isPaused; // 👈 new
-  final VoidCallback onPauseToggle; // 👈 new — toggles pause/resume
-  final VoidCallback onRestart; // 👈 new
-  final VoidCallback onSkipRound; // 👈 new
+  final bool isPaused;
+  final VoidCallback onPauseToggle;
+  final VoidCallback onRestart;
+  final VoidCallback onSkipRound;
+  final bool isHardMode; // 👈 new
 
   const ActiveBlockingCard({
     super.key,
@@ -30,6 +31,7 @@ class ActiveBlockingCard extends StatelessWidget {
     required this.onPauseToggle,
     required this.onRestart,
     required this.onSkipRound,
+    this.isHardMode = false, // 👈 new
   });
 
   @override
@@ -60,7 +62,6 @@ class ActiveBlockingCard extends StatelessWidget {
               const SizedBox(height: 12),
               _buildXpBar(context),
               const SizedBox(height: 16),
-
               if (isPomodoroMode)
                 _buildPomodoroControls(context)
               else ...[
@@ -69,25 +70,28 @@ class ActiveBlockingCard extends StatelessWidget {
               ],
             ],
           ),
-          // 👇 close icon — position now depends on mode
+          // 👇 close icon — grayed out and inert when Hard Mode is active
           Positioned(
             top: 0,
-            left: isPomodoroMode ? 0 : null,   // 👈 top-left for Pomodoro
-            right: isPomodoroMode ? null : 0,  // 👈 top-right for manual
-            child: GestureDetector(
-              onTap: onGiveUp,
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundSubtle(context),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.border(context), width: 0.5),
-                ),
-                child: Icon(
-                  Icons.close_rounded,
-                  size: 18,
-                  color: AppColors.textSecondary(context),
+            left: isPomodoroMode ? 0 : null,
+            right: isPomodoroMode ? null : 0,
+            child: Opacity(
+              opacity: isHardMode ? 0.35 : 1.0, // 👈 new
+              child: GestureDetector(
+                onTap: isHardMode ? null : onGiveUp, // 👈 new — no-op when locked
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundSubtle(context),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.border(context), width: 0.5),
+                  ),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: AppColors.textSecondary(context),
+                  ),
                 ),
               ),
             ),
@@ -96,7 +100,6 @@ class ActiveBlockingCard extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildSessionIcon() {
     if (isPomodoroMode) {
@@ -222,7 +225,7 @@ class ActiveBlockingCard extends StatelessWidget {
               color: AppColors.gold(context),
             ),
           ),
-        if (isPaused) // 👈 new — small "Paused" indicator above the timer
+        if (isPaused)
           Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Text(
@@ -239,7 +242,7 @@ class ActiveBlockingCard extends StatelessWidget {
             fontSize: 48,
             fontWeight: FontWeight.w900,
             color: isPaused
-                ? AppColors.textSecondary(context) // 👈 dimmed when paused
+                ? AppColors.textSecondary(context)
                 : AppColors.textPrimary(context),
             letterSpacing: -1,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -291,51 +294,23 @@ class ActiveBlockingCard extends StatelessWidget {
     }
   }
 
-  // 👇 new — replaces the old Pomodoro take-break-button logic entirely
   Widget _buildPomodoroControls(BuildContext context) {
     if (!isPaused) {
-      // ── not paused — single Pause button ──
-      return SizedBox(
-        width: double.infinity,
-        child: TextButton.icon(
-          onPressed: onPauseToggle,
-          icon: Icon(
-            Icons.pause_rounded,
-            color: AppColors.textPrimary(context),
-            size: 20,
-          ),
-          label: Text(
-            'Pause',
-            style: AppTextStyles.labelMedium.copyWith(
-              color: AppColors.textPrimary(context),
-              fontSize: 15,
-            ),
-          ),
-          style: TextButton.styleFrom(
-            backgroundColor: AppColors.backgroundSubtle(context),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: const StadiumBorder(),
-          ),
-        ),
-      );
-    }
-
-    // ── paused — Resume, then Restart + Skip Round side by side ──
-    return Column(
-      children: [
-        SizedBox(
+      return Opacity( // 👈 new
+        opacity: isHardMode ? 0.35 : 1.0,
+        child: SizedBox(
           width: double.infinity,
           child: TextButton.icon(
-            onPressed: onPauseToggle,
+            onPressed: isHardMode ? null : onPauseToggle, // 👈 new
             icon: Icon(
-              Icons.play_arrow_rounded,
-              color: AppColors.gold(context),
+              Icons.pause_rounded,
+              color: AppColors.textPrimary(context),
               size: 20,
             ),
             label: Text(
-              'Resume',
+              'Pause',
               style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.gold(context),
+                color: AppColors.textPrimary(context),
                 fontSize: 15,
               ),
             ),
@@ -346,86 +321,123 @@ class ActiveBlockingCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: TextButton.icon(
-                onPressed: onRestart,
-                icon: Icon(
-                  Icons.refresh_rounded,
-                  color: AppColors.textSecondary(context),
-                  size: 18,
-                ),
-                label: Text(
-                  'Restart',
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.textSecondary(context),
-                    fontSize: 14,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.backgroundSubtle(context),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: const StadiumBorder(),
+      );
+    }
+    // ── paused — Resume, then Restart + Skip Round side by side ──
+    // note: reaching this state at all under Hard Mode shouldn't be possible
+    // (since pausing is itself locked above), but the same guards are applied
+    // here defensively in case of a pre-existing pause when Hard Mode gets enabled
+    return Opacity(
+      opacity: isHardMode ? 0.35 : 1.0,
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: isHardMode ? null : onPauseToggle,
+              icon: Icon(
+                Icons.play_arrow_rounded,
+                color: AppColors.gold(context),
+                size: 20,
+              ),
+              label: Text(
+                'Resume',
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: AppColors.gold(context),
+                  fontSize: 15,
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextButton.icon(
-                onPressed: onSkipRound,
-                icon: Icon(
-                  Icons.skip_next_rounded,
-                  color: AppColors.textSecondary(context),
-                  size: 18,
-                ),
-                label: Text(
-                  'Skip Round',
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.textSecondary(context),
-                    fontSize: 14,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.backgroundSubtle(context),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: const StadiumBorder(),
-                ),
+              style: TextButton.styleFrom(
+                backgroundColor: AppColors.backgroundSubtle(context),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: const StadiumBorder(),
               ),
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: isHardMode ? null : onRestart,
+                  icon: Icon(
+                    Icons.refresh_rounded,
+                    color: AppColors.textSecondary(context),
+                    size: 18,
+                  ),
+                  label: Text(
+                    'Restart',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: AppColors.textSecondary(context),
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppColors.backgroundSubtle(context),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: const StadiumBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: isHardMode ? null : onSkipRound,
+                  icon: Icon(
+                    Icons.skip_next_rounded,
+                    color: AppColors.textSecondary(context),
+                    size: 18,
+                  ),
+                  label: Text(
+                    'Skip Round',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: AppColors.textSecondary(context),
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppColors.backgroundSubtle(context),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: const StadiumBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildTakeBreakButton(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
-    return SizedBox(
-      width: double.infinity,
-      child: TextButton.icon(
-        onPressed: isOnBreak ? onEndBreak : onTakeBreak,
-        icon: Icon(
-          isOnBreak ? null : Icons.pause_rounded,
-          color: isOnBreak
-              ? AppColors.gold(context)
-              : AppColors.textPrimary(context),
-          size: 20,
-        ),
-        label: Text(
-          isOnBreak ? 'End Break Now' : 'Take A Break',
-          style: AppTextStyles.labelMedium.copyWith(
+    return Opacity( // 👈 new
+      opacity: isHardMode ? 0.35 : 1.0,
+      child: SizedBox(
+        width: double.infinity,
+        child: TextButton.icon(
+          onPressed: isHardMode ? null : (isOnBreak ? onEndBreak : onTakeBreak), // 👈 new
+          icon: Icon(
+            isOnBreak ? null : Icons.pause_rounded,
             color: isOnBreak
                 ? AppColors.gold(context)
                 : AppColors.textPrimary(context),
-            fontSize: 15,
+            size: 20,
           ),
-        ),
-        style: TextButton.styleFrom(
-          backgroundColor: AppColors.backgroundSubtle(context),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: const StadiumBorder(),
+          label: Text(
+            isOnBreak ? 'End Break Now' : 'Take A Break',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: isOnBreak
+                  ? AppColors.gold(context)
+                  : AppColors.textPrimary(context),
+              fontSize: 15,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            backgroundColor: AppColors.backgroundSubtle(context),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: const StadiumBorder(),
+          ),
         ),
       ),
     );

@@ -5,27 +5,38 @@ import UIKit
 class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     override func configuration(shielding application: Application) -> ShieldConfiguration {
-        return shieldConfig(appName: application.localizedDisplayName ?? "This App")
+        let key = tokenKey(for: application.token)
+        return shieldConfig(appName: application.localizedDisplayName ?? "This App", attemptKey: key)
     }
 
     override func configuration(shielding application: Application, in category: ActivityCategory) -> ShieldConfiguration {
-        return shieldConfig(appName: application.localizedDisplayName ?? "This App")
+        let key = tokenKey(for: application.token)
+        return shieldConfig(appName: application.localizedDisplayName ?? "This App", attemptKey: key)
     }
 
     override func configuration(shielding webDomain: WebDomain) -> ShieldConfiguration {
-        return shieldConfig(appName: webDomain.domain ?? "This Site")
+        let key = tokenKey(for: webDomain.token)
+        return shieldConfig(appName: webDomain.domain ?? "This Site", attemptKey: key)
     }
 
     override func configuration(shielding webDomain: WebDomain, in category: ActivityCategory) -> ShieldConfiguration {
-        return shieldConfig(appName: webDomain.domain ?? "This Site")
+        let key = tokenKey(for: webDomain.token)
+        return shieldConfig(appName: webDomain.domain ?? "This Site", attemptKey: key)
     }
 
-    private func shieldConfig(appName: String = "This App") -> ShieldConfiguration {
+    private func tokenKey<T: Codable>(for token: T?) -> String {
+        guard let token = token, let data = try? JSONEncoder().encode(token) else {
+            return "unknown"
+        }
+        return data.base64EncodedString()
+    }
+
+    private func shieldConfig(appName: String, attemptKey: String) -> ShieldConfiguration {
         let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
 
-        let countKey = "openAttemptCount_\(appName)"
-        let dateKey = "openAttemptCountDate_\(appName)"
-        let lastIncrementKey = "openAttemptLastIncrement_\(appName)" // 👈 new — debounce tracker
+        let countKey = "openAttemptCount_\(attemptKey)"     // 👈 keyed on token, not appName
+        let dateKey = "openAttemptCountDate_\(attemptKey)"
+        let lastIncrementKey = "openAttemptLastIncrement_\(attemptKey)"
 
         let today = Calendar.current.startOfDay(for: Date())
         let lastCountDate = sharedDefaults?.double(forKey: dateKey) ?? 0
@@ -36,16 +47,14 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         var currentCount: Int
         let now = Date().timeIntervalSince1970
         let lastIncrementTime = sharedDefaults?.double(forKey: lastIncrementKey) ?? 0
-        let withinDebounceWindow = (now - lastIncrementTime) < 3.0 // 👈 3-second window — tune if needed
+        let withinDebounceWindow = (now - lastIncrementTime) < 3.0
 
         if lastCountDay != today {
-            // genuinely new day — always increment, debounce doesn't apply across day boundaries
             currentCount = 1
             sharedDefaults?.set(today.timeIntervalSince1970, forKey: dateKey)
             sharedDefaults?.set(now, forKey: lastIncrementKey)
             sharedDefaults?.set(currentCount, forKey: countKey)
         } else if withinDebounceWindow {
-            // 👇 this call is a redundant re-query (prefetch or .defer refresh) — don't increment, just reuse the last count
             currentCount = sharedDefaults?.integer(forKey: countKey) ?? 1
         } else {
             currentCount = (sharedDefaults?.integer(forKey: countKey) ?? 0) + 1
@@ -66,18 +75,9 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             backgroundBlurStyle: nil,
             backgroundColor: navyBg,
             icon: UIImage(named: "PauseNowIcon"),
-            title: ShieldConfiguration.Label(
-                text: "\(appName) blocked 🔒", // 👈 was "\(appName) 🛑"
-                color: .white
-            ),
-            subtitle: ShieldConfiguration.Label(
-                text: "\(currentCount)x today", // 👈 was the instructional text — now the count
-                color: mutedWhite
-            ),
-            primaryButtonLabel: ShieldConfiguration.Label(
-                text: "Nevermind",
-                color: goldText
-            ),
+            title: ShieldConfiguration.Label(text: "\(appName) blocked 🔒", color: .white),
+            subtitle: ShieldConfiguration.Label(text: "\(currentCount)x today", color: mutedWhite),
+            primaryButtonLabel: ShieldConfiguration.Label(text: "Nevermind", color: goldText),
             primaryButtonBackgroundColor: gold,
             secondaryButtonLabel: ShieldConfiguration.Label(
                 text: secondaryLabel,

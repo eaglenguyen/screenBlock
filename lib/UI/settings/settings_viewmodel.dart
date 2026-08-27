@@ -7,11 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../data/repositories/SettingsRepo.dart';
 import '../../domain/blocking_service.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../../data/models/block_session.dart';
 import '../../providers/premium_provider.dart';
+import '../../providers/repository_providers.dart';
 import '../../services/revenuecat_service.dart';
 import '../home/home_viewmodel.dart';
 import 'settings_state.dart';
@@ -24,11 +26,17 @@ class SettingsViewModel extends _$SettingsViewModel {
   @override
   SettingsState build() {
     Future.microtask(() => _checkPermissions());
-    return const SettingsState();
+    return SettingsState(
+      hardModeEnabled: ref.read(settingsRepositoryProvider).getHardModeEnabled(), // 👈 new — load initial value
+    );
   }
 
   BlockingService get _service =>
       ref.read(blockingServiceProvider);
+
+  SettingsRepository get _settingsRepo => // 👈 new — matches the pattern from HomeViewModel earlier tonight
+  ref.read(settingsRepositoryProvider);
+
 
 
   Future<void> requestAccessibilityPermission() async {
@@ -174,4 +182,10 @@ class SettingsViewModel extends _$SettingsViewModel {
         debugPrint('❌ restorePurchases error: $e');
       }
     }
+
+  // 👇 new — Hard Mode
+  Future<void> setHardMode(bool enabled) async {
+    await _settingsRepo.setHardModeEnabled(enabled);
+    state = state.copyWith(hardModeEnabled: enabled);
+  }
 }

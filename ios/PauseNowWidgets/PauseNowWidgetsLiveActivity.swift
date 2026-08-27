@@ -18,13 +18,23 @@ struct PauseNowLiveActivity: Widget {
                         Image(systemName: "pause.fill")
                             .font(.system(size: 11, weight: .bold))
                     }
-                    Text(context.state.isPaused ? "PAUSING" : (context.state.isOnBreak ? "ON BREAK" : "BLOCKING"))
+                    Text(
+                        context.state.isPaused
+                            ? "PAUSING"
+                            : (context.state.isOnBreak
+                                ? "ON BREAK"
+                                : (context.attributes.isPomodoro ? "POMODORO" : "BLOCKING"))
+                    )
                         .font(.system(size: 14, weight: .bold))
                 }
                 .foregroundColor(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 6)
-                .background((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+                .background(
+                    (context.state.isPaused || context.state.isOnBreak)
+                        ? Color.orange
+                        : (context.attributes.isPomodoro ? Color.red : Color(red: 237/255, green: 184/255, blue: 42/255))
+                )
                 .clipShape(Capsule())
 
                 if context.state.isPaused {
@@ -52,13 +62,23 @@ struct PauseNowLiveActivity: Widget {
                             Image(systemName: "pause.fill")
                                 .font(.system(size: 10, weight: .bold))
                         }
-                        Text(context.state.isPaused ? "PAUSING" : (context.state.isOnBreak ? "ON BREAK" : "BLOCKING"))
+                        Text(
+                            context.state.isPaused
+                                ? "PAUSING"
+                                : (context.state.isOnBreak
+                                    ? "ON BREAK"
+                                    : (context.attributes.isPomodoro ? "POMODORO" : "BLOCKING"))
+                        )
                             .font(.system(size: 11, weight: .bold))
                     }
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+                    .background(
+                        (context.state.isPaused || context.state.isOnBreak)
+                            ? Color.orange
+                            : (context.attributes.isPomodoro ? Color.red : Color(red: 237/255, green: 184/255, blue: 42/255))
+                    )
                     .clipShape(Capsule())
                 }
                 DynamicIslandExpandedRegion(.trailing) {
@@ -84,12 +104,12 @@ struct PauseNowLiveActivity: Widget {
                         .background(Color.orange)
                         .clipShape(Capsule())
                 } else {
-                    Text("BLOCKING")
+                    Text(context.attributes.isPomodoro ? "POMODORO" : "BLOCKING")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
-                        .background(Color(red: 237/255, green: 184/255, blue: 42/255))
+                        .background(context.attributes.isPomodoro ? Color.red : Color(red: 237/255, green: 184/255, blue: 42/255))
                         .clipShape(Capsule())
                 }
             } compactTrailing: {
@@ -108,11 +128,19 @@ struct PauseNowLiveActivity: Widget {
                 }
             } minimal: {
                 Circle()
-                    .fill((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+                    .fill(
+                        (context.state.isPaused || context.state.isOnBreak)
+                            ? Color.orange
+                            : (context.attributes.isPomodoro ? Color.red : Color(red: 237/255, green: 184/255, blue: 42/255))
+                    )
                     .frame(width: 12, height: 12)
             }
             .widgetURL(URL(string: "pausenow://open"))
-            .keylineTint((context.state.isPaused || context.state.isOnBreak) ? Color.orange : Color(red: 237/255, green: 184/255, blue: 42/255))
+            .keylineTint(
+                (context.state.isPaused || context.state.isOnBreak)
+                    ? Color.orange
+                    : (context.attributes.isPomodoro ? Color.red : Color(red: 237/255, green: 184/255, blue: 42/255))
+            )
         }
     }
 }

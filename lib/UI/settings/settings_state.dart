@@ -10,6 +10,7 @@ class SettingsState {
   final String appVersion;
   final bool hasScreenTimePermission;
   final bool hasNotificationPermission; // 👈 add
+  final bool hardModeEnabled;
 
 
   const SettingsState({
@@ -21,7 +22,7 @@ class SettingsState {
     this.isPremium = false,
     this.appVersion = '1.0.0',
     this.hasNotificationPermission = false, // 👈 add
-
+    this.hardModeEnabled = false,
   });
 
   SettingsState copyWith({
@@ -33,7 +34,7 @@ class SettingsState {
     bool? isPremium,
     String? appVersion,
     bool? hasNotificationPermission, // 👈 add
-
+    bool? hardModeEnabled,
   }) {
     return SettingsState(
       hasScreenTimePermission:
@@ -50,6 +51,7 @@ class SettingsState {
       appVersion: appVersion ?? this.appVersion,
       hasNotificationPermission:
       hasNotificationPermission ?? this.hasNotificationPermission,
+        hardModeEnabled: hardModeEnabled ?? this.hardModeEnabled
     );
   }
 }

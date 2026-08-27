@@ -315,6 +315,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
+            
         case "getOpenAttemptCount":
             if let args = call.arguments as? [String: Any], let appName = args["appName"] as? String {
                 result(IOSBlockingService.shared.getOpenAttemptCount(appName: appName))

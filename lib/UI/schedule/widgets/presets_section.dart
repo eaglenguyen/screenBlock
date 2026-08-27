@@ -142,14 +142,16 @@ class _PresetRow extends StatelessWidget {
               ),
             ),
             // + button
+            // + button
             Container(
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: preset.accentColor,
+                color: AppColors.backgroundSubtle(context), // 👈 was preset.accentColor
                 shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border(context), width: 0.5), // 👈 new — subtle definition against the card
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 18),
+              child: Icon(Icons.add, color: AppColors.gold(context), size: 18), // 👈 was Colors.white — now gold, matches your accent color scheme elsewhere
             ),
           ],
         ),

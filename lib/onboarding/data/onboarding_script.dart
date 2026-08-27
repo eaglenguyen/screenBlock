@@ -49,7 +49,7 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ChatMessage(type: MessageType.bot, text: 'have you ever opened TikTok or Instagram...'),
       ChatMessage(type: MessageType.bot, text: 'thinking you\'d scroll for \"just 5 minutes\"'),
       ChatMessage(type: MessageType.bot, text: 'then look up'),
-      ChatMessage(type: MessageType.bot, text: 'and 2-3 hours went by?'),
+      ChatMessage(type: MessageType.bot, text: 'and your whole day is wasted?'),
       ChatMessage(type: MessageType.bot, text: 'we all been there.'),
       ChatMessage(type: MessageType.bot, text: 'the hardest part isnt putting the phone down.'),
       ChatMessage(type: MessageType.bot, text: 'its remembering'),

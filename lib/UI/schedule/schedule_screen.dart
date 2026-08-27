@@ -22,6 +22,7 @@ import '../../featuress/timelimit/widget/time_limit_card.dart';
 import '../../featuress/timelimit/widget/time_limit_option_sheet.dart';
 import '../home/home_state.dart';
 import '../home/home_viewmodel.dart';
+import '../settings/settings_viewmodel.dart';
 
 class ScheduleScreen extends ConsumerWidget {
   const ScheduleScreen({super.key});
@@ -33,6 +34,7 @@ class ScheduleScreen extends ConsumerWidget {
     final isPremium = ref.watch(isPremiumProvider);
     final isManualBlocking = ref.watch(homeViewModelProvider).phase == BlockingPhase.active;
     final isPaused = ref.watch(homeViewModelProvider).phase == BlockingPhase.onBreak;
+    final hardModeEnabled = ref.watch(settingsViewModelProvider).hardModeEnabled; // 👈 new
 
 
 
@@ -94,52 +96,59 @@ class ScheduleScreen extends ConsumerWidget {
                         final i = entry.key;
                         final s = entry.value;
                         final isLocked = !isPremium && i >= 1;
+
+                        // 👇 new — pulled out so it can be reused below
+                        final isThisScheduleCurrentlyActive =
+                            ref.watch(homeViewModelProvider).isScheduleActive &&
+                                ScheduleChecker.instance.activeScheduleId == s.id;
+
+                        final isHardModeLocked = hardModeEnabled && isThisScheduleCurrentlyActive; // 👈 new
+
                         return Padding(
                           key: ValueKey(s.id),
                           padding: const EdgeInsets.only(bottom: 10),
-                            child: isLocked
-                                ? _LockedScheduleCard(schedule: s)
-                                : Opacity(
-                              opacity: isManualBlocking || isPaused ? 0.4 : 1.0, // 👈 gray out when locked
-                              child: IgnorePointer(
-                                ignoring: isManualBlocking || isPaused, // 👈 block all taps
-                                child: SessionCard(
-                                  schedule: s,
-                                  onTap: isManualBlocking || isPaused
-                                      ? null
-                                      : () => _openEditSession(context, ref, s),
-                                  onToggle: isManualBlocking || isPaused
-                                      ? () {}
-                                      : () => _checkAccessibilityAndProceed(
-                                    context,
-                                    ref,
-                                        () => ref
-                                        .read(scheduleViewModelProvider.notifier)
-                                        .toggleSchedule(s.id),
-                                  ),
-                                  isCurrentlyActive:
-                                  ref.watch(homeViewModelProvider).isScheduleActive &&
-                                      ScheduleChecker.instance.activeScheduleId == s.id,
-                                  isPaused: ref.watch(homeViewModelProvider).isSchedulePaused,
-                                  pauseRemainingSeconds: ref
-                                      .watch(homeViewModelProvider)
-                                      .schedulePauseRemainingSeconds,
-                                  onPause: () {
-                                    final homeState = ref.read(homeViewModelProvider);
-                                    PauseScheduleSheet.show(
-                                      context,
-                                      isPaused: homeState.isSchedulePaused,
-                                      onResume: () => ref
-                                          .read(homeViewModelProvider.notifier)
-                                          .resumeSchedule(),
-                                      onPause: (mins) => ref
-                                          .read(homeViewModelProvider.notifier)
-                                          .pauseSchedule(mins),
-                                    );
-                                  },
+                          child: isLocked
+                              ? _LockedScheduleCard(schedule: s)
+                              : Opacity(
+                            opacity: (isManualBlocking || isPaused || isHardModeLocked) ? 0.4 : 1.0, // 👈 added isHardModeLocked
+                            child: IgnorePointer(
+                              ignoring: isManualBlocking || isPaused || isHardModeLocked, // 👈 added isHardModeLocked — blocks the whole card, including onTap
+                              child: SessionCard(
+                                schedule: s,
+                                onTap: isManualBlocking || isPaused
+                                    ? null
+                                    : () => _openEditSession(context, ref, s),
+                                onToggle: isManualBlocking || isPaused
+                                    ? () {}
+                                    : () => _checkAccessibilityAndProceed(
+                                  context,
+                                  ref,
+                                      () => ref
+                                      .read(scheduleViewModelProvider.notifier)
+                                      .toggleSchedule(s.id),
                                 ),
+                                isCurrentlyActive: isThisScheduleCurrentlyActive,
+                                isPaused: ref.watch(homeViewModelProvider).isSchedulePaused,
+                                pauseRemainingSeconds: ref
+                                    .watch(homeViewModelProvider)
+                                    .schedulePauseRemainingSeconds,
+                                isHardModeLocked: isHardModeLocked,
+                                onPause: () {
+                                  final homeState = ref.read(homeViewModelProvider);
+                                  PauseScheduleSheet.show(
+                                    context,
+                                    isPaused: homeState.isSchedulePaused,
+                                    onResume: () => ref
+                                        .read(homeViewModelProvider.notifier)
+                                        .resumeSchedule(),
+                                    onPause: (mins) => ref
+                                        .read(homeViewModelProvider.notifier)
+                                        .pauseSchedule(mins),
+                                  );
+                                },
                               ),
                             ),
+                          ),
                         );
                       }).toList(),
                     ),

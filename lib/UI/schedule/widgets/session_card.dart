@@ -16,7 +16,7 @@ class SessionCard extends StatelessWidget {
     this.isCurrentlyActive = false,
     this.isPaused = false,
     this.pauseRemainingSeconds = 0,
-
+    this.isHardModeLocked = false
   });
 
   final Schedule schedule;
@@ -26,6 +26,7 @@ class SessionCard extends StatelessWidget {
   final bool isCurrentlyActive; // 👈 true when THIS schedule is blocking right now
   final bool isPaused; // 👈 true when paused
   final int pauseRemainingSeconds;
+  final bool isHardModeLocked;
 
   String _formatRemaining(int seconds) {
     final m = seconds ~/ 60;
@@ -218,41 +219,48 @@ class SessionCard extends StatelessWidget {
                   ),
                 ),
                 // toggle
-                GestureDetector(
-                  onTap: () {
-                    if (schedule.isActive && isCurrentlyActive) {
-                      // 👇 currently actively blocking — confirm before turning off
-                      _showGiveUpConfirmation(context);
-                    } else {
-                      // not currently active — toggle immediately, no confirmation needed
-                      onToggle();
-                    }
-                  },                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 44,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: schedule.isActive
-                          ? AppColors.gold(context)
-                          : AppColors.backgroundSubtle(context),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.border(context),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: AnimatedAlign(
-                      duration: const Duration(milliseconds: 200),
-                      alignment: schedule.isActive
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.all(2),
-                        width: 18,
-                        height: 18,
-                        decoration:  BoxDecoration(
-                          color: AppColors.textPrimary(context),
-                          shape: BoxShape.circle,
+                Opacity(
+                  opacity: isHardModeLocked ? 0.35 : 1.0, // 👈 new — visually grayed when locked
+                  child: GestureDetector(
+                    onTap: isHardModeLocked // 👈 new — no-op when locked, ignores taps entirely
+                        ? null
+                        : () {
+                      if (schedule.isActive && isCurrentlyActive) {
+                        _showGiveUpConfirmation(context);
+                      } else {
+                        onToggle();
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 44,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: schedule.isActive
+                              ? AppColors.gold(context)
+                              : AppColors.backgroundSubtle(context),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.border(context),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: AnimatedAlign(
+                          duration: const Duration(milliseconds: 200),
+                          alignment: schedule.isActive
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.all(2),
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: AppColors.textPrimary(context),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -265,82 +273,84 @@ class SessionCard extends StatelessWidget {
 
         // ── Pause button — only shown when active ──
         if (isCurrentlyActive)
-          GestureDetector(
-            onTap: onPause,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 18), // 👈 bigger from 12
-              decoration: BoxDecoration(
-                color: isPaused
-                    ? Colors.orange.withValues(alpha: 0.1)
-                    : AppColors.backgroundSubtle(context),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
+          Opacity( // 👈 new
+            opacity: isHardModeLocked ? 0.35 : 1.0,
+            child: GestureDetector(
+              onTap: isHardModeLocked ? null : onPause, // 👈 new — no-op when locked
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                decoration: BoxDecoration(
+                  color: isPaused
+                      ? Colors.orange.withValues(alpha: 0.1)
+                      : AppColors.backgroundSubtle(context),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  border: Border(
+                    left: BorderSide(
+                      color: isPaused
+                          ? Colors.orange.withValues(alpha: 0.4)
+                          : AppColors.border(context),
+                      width: 0.5,
+                    ),
+                    right: BorderSide(
+                      color: isPaused
+                          ? Colors.orange.withValues(alpha: 0.4)
+                          : AppColors.border(context),
+                      width: 0.5,
+                    ),
+                    bottom: BorderSide(
+                      color: isPaused
+                          ? Colors.orange.withValues(alpha: 0.4)
+                          : AppColors.border(context),
+                      width: 0.5,
+                    ),
+                  ),
                 ),
-                border: Border(
-                  left: BorderSide(
-                    color: isPaused
-                        ? Colors.orange.withValues(alpha: 0.4)
-                        : AppColors.border(context),
-                    width: 0.5,
-                  ),
-                  right: BorderSide(
-                    color: isPaused
-                        ? Colors.orange.withValues(alpha: 0.4)
-                        : AppColors.border(context),
-                    width: 0.5,
-                  ),
-                  bottom: BorderSide(
-                    color: isPaused
-                        ? Colors.orange.withValues(alpha: 0.4)
-                        : AppColors.border(context),
-                    width: 0.5,
-                  ),
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isPaused
-                            ? Icons.play_arrow_rounded
-                            : Icons.pause_rounded,
-                        color: isPaused
-                            ? Colors.orange
-                            : AppColors.textSecondary(context),
-                        size: 20, // 👈 bigger from 16
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        isPaused ? 'Pause Time Remaining...' : 'Pause blocking',
-                        style: TextStyle(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          isPaused
+                              ? Icons.play_arrow_rounded
+                              : Icons.pause_rounded,
                           color: isPaused
                               ? Colors.orange
                               : AppColors.textSecondary(context),
-                          fontSize: 15, // 👈 bigger from 13
-                          fontWeight: FontWeight.w600,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          isPaused ? 'Pause Time Remaining...' : 'Pause blocking',
+                          style: TextStyle(
+                            color: isPaused
+                                ? Colors.orange
+                                : AppColors.textSecondary(context),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (isPaused && pauseRemainingSeconds > 0) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        _formatRemaining(pauseRemainingSeconds),
+                        style: TextStyle(
+                          color: Colors.orange.withValues(alpha: 0.7),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
-                  ),
-                  // 👇 countdown when paused
-                  if (isPaused && pauseRemainingSeconds > 0) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      _formatRemaining(pauseRemainingSeconds),
-                      style: TextStyle(
-                        color: Colors.orange.withValues(alpha: 0.7),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ],
-                ],
+                ),
               ),
             ),
           ),

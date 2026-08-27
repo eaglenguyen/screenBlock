@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:pausenow/UI/settings/settings_viewmodel.dart';
 import 'package:pausenow/UI/settings/widgets/acknowledgements_sheet.dart';
+import 'package:pausenow/UI/settings/widgets/hard_mode_gate.dart';
 import 'package:pausenow/UI/settings/widgets/profile_card.dart';
 import 'package:pausenow/UI/settings/widgets/settings_section.dart';
 import 'package:pausenow/UI/settings/widgets/settings_upgrade_card.dart';
@@ -48,7 +49,7 @@ class SettingsScreen extends ConsumerWidget {
 
                   // Pro in Settings
                   if (!ref.watch(isPremiumProvider)) ...[
-                    const SettingsUpgradeCard(), // 👈 replaces the old SettingsSection/SettingsRow block
+                    const SettingsUpgradeCard(),
                     const SizedBox(height: 20),
                   ],
 
@@ -62,8 +63,8 @@ class SettingsScreen extends ConsumerWidget {
                         icon: isDark
                             ? Icons.dark_mode_rounded
                             : Icons.light_mode_rounded,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
                         label: isDark ? 'Dark Mode' : 'Light Mode',
                         onTap: () => ref.read(themeProvider.notifier).toggle(),
                         trailing: Switch(
@@ -93,26 +94,25 @@ class SettingsScreen extends ConsumerWidget {
                           if (await inAppReview.isAvailable()) {
                             inAppReview.requestReview();
                           } else {
-                            // fallback — open App Store page directly
                             inAppReview.openStoreListing(
-                              appStoreId: '6781065557', // 👈 add once app is live
+                              appStoreId: '6781065557',
                             );
                           }
                         },
                       ),
                       SettingsRow(
                         icon: Icons.chat_bubble_outline_rounded,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
                         label: 'Give Feedback',
-                        onTap: () => GiveFeedbackSheet.show(context), // 👈
+                        onTap: () => GiveFeedbackSheet.show(context),
                       ),
                       SettingsRow(
                         iconAsset: "assets/icons/mascot_face.png",
                         iconColor: AppColors.gold(context),
                         iconBgColor: Colors.transparent,
                         label: 'Get Help',
-                        onTap: () => GetHelpSheet.show(context), // 👈
+                        onTap: () => GetHelpSheet.show(context),
                       ),
                     ],
                   ),
@@ -124,8 +124,8 @@ class SettingsScreen extends ConsumerWidget {
                     rows: [
                       SettingsRow(
                         icon: Icons.notifications_rounded,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
                         label: 'Notifications',
                         onTap: () async {
                           if (Platform.isIOS) {
@@ -137,7 +137,7 @@ class SettingsScreen extends ConsumerWidget {
                             if (!granted) {
                               await notifier.requestNotificationPermission();
                             } else {
-                              await openAppSettings(); // 👈 opens app settings where notifications toggle is
+                              await openAppSettings();
                             }
                           }
                           await notifier.checkPermissions();
@@ -159,11 +159,11 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       if (Platform.isAndroid)
                         SettingsRow(
-                          icon: Icons.accessibility_new_rounded, // 👈 add this
+                          icon: Icons.accessibility_new_rounded,
                           iconColor: AppColors.success(context),
                           iconBgColor: AppColors.primarySubtle(context),
                           label: 'Accessibility',
-                          onTap: notifier.requestAccessibilityPermission, // 👈 add this method to notifier
+                          onTap: notifier.requestAccessibilityPermission,
                           trailing: _permissionBadge(state.hasAccessibilityPermission, context),
                         ),
                       if (Platform.isAndroid)
@@ -202,16 +202,43 @@ class SettingsScreen extends ConsumerWidget {
                     label: 'Account',
                     rows: [
                       SettingsRow(
+                        icon: Icons.shield_moon_rounded,
+                        iconColor: AppColors.error(context), // reads as serious/locked, distinct from the neutral rows around it
+                        iconBgColor: AppColors.error(context).withValues(alpha: 0.1),
+                        label: 'Hard Mode',
+                        onTap: () {},
+                        trailing: Switch(
+                          value: state.hardModeEnabled, // from wherever you surface the provider in this screen
+                          onChanged: (newValue) async {
+                            if (newValue) {
+                              // turning ON — no gate needed, just enable directly
+                              await notifier.setHardMode(true);
+                            } else {
+                              // turning OFF — require the math gate
+                              final solved = await HardModeMathGate.show(context);
+                              if (solved) {
+                                await notifier.setHardMode(false);
+                              }
+                              // wrong answer → do nothing, toggle visually stays on
+                            }
+                          },
+                          activeColor: AppColors.error(context),
+                          activeTrackColor: AppColors.error(context).withValues(alpha: 0.3),
+                          inactiveThumbColor: AppColors.textSecondary(context),
+                          inactiveTrackColor: AppColors.backgroundSubtle(context),
+                        ),
+                      ),
+                      SettingsRow(
                         icon: Icons.track_changes_rounded,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
                         label: 'Goals',
                         onTap: () => GoalSettingsSheet.show(context, ref),
                       ),
                       SettingsRow(
                         icon: Icons.settings_outlined,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
                         label: 'Manage Subscription',
                         onTap: () => launchUrl(
                           Uri.parse(
@@ -224,8 +251,8 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       SettingsRow(
                         icon: Icons.restore_rounded,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
                         label: 'Restore Purchases',
                         onTap: () {
                           notifier.restorePurchases().then((_) {
@@ -236,7 +263,7 @@ class SettingsScreen extends ConsumerWidget {
                                     ref.read(isPremiumProvider)
                                         ? 'Purchases restored! ✅'
                                         : 'No purchases found to restore.',
-                                    style: TextStyle(color: AppColors.textPrimary(context)), // 👈 add this
+                                    style: TextStyle(color: AppColors.textPrimary(context)),
                                   ),
                                   backgroundColor: AppColors.backgroundCard(context),
                                 ),
@@ -247,8 +274,8 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       SettingsRow(
                         icon: Icons.refresh_rounded,
-                        iconColor: AppColors.gold(context),
-                        iconBgColor: AppColors.primarySubtle(context),
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
                         label: 'Reset Time Blocked',
                         onTap: () => _confirmReset(context, notifier.resetDailyRecord),
                       ),
@@ -288,7 +315,7 @@ class SettingsScreen extends ConsumerWidget {
                           mode: LaunchMode.externalApplication,
                         ),
                       ),
-                      SettingsRow( // 👈 add this
+                      SettingsRow(
                         icon: Icons.favorite_outline_rounded,
                         iconColor: AppColors.textSecondary(context),
                         iconBgColor: AppColors.backgroundSubtle(context),
@@ -299,35 +326,6 @@ class SettingsScreen extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: 24),
-
-                  // 👇 debug section — only shows in debug mode
-                  // if (kDebugMode) ...[
-                  //   const SizedBox(height: 8),
-                  //   SettingsSection(
-                  //     label: '🛠 Debug',
-                  //     rows: [
-                  //       SettingsRow(
-                  //         icon: Icons.star_rounded,
-                  //         iconColor: Colors.purple,
-                  //         iconBgColor: Colors.purple.withValues(alpha: 0.1),
-                  //         label: 'Force Premium',
-                  //         onTap: () {},
-                  //         trailing: Switch(
-                  //           value: debugPremiumOverride,
-                  //           onChanged: (val) {
-                  //             debugPremiumOverride = val;
-                  //             ref.invalidate(isPremiumProvider); // 👈 force rebuild
-                  //           },
-                  //           activeColor: AppColors.gold(context),
-                  //           activeTrackColor: AppColors.gold(context).withValues(alpha: 0.3),
-                  //           inactiveThumbColor: AppColors.textSecondary(context),
-                  //           inactiveTrackColor: AppColors.backgroundSubtle(context),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ],
-
 
                   Center(
                     child: Text(

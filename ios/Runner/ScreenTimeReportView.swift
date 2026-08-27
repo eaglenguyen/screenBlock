@@ -26,7 +26,6 @@ struct ScreenTimeReportView: View {
 
     var body: some View {
         ZStack {
-            // 👇 fallback layer — visible until real content paints over it
             VStack(spacing: 16) {
                 if showRetryPrompt {
                     Image(systemName: "chart.bar.xaxis")
@@ -37,7 +36,7 @@ struct ScreenTimeReportView: View {
                         .foregroundColor(Color(red: 160/255, green: 160/255, blue: 160/255))
                     Button(action: {
                         showRetryPrompt = false
-                        reportId = UUID() // force a fresh attempt
+                        reportId = UUID()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                             showRetryPrompt = true
                         }
@@ -59,10 +58,16 @@ struct ScreenTimeReportView: View {
             DeviceActivityReport(.init("Total Activity"), filter: filter)
                 .id(reportId)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            // 👇 new — invisible, triggers CompactActivityDisplay's write side-effect
+            DeviceActivityReport(.init("Compact Activity"), filter: filter)
+                .id(reportId)
+                .frame(width: 1, height: 1)
+                .opacity(0)
+                .allowsHitTesting(false)
         }
         .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
         .onAppear {
-            // 👇 if nothing has rendered over the fallback within 6 seconds, show the retry prompt
             DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
                 showRetryPrompt = true
             }

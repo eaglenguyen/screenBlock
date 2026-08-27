@@ -356,6 +356,10 @@ class IOSBlockingService: NSObject {
     }
 
     // MARK: - Usage Stats
+    
+    func getTotalScreenTimeSeconds() -> Double {
+        return sharedDefaults?.double(forKey: "totalScreenTimeSeconds") ?? 0
+    }
 
     func fetchTodayUsage() async -> [[String: Any]] {
         let center = DeviceActivityCenter()
@@ -607,6 +611,8 @@ class IOSBlockingService: NSObject {
         else { return [] }
         return selection.applicationTokens
     }
+    
+    
     
     
     

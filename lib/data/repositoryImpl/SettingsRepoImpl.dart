@@ -84,4 +84,15 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<void> markReviewRequested(String key) async {
     await _box.put(key, true);
   }
+
+  // ── Hard Mode ───────────────────────
+  @override
+  bool getHardModeEnabled() {
+    return _box.get('hardModeEnabled', defaultValue: false) as bool;
+  }
+
+  @override
+  Future<void> setHardModeEnabled(bool enabled) async {
+    await _box.put('hardModeEnabled', enabled);
+  }
 }
