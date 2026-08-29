@@ -11,21 +11,21 @@ import 'data/onboarding_script.dart';
 import 'onboarding_viewmodel.dart';
 import 'widgets/typing_dots.dart';
 import 'widgets/onboarding_spotlight_overlay.dart';
-class OnboardingChatIntroScreen extends StatefulWidget {
+class OnboardingIntroScreen extends StatefulWidget {
   final VoidCallback onStart;
 
-  const OnboardingChatIntroScreen({
+  const OnboardingIntroScreen({
     super.key,
     required this.onStart,
   });
 
   @override
-  State<OnboardingChatIntroScreen> createState() =>
+  State<OnboardingIntroScreen> createState() =>
       _OnboardingChatIntroScreenState();
 }
 
 class _OnboardingChatIntroScreenState
-    extends State<OnboardingChatIntroScreen>
+    extends State<OnboardingIntroScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _bounceCtrl;
   late Animation<double> _bounceAnim;
@@ -82,7 +82,7 @@ class _OnboardingChatIntroScreenState
                           ),
                         ),
                         child: Text(
-                          'Hello! I\'m Boxy. Let\'s have a quick chat about what\'s going on here!',
+                          'Hello! I\'m Boxy. Let\'s get to know you a bit more and see what we can do!',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: 18,
@@ -122,7 +122,7 @@ class _OnboardingChatIntroScreenState
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  child: const Text('Start Chat'),
+                  child: const Text('Continue'),
                 ),
               ),
             ),
@@ -1235,6 +1235,125 @@ class _OnboardingGoalsConfirmScreenState
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// New name screen
+
+class OnboardingNameScreen extends ConsumerStatefulWidget {
+  final ValueChanged<String> onSelected;
+  const OnboardingNameScreen({super.key, required this.onSelected});
+
+  @override
+  ConsumerState<OnboardingNameScreen> createState() => _OnboardingNameScreenState();
+}
+
+class _OnboardingNameScreenState extends ConsumerState<OnboardingNameScreen> {
+  final TextEditingController _controller = TextEditingController();
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      setState(() => _hasText = _controller.text.trim().isNotEmpty);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final name = _controller.text.trim();
+    if (name.isEmpty) return;
+    HapticFeedback.mediumImpact();
+    ref.read(onboardingViewModelProvider.notifier).setUserName(name);
+    widget.onSelected(name);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF16162A),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 24, 28, 36),
+          child: Column(
+            children: [
+              const Spacer(flex: 2),
+              Text(
+                'What\'s your name?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 40),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF252542),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: _hasText
+                        ? const Color(0xFFEDB82A).withValues(alpha: 0.5)
+                        : const Color(0xFF2A2A48),
+                    width: _hasText ? 1.5 : 0.5,
+                  ),
+                ),
+                child: TextField(
+                  controller: _controller,
+                  autofocus: true,
+                  textAlign: TextAlign.center,
+                  textCapitalization: TextCapitalization.words,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                  ],
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Enter your name...',
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      fontSize: 20,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  ),
+                  onSubmitted: (_) => _submit(),
+                ),
+              ),
+              const Spacer(flex: 3),
+              AnimatedOpacity(
+                opacity: _hasText ? 1.0 : 0.35,
+                duration: const Duration(milliseconds: 200),
+                child: ElevatedButton(
+                  onPressed: _hasText ? _submit : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEDB82A),
+                    foregroundColor: const Color(0xFF1A1208),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: const StadiumBorder(),
+                    disabledBackgroundColor: const Color(0xFFEDB82A).withValues(alpha: 0.4),
+                    textStyle: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w800),
+                  ),
+                  child: const Text('Continue'),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

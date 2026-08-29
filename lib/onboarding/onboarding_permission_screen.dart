@@ -277,9 +277,9 @@ class _OnboardingPermissionsScreenState
                         disabledBackgroundColor: const Color(0xFFEDB82A)
                             .withValues(alpha: 0.4),
                         textStyle: GoogleFonts.poppins(
-                            fontSize: 17, fontWeight: FontWeight.w800),
+                            fontSize: 20, fontWeight: FontWeight.w800),
                       ),
-                      child: const Text('Continue →'),
+                      child: const Text('Continue'),
                     ),
                   ),
                 ),

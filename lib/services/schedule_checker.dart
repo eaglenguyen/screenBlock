@@ -238,16 +238,14 @@ class ScheduleChecker {
     _activeSchedule = schedule;
 
     if (Platform.isIOS) {
-      // 👇 pass sessionType directly instead of separate persistSessionType call
       await (_blockingService as IOSBlockingService)
-          .startMonitoring('ios_apps', 999, sessionType: 'schedule', blockingMode: schedule.blockingType, scheduleId: schedule.id); // 👈 add scheduleId
+          .startMonitoring('ios_apps', 999, sessionType: 'schedule', blockingMode: schedule.blockingType, scheduleId: schedule.id);
     } else {
       final allApps = schedule.blockingType ==
           AppConstants.blockingTypeSpecificApps
           ? schedule.blockedApps
           : schedule.allowedApps;
 
-      // 👇 free tier hard cap at 3 apps
       final premium = isPremium?.call() ?? false;
       final apps = premium ? allApps : allApps.take(3).toList();
 
@@ -263,6 +261,8 @@ class ScheduleChecker {
           sessionMinutes: 999,
           sessionType: 'schedule',
         );
+        await (_blockingService as AndroidBlockingService)
+            .checkCurrentForegroundApp(); // 👈 new — force immediate re-check of whatever's on screen right now
       }
     }
 
@@ -270,6 +270,7 @@ class ScheduleChecker {
     _activeScheduleId = schedule.id;
     onScheduleStarted?.call();
   }
+
 
   void _stopScheduleBlocking() {
     if (_blockingService == null) return;

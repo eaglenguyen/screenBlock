@@ -81,35 +81,16 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
     ],
     userResponses: [
-      'how do i get there?',
+      'I want to make better choices',
     ],
   ),
 
-  // Screen 4 — The Science
-  ChatStep(
-    botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'heres the secret...'),
-      ChatMessage(type: MessageType.bot, text: 'people who live intentionally'),
-      ChatMessage(type: MessageType.bot, text: 'dont have more motivation.'),
-      ChatMessage(type: MessageType.bot, text: 'they simply protect'),
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'whats important',
-        textColor: Color(0xFFEDB82A),
-      ),
-      ChatMessage(type: MessageType.bot, text: 'rather than doomscrolling'),
-      ChatMessage(type: MessageType.bot, text: 'they choose to do something more productive'),
-    ],
-    userResponses: [
-      'that makes sense',
-      'so how does pause now help?',
-    ],
-  ),
+  // Screen 4 — The Science REMOVED
 
   // Screen 5 — The Solution
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'that\'s exactly what Pause Now is for'),
+      ChatMessage(type: MessageType.bot, text: 'great, that\'s exactly what Pause Now is for'),
       ChatMessage(type: MessageType.bot, text: 'not to make your phone the enemy.'),
       ChatMessage(type: MessageType.bot, text: 'not to shame you for scrolling.'),
       ChatMessage(type: MessageType.bot, text: 'but to create'),
@@ -122,7 +103,6 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ),
     ],
     userResponses: [
-      'thats powerful',
       'help me get there!',
     ],
   ),
@@ -130,7 +110,7 @@ List<ChatStep> getOnboardingSteps(String name) => [
   // Screen 6 — Social Proof
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'people are already feeling the difference'),
+      ChatMessage(type: MessageType.bot, text: 'other people are already feeling the difference'),
       ChatMessage(
         type: MessageType.review,
         text: '★★★★★\n"I finally feel like I\'m living with intention"\n— Alex, 26',
@@ -146,16 +126,5 @@ List<ChatStep> getOnboardingSteps(String name) => [
       ChatMessage(type: MessageType.bot, text: 'Ready to start a healthier lifestyle and block these distractions?'),
     ],
     userResponses: ['Begin my journey!'],
-  ),
-
-  // Screen 7 — Demo intro
-  ChatStep(
-    botMessages: [
-      ChatMessage(
-        type: MessageType.bot,
-        text: 'Great, let\'s get to know you a bit more!',
-      ),
-    ],
-    userResponses: ['Sure'],
   ),
 ];

@@ -21,12 +21,11 @@ import 'onboarding_demo_screens.dart';
 import 'onboarding_personal_flow.dart';
 import 'onboarding_viewmodel.dart';
 
-
 class OnboardingSteps {
   static const int welcome = 0;
-  static const int chatIntro = 1;
-  static const int chat = 2;
-  static const int ageQuestion = 3;
+  static const int intro = 1;
+  static const int nameQuestion = 2; // 👈 new
+  static const int ageQuestion = 3;  // 👈 shifted +1
   static const int genderQuestion = 4;
   static const int hoursQuestion = 5;
   static const int badNewsStats = 6;
@@ -37,47 +36,49 @@ class OnboardingSteps {
   static const int qbFutureVision = 11;
   static const int qbGoalsConfirm = 12;
   static const int qbPhoneUsage = 13;
-  static const int qbSocialMedia = 14;       // 👈 was 15
-  static const int qbBlockers = 15;          // 👈 was 16
-  static const int qbStruggles = 16;         // 👈 was 17
-  static const int qbDistractingApps = 17;   // 👈 was 18
-  static const int qbTrust = 18;             // 👈 was 19
-  static const int qbTriedOthers = 19;       // 👈 was 20
-  static const int qbPresentFeeling = 20;    // 👈 was 21
-  static const int qbMorningRoutine = 21;    // 👈 was 22
-  static const int qbSympathy = 22;          // 👈 was 23
-  static const int qbScrollStartTime = 23;   // 👈 was 24
-  static const int qbBlockTime = 24;         // 👈 was 25
-  static const int qbRealisticTarget = 25;   // 👈 was 26
-  static const int qbPhoneFeeling = 26;      // 👈 was 27
-  static const int qbPassTime = 27;          // 👈 was 28
-  static const int infoDopamine = 28;        // 👈 was 29
-  static const int infoScheduleIntro = 29;   // 👈 was 30
-  static const int permissions = 30;         // 👈 was 31
-  static const int demoExplainer = 31;       // 👈 was 32
-  static const int demoStartTime = 32;       // 👈 was 33
-  static const int demoEndTime = 33;         // 👈 was 34
-  static const int demoDays = 34;            // 👈 was 35
-  static const int demoPickApps = 35; // (using your most recent numbering from earlier)
-  static const int setMultipleSchedules = 36; // 👈 new
-  static const int demoComparison = 37;      // 👈 was 36
-  static const int commitment = 38;          // 👈 was 37
-  static const int commitmentResult = 39;    // 👈 was 38
-  static const int commitmentSignature = 40; // 👈 was 39
-  static const int loadingPlan = 41;         // 👈 was 40
-  static const int scheduleConfirmation = 42; // 👈 was 41
-  static const int outlook = 43;             // 👈 was 42
-  static const int trialReminder = 44;       // 👈 was 43
-  static const int paywall = 45;         // 👈 was 45
+  static const int qbSocialMedia = 14;
+  static const int qbBlockers = 15;
+  static const int qbStruggles = 16;
+  static const int qbDistractingApps = 17;
+  static const int qbTrust = 18;
+  static const int qbTriedOthers = 19;
+  static const int qbPresentFeeling = 20;
+  static const int qbMorningRoutine = 21;
+  static const int qbSympathy = 22;
+  static const int qbScrollStartTime = 23;
+  static const int qbBlockTime = 24;
+  static const int qbRealisticTarget = 25;
+  static const int qbPhoneFeeling = 26;
+  static const int qbPassTime = 27;
+  static const int infoDopamine = 28;
+  static const int infoScheduleIntro = 29;
+  static const int permissions = 30;
+  static const int demoExplainer = 31;
+  static const int demoStartTime = 32;
+  static const int demoEndTime = 33;
+  static const int demoDays = 34;
+  static const int demoPickApps = 35;
+  static const int setMultipleSchedules = 36;
+  static const int demoComparison = 37;
+  static const int commitment = 38;
+  static const int commitmentResult = 39;
+  static const int commitmentSignature = 40;
+  static const int loadingPlan = 41;
+  static const int scheduleConfirmation = 42;
+  static const int outlook = 43;
+  static const int trialReminder = 44;
+  static const int paywall = 45;
 }
+
 
 class OnboardingStepNames {
   static const Map<int, String> names = {
     OnboardingSteps.welcome: 'welcome',
-    OnboardingSteps.chatIntro: 'chat_intro',
-    OnboardingSteps.chat: 'chat',
+    OnboardingSteps.intro: 'intro', // 👈 renamed from 'chat_intro'
+    OnboardingSteps.nameQuestion: 'name_question', // 👈 new
+
     OnboardingSteps.ageQuestion: 'age_question',
-    OnboardingSteps.genderQuestion: 'gender_question', // 👈 new
+    OnboardingSteps.genderQuestion: 'gender_question',
     OnboardingSteps.hoursQuestion: 'hours_question',
     OnboardingSteps.badNewsStats: 'bad_news_stats',
     OnboardingSteps.lifeGrid: 'life_grid',
@@ -89,19 +90,19 @@ class OnboardingStepNames {
     OnboardingSteps.qbSocialMedia: 'qb_social_media',
     OnboardingSteps.qbBlockers: 'qb_blockers',
     OnboardingSteps.qbStruggles: 'qb_struggles',
-    OnboardingSteps.qbDistractingApps: 'qb_distracting_apps', // 👈 new
-    OnboardingSteps.qbTrust: 'qb_trust',                       // 👈 new
-    OnboardingSteps.qbTriedOthers: 'qb_tried_others',          // 👈 new
-    OnboardingSteps.qbPresentFeeling: 'qb_present_feeling',    // 👈 new
-    OnboardingSteps.qbMorningRoutine: 'qb_morning_routine',    // 👈 new
+    OnboardingSteps.qbDistractingApps: 'qb_distracting_apps',
+    OnboardingSteps.qbTrust: 'qb_trust',
+    OnboardingSteps.qbTriedOthers: 'qb_tried_others',
+    OnboardingSteps.qbPresentFeeling: 'qb_present_feeling',
+    OnboardingSteps.qbMorningRoutine: 'qb_morning_routine',
     OnboardingSteps.qbSympathy: 'qb_sympathy',
     OnboardingSteps.qbScrollStartTime: 'qb_scroll_start_time',
     OnboardingSteps.qbBlockTime: 'qb_block_time',
     OnboardingSteps.qbRealisticTarget: 'qb_realistic_target',
     OnboardingSteps.qbPhoneFeeling: 'qb_phone_feeling',
     OnboardingSteps.qbPassTime: 'qb_pass_time',
-    OnboardingSteps.infoDopamine: 'info_dopamine',           // 👈 new
-    OnboardingSteps.infoScheduleIntro: 'info_schedule_intro', // 👈 new
+    OnboardingSteps.infoDopamine: 'info_dopamine',
+    OnboardingSteps.infoScheduleIntro: 'info_schedule_intro',
     OnboardingSteps.permissions: 'permissions',
     OnboardingSteps.demoExplainer: 'demo_explainer',
     OnboardingSteps.demoStartTime: 'demo_start_time',
@@ -327,17 +328,15 @@ class _OnboardingWelcomeFlowState
           onGetStarted: _nextStep,
           onSkip: _onComplete,
         );
-      case OnboardingSteps.chatIntro:
-        return OnboardingChatIntroScreen(
+      case OnboardingSteps.intro:
+        return OnboardingIntroScreen(
           key: const ValueKey('chatIntro'),
           onStart: _nextStep,
         );
-      case OnboardingSteps.chat:
-        return KeyedSubtree(
-          key: const ValueKey('chat'),
-          child: OnboardingChatScreen(
-            onChatComplete: _nextStep,
-          ),
+      case OnboardingSteps.nameQuestion: // 👈 new
+        return OnboardingNameScreen(
+          key: const ValueKey('name'),
+          onSelected: (_) => _nextStep(),
         );
       case OnboardingSteps.ageQuestion:
         return OnboardingAgeScreen(
