@@ -242,36 +242,6 @@ class SettingsScreen extends ConsumerWidget {
                     label: 'Account',
                     rows: [
                       SettingsRow(
-                        icon: Icons.shield_moon_rounded,
-                        iconColor: AppColors.error(context),
-                        iconBgColor: AppColors.error(context).withValues(alpha: 0.1),
-                        label: 'Hard Mode',
-                        onTap: () => _handleHardModeToggle(context, ref, state.hardModeEnabled),
-                        trailing: Switch(
-                          value: state.hardModeEnabled,
-                          onChanged: (_) => _handleHardModeToggle(context, ref, state.hardModeEnabled),
-                          activeColor: AppColors.error(context),
-                          activeTrackColor: AppColors.error(context).withValues(alpha: 0.3),
-                          inactiveThumbColor: AppColors.textSecondary(context),
-                          inactiveTrackColor: AppColors.backgroundSubtle(context),
-                        ),
-                      ),
-                      SettingsRow(
-                        icon: Icons.no_cell_rounded, // pick whatever icon fits — lock/shield-style
-                        iconColor: AppColors.error(context),
-                        iconBgColor: AppColors.error(context).withValues(alpha: 0.1),
-                        label: 'Uninstall Protection',
-                        onTap: () => _handleUninstallProtectionToggle(context, ref, state.uninstallProtectionEnabled),
-                        trailing: Switch(
-                          value: state.uninstallProtectionEnabled,
-                          onChanged: (_) => _handleUninstallProtectionToggle(context, ref, state.uninstallProtectionEnabled),
-                          activeColor: AppColors.error(context),
-                          activeTrackColor: AppColors.error(context).withValues(alpha: 0.3),
-                          inactiveThumbColor: AppColors.textSecondary(context),
-                          inactiveTrackColor: AppColors.backgroundSubtle(context),
-                        ),
-                      ),
-                      SettingsRow(
                         icon: Icons.track_changes_rounded,
                         iconColor: AppColors.textSecondary(context),
                         iconBgColor: AppColors.backgroundSubtle(context),
