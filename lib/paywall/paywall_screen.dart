@@ -320,7 +320,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                               color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.underline,
                               decorationColor: Colors.white.withValues(alpha: 0.3),
                             ),
                           ),

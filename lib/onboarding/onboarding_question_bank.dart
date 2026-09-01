@@ -1520,7 +1520,10 @@ class QBSympathyScreen extends StatelessWidget {
             ),
           ),
 
-          const Spacer(flex: 3),
+          const Spacer(flex: 2), // 👈 was flex: 3 — shrunk to make room for the carousel
+
+          const ReviewCarousel(), // 👈 new
+          const SizedBox(height: 24), // 👈 new — breathing room before the button
 
           ContinueButton(
             onTap: onNext,
@@ -1532,6 +1535,135 @@ class QBSympathyScreen extends StatelessWidget {
   }
 }
 
+// ── Review carousel ────────────────────────────────────
+class ReviewCarousel extends StatefulWidget {
+  const ReviewCarousel({super.key});
+
+  @override
+  State<ReviewCarousel> createState() => _ReviewCarouselState();
+}
+
+class _ReviewCarouselState extends State<ReviewCarousel> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<Map<String, String>> _reviews = [
+    {
+      'title': 'Best way to reclaim your\nlost time',
+      'author': 'Colton Smetana',
+      'body': 'Pause Now helped me break free from endless doomscrolling. I\'m more present and productive now. And the best part? The devs actually listen to feedback.',
+    },
+    {
+      'title': 'Changed my daily habits',
+      'author': 'Jamie Ruiz',
+      'body': 'I\'ve tried other blockers before but none of them stuck. The schedule feature keeps me honest without feeling like punishment. My screen time is finally down.',
+    },
+    {
+      'title': 'Finally focused again',
+      'author': 'Priya Shah',
+      'body': 'My focus completely changed after two weeks. Simple to set up, actually works, and the schedules never feel laggy or buggy like other apps I\'ve tried.',
+    },
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 200,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _reviews.length,
+            onPageChanged: (index) => setState(() => _currentPage = index),
+            itemBuilder: (context, index) {
+              final review = _reviews[index];
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white70,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      review['title']!,
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF1A1A1A),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        ...List.generate(5, (i) => const Icon(
+                          Icons.star_rounded,
+                          color: Color(0xFFFFC107),
+                          size: 15,
+                        )),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            review['author']!,
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFF1A1A1A).withValues(alpha: 0.5),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: Text(
+                        review['body']!,
+                        style: GoogleFonts.poppins(
+                          color: const Color(0xFF1A1A1A).withValues(alpha: 0.6),
+                          fontSize: 13,
+                          height: 1.45,
+                        ),
+                        overflow: TextOverflow.fade,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_reviews.length, (i) {
+            final isActive = i == _currentPage;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: isActive ? 20 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? Colors.white.withValues(alpha: 0.6)
+                    : Colors.white.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
 
 // Fake Loading
 class OnboardingLoadingPlanScreen extends StatefulWidget {
