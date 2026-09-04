@@ -6,18 +6,14 @@ import 'package:just_audio/just_audio.dart';
 import 'package:pausenow/onboarding/widgets/bouncing_arrow.dart';
 
 // ── Manual Blocking Tutorial Flow ────────────────────
-// Can be used in onboarding (step 7) or replayed from home screen
-
 class ManualBlockingTutorial extends StatefulWidget {
   final VoidCallback onComplete;
   final bool showSkip;
-
   const ManualBlockingTutorial({
     super.key,
     required this.onComplete,
     this.showSkip = false,
   });
-
   @override
   State<ManualBlockingTutorial> createState() =>
       _ManualBlockingTutorialState();
@@ -25,7 +21,6 @@ class ManualBlockingTutorial extends StatefulWidget {
 
 class _ManualBlockingTutorialState extends State<ManualBlockingTutorial> {
   int _step = 0;
-
   void _next() {
     HapticFeedback.lightImpact();
     if (_step >= 4) {
@@ -55,7 +50,6 @@ class _ManualBlockingTutorialState extends State<ManualBlockingTutorial> {
     );
   }
 
-
   Widget _buildStep() {
     switch (_step) {
       case 0:
@@ -81,7 +75,7 @@ class _ManualBlockingTutorialState extends State<ManualBlockingTutorial> {
           onNext: _next,
         );
       case 4:
-        return _ManualStep5ActiveSession(
+        return _ManualStep5ClaimStars(
           key: const ValueKey('manual5'),
           onNext: _next,
         );
@@ -90,28 +84,25 @@ class _ManualBlockingTutorialState extends State<ManualBlockingTutorial> {
         return const SizedBox.shrink();
     }
   }
-
 }
 
-// ── Step 1 — Home screen overview ────────────────────
-
+// ── Step 4 — Home screen overview ────────────────────
 class _ManualStep1HomeScreen extends StatelessWidget {
   final VoidCallback onNext;
-
-
   const _ManualStep1HomeScreen({
     super.key,
     required this.onNext,
   });
-
   @override
   Widget build(BuildContext context) {
     return _TutorialShell(
       child: Column(
         children: [
           const SizedBox(height: 32),
+          const _StepLabel(step: 4),
+          const SizedBox(height: 8),
           Text(
-            'Tap Block to start your session!',
+            'Start your blocking!',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -132,40 +123,37 @@ class _ManualStep1HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-
-          TutorialPhoneMockup(
-            child: _HomeScreenMockup(highlightBlockNow: true),
+          const TutorialPhoneMockup(
+            child: _HomeScreenMockup(),
           ),
-
           const SizedBox(height: 24),
-          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
-          _TutorialButton(label: 'Next →', onTap: onNext),
+          const Expanded(child: SizedBox()),
+          _TutorialButton(label: 'Next', onTap: onNext),
         ],
       ),
     );
   }
 }
 
-// ── Step 2 — Block Mode sheet ─────────────────────────
-
+// ── Step 1 — Block Mode sheet ─────────────────────────
 class _ManualStep2BlockMode extends StatelessWidget {
   final VoidCallback onNext;
   final bool showSkip;
   final VoidCallback onSkip;
-
   const _ManualStep2BlockMode({
     super.key,
     required this.onNext,
     required this.showSkip,
-    required this.onSkip
+    required this.onSkip,
   });
-
   @override
   Widget build(BuildContext context) {
     return _TutorialShell(
       child: Column(
         children: [
-          const SizedBox(height: 160),
+          const Expanded(child: SizedBox()), // 👈 was SizedBox(height: 130) — now flexible, centers content vertically
+          const _StepLabel(step: 1),
+          const SizedBox(height: 8),
           Text(
             'Choose your block mode',
             textAlign: TextAlign.center,
@@ -177,22 +165,10 @@ class _ManualStep2BlockMode extends StatelessWidget {
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Block specific apps or All apps expect the important ones',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 14,
-            ),
-          ),
           const SizedBox(height: 24),
-
-          // 👇 zoomed phone mockup — shows only bottom sheet portion
           Center(
             child: Container(
-              width: 260,
-              height: 220,
+              width: 320,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
                 border: Border.all(color: const Color(0xFF3A3A5C), width: 2.5),
@@ -207,16 +183,15 @@ class _ManualStep2BlockMode extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(29),
                 child: SizedBox(
-                  height: 220, // 👈 matches actual sheet content height
+                  height: 220,
                   child: _BlockModeSheetMockup(),
                 ),
               ),
-              ),
             ),
-
+          ),
           const SizedBox(height: 24),
-          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
-          _TutorialButton(label: 'Next →', onTap: onNext),
+          const Expanded(child: SizedBox()),
+          _TutorialButton(label: 'Next', onTap: onNext),
           if (showSkip) ...[
             const SizedBox(height: 12),
             GestureDetector(
@@ -235,19 +210,19 @@ class _ManualStep2BlockMode extends StatelessWidget {
     );
   }
 }
-// ── Step 3 — App picker ───────────────────────────────
 
+// ── Step 2 — App picker ───────────────────────────────
 class _ManualStep3AppPicker extends StatelessWidget {
   final VoidCallback onNext;
-
   const _ManualStep3AppPicker({super.key, required this.onNext});
-
   @override
   Widget build(BuildContext context) {
     return _TutorialShell(
       child: Column(
         children: [
-          const SizedBox(height: 100),
+          const Expanded(child: SizedBox()), // 👈 was SizedBox(height: 130) — now flexible, centers content vertically
+          const _StepLabel(step: 2),
+          const SizedBox(height: 8),
           Text(
             'Choose the apps that you want blocked',
             textAlign: TextAlign.center,
@@ -270,35 +245,32 @@ class _ManualStep3AppPicker extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-
           TutorialPhoneMockup(
             height: 250,
             width: 250,
             child: _AppPickerMockup(),
           ),
-
           const SizedBox(height: 60),
-          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
-          _TutorialButton(label: 'Next →', onTap: onNext),
+          const Expanded(child: SizedBox()),
+          _TutorialButton(label: 'Next', onTap: onNext),
         ],
       ),
     );
   }
 }
 
-// ── Step 4 — Set timer ────────────────────────────────
-
+// ── Step 3 — Set timer ────────────────────────────────
 class _ManualStep4Timer extends StatelessWidget {
   final VoidCallback onNext;
-
   const _ManualStep4Timer({super.key, required this.onNext});
-
   @override
   Widget build(BuildContext context) {
     return _TutorialShell(
       child: Column(
         children: [
-          const SizedBox(height: 150),
+          const Expanded(child: SizedBox()), // 👈 was SizedBox(height: 130) — now flexible, centers content vertically
+          const _StepLabel(step: 3),
+          const SizedBox(height: 8),
           Text(
             'Set your focus time',
             textAlign: TextAlign.center,
@@ -310,47 +282,34 @@ class _ManualStep4Timer extends StatelessWidget {
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'The longer your session,\n the more focused you become',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 14,
-              height: 1.5,
-            ),
-          ),
           const SizedBox(height: 28),
-
           TutorialPhoneMockup(
-            height: 200,
+            height: 220,
             child: _TimerSheetMockup(),
           ),
-
           const SizedBox(height: 24),
-          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
-          _TutorialButton(label: 'Next →', onTap: onNext),
+          const Expanded(child: SizedBox()),
+          _TutorialButton(label: 'Next', onTap: onNext),
         ],
       ),
     );
   }
 }
 
-// ── Step 5 — Active session ───────────────────────────
-
-class _ManualStep5ActiveSession extends StatelessWidget {
+// ── Step 5 — Claim Stars ──────────────────────────────
+class _ManualStep5ClaimStars extends StatelessWidget {
   final VoidCallback onNext;
-
-  const _ManualStep5ActiveSession({super.key, required this.onNext});
-
+  const _ManualStep5ClaimStars({super.key, required this.onNext});
   @override
   Widget build(BuildContext context) {
     return _TutorialShell(
       child: Column(
         children: [
           const SizedBox(height: 32),
+          const _StepLabel(step: 5),
+          const SizedBox(height: 8),
           Text(
-            "Blocking starts! 🔥",
+            'Claim your stars! ⭐️',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,
@@ -362,7 +321,7 @@ class _ManualStep5ActiveSession extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Your selected apps are now blocked.\nTake a break or push through!',
+            'Once your session ends, tap Claim\nto collect the stars you earned!',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),
@@ -371,35 +330,56 @@ class _ManualStep5ActiveSession extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-
           TutorialPhoneMockup(
-            child: _ActiveSessionMockup(),
+            child: _ClaimStarsMockup(onClaimed: onNext),
           ),
-
           const SizedBox(height: 24),
-          const Expanded(child: SizedBox()), // 👈 pushes button to bottom when there's extra space
-          _TutorialButton(label: "Let's go! 🚀", onTap: onNext),
+          const Expanded(child: SizedBox()),
+          GestureDetector(
+            onTap: onNext,
+            child: Text(
+              'Finish',
+              style: GoogleFonts.poppins(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 13,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-// ── Phone mockup wrapper ──────────────────────────────
+// ── Shared step label ─────────────────────────────────
+class _StepLabel extends StatelessWidget {
+  final int step;
+  const _StepLabel({required this.step});
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '$step.',
+      textAlign: TextAlign.center,
+      style: GoogleFonts.poppins(
+        color: Colors.white,
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+  }
+}
 
+// ── Phone mockup wrapper ──────────────────────────────
 class TutorialPhoneMockup extends StatelessWidget {
   final Widget child;
   final double height;
   final double width;
-
-
   const TutorialPhoneMockup({
     super.key,
     required this.child,
     this.height = 476,
     this.width = 280,
   });
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -426,83 +406,10 @@ class TutorialPhoneMockup extends StatelessWidget {
     );
   }
 }
-// ── Mockup 1 — Home screen with Block Now highlighted ─
 
-class _HomeScreenMockup extends StatefulWidget {
-  final bool highlightBlockNow;
-  const _HomeScreenMockup({this.highlightBlockNow = false});
-
-  @override
-  State<_HomeScreenMockup> createState() => _HomeScreenMockupState();
-}
-
-class _HomeScreenMockupState extends State<_HomeScreenMockup>
-    with TickerProviderStateMixin {
-  bool _tapped = false;
-
-  AudioPlayer? _audioPlayer;
-
-  bool _showFloating = false;
-  double _floatingOpacity = 0;
-  double _floatingOffset = 0;
-
-  @override
-  void initState() {
-    super.initState();
-
-
-    _audioPlayer = AudioPlayer();
-    _audioPlayer!.setAsset('assets/sounds/levelUp.mp3').then((_) {
-      _audioPlayer!.setVolume(0.5);
-    });
-  }
-
-  @override
-  void dispose() {
-    _audioPlayer?.dispose();
-    super.dispose();
-  }
-  Future<void> _onBlockNowTap() async {
-    if (_tapped) return;
-    setState(() => _tapped = true);
-    HapticFeedback.mediumImpact();
-
-    // 👇 removed floating label from here
-
-    // play sound and show floating label when returning to Block Now
-    Future.delayed(const Duration(milliseconds: 1200), () async {
-      if (!mounted) return;
-
-      // play sound
-      try {
-        await _audioPlayer?.seek(Duration.zero);
-        _audioPlayer?.play();
-      } catch (_) {}
-
-      // reset button
-      setState(() => _tapped = false);
-
-      // 👇 now show floating label
-      setState(() {
-        _showFloating = true;
-        _floatingOpacity = 1;
-        _floatingOffset = 0;
-      });
-
-      const steps = 20;
-      for (int i = 1; i <= steps; i++) {
-        await Future.delayed(const Duration(milliseconds: 30));
-        if (!mounted) return;
-        setState(() {
-          _floatingOffset = -(40 * i / steps);
-          _floatingOpacity = 1 - (i / steps);
-        });
-      }
-
-      setState(() => _showFloating = false);
-    });
-  }
-
+// ── Mockup — Home screen (with scattered blocked-app screenshot) ──
+class _HomeScreenMockup extends StatelessWidget {
+  const _HomeScreenMockup();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -510,7 +417,6 @@ class _HomeScreenMockupState extends State<_HomeScreenMockup>
       padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
       child: Column(
         children: [
-          // header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -524,74 +430,36 @@ class _HomeScreenMockupState extends State<_HomeScreenMockup>
                 child: const Icon(Icons.person_outline_rounded,
                     color: Colors.white38, size: 13),
               ),
-
-              // XP badge with floating label
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color:
-                          const Color(0xFFEDB82A).withValues(alpha: 0.4),
-                          width: 0.5),
-                    ),
-                    child: Text(
-                      '10 ⭐️',
-                      style: GoogleFonts.poppins(
-                          color: const Color(0xFFEDB82A),
-                          fontSize: 7,
-                          fontWeight: FontWeight.w600),
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFFEDB82A).withValues(alpha: 0.4),
+                    width: 0.5,
                   ),
-
-                  // floating +10 XP
-                  if (_showFloating)
-                    Positioned(
-                      top: _floatingOffset,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Opacity(
-                          opacity: _floatingOpacity.clamp(0.0, 1.0),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEDB82A),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '+10 XP',
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF1A1208),
-                                fontSize: 6,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                ),
+                child: Text(
+                  '10 ⭐️',
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFFEDB82A),
+                    fontSize: 7,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
 
-          // timer card
+          const SizedBox(height: 10),
           Container(
             height: 150,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: const Color(0xFF252525),
               borderRadius: BorderRadius.circular(12),
-              border:
-              Border.all(color: const Color(0xFF333333), width: 0.5),
+              border: Border.all(color: const Color(0xFF333333), width: 0.5),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -605,8 +473,7 @@ class _HomeScreenMockupState extends State<_HomeScreenMockup>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: ['00', '00', '00'].expand((t) sync* {
                     yield Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                       decoration: BoxDecoration(
                         color: const Color(0xFF2E2E2E),
                         borderRadius: BorderRadius.circular(5),
@@ -620,88 +487,62 @@ class _HomeScreenMockupState extends State<_HomeScreenMockup>
                     if (t != '00') yield const SizedBox(width: 3);
                   }).toList(),
                 ),
-
-                // selector pills
                 Row(
                   children: [
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFF2E2E2E),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text('🛡️ Specific Apps',
-                            style: GoogleFonts.poppins(
-                                color: Colors.white70, fontSize: 6),
+                            style: GoogleFonts.poppins(color: Colors.white70, fontSize: 6),
                             overflow: TextOverflow.ellipsis),
                       ),
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFF2E2E2E),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text('⏱ 30m',
-                            style: GoogleFonts.poppins(
-                                color: Colors.white70, fontSize: 6)),
+                        child: Text('⏱ 3h',
+                            style: GoogleFonts.poppins(color: Colors.white70, fontSize: 6)),
                       ),
                     ),
                   ],
                 ),
-
-                // Block Now button with pulse + tap animation
-               GestureDetector(
-                    onTap: _onBlockNowTap,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: _tapped
-                            ? const Color(0xFF4CAF50)
-                            : const Color(0xFFEDB82A),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFEDB82A)
-                                .withValues(alpha: _tapped ? 0.0 : 0.5),
-                            blurRadius: 10,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          _tapped ? '⏸ Blocking...' : '▶  Block Now',
-                          style: GoogleFonts.poppins(
-                              color: const Color(0xFF1A1208),
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800),
-                        ),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDB82A),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '▶  Start',
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF1A1208),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
-
-                ],
-
+                ),
+              ],
             ),
-
           ),
-          const SizedBox(height: 6),
-          BouncingArrowUp(),
-          const SizedBox(height: 2),
-          Text(
-            'Tap button!',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+          const SizedBox(height: 10),
+          // 👇 new — the blocked-apps screenshot, dropped straight in
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              'assets/images/appsLocked.png', // 👈 save your screenshot here
+              height: 220,
+              fit: BoxFit.cover,
             ),
           ),
         ],
@@ -711,88 +552,68 @@ class _HomeScreenMockupState extends State<_HomeScreenMockup>
 }
 
 
-// ── Mockup 2 — Block Mode sheet ───────────────────────
 
+// ── Mockup — Block Mode sheet ─────────────────────────
 class _BlockModeSheetMockup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18), // 👈 was (12, 10, 12, 12)
+      decoration: const BoxDecoration(
+        color: Color(0xFF252525),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end, // 👈 push sheet to bottom
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // bottom sheet
+          Container(width: 40, height: 4, // 👈 was 28, 3
+              decoration: BoxDecoration(color: const Color(0xFF444444), borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 12), // 👈 was 8
+          Text('Block Mode', style: GoogleFonts.poppins(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)), // 👈 was 11
+          const SizedBox(height: 12), // 👈 was 8
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFF252525),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            padding: const EdgeInsets.all(4), // 👈 was 3
+            decoration: BoxDecoration(
+              color: const Color(0xFF2E2E2E),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
               children: [
-                Container(width: 28, height: 3,
-                    decoration: BoxDecoration(color: const Color(0xFF444444), borderRadius: BorderRadius.circular(2))),
-                const SizedBox(height: 8),
-                Text('Block Mode', style: GoogleFonts.poppins(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 8),
-
-                // segmented control
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E2E2E),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          decoration: BoxDecoration(color: const Color(0xFF2E2E2E), borderRadius: BorderRadius.circular(20)),
-                          child: Text('All Apps', textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(color: Colors.white38, fontSize: 7, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          decoration: BoxDecoration(color: const Color(0xFFEDB82A), borderRadius: BorderRadius.circular(20)),
-                          child: Text('Specific Apps', textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(color: const Color(0xFF1A1208), fontSize: 7, fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                    ],
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8), // 👈 was 5
+                    decoration: BoxDecoration(color: const Color(0xFF2E2E2E), borderRadius: BorderRadius.circular(20)),
+                    child: Text('All Apps', textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w600)), // 👈 was 7
                   ),
                 ),
-                const SizedBox(height: 8),
-
-                // blocked apps row
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E2E2E),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text('Blocked Apps', style: GoogleFonts.poppins(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w600)),
-                          Text('Only these apps will be blocked', style: GoogleFonts.poppins(color: Colors.white38, fontSize: 6)),
-                        ]),
-                      ),
-                      const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 12),
-                    ],
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8), // 👈 was 5
+                    decoration: BoxDecoration(color: const Color(0xFFEDB82A), borderRadius: BorderRadius.circular(20)),
+                    child: Text('Specific Apps', textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(color: const Color(0xFF1A1208), fontSize: 10, fontWeight: FontWeight.w700)), // 👈 was 7
                   ),
                 ),
-                const SizedBox(height: 8),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: BoxDecoration(color: const Color(0xFFEDB82A), borderRadius: BorderRadius.circular(20)),
-                  child: Center(child: Text('Set Mode', style: GoogleFonts.poppins(color: const Color(0xFF1A1208), fontSize: 8, fontWeight: FontWeight.w800))),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12), // 👈 was 8
+          Container(
+            padding: const EdgeInsets.all(12), // 👈 was 8
+            decoration: BoxDecoration(
+              color: const Color(0xFF2E2E2E),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Blocked Apps', style: GoogleFonts.poppins(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)), // 👈 was 8
+                    Text('Only these apps will be blocked', style: GoogleFonts.poppins(color: Colors.white38, fontSize: 9)), // 👈 was 6
+                  ]),
                 ),
+                const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 16), // 👈 was 12
               ],
             ),
           ),
@@ -801,15 +622,12 @@ class _BlockModeSheetMockup extends StatelessWidget {
     );
   }
 }
-
-// ── Mockup 3 — App picker ─────────────────────────────
-
+// ── Mockup — App picker ───────────────────────────────
 class _AppItem {
   final String name;
   final bool selected;
   final String? icon;
   final Color color;
-
   const _AppItem({
     required this.name,
     required this.selected,
@@ -817,7 +635,6 @@ class _AppItem {
     required this.color,
   });
 }
-
 
 class _AppPickerMockup extends StatelessWidget {
   @override
@@ -832,7 +649,6 @@ class _AppPickerMockup extends StatelessWidget {
       _AppItem(name: 'Twitter', selected: false,
           icon: 'assets/icons/twitter-x.svg', color: const Color(0xFF1DA1F2)),
     ];
-
     return Container(
       color: const Color(0xFF1A1A1A),
       padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
@@ -842,18 +658,22 @@ class _AppPickerMockup extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Cancel', style: GoogleFonts.poppins(color: Colors.white54, fontSize: 8)),
-              Text('Select Apps', style: GoogleFonts.poppins(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
-              Text('Save', style: GoogleFonts.poppins(color: const Color(0xFFEDB82A), fontSize: 8, fontWeight: FontWeight.w700)),
+              Text('Select Apps',
+                  style: GoogleFonts.poppins(
+                      color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+              Text('Save',
+                  style: GoogleFonts.poppins(
+                      color: const Color(0xFFEDB82A), fontSize: 8, fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 8),
-
           ...apps.map((app) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Row(
               children: [
                 Container(
-                  width: 14, height: 14,
+                  width: 14,
+                  height: 14,
                   decoration: BoxDecoration(
                     color: app.selected ? const Color(0xFFEDB82A) : Colors.transparent,
                     shape: BoxShape.circle,
@@ -868,7 +688,8 @@ class _AppPickerMockup extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Container(
-                  width: 24, height: 24,
+                  width: 24,
+                  height: 24,
                   decoration: BoxDecoration(
                     color: app.color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
@@ -877,7 +698,8 @@ class _AppPickerMockup extends StatelessWidget {
                       ? Center(
                     child: SvgPicture.asset(
                       app.icon!,
-                      width: 14, height: 14,
+                      width: 14,
+                      height: 14,
                       colorFilter: ColorFilter.mode(app.color, BlendMode.srcIn),
                     ),
                   )
@@ -890,7 +712,6 @@ class _AppPickerMockup extends StatelessWidget {
               ],
             ),
           )),
-
           const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -911,71 +732,87 @@ class _AppPickerMockup extends StatelessWidget {
     );
   }
 }
-// ── Mockup 4 — Timer sheet ────────────────────────────
 
+// ── Mockup — Timer sheet (updated to ruler-picker style) ──
 class _TimerSheetMockup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final times = ['1m', '10m', '15m', '30m', '45m', '1h'];
-
     return Container(
       color: const Color(0xFF1A1A1A),
       child: Column(
         children: [
           Expanded(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFF252525),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(width: 20, height: 3,
-                    decoration: BoxDecoration(color: const Color(0xFF444444), borderRadius: BorderRadius.circular(2))),
-                const SizedBox(height: 8),
-                Text('Set Timer', style: GoogleFonts.poppins(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-                Text('Block Now will run for this duration',
-                    style: GoogleFonts.poppins(color: Colors.white38, fontSize: 10)),
-                const SizedBox(height: 8),
-
-                // time grid
-                GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 3,
-                  childAspectRatio: 2.2,
-                  mainAxisSpacing: 4,
-                  crossAxisSpacing: 4,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: times.map((t) {
-                    final isSelected = t == '30m';
-                    return Container(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              decoration: const BoxDecoration(
+                color: Color(0xFF252525),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                      width: 20,
+                      height: 3,
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFEDB82A) : const Color(0xFF2E2E2E),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(t,
-                            style: GoogleFonts.poppins(
-                              color: isSelected ? const Color(0xFF1A1208) : Colors.white70,
-                              fontSize: 9,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                            )),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 8),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: BoxDecoration(color: const Color(0xFFEDB82A), borderRadius: BorderRadius.circular(20)),
-                  child: Center(child: Text('Set 30m', style: GoogleFonts.poppins(color: const Color(0xFF1A1208), fontSize: 10, fontWeight: FontWeight.w800))),
-                ),
-              ],
+                          color: const Color(0xFF444444),
+                          borderRadius: BorderRadius.circular(2))),
+                  const SizedBox(height: 12),
+                  Text('Set Timer',
+                      style: GoogleFonts.poppins(
+                          color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 10),
+                  // big duration readout
+                  Text(
+                    '3h',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFFEDB82A),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // flanking labels
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('1h',
+                          style: GoogleFonts.poppins(
+                              color: Colors.white24, fontSize: 9)),
+                      Text('5h',
+                          style: GoogleFonts.poppins(
+                              color: Colors.white24, fontSize: 9)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // ruler ticks mockup
+                  SizedBox(
+                    height: 36,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(17, (i) {
+                            final isMajor = i % 4 == 0;
+                            return Container(
+                              width: 1.2,
+                              height: isMajor ? 22 : 12,
+                              color: Colors.white.withValues(alpha: isMajor ? 0.35 : 0.15),
+                            );
+                          }),
+                        ),
+                        Container(
+                          width: 2,
+                          height: 30,
+                          color: const Color(0xFF3B82F6),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
           ),
         ],
       ),
@@ -983,9 +820,70 @@ class _TimerSheetMockup extends StatelessWidget {
   }
 }
 
-// ── Mockup 5 — Active session ─────────────────────────
+// ── Mockup — Claim Stars (interaction + header badge moved here) ─────
+class _ClaimStarsMockup extends StatefulWidget {
+  final VoidCallback onClaimed;
+  const _ClaimStarsMockup({required this.onClaimed});
+  @override
+  State<_ClaimStarsMockup> createState() => _ClaimStarsMockupState();
+}
 
-class _ActiveSessionMockup extends StatelessWidget {
+class _ClaimStarsMockupState extends State<_ClaimStarsMockup> {
+  bool _claimed = false;
+  AudioPlayer? _audioPlayer;
+  bool _showFloating = false;
+  double _floatingOpacity = 0;
+  double _floatingOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+    _audioPlayer!.setAsset('assets/sounds/levelUp.mp3').then((_) {
+      _audioPlayer!.setVolume(0.5);
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onClaimTap() async {
+    if (_claimed) return;
+    setState(() => _claimed = true);
+    HapticFeedback.mediumImpact();
+
+    try {
+      await _audioPlayer?.seek(Duration.zero);
+      _audioPlayer?.play();
+    } catch (_) {}
+
+    // 👇 badge floating animation, same treatment as the original home screen header
+    setState(() {
+      _showFloating = true;
+      _floatingOpacity = 1;
+      _floatingOffset = 0;
+    });
+
+    const steps = 20;
+    for (int i = 1; i <= steps; i++) {
+      await Future.delayed(const Duration(milliseconds: 30));
+      if (!mounted) return;
+      setState(() {
+        _floatingOffset = -(40 * i / steps);
+        _floatingOpacity = 1 - (i / steps);
+      });
+    }
+    if (!mounted) return;
+    setState(() => _showFloating = false);
+
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    widget.onClaimed();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -993,70 +891,126 @@ class _ActiveSessionMockup extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
       child: Column(
         children: [
+          // 👇 header row — moved from step 4, person icon + XP badge with floating label
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(width: 22, height: 22,
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), shape: BoxShape.circle),
-                  child: const Icon(Icons.person_outline_rounded, color: Colors.white38, size: 13)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                width: 22,
+                height: 22,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
                 ),
-                child: Text('10 ⭐️', style: GoogleFonts.poppins(color: const Color(0xFFEDB82A), fontSize: 7, fontWeight: FontWeight.w600)),
+                child: const Icon(Icons.person_outline_rounded, color: Colors.white38, size: 13),
+              ),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFFEDB82A).withValues(alpha: 0.4),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Text(
+                      _claimed ? '100 ⭐️' : '10 ⭐️',
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFFEDB82A),
+                        fontSize: 7,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (_showFloating)
+                    Positioned(
+                      top: _floatingOffset,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Opacity(
+                          opacity: _floatingOpacity.clamp(0.0, 1.0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEDB82A),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '+90 XP',
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFF1A1208),
+                                fontSize: 6,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 10),
-
+          const SizedBox(height: 30),
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-              color: const Color(0xFF252525),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFEDB82A).withValues(alpha: 0.3), width: 0.5),
+              color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFEDB82A).withValues(alpha: 0.4), width: 1),
             ),
-            child: Column(
-              children: [
-                Container(
-                  width: 32, height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3355FF).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(10),
+            child: const Center(child: Text('⭐️', style: TextStyle(fontSize: 28))),
+          ),
+          const SizedBox(height: 14),
+          Text('Session Complete!',
+              style: GoogleFonts.poppins(
+                  color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Text('You earned +90 ⭐️',
+              style: GoogleFonts.poppins(color: Colors.white38, fontSize: 10)),
+          const SizedBox(height: 40),
+          GestureDetector(
+            onTap: _onClaimTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: _claimed ? const Color(0xFF4CAF50) : const Color(0xFFEDB82A),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFEDB82A).withValues(alpha: _claimed ? 0.0 : 0.5),
+                    blurRadius: 10,
+                    spreadRadius: 1,
                   ),
-                  child: const Icon(Icons.shield_rounded, color: Color(0xFF3355FF), size: 18),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  _claimed ? '✓ Claimed!' : 'Claim Stars ⭐️',
+                  style: GoogleFonts.poppins(
+                      color: const Color(0xFF1A1208), fontSize: 11, fontWeight: FontWeight.w800),
                 ),
-                const SizedBox(height: 4),
-                Text('Focus Session', style: GoogleFonts.poppins(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                Text('00:09:59',
-                    style: GoogleFonts.poppins(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-                const SizedBox(height: 6),
-                // progress bar
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: LinearProgressIndicator(
-                    value: 0.05,
-                    backgroundColor: const Color(0xFF333333),
-                    valueColor: const AlwaysStoppedAnimation(Color(0xFFEDB82A)),
-                    minHeight: 3,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  decoration: BoxDecoration(color: const Color(0xFF333333), borderRadius: BorderRadius.circular(8)),
-                  child: Center(child: Text('⏸ Take A Break', style: GoogleFonts.poppins(color: Colors.white, fontSize: 7, fontWeight: FontWeight.w600))),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  decoration: BoxDecoration(color: const Color(0xFFE53935).withValues(alpha: 0.8), borderRadius: BorderRadius.circular(8)),
-                  child: Center(child: Text('■ Give Up', style: GoogleFonts.poppins(color: Colors.white, fontSize: 7, fontWeight: FontWeight.w600))),
-                ),
-              ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          const BouncingArrowUp(),
+          const SizedBox(height: 4),
+          Text(
+            'Tap to claim!',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -1064,57 +1018,10 @@ class _ActiveSessionMockup extends StatelessWidget {
     );
   }
 }
-
-// ── Shared bottom nav ─────────────────────────────────
-
-class _TutorialBottomNav extends StatelessWidget {
-  final int activeIndex;
-
-  const _TutorialBottomNav({required this.activeIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    final icons = [
-      Icons.home_rounded,
-      Icons.calendar_today_rounded,
-      Icons.bar_chart_rounded,
-      Icons.settings_rounded,
-    ];
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF252525),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF333333), width: 0.5),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(icons.length, (i) {
-          final isActive = i == activeIndex;
-          return Container(
-            width: 24, height: 24,
-            decoration: isActive
-                ? const BoxDecoration(color: Color(0xFFEDB82A), shape: BoxShape.circle)
-                : null,
-            child: Icon(icons[i],
-                color: isActive ? const Color(0xFF1A1208) : Colors.white.withValues(alpha: 0.3),
-                size: 13),
-          );
-        }),
-      ),
-    );
-  }
-}
-
 // ── Shared shell ──────────────────────────────────────
-
 class _TutorialShell extends StatelessWidget {
   final Widget child;
-
   const _TutorialShell({required this.child});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1132,9 +1039,11 @@ class _TutorialShell extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: -40, right: -40,
+            top: -40,
+            right: -40,
             child: Container(
-              width: 200, height: 200,
+              width: 200,
+              height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: const Color(0xFFEDB82A).withValues(alpha: 0.04),
@@ -1164,13 +1073,10 @@ class _TutorialShell extends StatelessWidget {
 }
 
 // ── Shared button ─────────────────────────────────────
-
 class _TutorialButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-
   const _TutorialButton({required this.label, required this.onTap});
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
