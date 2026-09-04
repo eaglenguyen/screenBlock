@@ -11,6 +11,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'dart:io';
 
+import '../home/home_viewmodel.dart';
+
 
 class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
@@ -34,6 +36,14 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(statsViewModelProvider);
+
+    // 👇 new — re-fetch stats whenever HomeState's blocked-time total changes
+    ref.listen(homeViewModelProvider.select((s) => s.todayBlockedTime), (previous, next) {
+      if (previous != next) {
+        ref.read(statsViewModelProvider.notifier).loadStats();
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background(context),
       body: Column(

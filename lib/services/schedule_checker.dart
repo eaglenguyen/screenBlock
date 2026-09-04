@@ -17,11 +17,12 @@ class ScheduleChecker {
 
   Timer? _timer;
   Timer? _pauseTimer;
-  Timer? _activeTickTimer; // 👈 new — drives the accumulator
   BlockingService? _blockingService;
-  BlockSessionRepository? _sessionRepo; // 👈 new
-  String? _activeSessionKey; // 👈 new
-  int _activeSecondsAccumulator = 0; // 👈 new
+  BlockSessionRepository? _sessionRepo;
+  String? _activeSessionKey;
+  DateTime? _activeStartTime; // 👈 new — when this activation genuinely began
+  int _totalPausedSeconds = 0; // 👈 new — accumulated across any pause/resume cycles
+  DateTime? _pauseStartedAt; // 👈 new — when the current pause began, if any
   bool _isScheduleBlocking = false;
   bool _isPaused = false;
   String? _activeScheduleId;
@@ -36,9 +37,9 @@ class ScheduleChecker {
   VoidCallback? onScheduleResumed;
   void Function(int remainingSeconds)? onPauseTickChanged;
 
-  void start(BlockingService blockingService, BlockSessionRepository sessionRepo) { // 👈 new param
+  void start(BlockingService blockingService, BlockSessionRepository sessionRepo) {
     _blockingService = blockingService;
-    _sessionRepo = sessionRepo; // 👈 new
+    _sessionRepo = sessionRepo;
     _timer?.cancel();
     debugPrint('📅 ScheduleChecker started');
     _timer = Timer.periodic(const Duration(seconds: 5), (_) => _check());
@@ -50,26 +51,10 @@ class ScheduleChecker {
     _timer = null;
     _pauseTimer?.cancel();
     _pauseTimer = null;
-    _activeTickTimer?.cancel(); // 👈 new
-    _activeTickTimer = null;
   }
 
   void checkNow() {
     _check();
-  }
-
-  // 👇 new — starts/resumes the accumulator tick
-  void _startActiveTick() {
-    _activeTickTimer?.cancel();
-    _activeTickTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _activeSecondsAccumulator++;
-    });
-  }
-
-  // 👇 new — stops the accumulator tick (called on pause)
-  void _stopActiveTick() {
-    _activeTickTimer?.cancel();
-    _activeTickTimer = null;
   }
 
   Future<void> pauseFor(int minutes) async {
@@ -78,7 +63,7 @@ class ScheduleChecker {
     _isPaused = true;
     _isScheduleBlocking = true;
     _pauseEndsAt = DateTime.now().add(Duration(minutes: minutes));
-    _stopActiveTick(); // 👈 new — freeze the accumulator
+    _pauseStartedAt = DateTime.now(); // 👈 new — mark when this pause began
 
     if (Platform.isIOS) {
       await (_blockingService as IOSBlockingService).pauseBlocking(minutes);
@@ -136,12 +121,17 @@ class ScheduleChecker {
     debugPrint('📅 Schedule resuming from pause');
     _isPaused = false;
     _pauseEndsAt = null;
-    _startActiveTick(); // 👈 new — resume the accumulator
+
+    // 👇 new — accumulate however long this pause actually lasted, timestamp-based, survives backgrounding
+    if (_pauseStartedAt != null) {
+      _totalPausedSeconds += DateTime.now().difference(_pauseStartedAt!).inSeconds;
+      _pauseStartedAt = null;
+    }
 
     if (Platform.isIOS) {
       (_blockingService as IOSBlockingService).resumeBlocking();
     } else if (_activeSchedule != null) {
-      _startScheduleBlocking(_activeSchedule!); // note: this re-runs startSession — see caveat below
+      _startScheduleBlocking(_activeSchedule!);
     }
 
     onScheduleResumed?.call();
@@ -217,18 +207,17 @@ class ScheduleChecker {
   Future<void> _startScheduleBlocking(Schedule schedule) async {
     if (_blockingService == null) return;
 
-    // 👇 new — only start a fresh session/accumulator if this is a genuinely new activation,
-    // not a resume-from-pause re-entry (guarded by checking if we already have a key for this schedule)
     final isNewActivation = _activeSessionKey == null || _activeScheduleId != schedule.id;
 
     _blockingService!.setBlockingMode(schedule.blockingType);
     _activeSchedule = schedule;
 
     if (isNewActivation && _sessionRepo != null) {
-      _activeSecondsAccumulator = 0; // 👈 new — reset for a fresh session
+      _activeStartTime = DateTime.now(); // 👈 new — record genuine start time
+      _totalPausedSeconds = 0; // 👈 new — reset for a fresh session
       _activeSessionKey = await _sessionRepo!.startSession(
         blockingType: schedule.blockingType,
-        selectedMinutes: 0, // not meaningful for schedules — activeSeconds is the source of truth now
+        selectedMinutes: 0,
       );
     }
 
@@ -258,25 +247,62 @@ class ScheduleChecker {
 
     _isScheduleBlocking = true;
     _activeScheduleId = schedule.id;
-    _startActiveTick(); // 👈 new — start ticking (safe to call even on resume, just restarts the timer)
     onScheduleStarted?.call();
   }
+
+  // 👇 new — computes the schedule's real intended end datetime, so late-detected
+// stops (e.g. after being backgrounded overnight) don't inflate the duration
+  DateTime _computeScheduledEndDateTime(Schedule schedule, DateTime referenceStart) {
+    final startParts = schedule.startTime.split(':');
+    final endParts = schedule.endTime.split(':');
+    final startMinutes = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+    final endHour = int.parse(endParts[0]);
+    final endMinute = int.parse(endParts[1]);
+    final endMinutes = endHour * 60 + endMinute;
+
+    var endDateTime = DateTime(
+      referenceStart.year,
+      referenceStart.month,
+      referenceStart.day,
+      endHour,
+      endMinute,
+    );
+
+    // overnight schedule — end time is actually the next calendar day
+    if (endMinutes <= startMinutes) {
+      endDateTime = endDateTime.add(const Duration(days: 1));
+    }
+
+    return endDateTime;
+  }
+
 
   void _stopScheduleBlocking() {
     if (_blockingService == null) return;
     debugPrint('📅 Schedule ending — stopping blocking');
 
-    _stopActiveTick(); // 👈 new
+    if (_sessionRepo != null && _activeSessionKey != null && _activeStartTime != null) {
+      final now = DateTime.now();
 
-    // 👇 new — write the final accumulated active time
-    if (_sessionRepo != null && _activeSessionKey != null) {
+      // 👇 new — cap the "end" used for calculation at the schedule's real intended end time,
+      // never later than that, even if Dart didn't catch up until much later
+      final scheduledEnd = _activeSchedule != null
+          ? _computeScheduledEndDateTime(_activeSchedule!, _activeStartTime!)
+          : now;
+      final effectiveEnd = now.isBefore(scheduledEnd) ? now : scheduledEnd;
+
+      final totalElapsed = effectiveEnd.difference(_activeStartTime!).inSeconds;
+      final activeSeconds = (totalElapsed - _totalPausedSeconds).clamp(0, totalElapsed);
+
+      debugPrint('📅 Ending schedule session — totalElapsed: $totalElapsed, paused: $_totalPausedSeconds, active: $activeSeconds');
       _sessionRepo!.endSession(
         key: _activeSessionKey!,
         completed: true,
-        activeSeconds: _activeSecondsAccumulator,
+        activeSeconds: activeSeconds,
       );
       _activeSessionKey = null;
-      _activeSecondsAccumulator = 0;
+      _activeStartTime = null;
+      _totalPausedSeconds = 0;
     }
 
     _pauseTimer?.cancel();
@@ -302,7 +328,7 @@ class ScheduleChecker {
     debugPrint('📅 Restarting blocking with updated app list');
     _blockingService!.stopAllMonitoring();
     await Future.delayed(const Duration(milliseconds: 300));
-    await _startScheduleBlocking(schedule); // note: isNewActivation check prevents accumulator reset here, since scheduleId is unchanged
+    await _startScheduleBlocking(schedule);
   }
 
   bool get isScheduleBlocking => _isScheduleBlocking;

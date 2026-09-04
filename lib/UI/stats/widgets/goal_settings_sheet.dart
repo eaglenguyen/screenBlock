@@ -89,9 +89,9 @@ class _GoalMenuSheet extends StatelessWidget {
         title: 'Daily Screen Time Limit',
         subtitle: null,
         initialHours: StatsState.loadGoalHours(),
-        minHours: 0.5,
-        maxHours: 7.0,
-        divisions: 13,
+        minHours: 1.0, // 👈 was 0.5
+        maxHours: 20.0, // 👈 was 7.0
+        divisions: 19, // 👈 was 13 — (20 - 1) = 19 steps, one per whole hour
         accentColor: const Color(0xFFEDB82A),
         textColor: const Color(0xFF1A1208),
         hiveKey: 'dailyScreenTimeGoal',
@@ -109,16 +109,18 @@ class _GoalMenuSheet extends StatelessWidget {
         title: 'Daily Block Goal',
         subtitle: 'How long do you want to block apps each day?',
         initialHours: StatsState.loadBlockGoalHours(),
-        minHours: 0.5,
-        maxHours: 8.0,
-        divisions: 15,
+        minHours: 1.0, // 👈 was 0.5
+        maxHours: 23.0, // 👈 was 8.0
+        divisions: 22, // 👈 was 15 — (23 - 1) = 22 steps, one per whole hour
         accentColor: const Color(0xFF4ECDC4),
         textColor: const Color(0xFF0A2A29),
-        hiveKey: HiveBoxNames.blockingGoalHours, // 👈 was the raw string 'dailyBlockGoal'
+        hiveKey: HiveBoxNames.blockingGoalHours,
         ref: ref,
       ),
     );
   }
+
+
 }
 
 // ── Reusable goal slider sheet ────────────────────────

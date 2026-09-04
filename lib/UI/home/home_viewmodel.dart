@@ -1170,6 +1170,11 @@ class HomeViewModel extends _$HomeViewModel {
         ScheduleChecker.instance.resumeNow();
       }
     }
+
+    ScheduleChecker.instance.checkNow(); // 👈 new — force a schedule re-check on resume, closing out any session that ended while backgrounded
+    loadTodayBlockedTime(); // 👈 new — refresh HomeState's own blocked-time total right after
+
+
     switch (state.phase) {
       case BlockingPhase.active:
         if (state.isPaused) return;
