@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pausenow/providers/blocking_service_provider.dart';
 import 'package:pausenow/providers/premium_provider.dart';
+import 'package:pausenow/providers/repository_providers.dart';
 import 'package:pausenow/services/notification_service.dart';
 import 'package:pausenow/services/revenuecat_service.dart';
 import 'package:pausenow/services/schedule_checker.dart';
@@ -92,7 +93,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // start schedule checker
     final blockingService = ref.read(blockingServiceProvider);
-    ScheduleChecker.instance.start(blockingService);
+    final sessionRepo = ref.read(blockSessionRepositoryProvider); // 👈 new
+    ScheduleChecker.instance.start(blockingService, sessionRepo); // 👈 updated
 
     final themeMode = ref.watch(themeProvider); // 👈 add this
 

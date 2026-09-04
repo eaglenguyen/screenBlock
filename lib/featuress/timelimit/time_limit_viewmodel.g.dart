@@ -7,7 +7,7 @@ part of 'time_limit_viewmodel.dart';
 // **************************************************************************
 
 String _$timeLimitViewModelHash() =>
-    r'56073735c634728d7430b2345c68a53e971bc16b';
+    r'94baf190c9bf074234a3cea72507a04821ce76e4';
 
 /// See also [TimeLimitViewModel].
 @ProviderFor(TimeLimitViewModel)

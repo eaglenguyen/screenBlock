@@ -42,7 +42,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     
     override func intervalDidEnd(for activity: DeviceActivityName) {
         super.intervalDidEnd(for: activity)
-        os_log("🔥 intervalDidEnd: %{public}@", log: logger, type: .fault, activity.rawValue)
         sharedDefaults?.set("intervalDidEnd", forKey: "extensionLastEvent")
         sharedDefaults?.set(activity.rawValue, forKey: "extensionLastActivity")
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")
@@ -62,14 +61,14 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             let scheduleId = activity.rawValue.replacingOccurrences(
                 of: "com.eagle.pausenow.schedule.", with: ""
             )
-            unshieldScheduleAppsInExtension(scheduleId: scheduleId)
+            store.clearAllSettings() // 👈 replaces unshieldScheduleAppsInExtension(scheduleId:) — full clear instead of token-subtract, since subtract silently fails when tokens rotate
 
-            // 👇 new — mark schedule as no longer active
             sharedDefaults?.set(false, forKey: "isScheduleCurrentlyActive")
             sharedDefaults?.synchronize()
 
-            // 👇 new — lift Uninstall Protection (replaces the old raw denyAppRemoval = false)
             store.application.denyAppRemoval = false
+
+            os_log("✅ schedule ended, full shield cleared for %{public}@", log: logger, type: .fault, scheduleId)
         }
     }
     

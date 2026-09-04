@@ -7,8 +7,6 @@ class BlockSessionRepository {
   Box<BlockSession> get _box =>
       Hive.box<BlockSession>(HiveBoxNames.blockSessions);
 
-  // ── Write ────────────────────────────────────────
-
   Future<String> startSession({
     required String blockingType,
     required int selectedMinutes,
@@ -25,37 +23,31 @@ class BlockSessionRepository {
   Future<void> endSession({
     required String key,
     required bool completed,
+    int? activeSeconds, // 👈 new — optional, defaults to old timestamp-based behavior if omitted
   }) async {
     final session = _box.get(int.parse(key));
     if (session == null) return;
     session.endTime = DateTime.now();
     session.completed = completed;
+    if (activeSeconds != null) {
+      session.activeSeconds = activeSeconds; // 👈 new
+    }
     await session.save();
   }
 
-  // ── Read ─────────────────────────────────────────
-
   List<BlockSession> getTodaySessions() {
-    return _box.values
-        .where((s) => s.isToday)
-        .toList();
+    return _box.values.where((s) => s.isToday).toList();
   }
 
   Duration getTodayTotalDuration() {
     return getTodaySessions()
-        .where((s) => s.endTime != null) // 👈 only completed sessions
-        .fold(
-      Duration.zero,
-          (total, session) => total + session.duration,
-    );
+        .where((s) => s.endTime != null)
+        .fold(Duration.zero, (total, session) => total + session.duration);
   }
 
   Duration getTodayCompletedDuration() {
     return getTodaySessions()
         .where((s) => s.completed && s.endTime != null)
-        .fold(
-      Duration.zero,
-          (total, session) => total + session.duration,
-    );
+        .fold(Duration.zero, (total, session) => total + session.duration);
   }
 }

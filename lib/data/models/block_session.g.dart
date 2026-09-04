@@ -22,13 +22,14 @@ class BlockSessionAdapter extends TypeAdapter<BlockSession> {
       blockingType: fields[2] as String,
       selectedMinutes: fields[3] as int,
       completed: fields[4] as bool,
+      activeSeconds: fields[5] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BlockSession obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.startTime)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class BlockSessionAdapter extends TypeAdapter<BlockSession> {
       ..writeByte(3)
       ..write(obj.selectedMinutes)
       ..writeByte(4)
-      ..write(obj.completed);
+      ..write(obj.completed)
+      ..writeByte(5)
+      ..write(obj.activeSeconds);
   }
 
   @override

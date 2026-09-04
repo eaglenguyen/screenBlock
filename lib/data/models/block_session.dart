@@ -1,5 +1,4 @@
 import 'package:hive/hive.dart';
-
 import '../../core/constants/app_constants.dart';
 
 part 'block_session.g.dart';
@@ -19,7 +18,10 @@ class BlockSession extends HiveObject {
   int selectedMinutes;
 
   @HiveField(4)
-  bool completed; // true = timer expired, false = gave up
+  bool completed;
+
+  @HiveField(5)
+  int? activeSeconds; // 👈 new — nullable so old records without it don't break; null = fall back to old calculation
 
   BlockSession({
     required this.startTime,
@@ -27,21 +29,22 @@ class BlockSession extends HiveObject {
     required this.blockingType,
     required this.selectedMinutes,
     this.completed = false,
+    this.activeSeconds,
   });
 
   Duration get duration {
+    // 👇 new — if we have a real tracked active-seconds value, trust it directly
+    if (activeSeconds != null) {
+      return Duration(seconds: activeSeconds!);
+    }
+
+    // 👇 fallback — old behavior, for any session recorded before this change
     final end = endTime ?? DateTime.now();
     final elapsed = end.difference(startTime);
-
     if (completed) {
-      // 👇 a completed session's real duration is exactly its configured length —
-      // never more, even if endSession() was called late (e.g. app was
-      // backgrounded past the timer's actual expiry)
       final configured = Duration(minutes: selectedMinutes);
       return elapsed < configured ? elapsed : configured;
     }
-
-    // gave up early — real elapsed time is meaningful here, keep as-is
     return elapsed;
   }
 

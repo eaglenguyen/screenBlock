@@ -122,7 +122,7 @@ class HomeViewModel extends _$HomeViewModel {
     _setupScheduleChecker();
     _setupPremiumListener();
     _setupAppLimitListener();
-    ScheduleChecker.instance.start(_blockingService);
+    ScheduleChecker.instance.start(_blockingService, _sessionRepo);
     _restoreSession();
     _checkPendingCheckInFlow();
     _requestReviewAfterDays();
