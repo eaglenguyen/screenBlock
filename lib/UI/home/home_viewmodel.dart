@@ -776,27 +776,21 @@ class HomeViewModel extends _$HomeViewModel {
       pomodoroRoundCount: newRoundCount,
       xpEarned: totalXpEarned,
     );
-    final isLongBreak = newRoundCount % 4 == 0;
-    final breakMinutes = isLongBreak
-        ? state.pomodoroConfig.longBreakMinutes
-        : state.pomodoroConfig.shortBreakMinutes;
+    final breakMinutes = state.pomodoroConfig.shortBreakMinutes;
+
     await AnalyticsService.instance.capture(
       AnalyticsEvents.pomodoroRoundCompleted,
-      {
-        AnalyticsProps.roundNumber: newRoundCount,
-        AnalyticsProps.isLongBreak: isLongBreak,
-      },
+      {AnalyticsProps.roundNumber: newRoundCount},
     );
+
+    // 👇 new — lift the shield either way, so the user isn't stuck blocked while deciding
     if (Platform.isIOS) {
-      await const MethodChannel('com.eagle.pausenow/ios_blocking')
-          .invokeMethod('savePomodoroBreakState', {
-        'roundCount': newRoundCount,
-        'breakMinutes': breakMinutes,
-        'breakStartTime': DateTime.now().millisecondsSinceEpoch,
-        'isLongBreak': isLongBreak,
-      });
-      await (_blockingService as IOSBlockingService).playSystemSound(1005);
+      await (_blockingService as IOSBlockingService).liftShieldOnly();
     } else {
+      await _blockingService.stopAllMonitoring();
+    }
+
+    if (Platform.isAndroid) {
       try {
         final player = AudioPlayer();
         await player.setAsset('assets/sounds/bell.wav');
@@ -810,7 +804,23 @@ class HomeViewModel extends _$HomeViewModel {
         debugPrint('❌ sound error: $e');
       }
       HapticFeedback.heavyImpact();
+    } else if (Platform.isIOS) {
+      await (_blockingService as IOSBlockingService).playSystemSound(1005);
     }
+
+    if (!state.pomodoroConfig.autoStartBreak) {
+      // 👇 new — wait for user confirmation instead of auto-starting
+      state = state.copyWith(phase: BlockingPhase.awaitingBreakConfirmation);
+      await NotificationService.instance.scheduleNotification(
+        id: 200,
+        title: 'Work session complete! 🍅',
+        body: 'Tap to decide: start your break or stop here.',
+        scheduledTime: DateTime.now().add(const Duration(seconds: 1)),
+      );
+      return;
+    }
+
+    // 👇 existing auto-start path, unchanged from here down
     await NotificationService.instance.cancelNotification(200);
     await NotificationService.instance.scheduleNotification(
       id: 201,
@@ -822,9 +832,7 @@ class HomeViewModel extends _$HomeViewModel {
     await NotificationService.instance.scheduleNotification(
       id: 200,
       title: 'Break time! 🍅',
-      body: isLongBreak
-          ? 'Great work! Time for a long break — you earned it.'
-          : 'Work session complete! Take a short break.',
+      body: 'Work session complete! Take a short break.',
       scheduledTime: DateTime.now().add(const Duration(seconds: 1)),
       categoryIdentifier: 'POMODORO_WORK_ENDED',
     );
@@ -1048,7 +1056,39 @@ class HomeViewModel extends _$HomeViewModel {
     }
   }
 
-// shield/block
+  Future<void> confirmStartBreak() async {
+    if (state.phase != BlockingPhase.awaitingBreakConfirmation) return;
+    await NotificationService.instance.cancelNotification(200);
+    final breakMinutes = state.pomodoroConfig.shortBreakMinutes;
+    await NotificationService.instance.scheduleNotification(
+      id: 201,
+      title: 'Break over! 🔒',
+      body: 'Hold For Options',
+      scheduledTime: DateTime.now().add(Duration(minutes: breakMinutes)),
+      categoryIdentifier: 'POMODORO_BREAK_ENDED',
+    );
+    startBreak(breakMinutes);
+  }
+
+  Future<void> declineStartBreak() async {
+    if (state.phase != BlockingPhase.awaitingBreakConfirmation) return;
+    await NotificationService.instance.cancelNotification(200);
+    await NotificationService.instance.cancelNotification(201);
+    await NotificationService.instance.cancelNotification(202);
+    // 👇 fully exit Pomodoro, same end-state as giveUp() but shield's already lifted
+    state = state.copyWith(
+      phase: state.xpEarned > 0 ? BlockingPhase.completed : BlockingPhase.idle,
+      remainingSeconds: 0,
+      breakRemainingSeconds: 0,
+      activeSessionKey: null,
+      pomodoroRoundCount: 0,
+      isPaused: false,
+      clearPausedAt: true,
+    );
+    ScheduleChecker.instance.checkNow();
+  }
+
+// Shield and Block Logic
 
   Future<void> _reapplyShield() async {
     _blockingService.setBlockingMode(state.blockingType);

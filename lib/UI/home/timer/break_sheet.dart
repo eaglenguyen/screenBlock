@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../schedule/widgets/hold_to_confirm.dart';
+import '../home_viewmodel.dart';
 
 class BreakSheet extends StatefulWidget {
   const BreakSheet({
@@ -17,7 +19,6 @@ class BreakSheet extends StatefulWidget {
 }
 
 class _BreakSheetState extends State<BreakSheet> {
-  // 👇 no animation controller needed anymore
   int _selectedMinutes = 5;
 
   @override
@@ -33,21 +34,21 @@ class _BreakSheetState extends State<BreakSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHandle(),
+          _buildHandle(context),
           const SizedBox(height: 20),
           _buildTitle(),
           const SizedBox(height: 8),
-          _buildValue(),
+          _buildValue(context),
           const SizedBox(height: 16),
-          _buildSlider(),
+          _buildSlider(context),
           const SizedBox(height: 20),
-          _buildStartButton(),
+          _buildStartButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildHandle() {
+  Widget _buildHandle(BuildContext context) {
     return Container(
       width: 40,
       height: 4,
@@ -66,23 +67,23 @@ class _BreakSheetState extends State<BreakSheet> {
     );
   }
 
-  Widget _buildValue() {
+  Widget _buildValue(BuildContext context) {
     return Text(
       '$_selectedMinutes min break',
       style: AppTextStyles.headlineMedium.copyWith(
-        color: Colors.orange,
+        color: AppColors.warning(context),
       ),
       textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildSlider() {
+  Widget _buildSlider(BuildContext context) {
     return SliderTheme(
       data: SliderThemeData(
-        activeTrackColor: Colors.orange,
+        activeTrackColor: AppColors.warning(context),
         inactiveTrackColor: AppColors.backgroundSubtle(context),
-        thumbColor: Colors.orange,
-        overlayColor: Colors.orange.withValues(alpha: 0.2),
+        thumbColor: AppColors.warning(context),
+        overlayColor: AppColors.warning(context).withValues(alpha: 0.2),
         thumbShape: const RoundSliderThumbShape(
           enabledThumbRadius: 12,
         ),
@@ -101,10 +102,13 @@ class _BreakSheetState extends State<BreakSheet> {
     );
   }
 
-  Widget _buildStartButton() {
+  Widget _buildStartButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: HoldToConfirmButton(
+        color: AppColors.warning(context),
+        fillColor: AppColors.warningDark(context),
+        textColor: AppColors.warningLight(context),
         onConfirmed: () {
           widget.onStartBreak(_selectedMinutes);
           Navigator.pop(context);
@@ -112,4 +116,6 @@ class _BreakSheetState extends State<BreakSheet> {
       ),
     );
   }
+
+
 }

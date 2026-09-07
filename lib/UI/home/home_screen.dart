@@ -18,6 +18,7 @@ import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../settings/settings_viewmodel.dart';
 import 'cards/active_blocking_card.dart';
+import 'cards/break_confirmation_card.dart';
 import 'cards/countdown_card.dart';
 import 'checkIn/check_in_slider_screen.dart';
 import 'widgets/xp_animation.dart';
@@ -90,147 +91,157 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             state: state,
             xpBadgeKey: _xpBadgeKey,
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 100),
-              child: Column(
-                children: [
-                  // ── Schedule banner ─────────────────────────
-                  if (state.isScheduleActive || state.isAppLimitActiveToday) // 👈 was just state.isScheduleActive
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
+      Expanded(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 100),
+          child: Column(
+            children: [
+              // ── Schedule banner ─────────────────────────
+              if (state.isScheduleActive || state.isAppLimitActiveToday)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: state.isSchedulePaused
+                        ? Colors.orange.withValues(alpha: 0.1)
+                        : AppColors.error(context).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: state.isSchedulePaused
+                          ? Colors.orange.withValues(alpha: 0.3)
+                          : AppColors.error(context).withValues(alpha: 0.3),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        state.isSchedulePaused
+                            ? Icons.pause_circle_outline_rounded
+                            : Icons.block_rounded,
                         color: state.isSchedulePaused
-                            ? Colors.orange.withValues(alpha: 0.1)
-                            : AppColors.error(context).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: state.isSchedulePaused
-                              ? Colors.orange.withValues(alpha: 0.3)
-                              : AppColors.error(context).withValues(alpha: 0.3),
-                          width: 0.5,
-                        ),
+                            ? Colors.orange
+                            : AppColors.error(context),
+                        size: 14,
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            state.isSchedulePaused
-                                ? Icons.pause_circle_outline_rounded
-                                : Icons.block_rounded,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          state.isSchedulePaused
+                              ? 'Schedule paused — resumes in ${state.formattedPauseRemaining}'
+                              : 'To use Manual Block, please disable the schedule session!',
+                          style: AppTextStyles.bodySmall.copyWith(
                             color: state.isSchedulePaused
                                 ? Colors.orange
                                 : AppColors.error(context),
-                            size: 14,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              state.isSchedulePaused
-                                  ? 'Schedule paused — resumes in ${state.formattedPauseRemaining}'
-                                  : 'To use Manual Block, please disable the schedule session!',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: state.isSchedulePaused
-                                    ? Colors.orange
-                                    : AppColors.error(context),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  // ── Phase cards ──────────────────────────────
-                  switch (state.phase) {
-                    // Idle
-                    BlockingPhase.idle => TimerCard(
-                      onBlockNow: _onBlockNowTapped,
-                      onSelectorTapped: _onSelectorTapped,
-                      onBlockModeTapped: _onBlockModeTapped,
-                      onTimerTapped: _onTimerTapped,
-                      blockingType: state.blockingType,
-                      selectedMinutes: state.selectedMinutes,
-                      blockedTime: state.formattedBlockedTime,
-                      shouldAnimate: state.shouldAnimateBlockedTime,
-                      isScheduleActive: state.isScheduleActive,
-                      isAppLimitActiveToday: state.isAppLimitActiveToday,
-                      onPomodoroTapped: _onPomodoroTapped,
-                      isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
-                      pomodoroRestMinutes: state.pomodoroConfig.shortBreakMinutes, // 👈 new
-
-                      onTutorialTap: () {
-                        showGeneralDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          barrierColor: Colors.black,
-                          transitionDuration: const Duration(milliseconds: 300),
-                          transitionBuilder: (_, anim, __, child) => FadeTransition(
-                            opacity: anim,
-                            child: child,
-                          ),
-                            pageBuilder: (dialogContext, __, ___) => Scaffold(
-                              backgroundColor: const Color(0xFF16162A),
-                              body: ManualBlockingTutorial(
-                                onComplete: () => Navigator.of(dialogContext).pop(),
-                                showSkip: true,
-                              ),
-                            ),
-                        );
-                      },
-                      onAnimationStarted: () => ref
-                          .read(homeViewModelProvider.notifier)
-                          .resetAnimateBlockedTime(),
-                    ),
-                  // Countdown
-                    BlockingPhase.countdown => CountdownCard(
-                      count: state.remainingSeconds,
-                      onCancel: _onCancelCountdown,
-                    ),
-                  // Active
-                    BlockingPhase.active || BlockingPhase.onBreak =>
-                        ActiveBlockingCard(
-                          state: state,
-                          onTakeBreak: _onTakeBreak,
-                          onGiveUp: _onGiveUp,
-                          onEndBreak: () => _showEndBreakConfirm(),
-                          onBlockListTapped: _onBlockListTapped,
-                          isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
-                          pomodoroRound: state.pomodoroRoundCount,
-                          isPaused: state.isPaused,
-                          onPauseToggle: () => ref.read(homeViewModelProvider.notifier).togglePause(),
-                          onRestart: () => ref.read(homeViewModelProvider.notifier).restartRound(),
-                          onSkipRound: () => ref.read(homeViewModelProvider.notifier).skipRound(),
-                            isHardMode: ref.watch(settingsViewModelProvider).hardModeEnabled
                         ),
-                  // Completed
-                    BlockingPhase.completed => SessionCompletedCard(
-                      selectedMinutes: state.selectedMinutes,
-                      xpEarned: state.xpEarned,
-                      onFinish: () => ref
-                          .read(homeViewModelProvider.notifier)
-                          .finishAndUnblock(),
-                    ),
-                  // Claim XP
-                    BlockingPhase.claimXp => ClaimXpCard(
-                      xpEarned: state.xpEarned,
-                      sessionMinutes: state.selectedMinutes,
-                      todayBlocked: state.formattedBlockedTime,
-                      totalXp: state.totalXp,
-                      onClaim: () => ref
-                          .read(homeViewModelProvider.notifier)
-                          .claimXp(),
-                    ),
-                  },
+                      ),
+                    ],
+                  ),
+                ),
 
-                  const SizedBox(height: 12),
+              // ── Phase cards ──────────────────────────────
+              if (state.phase == BlockingPhase.active || state.phase == BlockingPhase.onBreak)
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom -
+                        150,
+                  ),
+                  child: Center(
+                    child: ActiveBlockingCard(
+                      state: state,
+                      onTakeBreak: _onTakeBreak,
+                      onGiveUp: _onGiveUp,
+                      onEndBreak: () => _showEndBreakConfirm(),
+                      onBlockListTapped: _onBlockListTapped,
+                      isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
+                      pomodoroRound: state.pomodoroRoundCount,
+                      isPaused: state.isPaused,
+                      onPauseToggle: () => ref.read(homeViewModelProvider.notifier).togglePause(),
+                      onRestart: () => ref.read(homeViewModelProvider.notifier).restartRound(),
+                      onSkipRound: () => ref.read(homeViewModelProvider.notifier).skipRound(),
+                      isHardMode: ref.watch(settingsViewModelProvider).hardModeEnabled,
+                    ),
+                  ),
+                )
+              else
+                switch (state.phase) {
+                  BlockingPhase.idle => TimerCard(
+                    onBlockNow: _onBlockNowTapped,
+                    onSelectorTapped: _onSelectorTapped,
+                    onBlockModeTapped: _onBlockModeTapped,
+                    onTimerTapped: _onTimerTapped,
+                    blockingType: state.blockingType,
+                    selectedMinutes: state.selectedMinutes,
+                    blockedTime: state.formattedBlockedTime,
+                    shouldAnimate: state.shouldAnimateBlockedTime,
+                    isScheduleActive: state.isScheduleActive,
+                    isAppLimitActiveToday: state.isAppLimitActiveToday,
+                    onPomodoroTapped: _onPomodoroTapped,
+                    isPomodoroMode: state.pomodoroConfig.isPomodoroMode,
+                    pomodoroRestMinutes: state.pomodoroConfig.shortBreakMinutes,
+                    onTutorialTap: () {
+                      showGeneralDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        barrierColor: Colors.black,
+                        transitionDuration: const Duration(milliseconds: 300),
+                        transitionBuilder: (_, anim, __, child) => FadeTransition(
+                          opacity: anim,
+                          child: child,
+                        ),
+                        pageBuilder: (dialogContext, __, ___) => Scaffold(
+                          backgroundColor: const Color(0xFF16162A),
+                          body: ManualBlockingTutorial(
+                            onComplete: () => Navigator.of(dialogContext).pop(),
+                            showSkip: true,
+                          ),
+                        ),
+                      );
+                    },
+                    onAnimationStarted: () => ref
+                        .read(homeViewModelProvider.notifier)
+                        .resetAnimateBlockedTime(),
+                  ),
+                  BlockingPhase.countdown => CountdownCard(
+                    count: state.remainingSeconds,
+                    onCancel: _onCancelCountdown,
+                  ),
+                  BlockingPhase.completed => SessionCompletedCard(
+                    selectedMinutes: state.selectedMinutes,
+                    xpEarned: state.xpEarned,
+                    onFinish: () => ref
+                        .read(homeViewModelProvider.notifier)
+                        .finishAndUnblock(),
+                  ),
+                  BlockingPhase.awaitingBreakConfirmation => BreakConfirmationCard(
+                    onYes: () => ref.read(homeViewModelProvider.notifier).confirmStartBreak(),
+                    onNo: () => ref.read(homeViewModelProvider.notifier).declineStartBreak(),
+                  ),
+                  BlockingPhase.claimXp => ClaimXpCard(
+                    xpEarned: state.xpEarned,
+                    sessionMinutes: state.selectedMinutes,
+                    todayBlocked: state.formattedBlockedTime,
+                    totalXp: state.totalXp,
+                    onClaim: () => ref
+                        .read(homeViewModelProvider.notifier)
+                        .claimXp(),
+                  ),
+                  _ => const SizedBox.shrink(),
+                },
 
-                  const SpinWheelCard()
-                ],
-              ),
-            ),
+              const SizedBox(height: 12),
+              const SpinWheelCard(),
+            ],
           ),
+        ),
+      ),
         ],
       ),
     );
@@ -247,6 +258,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
     );
   }
+
 
   void _onBlockNowTapped() async {
     final state = ref.read(homeViewModelProvider);
@@ -277,31 +289,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return;
       }
 
-      if (Platform.isAndroid) {
-        // check accessibility
-        final hasAccessibility = await service.hasAccessibilityPermission();
-        if (!hasAccessibility) {
-          if (!context.mounted) return;
-          final openSettings = await showAccessibilityDialog(context);
-          if (openSettings && context.mounted) {
-            await service.requestAccessibilityPermission();
+      await checkAccessibilityAndProceed(context, ref, () async {
+        if (Platform.isAndroid) {
+          final hasOverlay = await service.hasOverlayPermission();
+          if (!hasOverlay) {
+            await service.requestOverlayPermission();
+            return;
           }
-          return;
         }
-
-        // check overlay
-        final hasOverlay = await service.hasOverlayPermission();
-        if (!hasOverlay) {
-          if (!context.mounted) return;
-          await service.requestOverlayPermission();
-          return;
-        }
-      }
-
-      if (!context.mounted) return;
-      notifier.startBlocking();
+        notifier.startBlocking();
+      });
     }
   }
+
 
   void _onSelectorTapped(String type) {}
 
@@ -428,7 +428,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-  // Bottom sheet for resume pause
   void _showEndBreakConfirm() {
     showModalBottomSheet(
       context: context,
@@ -438,33 +437,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           24, 20, 24,
           MediaQuery.of(ctx).padding.bottom + 100,
         ),
-        decoration: const BoxDecoration(
-          color: Color(0xFF1E1E35),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundCard(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // drag handle
             Container(
               width: 36,
               height: 4,
               margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: AppColors.border(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             Text(
               'Blocking Paused',
-              style: AppTextStyles.headlineSmall,
+              style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
             ),
             const SizedBox(height: 8),
             Text(
               'Your break is ongoing.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.4),
+                color: AppColors.textSecondary(context),
                 fontSize: 14,
               ),
             ),
@@ -477,8 +475,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ref.read(homeViewModelProvider.notifier).endBreak();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEDB82A),
-                  foregroundColor: const Color(0xFF1A1208),
+                  backgroundColor: AppColors.warning(context),
+                  foregroundColor: AppColors.warningLight(context),
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: const StadiumBorder(),
                   textStyle: const TextStyle(

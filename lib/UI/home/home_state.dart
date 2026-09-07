@@ -6,10 +6,11 @@ import '../../core/constants/app_constants.dart';
 
 
 enum BlockingPhase {
-  idle,        // default — shows normal timer card
-  countdown,   // 3 second countdown
-  active,      // actively blocking with timer
-  onBreak,     // break in progress
+  idle,
+  countdown,
+  active,
+  onBreak,
+  awaitingBreakConfirmation, // 👈 new
   completed,
   claimXp,
 }

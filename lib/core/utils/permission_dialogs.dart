@@ -1,11 +1,31 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/blocking_service_provider.dart';
 import '../theme/app_colors.dart';
 
-Future<bool> showAccessibilityDialog(BuildContext context) async {
-  if (!Platform.isAndroid) return true;
 
-  final result = await showDialog<bool>(
+Future<void> checkAccessibilityAndProceed(
+    BuildContext context,
+    WidgetRef ref,
+    VoidCallback onGranted,
+    ) async {
+  if (!Platform.isAndroid) {
+    onGranted();
+    return;
+  }
+
+  final service = ref.read(blockingServiceProvider);
+  final hasAccessibility = await service.hasAccessibilityPermission();
+
+  if (!context.mounted) return;
+
+  if (hasAccessibility) {
+    onGranted();
+    return;
+  }
+
+  showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
       backgroundColor: AppColors.backgroundCard(context),
@@ -37,7 +57,7 @@ Future<bool> showAccessibilityDialog(BuildContext context) async {
           ),
           const SizedBox(height: 8),
           Text(
-            'Pause Now needs Accessibility permission to block apps. Tap below to enable it in Settings.',
+            'Accessibility permission only needs to be enabled once to block apps.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.textSecondary(context),
@@ -51,36 +71,28 @@ Future<bool> showAccessibilityDialog(BuildContext context) async {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true), // 👈 true = go to settings
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await service.requestAccessibilityPermission();
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accent(context),
               foregroundColor: AppColors.accentText(context),
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: const Text(
-              'Open Settings',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
+            child: const Text('Enable', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ),
         const SizedBox(height: 4),
         SizedBox(
           width: double.infinity,
           child: TextButton(
-            onPressed: () => Navigator.pop(ctx, false), // 👈 false = cancel
-            child: Text(
-              'Not Now',
-              style: TextStyle(
-                color: AppColors.textSecondary(context),
-                fontSize: 14,
-              ),
-            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Not Now', style: TextStyle(color: AppColors.textSecondary(context), fontSize: 14)),
           ),
         ),
       ],
     ),
   );
-
-  return result ?? false;
 }

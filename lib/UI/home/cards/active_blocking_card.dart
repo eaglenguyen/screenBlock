@@ -50,14 +50,9 @@ class ActiveBlockingCard extends StatelessWidget {
       child: Stack(
         children: [
           Column(
+            crossAxisAlignment: CrossAxisAlignment.center, // 👈 new
             children: [
               const SizedBox(height: 4),
-              _buildSessionIcon(),
-              const SizedBox(height: 10),
-              _buildSessionName(),
-              const SizedBox(height: 12),
-              _buildBlockListPill(context),
-              const SizedBox(height: 20),
               _buildTimer(context),
               const SizedBox(height: 12),
               _buildXpBar(context),
@@ -70,15 +65,14 @@ class ActiveBlockingCard extends StatelessWidget {
               ],
             ],
           ),
-          // 👇 close icon — grayed out and inert when Hard Mode is active
           Positioned(
             top: 0,
             left: isPomodoroMode ? 0 : null,
             right: isPomodoroMode ? null : 0,
             child: Opacity(
-              opacity: isHardMode ? 0.35 : 1.0, // 👈 new
+              opacity: isHardMode ? 0.35 : 1.0,
               child: GestureDetector(
-                onTap: isHardMode ? null : onGiveUp, // 👈 new — no-op when locked
+                onTap: isHardMode ? null : onGiveUp,
                 child: Container(
                   width: 32,
                   height: 32,
@@ -430,7 +424,7 @@ class ActiveBlockingCard extends StatelessWidget {
               color: isOnBreak
                   ? AppColors.accent(context)
                   : AppColors.textPrimary(context),
-              fontSize: 15,
+              fontSize: 18,
             ),
           ),
           style: TextButton.styleFrom(

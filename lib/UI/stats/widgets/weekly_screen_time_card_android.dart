@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_card.dart';
 import '../stats_viewmodel.dart';
 
 class WeeklyScreenTimeCardAndroid extends ConsumerStatefulWidget {
@@ -109,12 +110,8 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
 
     // New
     if (!_hasPermission) {
-      return Container(
+      return LippedCard(
         padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundCard(context),
-          borderRadius: BorderRadius.circular(20),
-        ),
         child: Column(
           children: [
             Icon(Icons.lock_outline_rounded, color: AppColors.textSecondary(context), size: 36),
@@ -134,7 +131,6 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
             ElevatedButton(
               onPressed: () async {
                 await ref.read(statsViewModelProvider.notifier).requestUsagePermission();
-                // re-check once they return from Settings
                 setState(() => _isLoading = true);
                 _fetchWeek();
               },
@@ -157,12 +153,8 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
 
     const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    return Container(
+    return LippedCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.circular(20),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -27,24 +27,12 @@ class _UsageGaugeState extends State<UsageGauge>
   @override
   void initState() {
     super.initState();
-    _outerCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _innerCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    );
+    _outerCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    _innerCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
     _outerAnim = Tween<double>(begin: 0, end: widget.state.gaugeValue)
-        .animate(CurvedAnimation(
-      parent: _outerCtrl,
-      curve: Curves.easeOutCubic,
-    ));
+        .animate(CurvedAnimation(parent: _outerCtrl, curve: Curves.easeOutCubic));
     _innerAnim = Tween<double>(begin: 0, end: widget.state.blockedGaugeValue)
-        .animate(CurvedAnimation(
-      parent: _innerCtrl,
-      curve: Curves.easeOutCubic,
-    ));
+        .animate(CurvedAnimation(parent: _innerCtrl, curve: Curves.easeOutCubic));
     _outerCtrl.forward();
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) _innerCtrl.forward();
@@ -55,17 +43,13 @@ class _UsageGaugeState extends State<UsageGauge>
   void didUpdateWidget(UsageGauge oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.state.gaugeValue != widget.state.gaugeValue) {
-      _outerAnim = Tween<double>(
-        begin: _outerAnim.value,
-        end: widget.state.gaugeValue,
-      ).animate(CurvedAnimation(parent: _outerCtrl, curve: Curves.easeOutCubic));
+      _outerAnim = Tween<double>(begin: _outerAnim.value, end: widget.state.gaugeValue)
+          .animate(CurvedAnimation(parent: _outerCtrl, curve: Curves.easeOutCubic));
       _outerCtrl..reset()..forward();
     }
     if (oldWidget.state.blockedGaugeValue != widget.state.blockedGaugeValue) {
-      _innerAnim = Tween<double>(
-        begin: _innerAnim.value,
-        end: widget.state.blockedGaugeValue,
-      ).animate(CurvedAnimation(parent: _innerCtrl, curve: Curves.easeOutCubic));
+      _innerAnim = Tween<double>(begin: _innerAnim.value, end: widget.state.blockedGaugeValue)
+          .animate(CurvedAnimation(parent: _innerCtrl, curve: Curves.easeOutCubic));
       _innerCtrl..reset()..forward();
     }
   }
@@ -77,10 +61,10 @@ class _UsageGaugeState extends State<UsageGauge>
     super.dispose();
   }
 
-  Color get _outerColor {
-    if (widget.state.gaugeValue >= 0.8) return const Color(0xFFE74C3C);
-    if (widget.state.gaugeValue >= 0.5) return const Color(0xFFFF8C00);
-    return const Color(0xFF4CAF50);
+  Color _outerColor(BuildContext context) {
+    if (widget.state.gaugeValue >= 0.8) return AppColors.error(context);
+    if (widget.state.gaugeValue >= 0.5) return AppColors.warning(context);
+    return AppColors.success(context);
   }
 
   String _formatOverage() {
@@ -96,9 +80,8 @@ class _UsageGaugeState extends State<UsageGauge>
     return LippedCard(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, // 👈 new
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // ── Rings (left side) ──────────────────────
           SizedBox(
             width: 160,
             height: 160,
@@ -108,6 +91,7 @@ class _UsageGaugeState extends State<UsageGauge>
                 return CustomPaint(
                   size: const Size(160, 160),
                   painter: _DualRingPainter(
+                    context: context, // 👈 new
                     outerValue: _outerAnim.value,
                     innerValue: _innerAnim.value,
                     isOverGoal: widget.state.isOverGoal,
@@ -118,21 +102,19 @@ class _UsageGaugeState extends State<UsageGauge>
             ),
           ),
           const SizedBox(width: 20),
-          // ── Stats (right side) ────────────────────
-          Flexible( // 👈 was Expanded — Flexible lets it shrink-to-fit instead of forcing full remaining width
+          Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, // 👈 new
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (!Platform.isIOS) ...[
                   _statRow(
+                    context: context,
                     label: 'Screen Time',
-                    value: widget.state.totalUsage > Duration.zero
-                        ? widget.state.formattedTotal
-                        : '--',
+                    value: widget.state.totalUsage > Duration.zero ? widget.state.formattedTotal : '--',
                     goal: widget.state.formattedGoal,
-                    color: _outerColor,
+                    color: _outerColor(context),
                     suffix: widget.state.totalUsage > Duration.zero
                         ? widget.state.isOverGoal
                         ? '+${_formatOverage()} over'
@@ -141,17 +123,15 @@ class _UsageGaugeState extends State<UsageGauge>
                     isOverGoal: widget.state.isOverGoal,
                   ),
                   const SizedBox(height: 8),
-                  Container(
-                    height: 0.5,
-                    color: Colors.white.withValues(alpha: 0.08),
-                  ),
+                  Container(height: 0.5, color: AppColors.border(context)),
                   const SizedBox(height: 8),
                 ],
                 _statRow(
+                  context: context,
                   label: 'Block Time',
                   value: widget.state.formattedBlocked,
                   goal: widget.state.formattedBlockGoal,
-                  color: const Color(0xFF4ECDC4),
+                  color: AppColors.accent(context),
                   suffix: widget.state.blockedGaugeValue >= 1.0
                       ? 'Goal hit! 🎉'
                       : '${(widget.state.blockedGaugeValue * 100).round()}% of goal',
@@ -165,8 +145,8 @@ class _UsageGaugeState extends State<UsageGauge>
     );
   }
 
-
   Widget _statRow({
+    required BuildContext context,
     required String label,
     required String value,
     required String goal,
@@ -180,7 +160,7 @@ class _UsageGaugeState extends State<UsageGauge>
         Text(
           label,
           style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.white.withValues(alpha: 0.45),
+            color: AppColors.textSecondary(context),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,
           ),
@@ -191,17 +171,11 @@ class _UsageGaugeState extends State<UsageGauge>
             children: [
               TextSpan(
                 text: value,
-                style: AppTextStyles.displayMedium.copyWith(
-                  color: color,
-                  fontSize: 32,
-                  letterSpacing: -1,
-                ),
+                style: AppTextStyles.displayMedium.copyWith(color: color, fontSize: 32, letterSpacing: -1),
               ),
               TextSpan(
                 text: ' / ${goal.replaceAll(' goal', '')}',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.white.withValues(alpha: 0.35),
-                ),
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
               ),
             ],
           ),
@@ -210,7 +184,7 @@ class _UsageGaugeState extends State<UsageGauge>
         Text(
           suffix,
           style: AppTextStyles.bodySmall.copyWith(
-            color: isOverGoal ? const Color(0xFFE74C3C) : color.withValues(alpha: 0.7),
+            color: isOverGoal ? AppColors.error(context) : color.withValues(alpha: 0.7),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -221,15 +195,17 @@ class _UsageGaugeState extends State<UsageGauge>
 
 class _DualRingPainter extends CustomPainter {
   const _DualRingPainter({
+    required this.context, // 👈 new
     required this.outerValue,
     required this.innerValue,
     required this.isOverGoal,
-    this.showOuterRing = true, // 👈 new — defaults to true so Android's behavior is unchanged
+    this.showOuterRing = true,
   });
+  final BuildContext context; // 👈 new
   final double outerValue;
   final double innerValue;
   final bool isOverGoal;
-  final bool showOuterRing; // 👈 new
+  final bool showOuterRing;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -242,20 +218,20 @@ class _DualRingPainter extends CustomPainter {
     final innerRadius = outerRadius - strokeWidth - ringGap;
 
     Color outerColor() {
-      if (outerValue >= 0.8) return const Color(0xFFE74C3C);
-      if (outerValue >= 0.5) return const Color(0xFFFF8C00);
-      return const Color(0xFF4CAF50);
+      if (outerValue >= 0.8) return AppColors.error(context);
+      if (outerValue >= 0.5) return AppColors.warning(context);
+      return AppColors.success(context);
     }
 
     final remainingValue = (1.0 - outerValue).clamp(0.0, 1.0);
+    final trackColor = AppColors.backgroundSubtle(context);
 
-    // ── Outer track + fill — only drawn when showOuterRing is true ──
-    if (showOuterRing) { // 👈 new guard wraps the entire outer-ring block
+    if (showOuterRing) {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: outerRadius),
         startAngle, fullSweep, false,
         Paint()
-          ..color = const Color(0xFF252542)
+          ..color = trackColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth
           ..strokeCap = StrokeCap.round,
@@ -270,17 +246,14 @@ class _DualRingPainter extends CustomPainter {
       if (remainingValue > 0) {
         canvas.drawArc(
           Rect.fromCircle(center: center, radius: outerRadius),
-          startAngle,
-          fullSweep * remainingValue,
-          false,
-          outerFillPaint,
+          startAngle, fullSweep * remainingValue, false, outerFillPaint,
         );
       } else {
         canvas.drawArc(
           Rect.fromCircle(center: center, radius: outerRadius),
           startAngle, 0.001, false,
           Paint()
-            ..color = const Color(0xFFE74C3C)
+            ..color = AppColors.error(context)
             ..style = PaintingStyle.stroke
             ..strokeWidth = strokeWidth
             ..strokeCap = StrokeCap.round,
@@ -288,14 +261,13 @@ class _DualRingPainter extends CustomPainter {
       }
     }
 
-    // ── Inner track + fill (blocked) — always drawn, on both platforms ──
-    final innerDrawRadius = showOuterRing ? innerRadius : outerRadius; // 👈 new — expands to fill the space if the outer ring is hidden
+    final innerDrawRadius = showOuterRing ? innerRadius : outerRadius;
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: innerDrawRadius),
       startAngle, fullSweep, false,
       Paint()
-        ..color = const Color(0xFF252542)
+        ..color = trackColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round,
@@ -304,11 +276,9 @@ class _DualRingPainter extends CustomPainter {
     if (innerValue > 0) {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: innerDrawRadius),
-        startAngle,
-        fullSweep * innerValue.clamp(0.0, 1.0),
-        false,
+        startAngle, fullSweep * innerValue.clamp(0.0, 1.0), false,
         Paint()
-          ..color = const Color(0xFF4ECDC4)
+          ..color = AppColors.accent(context)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth
           ..strokeCap = StrokeCap.round,
@@ -321,5 +291,5 @@ class _DualRingPainter extends CustomPainter {
       old.outerValue != outerValue ||
           old.innerValue != innerValue ||
           old.isOverGoal != isOverGoal ||
-          old.showOuterRing != showOuterRing; // 👈 new
+          old.showOuterRing != showOuterRing;
 }

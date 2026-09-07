@@ -98,8 +98,8 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
               width: double.infinity,
               child: HoldToConfirmButton(
                 color: AppColors.warning(context),
-                fillColor: AppColors.accentDark(context),
-                textColor: AppColors.accentPeachText(context),
+                fillColor: AppColors.warningDark(context),
+                textColor: AppColors.warningLight(context),
                 onConfirmed: () {
                   Navigator.pop(context);
                   widget.onPause(_pauseMinutes);

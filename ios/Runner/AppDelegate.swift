@@ -439,7 +439,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 defaults?.set(args["roundCount"], forKey: "pomodoroRoundCount")
                 defaults?.set(args["breakMinutes"], forKey: "pomodoroBreakMinutes")
                 defaults?.set(args["breakStartTime"], forKey: "pomodoroBreakStartTime")
-                defaults?.set(args["isLongBreak"], forKey: "pomodoroIsLongBreak")
                 defaults?.set("break", forKey: "pomodoroPhase")
                 defaults?.synchronize()
             }
@@ -451,13 +450,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 "pomodoroBreakMinutes": defaults?.integer(forKey: "pomodoroBreakMinutes") ?? 5,
                 "pomodoroBreakStartTime": defaults?.integer(forKey: "pomodoroBreakStartTime") ?? 0,
                 "pomodoroRoundCount": defaults?.integer(forKey: "pomodoroRoundCount") ?? 0,
-                "pomodoroIsLongBreak": defaults?.bool(forKey: "pomodoroIsLongBreak") ?? false,
             ])
         case "clearPomodoroBreakState":
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             defaults?.removeObject(forKey: "pomodoroBreakMinutes")
             defaults?.removeObject(forKey: "pomodoroBreakStartTime")
-            defaults?.removeObject(forKey: "pomodoroIsLongBreak")
             defaults?.set("work", forKey: "pomodoroPhase")
             defaults?.synchronize()
             result(nil)

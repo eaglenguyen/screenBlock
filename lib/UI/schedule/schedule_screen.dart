@@ -16,6 +16,7 @@ import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
+import '../../core/utils/permission_dialogs.dart';
 import '../../data/models/time_limit_config.dart';
 import '../../featuress/quickblock/widgets/quick_block_row.dart';
 import '../../featuress/timelimit/time_limit_viewmodel.dart';
@@ -122,7 +123,7 @@ class ScheduleScreen extends ConsumerWidget {
                                     : () => _openEditSession(context, ref, s),
                                 onToggle: isManualBlocking || isPaused
                                     ? () {}
-                                    : () => _checkAccessibilityAndProceed(
+                                    : () => checkAccessibilityAndProceed(
                                   context,
                                   ref,
                                       () => ref
@@ -305,7 +306,7 @@ class ScheduleScreen extends ConsumerWidget {
   }
 
   void _openCreateSession(BuildContext context, WidgetRef ref) {
-    _checkAccessibilityAndProceed(context, ref, () {
+    checkAccessibilityAndProceed(context, ref, () {
       SessionModePickerSheet.show(
         context,
         onScheduleTap: () {
@@ -523,108 +524,6 @@ class _LockedTimeLimitCard extends StatelessWidget {
       ],
     );
   }
-}
-
-Future<void> _checkAccessibilityAndProceed(
-    BuildContext context,
-    WidgetRef ref,
-    VoidCallback onGranted,
-    ) async {
-  if (!Platform.isAndroid) {
-    onGranted();
-    return;
-  }
-
-  final service = ref.read(blockingServiceProvider);
-  final hasAccessibility = await service.hasAccessibilityPermission();
-
-  if (!context.mounted) return;
-
-  if (hasAccessibility) {
-    onGranted();
-    return;
-  }
-
-  // 👇 show dialog before going to settings
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      backgroundColor: AppColors.backgroundCard(context),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppColors.accent(context).withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.accessibility_new_rounded,
-              color: AppColors.accent(context),
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Accessibility Required',
-            style: TextStyle(
-              color: AppColors.textPrimary(context),
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Accessibility permission needed to block apps. Tap below to enable it in Settings.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textSecondary(context),
-              fontSize: 13,
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await service.requestAccessibilityPermission();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent(context),
-              foregroundColor: AppColors.accentText(context),
-              shape: const StadiumBorder(),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            child: const Text(
-              'Open Settings',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Not Now',
-              style: TextStyle(
-                color: AppColors.textSecondary(context),
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 

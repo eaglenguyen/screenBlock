@@ -73,7 +73,13 @@ class AppColors {
       _isDark(context) ? const Color(0xFFE74C3C) : const Color(0xFFE8899E);
 
   static Color warning(BuildContext context) =>
-      _isDark(context) ? const Color(0xFFEDB82A) : const Color(0xFFEDB8A0);
+      _isDark(context) ? const Color(0xFFD4CFC4) : const Color(0xFFEDB8A0);
+
+  static Color warningDark(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFA8A296) : const Color(0xFFD98F6E);
+
+  static Color warningLight(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFEAE6DE) : const Color(0xFFFFE0D0);
 
   static Color pause(BuildContext context) => Colors.orange;
 

@@ -11,29 +11,28 @@ import '../../../services/notification_service.dart';
 class PomodoroConfig {
   final int workMinutes;
   final int shortBreakMinutes;
-  final int longBreakMinutes;
   final bool isPomodoroMode;
+  final bool autoStartBreak; // 👈 new, defaults true — no behavior change for existing users
   const PomodoroConfig({
     this.workMinutes = 25,
     this.shortBreakMinutes = 5,
-    this.longBreakMinutes = 30,
     this.isPomodoroMode = false,
+    this.autoStartBreak = true, // 👈 new
   });
   PomodoroConfig copyWith({
     int? workMinutes,
     int? shortBreakMinutes,
-    int? longBreakMinutes,
     bool? isPomodoroMode,
+    bool? autoStartBreak, // 👈 new
   }) {
     return PomodoroConfig(
       workMinutes: workMinutes ?? this.workMinutes,
       shortBreakMinutes: shortBreakMinutes ?? this.shortBreakMinutes,
-      longBreakMinutes: longBreakMinutes ?? this.longBreakMinutes,
       isPomodoroMode: isPomodoroMode ?? this.isPomodoroMode,
+      autoStartBreak: autoStartBreak ?? this.autoStartBreak, // 👈 new
     );
   }
 }
-
 // ── Duration formatter ────────────────────────────────
 String formatDuration(int minutes) {
   if (minutes < 60) return '${minutes}m';
@@ -72,7 +71,6 @@ class PomodoroSheet extends ConsumerStatefulWidget {
 class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
   late int _workMinutes;
   late int _shortBreakMinutes;
-  late int _longBreakMinutes;
   late bool _isPomodoroMode;
   String? _expandedRow; // 👈 new — null means none expanded; otherwise 'work' / 'rest' / 'longRest'
 
@@ -81,7 +79,6 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
     super.initState();
     _workMinutes = widget.config.workMinutes;
     _shortBreakMinutes = widget.config.shortBreakMinutes;
-    _longBreakMinutes = widget.config.longBreakMinutes;
     _isPomodoroMode = widget.config.isPomodoroMode;
   }
 
@@ -248,20 +245,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 }),
                 onChanged: (v) => setState(() => _shortBreakMinutes = v),
               ),
-              Divider(color: AppColors.border(context), height: 1),
-              ExpandablePickerRow(
-                icon: Icons.self_improvement_rounded,
-                label: 'Long Rest (4 rounds)',
-                value: _longBreakMinutes,
-                min: 5,
-                max: 480,
-                step: 5,
-                isExpanded: _expandedRow == 'longRest', // 👈 new
-                onToggle: () => setState(() {
-                  _expandedRow = _expandedRow == 'longRest' ? null : 'longRest';
-                }),
-                onChanged: (v) => setState(() => _longBreakMinutes = v),
-              ),
+
               const SizedBox(height: 12),
             ],
             // save button
@@ -275,7 +259,6 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 widget.onSave(PomodoroConfig(
                   workMinutes: _workMinutes,
                   shortBreakMinutes: _shortBreakMinutes,
-                  longBreakMinutes: _longBreakMinutes,
                   isPomodoroMode: _isPomodoroMode,
                 ));
                 Navigator.pop(context);

@@ -1,9 +1,10 @@
-// lib/featuress/quickblock/widgets/quick_block_row.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import '../../../UI/schedule/schedule_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/permission_dialogs.dart';
 import '../quick_block_viewmodel.dart';
 
 class QuickBlockApp {
@@ -26,26 +27,30 @@ const quickBlockApps = [
   QuickBlockApp(name: 'TikTok', iconAsset: 'assets/icons/tiktok.svg', iconColor: Colors.white, bgColor: Color(0xFFDCEBFF), packageName: 'com.zhiliaoapp.musically'),
   QuickBlockApp(name: 'Instagram', iconAsset: 'assets/icons/instagram.svg', iconColor: Color(0xFFC2478B), bgColor: Color(0xFFFFE1EC), packageName: 'com.instagram.android'),
   QuickBlockApp(name: 'YouTube', iconAsset: 'assets/icons/youtube.svg', iconColor: Color(0xFFB07A1E), bgColor: Color(0xFFFFE8B8), packageName: 'com.google.android.youtube'),
+  QuickBlockApp(name: 'Facebook', iconAsset: 'assets/icons/facebook.svg', iconColor: Color(0xFF1877F2), bgColor: Color(0xFFDCEBFF), packageName: 'com.facebook.katana'),
+  QuickBlockApp(name: 'Twitter', iconAsset: 'assets/icons/twitter-x.svg', iconColor: Colors.black, bgColor: Color(0xFFE8E8E8), packageName: 'com.twitter.android'),
+  QuickBlockApp(name: 'Snapchat', iconAsset: 'assets/icons/snapchat.svg', iconColor: Color(0xFFB89400), bgColor: Color(0xFFFFF4B8), packageName: 'com.snapchat.android'),
 ];
-
 class QuickBlockRow extends ConsumerWidget {
   const QuickBlockRow({super.key});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget _buildRow(BuildContext context, WidgetRef ref, List<QuickBlockApp> apps) {
     final blocked = ref.watch(quickBlockViewModelProvider);
     final notifier = ref.read(quickBlockViewModelProvider.notifier);
 
     return Row(
-      children: quickBlockApps.map((app) {
+      children: apps.map((app) {
         final isBlocked = blocked.contains(app.packageName);
         return Expanded(
           child: GestureDetector(
-            onTap: () => notifier.toggle(app.packageName),
-            child: SizedBox(
+            onTap: () => checkAccessibilityAndProceed(
+              context,
+              ref,
+                  () => notifier.toggle(app.packageName),
+            ),            child: SizedBox(
               height: 120,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 8), // 👈 reserves room for the lip so it doesn't get clipped by the fixed height
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -67,11 +72,13 @@ class QuickBlockRow extends ConsumerWidget {
                             ),
                           ),
                           Container(
-                            width: double.infinity, // 👈 forces full width
-                            height: 112, // 👈 forces explicit height instead of shrinking to content
+                            width: double.infinity,
+                            height: 112,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: app.bgColor,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? AppColors.backgroundSubtle(context)
+                                  : app.bgColor,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
@@ -117,6 +124,17 @@ class QuickBlockRow extends ConsumerWidget {
           ),
         );
       }).toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        _buildRow(context, ref, quickBlockApps.sublist(0, 3)),
+        const SizedBox(height: 8),
+        _buildRow(context, ref, quickBlockApps.sublist(3, 6)),
+      ],
     );
   }
 }

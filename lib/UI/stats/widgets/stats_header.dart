@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -13,15 +11,18 @@ class StatsHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 52, 20, 16),
-      decoration:  BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Theme.of(context).brightness == Brightness.dark
+            Theme
+                .of(context)
+                .brightness == Brightness.dark
                 ? const Color(0xFF252015)
                 : AppColors.backgroundCard(context),
-            AppColors.background(context),          ],
+            AppColors.background(context),
+          ],
         ),
       ),
       child: Row(
@@ -31,32 +32,26 @@ class StatsHeader extends ConsumerWidget {
             style: AppTextStyles.headlineSmall.copyWith(fontSize: 18),
           ),
           const Spacer(),
-          _iconButton(
-            icon: Icons.timelapse,
+          GestureDetector(
             onTap: () => GoalSettingsSheet.show(context, ref),
-              context: context
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundCard(context),
+                borderRadius: BorderRadius.circular(50),
+                border: Border.all(
+                    color: AppColors.border(context), width: 0.5),
+              ),
+              child: Text(
+                'Goals',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _iconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required BuildContext context
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          color: AppColors.backgroundCard(context),
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.border(context), width: 0.5),
-        ),
-        child: Icon(icon, color: AppColors.textSecondary(context), size: 16),
       ),
     );
   }
