@@ -23,6 +23,7 @@ import '../../home/widgets/app_list_sheet.dart';
 import '../schedule_viewmodel.dart';
 import 'hold_to_confirm.dart';
 
+
 class SessionBottomSheet extends ConsumerStatefulWidget {
   const SessionBottomSheet({
     super.key,
@@ -135,7 +136,6 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
       ),
       child: Row(
         children: [
-          const Text('🧘', style: TextStyle(fontSize: 18)),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(

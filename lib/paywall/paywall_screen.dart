@@ -16,7 +16,6 @@ import 'widget/all_plans_sheet.dart';
 class PaywallScreen extends ConsumerStatefulWidget {
   final String source;
   const PaywallScreen({super.key, required this.source});
-
   @override
   ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
 }
@@ -134,7 +133,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   }
 
   String get _ctaLabel => 'Start My 7-Day Free Trial';
-
   String get _billingDate {
     final date = DateTime.now().add(const Duration(days: 7));
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -153,22 +151,25 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final annual = packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
     final monthly = packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
     final isAnnualSelected = _selectedPackage?.packageType == PackageType.annual;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF16162A),
+      backgroundColor: AppColors.background(context),
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
+            decoration: BoxDecoration(
+              gradient: isDark
+                  ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1a0a3d),
-                  Color(0xFF16162a),
-                  Color(0xFF0a1a2a),
-                ],
+                colors: [Color(0xFF1a0a3d), Color(0xFF16162a), Color(0xFF0a1a2a)],
                 stops: [0.0, 0.5, 1.0],
+              )
+                  : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.background(context), AppColors.background(context)],
               ),
             ),
           ),
@@ -189,10 +190,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.08),
+                                color: AppColors.backgroundSubtle(context),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.close_rounded, color: Colors.white54, size: 18),
+                              child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 18),
                             ),
                           ),
                         ),
@@ -200,7 +201,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         Text(
                           'Start your 7-day FREE\ntrial to continue.',
                           style: GoogleFonts.poppins(
-                            color: Colors.white,
+                            color: AppColors.textPrimary(context),
                             fontSize: 30,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.5,
@@ -208,18 +209,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        _buildTimeline(),
+                        _buildTimeline(context),
                       ],
                     ),
                   ),
                 ),
-                // bottom pricing card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF1E1E35),
-                    borderRadius: BorderRadius.only(
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundCard(context),
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(28),
                       topRight: Radius.circular(28),
                     ),
@@ -258,12 +258,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.check_rounded, color: Color(0xFFEDB82A), size: 14),
+                          Icon(Icons.check_rounded, color: AppColors.accent(context), size: 14),
                           const SizedBox(width: 4),
                           Text(
                             'No Payment Due Now',
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: AppColors.textSecondary(context),
                               fontSize: 15,
                             ),
                           ),
@@ -282,18 +282,18 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _purchase,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFEDB82A),
-                            foregroundColor: const Color(0xFF1A1208),
+                            backgroundColor: AppColors.accent(context),
+                            foregroundColor: AppColors.accentText(context),
                             padding: const EdgeInsets.symmetric(vertical: 18),
                             shape: const StadiumBorder(),
                             elevation: 0,
                             textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
                           ),
                           child: _isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(color: Color(0xFF1A1208), strokeWidth: 2))
+                              child: CircularProgressIndicator(color: AppColors.accentText(context), strokeWidth: 2))
                               : Text(_ctaLabel),
                         ),
                       ),
@@ -306,7 +306,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             : '',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
-                          color: Colors.white.withValues(alpha: 0.3),
+                          color: AppColors.textSecondary(context),
                           fontSize: 12,
                         ),
                       ),
@@ -317,10 +317,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           child: Text(
                             'View all plans',
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: AppColors.textSecondary(context),
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              decorationColor: Colors.white.withValues(alpha: 0.3),
                             ),
                           ),
                         ),
@@ -336,32 +335,32 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     );
   }
 
-  List<_TimelineItem> get _timelineItems {
+  List<_TimelineItem> _timelineItems(BuildContext context) {
     return [
       _TimelineItem(
         icon: Icons.lock_open_rounded,
         label: 'Today',
         desc: 'Unlock all the app\'s features instantly.',
-        color: const Color(0xFFEDB82A),
+        color: AppColors.accent(context),
       ),
       _TimelineItem(
         icon: Icons.notifications_none_rounded,
         label: 'In 2 Days - Reminder',
         desc: 'We\'ll send you a reminder that your trial is ending soon.',
-        color: const Color(0xFFEDB82A),
+        color: AppColors.accent(context),
       ),
       _TimelineItem(
         icon: Icons.workspace_premium_rounded,
         label: 'In 7 Days - Billing Starts',
         desc: 'You\'ll be charged on $_billingDate unless you cancel anytime before.',
-        color: Colors.white.withValues(alpha: 0.15),
-        iconColor: Colors.white.withValues(alpha: 0.4),
+        color: AppColors.backgroundSubtle(context),
+        iconColor: AppColors.textSecondary(context),
       ),
     ];
   }
 
-  Widget _buildTimeline() {
-    final items = _timelineItems;
+  Widget _buildTimeline(BuildContext context) {
+    final items = _timelineItems(context);
     return Column(
       children: items.asMap().entries.map((entry) {
         final i = entry.key;
@@ -381,14 +380,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                   child: Icon(
                     item.icon,
-                    color: item.iconColor ?? const Color(0xFF1A1208),
+                    color: item.iconColor ?? AppColors.accentText(context),
                     size: 16,
                   ),
                 ),
                 Container(
                   width: 10,
                   height: isLast ? 30 : 80,
-                  color: const Color(0xFFEDB82A).withValues(alpha: 0.3),
+                  color: AppColors.accent(context).withValues(alpha: 0.3),
                 ),
               ],
             ),
@@ -402,7 +401,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     Text(
                       item.label,
                       style: GoogleFonts.poppins(
-                        color: Colors.white,
+                        color: AppColors.textPrimary(context),
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
@@ -411,7 +410,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     Text(
                       item.desc,
                       style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: AppColors.textSecondary(context),
                         fontSize: 15,
                         height: 1.4,
                       ),
@@ -449,7 +448,6 @@ class _PlanCard extends StatelessWidget {
   final String? badge;
   final bool isSelected;
   final VoidCallback onTap;
-
   const _PlanCard({
     required this.label,
     required this.price,
@@ -463,81 +461,81 @@ class _PlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF16162A),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isSelected ? const Color(0xFFEDB82A) : Colors.white.withValues(alpha: 0.12),
-                  width: isSelected ? 1.5 : 0.5,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: price,
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        TextSpan(
-                          text: period,
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.background(context),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected ? AppColors.accent(context) : AppColors.border(context),
+                width: isSelected ? 1.5 : 0.5,
               ),
             ),
-            if (badge != null)
-              Positioned(
-                top: -14,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEDB82A),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      badge!,
-                      style: GoogleFonts.poppins(
-                        color: const Color(0xFF1A1208),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    color: AppColors.textPrimary(context),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: price,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.textPrimary(context),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
+                      TextSpan(
+                        text: period,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.textSecondary(context),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (badge != null)
+            Positioned(
+              top: -14,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent(context),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: GoogleFonts.poppins(
+                      color: AppColors.accentText(context),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
+      ),
     );
   }
 }

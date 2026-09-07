@@ -95,68 +95,68 @@ class _PresetRow extends StatelessWidget {
         );
       },
 
-        borderRadius: BorderRadius.circular(16),
-        child: Opacity(
-          opacity: isLocked  ? 0.4 : 1.0, // 👈 dim when disabled
-          child: Padding(
+      borderRadius: BorderRadius.circular(16),
+      child: Opacity(
+        opacity: isLocked  ? 0.4 : 1.0, // 👈 dim when disabled
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            // emoji circle
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: preset.accentColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
+          child: Row(
+            children: [
+              // emoji circle
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: preset.accentColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(preset.emoji, style: const TextStyle(fontSize: 20)),
+                ),
               ),
-              child: Center(
-                child: Text(preset.emoji, style: const TextStyle(fontSize: 20)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            // name + time
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    preset.name,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.textPrimary(context),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Text(
-                        '${_fmt(preset.startTime)} - ${_fmt(preset.endTime)}',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary(context),
-                        ),
+              const SizedBox(width: 12),
+              // name + time
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      preset.name,
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textPrimary(context),
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Text(
+                          '${_fmt(preset.startTime)} - ${_fmt(preset.endTime)}',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            // + button
-            // + button
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: AppColors.backgroundSubtle(context), // 👈 was preset.accentColor
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border(context), width: 0.5), // 👈 new — subtle definition against the card
+              // + button
+              // + button
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundSubtle(context), // 👈 was preset.accentColor
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.border(context), width: 0.5), // 👈 new — subtle definition against the card
+                ),
+                child: Icon(Icons.add, color: AppColors.accent(context), size: 18), // 👈 was Colors.white — now gold, matches your accent color scheme elsewhere
               ),
-              child: Icon(Icons.add, color: AppColors.accent(context), size: 18), // 👈 was Colors.white — now gold, matches your accent color scheme elsewhere
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-        ),
     );
   }
 

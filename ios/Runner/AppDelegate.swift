@@ -315,6 +315,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
+        case "resetQuickBlockSelection":
+            if let args = call.arguments as? [String: Any], let cardId = args["cardId"] as? String {
+                service.resetQuickBlockSelection(cardId: cardId)
+            }
+            result(nil)
+        case "toggleQuickBlock":
+            if let args = call.arguments as? [String: Any],
+               let cardId = args["cardId"] as? String,
+               let blocked = args["blocked"] as? Bool {
+                service.toggleQuickBlock(cardId: cardId, blocked: blocked)
+            }
+            result(nil)
+        case "showQuickBlockPicker":
+            if let args = call.arguments as? [String: Any],
+               let cardId = args["cardId"] as? String,
+               let appLabel = args["appLabel"] as? String {
+                await showQuickBlockPicker(cardId: cardId, appLabel: appLabel, result: result)
+            } else {
+                result(FlutterError(code: "BAD_ARGS", message: "cardId and appLabel required", details: nil))
+            }
+        case "hasQuickBlockSelection":
+            if let args = call.arguments as? [String: Any], let cardId = args["cardId"] as? String {
+                result(service.hasQuickBlockSelection(cardId: cardId))
+            } else {
+                result(false)
+            }
         case "setUninstallProtectionEnabled":
             if let args = call.arguments as? [String: Any], let enabled = args["enabled"] as? Bool {
                 UserDefaults(suiteName: "group.com.eagle.pausenow")?.set(enabled, forKey: "uninstallProtectionEnabled")
@@ -789,6 +815,51 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         )
         rootVC.present(picker, animated: true)
     }
+    
+    @available(iOS 16.0, *)
+    @MainActor
+    private func showQuickBlockPicker(cardId: String, appLabel: String, result: @escaping FlutterResult) async {
+        guard let windowScene = UIApplication.shared
+            .connectedScenes
+            .first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?
+            .rootViewController
+        else {
+            result(FlutterError(
+                code: "NO_VIEW",
+                message: "No view controller",
+                details: nil
+            ))
+            return
+        }
+
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        let saveKey = "quickblock_\(cardId)"
+
+        let picker = FamilyActivityPickerViewController(
+            service: IOSBlockingService.shared,
+            onDismiss: {
+                if let data = sharedDefaults?.data(forKey: saveKey),
+                   let selection = try? JSONDecoder().decode(
+                       FamilyActivitySelection.self,
+                       from: data
+                   ) {
+                    let count = selection.applicationTokens.count
+                    NSLog("✅ quick-block picker dismissed for \(cardId) with \(count) apps saved")
+                    result(count)
+                } else {
+                    NSLog("✅ quick-block picker dismissed for \(cardId) with 0 apps saved")
+                    result(0)
+                }
+            },
+            saveKey: saveKey,
+            pickerTitle: "Choose \(appLabel)", // 👈 the custom title
+            requireSelection: true // 👈 new
+
+        )
+        rootVC.present(picker, animated: true)
+    }
+    
     
     @available(iOS 16.0, *)
     @MainActor

@@ -72,6 +72,8 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
   late int _workMinutes;
   late int _shortBreakMinutes;
   late bool _isPomodoroMode;
+  late bool _autoStartBreak; // 👈 new
+
   String? _expandedRow; // 👈 new — null means none expanded; otherwise 'work' / 'rest' / 'longRest'
 
   @override
@@ -80,6 +82,8 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
     _workMinutes = widget.config.workMinutes;
     _shortBreakMinutes = widget.config.shortBreakMinutes;
     _isPomodoroMode = widget.config.isPomodoroMode;
+    _autoStartBreak = widget.config.autoStartBreak; // 👈 new
+
   }
 
   @override
@@ -124,10 +128,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
               const Spacer(),
               if (!isPremium)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.accent(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(50),
@@ -141,6 +142,54 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.accent(context),
                       fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              else if (_isPomodoroMode) // 👈 new — only show when Pomodoro is actually enabled
+                GestureDetector(
+                  onTap: () => setState(() => _autoStartBreak = !_autoStartBreak),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundSubtle(context),
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(color: AppColors.border(context), width: 0.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Auto-start',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary(context),
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 32,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: _autoStartBreak ? AppColors.accent(context) : AppColors.backgroundCard(context),
+                            borderRadius: BorderRadius.circular(9),
+                            border: Border.all(color: AppColors.border(context), width: 0.5),
+                          ),
+                          child: AnimatedAlign(
+                            duration: const Duration(milliseconds: 200),
+                            alignment: _autoStartBreak ? Alignment.centerRight : Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.all(1.5),
+                              width: 13,
+                              height: 13,
+                              decoration: BoxDecoration(
+                                color: AppColors.textPrimary(context),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -260,6 +309,8 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   workMinutes: _workMinutes,
                   shortBreakMinutes: _shortBreakMinutes,
                   isPomodoroMode: _isPomodoroMode,
+                  autoStartBreak: _autoStartBreak, // 👈 new
+
                 ));
                 Navigator.pop(context);
               },

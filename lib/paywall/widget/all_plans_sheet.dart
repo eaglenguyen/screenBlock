@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import '../../core/theme/app_colors.dart';
 
 class AllPlansSheet extends StatefulWidget {
   final List<Package> packages;
@@ -21,9 +22,10 @@ class AllPlansSheet extends StatefulWidget {
   @override
   State<AllPlansSheet> createState() => _AllPlansSheetState();
 }
+
 class _AllPlansSheetState extends State<AllPlansSheet> {
   int _tabIndex = 0;
-  late Package? _localSelected; // 👈 new — local copy, updates immediately
+  late Package? _localSelected;
 
   String? _monthlyEquivalent(Package pkg) {
     if (pkg.packageType != PackageType.annual) return null;
@@ -37,20 +39,22 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
   void initState() {
     super.initState();
     _localSelected = widget.selectedPackage;
-    _tabIndex = 0; // 👈 always default to One-Time, regardless of incoming selection
+    _tabIndex = 0;
     _selectDefaultForTab(_tabIndex);
   }
+
   @override
   Widget build(BuildContext context) {
     final annual = widget.packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
     final monthly = widget.packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
     final lifetime = widget.packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Color(0xFF16162A),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundCard(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
         children: [
@@ -59,19 +63,25 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
               Container(
                 height: 220,
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+                decoration: BoxDecoration(
+                  gradient: isDark
+                      ? const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [Color(0xFF1a0a3d), Color(0xFF16162a)],
+                  )
+                      : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.backgroundSubtle(context), AppColors.backgroundCard(context)],
                   ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                 ),
-                child: ClipRRect( // 👈 new — keeps the image's corners rounded to match the container
+                child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                   child: Image.asset(
                     'assets/images/squareman.png',
-                    fit: BoxFit.cover, // fills the whole 220-height area, cropping if needed
+                    fit: BoxFit.cover,
                     width: double.infinity,
                     height: 220,
                   ),
@@ -86,7 +96,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.45), // 👈 was Colors.white.withValues(alpha: 0.15)
+                      color: Colors.black.withValues(alpha: 0.45),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
@@ -95,7 +105,6 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
               ),
             ],
           ),
-
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -105,28 +114,27 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E35),
+                      color: AppColors.backgroundSubtle(context),
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Row(
                       children: [
-                        Expanded(child: _tabButton('One-Time', 0)), // 👈 was 'Subscriptions', now index 0
-                        Expanded(child: _tabButton('Subscriptions', 1)), //
+                        Expanded(child: _tabButton(context, 'One-Time', 0)),
+                        Expanded(child: _tabButton(context, 'Subscriptions', 1)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
-
                   if (_tabIndex == 1) ...[
                     if (annual != null)
                       _PlanOptionRow(
                         label: 'Annual',
                         priceLine: '${annual.storeProduct.priceString}/year',
                         badge: 'Free Trial',
-                        discountBadge: '-58%', // 👈 new
+                        discountBadge: '-58%',
                         subLine: 'One Week Free, then ${_monthlyEquivalent(annual)}',
-                        isSelected: _localSelected?.identifier == annual.identifier, // 👈 local
-                        onTap: () => setState(() => _localSelected = annual), // 👈 local setState
+                        isSelected: _localSelected?.identifier == annual.identifier,
+                        onTap: () => setState(() => _localSelected = annual),
                       ),
                     if (annual != null && monthly != null)
                       const SizedBox(height: 12),
@@ -140,7 +148,6 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                         onTap: () => setState(() => _localSelected = monthly),
                       ),
                   ],
-
                   if (_tabIndex == 0) ...[
                     if (lifetime != null)
                       _PlanOptionRow(
@@ -157,7 +164,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                           child: Text(
                             'Lifetime plan not available',
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: AppColors.textSecondary(context),
                               fontSize: 14,
                             ),
                           ),
@@ -168,7 +175,6 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
               ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             child: SizedBox(
@@ -177,52 +183,49 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                 onPressed: widget.isLoading || _localSelected == null
                     ? null
                     : () {
-                  widget.onSelect(_localSelected!); // 👈 sync final choice back to parent
+                  widget.onSelect(_localSelected!);
                   Navigator.pop(context);
                   widget.onPurchase();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEDB82A),
-                  foregroundColor: const Color(0xFF1A1208),
+                  backgroundColor: AppColors.accent(context),
+                  foregroundColor: AppColors.accentText(context),
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: const StadiumBorder(),
                   elevation: 0,
                   textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
                 ),
                 child: Text(
-                  _tabIndex == 0
-                      ? 'Get Lifetime Access'
-                      : 'Redeem Your Free Week',
+                  _tabIndex == 0 ? 'Get Lifetime Access' : 'Redeem Your Free Week',
                 ),
               ),
             ),
           ),
-
           const SizedBox(height: 20),
-
         ],
       ),
     );
   }
 
-  Widget _tabButton(String label, int index) {
+  Widget _tabButton(BuildContext context, String label, int index) {
     final isActive = _tabIndex == index;
     return GestureDetector(
       onTap: () => setState(() {
         _tabIndex = index;
-        _selectDefaultForTab(index); // 👈 new
-      }),      child: AnimatedContainer(
+        _selectDefaultForTab(index);
+      }),
+      child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFEDB82A) : Colors.transparent,
+          color: isActive ? AppColors.accent(context) : Colors.transparent,
           borderRadius: BorderRadius.circular(100),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
-            color: isActive ? const Color(0xFF1A1208) : Colors.white.withValues(alpha: 0.6),
+            color: isActive ? AppColors.accentText(context) : AppColors.textSecondary(context),
             fontSize: 14,
             fontWeight: FontWeight.w700,
           ),
@@ -230,28 +233,24 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
       ),
     );
   }
-// 👇 new — ensures something is always selected within the tab you just switched to
+
   void _selectDefaultForTab(int tabIndex) {
     final annual = widget.packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
     final monthly = widget.packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
     final lifetime = widget.packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull;
 
     if (tabIndex == 1) {
-      // Subscriptions
       final isAlreadyValid = _localSelected?.packageType == PackageType.annual ||
           _localSelected?.packageType == PackageType.monthly;
       if (!isAlreadyValid) {
         _localSelected = annual ?? monthly;
       }
     } else {
-      // One-Time
       if (_localSelected?.packageType != PackageType.lifetime) {
         _localSelected = lifetime;
       }
     }
   }
-
-
 }
 
 class _PlanOptionRow extends StatelessWidget {
@@ -259,7 +258,7 @@ class _PlanOptionRow extends StatelessWidget {
   final String priceLine;
   final String subLine;
   final String? badge;
-  final String? discountBadge; // 👈 new
+  final String? discountBadge;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -268,7 +267,7 @@ class _PlanOptionRow extends StatelessWidget {
     required this.priceLine,
     required this.subLine,
     this.badge,
-    this.discountBadge, // 👈 new
+    this.discountBadge,
     required this.isSelected,
     required this.onTap,
   });
@@ -281,10 +280,10 @@ class _PlanOptionRow extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E35),
+          color: AppColors.background(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? const Color(0xFFEDB82A) : Colors.white.withValues(alpha: 0.12),
+            color: isSelected ? AppColors.accent(context) : AppColors.border(context),
             width: isSelected ? 1.5 : 0.5,
           ),
         ),
@@ -295,14 +294,14 @@ class _PlanOptionRow extends StatelessWidget {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? const Color(0xFFEDB82A) : Colors.transparent,
+                color: isSelected ? AppColors.accent(context) : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFFEDB82A) : Colors.white.withValues(alpha: 0.3),
+                  color: isSelected ? AppColors.accent(context) : AppColors.textSecondary(context),
                   width: 1.5,
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check_rounded, color: Color(0xFF1A1208), size: 14)
+                  ? Icon(Icons.check_rounded, color: AppColors.accentText(context), size: 14)
                   : null,
             ),
             const SizedBox(width: 14),
@@ -315,24 +314,24 @@ class _PlanOptionRow extends StatelessWidget {
                       Text(
                         label,
                         style: GoogleFonts.poppins(
-                          color: Colors.white,
+                          color: AppColors.textPrimary(context),
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (discountBadge != null) ...[ // 👈 new — sits right next to the label
+                      if (discountBadge != null) ...[
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEDB82A).withValues(alpha: 0.15),
+                            color: AppColors.accent(context).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFEDB82A).withValues(alpha: 0.4), width: 0.5),
+                            border: Border.all(color: AppColors.accent(context).withValues(alpha: 0.4), width: 0.5),
                           ),
                           child: Text(
                             discountBadge!,
                             style: GoogleFonts.poppins(
-                              color: const Color(0xFFEDB82A),
+                              color: AppColors.accent(context),
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
                             ),
@@ -346,7 +345,7 @@ class _PlanOptionRow extends StatelessWidget {
                     Text(
                       priceLine,
                       style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: AppColors.textSecondary(context),
                         fontSize: 13,
                       ),
                     ),
@@ -355,7 +354,7 @@ class _PlanOptionRow extends StatelessWidget {
                   Text(
                     subLine,
                     style: GoogleFonts.poppins(
-                      color: Colors.white.withValues(alpha: 0.4),
+                      color: AppColors.textSecondary(context),
                       fontSize: 11.5,
                     ),
                   ),
@@ -366,13 +365,13 @@ class _PlanOptionRow extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEDB82A),
+                  color: AppColors.accent(context),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   badge!,
                   style: GoogleFonts.poppins(
-                    color: const Color(0xFF1A1208),
+                    color: AppColors.accentText(context),
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),

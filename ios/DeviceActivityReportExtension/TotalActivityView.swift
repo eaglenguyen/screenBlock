@@ -66,12 +66,12 @@ struct TotalActivityView: View {
                             )
                             if index < min(configuration.appUsages.count, 15) - 1 {
                                 Divider()
-                                    .background(Color(red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255))
+                                    .background(isDark ? Color(red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255) : Color(red: 0xE0/255, green: 0xE0/255, blue: 0xE0/255))
                                     .padding(.leading, 64)
                             }
                         }
                     }
-                    .background(Color(red: 0x30/255, green: 0x30/255, blue: 0x30/255))
+                    .background(cardColor) 
                     .cornerRadius(20)
                     .padding(.horizontal, 16)
                 }
@@ -86,11 +86,21 @@ struct AppUsageRow: View {
     let app: AppUsageData
     let maxDuration: TimeInterval
 
+    private var isDark: Bool {
+        UserDefaults(suiteName: "group.com.eagle.pausenow")?.bool(forKey: "appIsDarkMode") ?? true
+    }
+    private var textPrimary: Color {
+        isDark ? .white : Color(red: 0x17/255, green: 0x17/255, blue: 0x1A/255)
+    }
+    private var trackColor: Color {
+        isDark ? Color(red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255) : Color(red: 0xE0/255, green: 0xE0/255, blue: 0xE0/255)
+    }
+
     var proportion: Double {
         guard maxDuration > 0 else { return 0 }
         return min(app.duration / maxDuration, 1.0)
     }
-    
+
     var fallbackIcon: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
@@ -106,27 +116,23 @@ struct AppUsageRow: View {
         HStack(spacing: 12) {
             appIconView
                 .frame(width: 40, height: 40)
-
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(app.name)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(textPrimary) // 👈 was hardcoded .white
                         .lineLimit(1)
                     Spacer()
                     Text(app.formattedDuration)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(Color(
-                            red: 237/255, green: 184/255, blue: 42/255 // gold — unchanged, no navy here
+                            red: 237/255, green: 184/255, blue: 42/255
                         ))
                 }
-
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: 3)
-                            .fill(Color(
-                                red: 0x3A/255, green: 0x3A/255, blue: 0x3A/255 // 👈 was navy 42/42/72
-                            ))
+                            .fill(trackColor) // 👈 was hardcoded 0x3A3A3A
                             .frame(height: 4)
                         RoundedRectangle(cornerRadius: 3)
                             .fill(Color(
@@ -144,8 +150,7 @@ struct AppUsageRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
     }
-    
-    
+
     @ViewBuilder
     var appIconView: some View {
         if let token = app.token {
@@ -157,7 +162,6 @@ struct AppUsageRow: View {
             fallbackIcon
         }
     }
-    
 
     func iconColor(for name: String) -> Color {
         let colors: [Color] = [

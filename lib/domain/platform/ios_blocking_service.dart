@@ -299,7 +299,25 @@ class IOSBlockingService implements BlockingService {
     }
   }
 
+  Future<int?> showQuickBlockPicker({required String cardId, required String appLabel}) async {
+    final count = await _channel.invokeMethod<int>('showQuickBlockPicker', {
+      'cardId': cardId,
+      'appLabel': appLabel,
+    });
+    return count;
+  }
 
+  Future<void> toggleQuickBlock({required String cardId, required bool blocked}) async {
+    await _channel.invokeMethod('toggleQuickBlock', {'cardId': cardId, 'blocked': blocked});
+  }
+
+  Future<bool> hasQuickBlockSelection(String cardId) async {
+    final result = await _channel.invokeMethod<bool>('hasQuickBlockSelection', {'cardId': cardId});
+    return result ?? false;
+  }
+  Future<void> resetQuickBlockSelection(String cardId) async {
+    await _channel.invokeMethod('resetQuickBlockSelection', {'cardId': cardId});
+  }
 
 
   @override

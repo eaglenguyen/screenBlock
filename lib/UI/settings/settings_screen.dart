@@ -18,6 +18,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/theme.notifier.dart';
+import '../../featuress/quickblock/quick_block_viewmodel.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/premium_provider.dart';
 import '../stats/widgets/goal_settings_sheet.dart';
@@ -283,6 +284,13 @@ class SettingsScreen extends ConsumerWidget {
                             }
                           });
                         },
+                      ),
+                      SettingsRow(
+                        icon: Icons.refresh_rounded,
+                        iconColor: AppColors.textSecondary(context), // 👈 add — matches the pattern used everywhere else
+                        iconBgColor: AppColors.backgroundSubtle(context), // 👈 add
+                        label: 'Reset Quick Blocks',
+                        onTap: () => _showResetAllConfirm(context, ref),
                       ),
                       SettingsRow(
                         icon: Icons.refresh_rounded,
@@ -676,6 +684,48 @@ class SettingsScreen extends ConsumerWidget {
                 shape: const StadiumBorder(),
               ),
               child: const Text('Okay'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showResetAllConfirm(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundCard(context),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Reset all Quick Blocks?', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)), textAlign: TextAlign.center),
+        content: Text(
+          'Clears every app you\'ve picked for Quick Block cards, and unblocks anything currently active.',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await ref.read(quickBlockViewModelProvider.notifier).resetAll();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error(context),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: const StadiumBorder(),
+              ),
+              child: const Text('Reset All'),
+            ),
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary(context))),
             ),
           ),
         ],

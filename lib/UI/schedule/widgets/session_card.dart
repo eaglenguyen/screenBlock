@@ -118,6 +118,7 @@ class SessionCard extends StatelessWidget {
       child: Column(
         children: [
           GestureDetector(
+            behavior: HitTestBehavior.opaque, // 👈 new
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -199,6 +200,7 @@ class SessionCard extends StatelessWidget {
                   Opacity(
                     opacity: isHardModeLocked ? 0.35 : 1.0,
                     child: GestureDetector(
+                      behavior: HitTestBehavior.opaque, // 👈 new
                       onTap: isHardModeLocked
                           ? null
                           : () {

@@ -5,16 +5,18 @@ import DeviceActivity
 struct ScreenTimeReportView: View {
     let id: UUID
     let targetDate: Date
-
     @State private var reportId = UUID()
     @State private var showRetryPrompt = false
+
+    private var isDark: Bool {
+        UserDefaults(suiteName: "group.com.eagle.pausenow")?.bool(forKey: "appIsDarkMode") ?? true
+    }
 
     private var filter: DeviceActivityFilter {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: targetDate)
         let isToday = calendar.isDateInToday(targetDate)
         let endOfInterval = isToday ? Date() : calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-
         return DeviceActivityFilter(
             segment: .daily(
                 during: DateInterval(start: startOfDay, end: endOfInterval)
@@ -43,30 +45,27 @@ struct ScreenTimeReportView: View {
                     }) {
                         Text("Retry")
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(Color(red: 26/255, green: 18/255, blue: 8/255))
+                            .foregroundColor(isDark ? Color(red: 26/255, green: 18/255, blue: 8/255) : .white) // 👈 needs to work on both accent colors, see note below
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
-                            .background(Color(red: 237/255, green: 184/255, blue: 42/255))
+                            .background(isDark ? Color(red: 0xD4/255, green: 0xCF/255, blue: 0xC4/255) : Color(red: 0x7D/255, green: 0xD3/255, blue: 0xB0/255)) // 👈 was hardcoded gold — now matches accent()
                             .clipShape(Capsule())
                     }
                 } else {
                     ProgressView()
-                        .tint(Color(red: 237/255, green: 184/255, blue: 42/255))
+                        .tint(isDark ? Color(red: 0xD4/255, green: 0xCF/255, blue: 0xC4/255) : Color(red: 0x7D/255, green: 0xD3/255, blue: 0xB0/255)) // 👈 was hardcoded gold
                 }
             }
-
             DeviceActivityReport(.init("Total Activity"), filter: filter)
                 .id(reportId)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            // 👇 new — invisible, triggers CompactActivityDisplay's write side-effect
             DeviceActivityReport(.init("Compact Activity"), filter: filter)
                 .id(reportId)
                 .frame(width: 1, height: 1)
                 .opacity(0)
                 .allowsHitTesting(false)
         }
-        .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
+        .background(isDark ? Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255) : Color.white) // 👈 was hardcoded dark only
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
                 showRetryPrompt = true

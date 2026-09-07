@@ -1,4 +1,5 @@
 // lib/data/repositoryImpl/quick_block_repository.dart
+import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
 import '../../core/constants/hivebox_names.dart';
 import '../models/quick_block.dart';
@@ -25,6 +26,7 @@ class QuickBlockRepository {
 
   Future<void> unblock(String packageName) async {
     final matches = _box.values.where((q) => q.packageName == packageName).toList();
+    debugPrint('🔍 unblock($packageName) — found ${matches.length} matching records');
     for (final m in matches) {
       await m.delete();
     }

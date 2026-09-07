@@ -12,10 +12,8 @@ import '../core/analytics/analytics_events.dart';
 import '../core/analytics/analytics_service.dart';
 
 class FeaturePaywallScreen extends ConsumerStatefulWidget {
-  final String source; // 👈 add this
-
+  final String source;
   const FeaturePaywallScreen({super.key, required this.source});
-
   @override
   ConsumerState<FeaturePaywallScreen> createState() => _FeaturePaywallScreenState();
 }
@@ -41,8 +39,6 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   void initState() {
     super.initState();
     _loadOfferings();
-
-    // 👇 track paywall view with its source
     AnalyticsService.instance.capture(
       AnalyticsEvents.paywallViewed,
       {AnalyticsProps.source: widget.source},
@@ -86,7 +82,6 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     }
   }
 
-
   Future<void> _purchase() async {
     if (_selectedPackage == null) return;
     setState(() { _isLoading = true; _error = null; });
@@ -98,8 +93,6 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
           .containsKey('pause now Premium');
       if (isPremium && mounted) {
         ref.invalidate(premiumProvider);
-
-        // 👇 track purchase with source + plan
         await AnalyticsService.instance.capture(
           AnalyticsEvents.purchaseCompleted,
           {
@@ -107,14 +100,11 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
             AnalyticsProps.plan: _selectedPackage!.packageType.name,
           },
         );
-
         final box = Hive.box(HiveBoxNames.settings);
         await box.put('paywallSeen', true);
-
-        if (mounted) await PurchaseSuccessScreen.show(context); // 👈 new — consistent with the other purchase flows
-
+        if (mounted) await PurchaseSuccessScreen.show(context);
         await Future.delayed(const Duration(milliseconds: 800));
-        if (mounted) Navigator.pop(context); // 👈 dismiss the bottom sheet
+        if (mounted) Navigator.pop(context);
       }
     } catch (e) {
       if (e is PurchasesError &&
@@ -142,18 +132,25 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final packages = _offerings?.current?.availablePackages ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF16162A),
+      backgroundColor: AppColors.background(context),
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
+            decoration: BoxDecoration(
+              gradient: isDark
+                  ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [Color(0xFF1a0a3d), Color(0xFF16162a), Color(0xFF0a1a2a)],
                 stops: [0.0, 0.5, 1.0],
+              )
+                  : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.background(context), AppColors.background(context)],
               ),
             ),
           ),
@@ -163,8 +160,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 40),
-
+                  const SizedBox(height: 40),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: RichText(
@@ -177,15 +173,15 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                         children: [
                           TextSpan(
                             text: 'pause now ',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: AppColors.textPrimary(context)),
                           ),
                           TextSpan(
                             text: 'Free',
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                            style: TextStyle(color: AppColors.textSecondary(context)),
                           ),
                           WidgetSpan(
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 40), // 👈 shift right
+                              padding: const EdgeInsets.only(left: 40),
                               child: RichText(
                                 text: TextSpan(
                                   style: GoogleFonts.poppins(
@@ -197,27 +193,27 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                                     TextSpan(
                                       text: 'vs ',
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.3),
+                                        color: AppColors.textSecondary(context),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                     TextSpan(
                                       text: 'pause now ',
-                                      style: const TextStyle(color: Color(0xFFEDB82A)),
+                                      style: TextStyle(color: AppColors.accent(context)),
                                     ),
                                     WidgetSpan(
                                       child: Container(
                                         margin: const EdgeInsets.only(left: 4),
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFEDB82A),
+                                          color: AppColors.accent(context),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: Text(
                                           'Pro',
                                           style: GoogleFonts.poppins(
-                                            color: const Color(0xFF1A1208),
+                                            color: AppColors.accentText(context),
                                             fontSize: 14,
                                             fontWeight: FontWeight.w800,
                                           ),
@@ -233,15 +229,9 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                       ),
                     ),
                   ),
-
-                  SizedBox(height: 16),
-
-                  // ── Free vs Pro comparison table ──────
-                  _buildComparisonTable(),
+                  const SizedBox(height: 16),
+                  _buildComparisonTable(context),
                   const SizedBox(height: 28),
-
-                  
-                  // error
                   if (_error != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -250,37 +240,35 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                           style: GoogleFonts.poppins(
                               color: AppColors.error(context), fontSize: 13)),
                     ),
-
-                  // CTA
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _purchase,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accent(context),
-                        foregroundColor: const Color(0xFF1A1208),
+                        foregroundColor: AppColors.accentText(context),
                         padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder( // 👈 was const StadiumBorder()
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                        ),                                            elevation: 0,
+                        ),
+                        elevation: 0,
                         textStyle: GoogleFonts.poppins(
                             fontSize: 17, fontWeight: FontWeight.w800),
                       ),
                       child: _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                           width: 20, height: 20,
                           child: CircularProgressIndicator(
-                              color: Color(0xFF1A1208), strokeWidth: 2))
+                              color: AppColors.accentText(context), strokeWidth: 2))
                           : Text(_ctaLabel),
                     ),
                   ),
-                  
                   const SizedBox(height: 8),
                   Text(
                     _renewalText,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
-                      color: Colors.white,
+                      color: AppColors.textPrimary(context),
                       fontSize: 14,
                     ),
                   ),
@@ -292,18 +280,17 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                         child: Text(
                           'View all plans',
                           style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color: AppColors.textSecondary(context),
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             decoration: TextDecoration.underline,
-                            decorationColor: Colors.white.withValues(alpha: 0.3),
+                            decorationColor: AppColors.textSecondary(context),
                           ),
                         ),
                       ),
                     ),
                   ],
                   const SizedBox(height: 8),
-           
                 ],
               ),
             ),
@@ -318,10 +305,10 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: AppColors.backgroundSubtle(context),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                  child: Icon(Icons.close_rounded, color: AppColors.textPrimary(context), size: 18),
                 ),
               ),
             ),
@@ -331,31 +318,30 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     );
   }
 
-  Widget _buildComparisonTable() {
+  Widget _buildComparisonTable(BuildContext context) {
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFEDB82A).withValues(alpha: 0.2), // 👈 subtle gold border around the whole table
+              color: AppColors.accent(context).withValues(alpha: 0.2),
               width: 1,
             ),
           ),
-          clipBehavior: Clip.antiAlias, // 👈 replaces ClipRRect — clips children to the rounded border
+          clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
-              // header row — unchanged
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                color: const Color(0xFF141428),
+                color: AppColors.backgroundSubtle(context),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
                         '',
                         style: GoogleFonts.poppins(
-                          color: Colors.white,
+                          color: AppColors.textPrimary(context),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -366,7 +352,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                       child: Center(
                         child: Text('Free',
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: AppColors.textSecondary(context),
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             )),
@@ -379,12 +365,12 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 5),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEDB82A),
+                            color: AppColors.accent(context),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text('Pro',
                               style: GoogleFonts.poppins(
-                                color: const Color(0xFF1A1208),
+                                color: AppColors.accentText(context),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                               )),
@@ -394,8 +380,6 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                   ],
                 ),
               ),
-
-              // feature rows — unchanged
               ...List.generate(_features.length, (i) {
                 final f = _features[i];
                 final isLast = i == _features.length - 1;
@@ -403,13 +387,13 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
                   decoration: BoxDecoration(
                     color: i % 2 == 0
-                        ? const Color(0xFF1E1E35)
-                        : const Color(0xFF191930),
+                        ? AppColors.backgroundCard(context)
+                        : AppColors.background(context),
                     border: isLast
                         ? null
                         : Border(
                       bottom: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: AppColors.border(context),
                         width: 0.5,
                       ),
                     ),
@@ -419,18 +403,18 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                       Expanded(
                         child: Text(f.label,
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: AppColors.textPrimary(context),
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             )),
                       ),
                       SizedBox(
                         width: 64,
-                        child: Center(child: _statusIcon(f.free, false)),
+                        child: Center(child: _statusIcon(context, f.free, false)),
                       ),
                       SizedBox(
                         width: 64,
-                        child: Center(child: _statusIcon(f.pro, true)),
+                        child: Center(child: _statusIcon(context, f.pro, true)),
                       ),
                     ],
                   ),
@@ -443,22 +427,22 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     );
   }
 
-  Widget _statusIcon(bool included, bool isPro) {
+  Widget _statusIcon(BuildContext context, bool included, bool isPro) {
     if (included) {
       return Container(
         width: 26, height: 26,
         decoration: BoxDecoration(
-          color: isPro ? const Color(0xFFEDB82A) : const Color(0xFF4CAF50),
+          color: isPro ? AppColors.accent(context) : AppColors.success(context),
           shape: BoxShape.circle,
         ),
         child: Icon(Icons.check_rounded,
-            color: isPro ? const Color(0xFF1A1208) : Colors.white, size: 15),
+            color: isPro ? AppColors.accentText(context) : Colors.white, size: 15),
       );
     } else {
       return Container(
         width: 26, height: 26,
-        decoration: const BoxDecoration(
-          color: Color(0xFFE53935),
+        decoration: BoxDecoration(
+          color: AppColors.error(context),
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.close_rounded, color: Colors.white, size: 15),
@@ -467,159 +451,9 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   }
 }
 
-// ── Feature item ──────────────────────────────────────
-
 class _FeatureItem {
   final String label;
   final bool free;
   final bool pro;
   const _FeatureItem({required this.label, required this.free, required this.pro});
 }
-
-// ── Plan Card ─────────────────────────────────────────
-
-class _PlanCard extends StatelessWidget {
-  final String label;
-  final String price;
-  final String period;
-  final String? badge;
-  final String? monthlyEquivalent;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final bool fullWidth;
-
-  const _PlanCard({
-    required this.label,
-    required this.price,
-    required this.period,
-    required this.badge,
-    this.monthlyEquivalent,
-    required this.isSelected,
-    required this.onTap,
-    this.fullWidth = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.fromLTRB(16, 22, 16, 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFEDB82A).withValues(alpha: 0.08)
-              : const Color(0xFF1E1E35),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFFEDB82A)
-                : Colors.white.withValues(alpha: 0.1),
-            width: isSelected ? 1.5 : 0.5,
-          ),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            if (badge != null)
-              Positioned(
-                top: -32, right: 0,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFFEDB82A)
-                        : Colors.white.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(badge!,
-                      style: GoogleFonts.poppins(
-                        color: isSelected
-                            ? const Color(0xFF1A1208)
-                            : Colors.white.withValues(alpha: 0.4),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                      )),
-                ),
-              ),
-            Row(
-              mainAxisAlignment: fullWidth
-                  ? MainAxisAlignment.spaceBetween
-                  : MainAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label,
-                        style: GoogleFonts.poppins(
-                          color: isSelected
-                              ? const Color(0xFFEDB82A)
-                              : Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        )),
-                    const SizedBox(height: 2),
-                    if (monthlyEquivalent != null) ...[
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: price,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            TextSpan(
-                              text: period,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white.withValues(alpha: 0.45),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '($monthlyEquivalent)',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ]
-                    else
-                      RichText(
-                        text: TextSpan(children: [
-                          TextSpan(
-                            text: price,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          TextSpan(
-                            text: period,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.45),
-                              fontSize: 11,
-                            ),
-                          ),
-                        ]),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-

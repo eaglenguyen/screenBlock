@@ -645,6 +645,31 @@ class IOSBlockingService: NSObject {
         store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
     }
     
+    func toggleQuickBlock(cardId: String, blocked: Bool) {
+        guard let data = sharedDefaults?.data(forKey: "quickblock_\(cardId)"),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else { return }
+
+        var shielded = store.shield.applications ?? []
+        if blocked {
+            shielded.formUnion(selection.applicationTokens)
+        } else {
+            shielded.subtract(selection.applicationTokens)
+        }
+        store.shield.applications = shielded.isEmpty ? nil : shielded
+    }
+    
+    func hasQuickBlockSelection(cardId: String) -> Bool {
+        return sharedDefaults?.data(forKey: "quickblock_\(cardId)") != nil
+    }
+    
+    func resetQuickBlockSelection(cardId: String) {
+        toggleQuickBlock(cardId: cardId, blocked: false)
+        sharedDefaults?.removeObject(forKey: "quickblock_\(cardId)")
+        sharedDefaults?.synchronize()
+    }
+
+    
     
 
 }

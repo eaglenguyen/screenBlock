@@ -127,7 +127,7 @@ class _TimerCardState extends State<TimerCard>
       child: Column(
         children: [
           Text(
-            'Manual Sessions',
+            'Focus Session',
             style: AppTextStyles.headlineSmall.copyWith(fontSize: 25),
           ),
           const SizedBox(height: 8),

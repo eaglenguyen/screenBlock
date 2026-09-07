@@ -2,28 +2,30 @@
 //  FamilyActivityPickerViewController.swift
 //  Runner
 //
-//  Created by Egor on 5/18/26.
-//
-
 import UIKit
 import SwiftUI
 import FamilyControls
 
 @available(iOS 16.0, *)
 class FamilyActivityPickerViewController: UIViewController {
-
     private let service: IOSBlockingService
     private let onDismiss: () -> Void
     private let saveKey: String
+    private let pickerTitle: String
+    private let requireSelection: Bool // 👈 new
 
     init(
         service: IOSBlockingService,
         onDismiss: @escaping () -> Void,
-        saveKey: String = "blockedApps"
+        saveKey: String = "blockedApps",
+        pickerTitle: String = "Select Apps",
+        requireSelection: Bool = false // 👈 new
     ) {
         self.service = service
         self.onDismiss = onDismiss
         self.saveKey = saveKey
+        self.pickerTitle = pickerTitle
+        self.requireSelection = requireSelection // 👈 new
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -33,7 +35,6 @@ class FamilyActivityPickerViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         let pickerView = FamilyActivityPickerView(
             service: service,
             onDismiss: { [weak self] in
@@ -41,9 +42,10 @@ class FamilyActivityPickerViewController: UIViewController {
                     self?.onDismiss()
                 }
             },
-            saveKey: saveKey // 👈 pass through
+            saveKey: saveKey,
+            title: pickerTitle,
+            requireSelection: requireSelection // 👈 new
         )
-
         let hostingController = UIHostingController(
             rootView: pickerView
         )
@@ -58,19 +60,35 @@ class FamilyActivityPickerViewController: UIViewController {
     }
 }
 
+
+
 @available(iOS 16.0, *)
 struct FamilyActivityPickerView: View {
-
     let service: IOSBlockingService
     let onDismiss: () -> Void
     let saveKey: String
-
+    let title: String
+    let requireSelection: Bool // 👈 new — defaults false to preserve existing pickers' behavior
     @State private var selection = FamilyActivitySelection()
+
+    init(
+        service: IOSBlockingService,
+        onDismiss: @escaping () -> Void,
+        saveKey: String,
+        title: String,
+        requireSelection: Bool = false // 👈 new
+    ) {
+        self.service = service
+        self.onDismiss = onDismiss
+        self.saveKey = saveKey
+        self.title = title
+        self.requireSelection = requireSelection
+    }
 
     var body: some View {
         NavigationView {
             FamilyActivityPicker(selection: $selection)
-                .navigationTitle("Select Apps")
+                .navigationTitle(title)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
@@ -88,12 +106,10 @@ struct FamilyActivityPickerView: View {
                             onDismiss()
                         }
                         .fontWeight(.semibold)
-                        // 👈 remove the disabled condition entirely
-                        // allow saving even with empty selection
+                        .disabled(requireSelection && selection.applicationTokens.isEmpty) // 👈 new
                     }
                 }
                 .onAppear {
-                    // load previously saved selection
                     loadSavedSelection()
                 }
         }
@@ -111,12 +127,10 @@ struct FamilyActivityPickerView: View {
             print("🦅 no shared defaults available")
             return
         }
-
         guard let data = defaults.data(forKey: saveKey) else {
             print("🦅 no saved selection for key: \(saveKey)")
             return
         }
-
         do {
             let saved = try JSONDecoder().decode(
                 FamilyActivitySelection.self,

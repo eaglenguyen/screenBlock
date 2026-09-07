@@ -41,7 +41,7 @@ struct CompactScreenTimeView: View {
                 .id(reportId)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255))
+        .background(Color.clear)
         .onAppear {
             scheduleAutoRetry()
         }

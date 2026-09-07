@@ -535,15 +535,65 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
     return 'Custom';
   }
 
+
+  void _showValidationDialog(BuildContext context, {required String title, required String message}) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundCard(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.headlineSmall.copyWith(
+            color: AppColors.textPrimary(context),
+          ),
+        ),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary(context),
+          ),
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: AppColors.accentText(context),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: const StadiumBorder(),
+              ),
+              child: const Text('Got it'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _onSave() async {
-    if (_nameController.text.trim().isEmpty) return;
-    if (_packageNames.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pick at least one app'), backgroundColor: Colors.red),
+    if (_nameController.text.trim().isEmpty) {
+      _showValidationDialog(
+        context,
+        title: 'Name Required',
+        message: 'Please enter a name for this time limit!',
       );
       return;
     }
-
+    if (_packageNames.isEmpty) {
+      _showValidationDialog(
+        context,
+        title: 'No Apps Selected',
+        message: 'Please pick at least 1 app to add a time limit to!',
+      );
+      return;
+    }
     await ref.read(timeLimitViewModelProvider.notifier).saveConfig(
       existingId: _configId,
       name: _nameController.text.trim(),
@@ -554,7 +604,6 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
     );
     if (mounted) Navigator.pop(context);
   }
-
 
 
   Future<void> _onDelete() async {

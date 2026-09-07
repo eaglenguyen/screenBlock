@@ -1,10 +1,3 @@
-//
-//  CompactActivityDisplay.swift
-//  Runner
-//
-//  Created by Egor on 7/16/26.
-//
-
 import SwiftUI
 import DeviceActivity
 
@@ -18,7 +11,7 @@ struct CompactActivityDisplay: View {
     var body: some View {
         Text(configuration.formattedTotal)
             .font(.system(size: 32, weight: .bold))
-            .foregroundColor(isDark ? .white : Color(red: 0x17/255, green: 0x17/255, blue: 0x1A/255))
+            .foregroundColor(isDark ? .white : Color(red: 0x4A/255, green: 0x37/255, blue: 0x28/255)) // 👈 was 0x17171A
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(isDark ? Color(red: 0x25/255, green: 0x25/255, blue: 0x25/255) : Color.white)
     }
