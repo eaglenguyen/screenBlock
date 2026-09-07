@@ -24,7 +24,7 @@ class SpinWheelCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.gold(context).withValues(alpha: 0.15),
+                color: AppColors.accent(context).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Center(child: Text('🎡', style: TextStyle(fontSize: 22))),

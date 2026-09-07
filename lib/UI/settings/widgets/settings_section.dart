@@ -25,17 +25,11 @@ class SettingsRow {
 }
 
 class SettingsSection extends StatelessWidget {
-  const SettingsSection({
-    super.key,
-    required this.label,
-    required this.rows,
-    this.labelFlair, // 👈 new
-
-  });
+  const SettingsSection({super.key, required this.label, required this.rows, this.labelFlair});
 
   final String label;
   final List<SettingsRow> rows;
-  final String? labelFlair; // 👈 new
+  final String? labelFlair;
 
   @override
   Widget build(BuildContext context) {
@@ -44,70 +38,57 @@ class SettingsSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Row( // 👈 was a bare Text — now a Row so the flair can sit beside it
-            children: [
-              Text(
-                label.toUpperCase(),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary(context),
-                  letterSpacing: 0.1,
-                  fontSize: 14,
-                ),
-              ),
-              if (labelFlair != null) ...[ // 👈 new
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold(context).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: AppColors.gold(context).withValues(alpha: 0.3),
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Text(
-                    labelFlair!.toUpperCase(),
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.gold(context),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.backgroundCard(context),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.border(context),
-              width: 0.5,
+          child: Text(
+            label,
+            style: AppTextStyles.headlineSmall.copyWith(
+              color: AppColors.textPrimary(context),
+              fontWeight: FontWeight.w800,
             ),
           ),
-          child: Column(
-            children: List.generate(rows.length, (index) {
-              final row = rows[index];
-              final isLast = index == rows.length - 1;
-              return Column(
-                children: [
-                  _buildRow(row, context),
-                  if (!isLast)
-                    Divider(
-                      height: 0.5,
-                      thickness: 0.5,
-                      color: AppColors.border(context),
-                      indent: 16,
-                      endIndent: 16,
-                    ),
+        ),
+        // 👇 REPLACE FROM HERE...
+        Stack(
+          clipBehavior: Clip.none, // 👈 required — lets the back layer render outside the front card's bounds
+          children: [
+            Positioned(
+              top: 6,
+              left: 4,
+              right: 4,
+              bottom: -8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.cardLip(context), // 👈 was the raw hex
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.backgroundCard(context),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
-              );
-            }),
-          ),
+              ),
+              child: Column(
+                children: List.generate(rows.length, (index) {
+                  final row = rows[index];
+                  final isLast = index == rows.length - 1;
+                  return Column(
+                    children: [
+                      _buildRow(row, context),
+                      if (!isLast)
+                        Divider(height: 0.5, thickness: 0.5, color: AppColors.border(context), indent: 60, endIndent: 16),
+                    ],
+                  );
+                }),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -118,34 +99,24 @@ class SettingsSection extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: row.onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 20,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
               _buildIcon(row),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   row.label,
                   style: AppTextStyles.bodyLarge.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: row.isDanger
-                        ? AppColors.error(context)
-                        : AppColors.textPrimary(context),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: row.isDanger ? AppColors.error(context) : AppColors.textPrimary(context),
                   ),
                 ),
               ),
-              row.trailing ??
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.textSecondary(context),
-                    size: 20,
-                  ),
+              row.trailing ?? Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary(context), size: 20),
             ],
           ),
         ),
@@ -155,27 +126,15 @@ class SettingsSection extends StatelessWidget {
 
   Widget _buildIcon(SettingsRow row) {
     return Container(
-      width: 40,
-      height: 40,
+      width: 34,
+      height: 34,
       decoration: BoxDecoration(
         color: row.iconBgColor,
-        borderRadius: BorderRadius.circular(8),
+        shape: BoxShape.circle, // was rounded rect
       ),
       child: row.iconAsset != null
-          ? ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(
-          row.iconAsset!,
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-        ),
-      )
-          : Icon(
-        row.icon!,
-        color: row.iconColor,
-        size: 22,
-      ),
+          ? ClipOval(child: Image.asset(row.iconAsset!, width: 34, height: 34, fit: BoxFit.cover))
+          : Icon(row.icon!, color: row.iconColor, size: 18),
     );
   }
 }

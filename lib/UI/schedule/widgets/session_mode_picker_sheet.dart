@@ -179,7 +179,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                   width: 1,
                   height: 88,
                   margin: const EdgeInsets.symmetric(vertical: 8),
-                  color: AppColors.gold(context).withValues(alpha: 0.5),
+                  color: AppColors.accent(context).withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(width: 8),
@@ -253,7 +253,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                 color: AppColors.backgroundSubtle(context),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.gold(context).withValues(alpha: 0.8),
+                  color: AppColors.accent(context).withValues(alpha: 0.8),
                   width: 1,
                 ),
               ),
@@ -297,7 +297,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                     children: [
                       Icon(
                         Icons.lock_rounded,
-                        color: AppColors.gold(context),
+                        color: AppColors.accent(context),
                         size: 16,
                       ),
                       const SizedBox(height: 4),
@@ -305,7 +305,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                         'Upgrade to unlock',
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.gold(context),
+                          color: AppColors.accent(context),
                           fontWeight: FontWeight.w700,
                         ),
                       ),

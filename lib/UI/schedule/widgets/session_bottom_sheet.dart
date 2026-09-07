@@ -179,7 +179,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: _isAllDay
-                ? AppColors.gold(context).withValues(alpha: 0.4)
+                ? AppColors.accent(context).withValues(alpha: 0.4)
                 : AppColors.border(context),
             width: 0.5,
           ),
@@ -202,7 +202,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
               height: 24,
               decoration: BoxDecoration(
                 color: _isAllDay
-                    ? AppColors.gold(context)
+                    ? AppColors.accent(context)
                     : AppColors.backgroundSubtle(context),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border(context), width: 0.5),
@@ -260,7 +260,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
           children: [
             Text(label, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context))),
             const Spacer(),
-            Text(value, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gold(context))),
+            Text(value, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.accent(context))),
           ],
         ),
       ),
@@ -317,7 +317,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                     Icon(
                       Icons.apps_rounded,
                       color: !isAllApps
-                          ? AppColors.gold(context)
+                          ? AppColors.accent(context)
                           : AppColors.textSecondary(context),
                       size: 18,
                     ),
@@ -326,7 +326,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                       'Specific Apps',
                       style: AppTextStyles.bodyLarge.copyWith(
                         color: !isAllApps
-                            ? AppColors.gold(context)
+                            ? AppColors.accent(context)
                             : AppColors.textPrimary(context),
                         fontWeight: !isAllApps
                             ? FontWeight.w700
@@ -336,7 +336,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                     if (!isAllApps) ...[
                       const Spacer(),
                       Icon(Icons.check_rounded,
-                          color: AppColors.gold(context), size: 16),
+                          color: AppColors.accent(context), size: 16),
                     ],
                   ],
                 ),
@@ -348,7 +348,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                     Icon(
                       Icons.block_rounded,
                       color: isAllApps
-                          ? AppColors.gold(context)
+                          ? AppColors.accent(context)
                           : AppColors.textSecondary(context),
                       size: 18,
                     ),
@@ -357,7 +357,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                       'All Apps',
                       style: AppTextStyles.bodyLarge.copyWith(
                         color: isAllApps
-                            ? AppColors.gold(context)
+                            ? AppColors.accent(context)
                             : AppColors.textPrimary(context),
                         fontWeight: isAllApps
                             ? FontWeight.w700
@@ -367,19 +367,19 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                     const Spacer(),
                     if (isAllApps)
                       Icon(Icons.check_rounded,
-                          color: AppColors.gold(context), size: 16),
+                          color: AppColors.accent(context), size: 16),
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.gold(context),
+                          color: AppColors.accent(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           'PRO',
                           style: TextStyle(
-                            color: AppColors.goldText(context),
+                            color: AppColors.accentText(context),
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
                           ),
@@ -394,13 +394,13 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                 Text(
                   isAllApps ? 'All Apps' : 'Specific Apps',
                   style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.gold(context),
+                    color: AppColors.accent(context),
                   ),
                 ),
                 const SizedBox(width: 4),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                   size: 18,
                 ),
               ],
@@ -509,13 +509,13 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.gold(context).withValues(alpha: 0.15),
+                            color: AppColors.accent(context).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Text(
                             '$count',
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.gold(context),
+                              color: AppColors.accent(context),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -558,7 +558,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
             children: [
               Text('On these days:', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context))),
               const Spacer(),
-              Text(_getDaysLabel(), style: AppTextStyles.bodySmall.copyWith(color: AppColors.gold(context))),
+              Text(_getDaysLabel(), style: AppTextStyles.bodySmall.copyWith(color: AppColors.accent(context))),
             ],
           ),
           const SizedBox(height: 12),
@@ -573,10 +573,10 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                   width: 34,
                   height: 34,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.gold(context) : AppColors.backgroundCard(context),
+                    color: isSelected ? AppColors.accent(context) : AppColors.backgroundCard(context),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? AppColors.gold(context) : AppColors.border(context),
+                      color: isSelected ? AppColors.accent(context) : AppColors.border(context),
                       width: 1.5,
                     ),
                   ),
@@ -584,7 +584,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                     child: Text(
                       days[index],
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: isSelected ? AppColors.goldText(context) : AppColors.textSecondary(context),
+                        color: isSelected ? AppColors.accentText(context) : AppColors.textSecondary(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -607,8 +607,8 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
           child: ElevatedButton(
             onPressed: _onSave,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.gold(context),
-              foregroundColor: AppColors.goldText(context),
+              backgroundColor: AppColors.accent(context),
+              foregroundColor: AppColors.accentText(context),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: const StadiumBorder(),
               textStyle: AppTextStyles.labelLarge,
@@ -791,7 +791,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                     child: Text(
                       'Save',
                       style: TextStyle(
-                        color: AppColors.gold(context),
+                        color: AppColors.accent(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -842,7 +842,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.dark(
-            primary: AppColors.gold(context),
+            primary: AppColors.accent(context),
             onSurface: AppColors.textPrimary(context),
           ),
         ),
@@ -881,8 +881,8 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
             child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: AppColors.accentText(context),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: const StadiumBorder(),
               ),
@@ -967,7 +967,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                   conflict.timeRange,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.gold(context),
+                    color: AppColors.accent(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -987,8 +987,8 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold(context),
-                    foregroundColor: AppColors.goldText(context),
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: AppColors.accentText(context),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: const StadiumBorder(),
                   ),

@@ -43,7 +43,7 @@ class ActiveBlockingCard extends StatelessWidget {
         color: AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: AppColors.gold(context).withOpacity(0.3),
+          color: AppColors.accent(context).withOpacity(0.3),
           width: 0.5,
         ),
       ),
@@ -222,7 +222,7 @@ class ActiveBlockingCard extends StatelessWidget {
           Text(
             'Break',
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.gold(context),
+              color: AppColors.accent(context),
             ),
           ),
         if (isPaused)
@@ -267,7 +267,7 @@ class ActiveBlockingCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.backgroundSubtle(context),
-              valueColor: AlwaysStoppedAnimation(AppColors.gold(context)),
+              valueColor: AlwaysStoppedAnimation(AppColors.accent(context)),
               minHeight: 6,
             ),
           ),
@@ -276,7 +276,7 @@ class ActiveBlockingCard extends StatelessWidget {
         Text(
           '+$xpSoFar ⭐️',
           style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.gold(context),
+            color: AppColors.accent(context),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -337,13 +337,13 @@ class ActiveBlockingCard extends StatelessWidget {
               onPressed: isHardMode ? null : onPauseToggle,
               icon: Icon(
                 Icons.play_arrow_rounded,
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
                 size: 20,
               ),
               label: Text(
                 'Resume',
                 style: AppTextStyles.labelMedium.copyWith(
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                   fontSize: 15,
                 ),
               ),
@@ -420,7 +420,7 @@ class ActiveBlockingCard extends StatelessWidget {
           icon: Icon(
             isOnBreak ? null : Icons.pause_rounded,
             color: isOnBreak
-                ? AppColors.gold(context)
+                ? AppColors.accent(context)
                 : AppColors.textPrimary(context),
             size: 20,
           ),
@@ -428,7 +428,7 @@ class ActiveBlockingCard extends StatelessWidget {
             isOnBreak ? 'End Break Now' : 'Take A Break',
             style: AppTextStyles.labelMedium.copyWith(
               color: isOnBreak
-                  ? AppColors.gold(context)
+                  ? AppColors.accent(context)
                   : AppColors.textPrimary(context),
               fontSize: 15,
             ),

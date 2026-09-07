@@ -106,7 +106,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: AppColors.gold(context),
+                      color: AppColors.accent(context),
                       borderRadius: BorderRadius.circular(9),
                     ),
                     child: ClipRRect(
@@ -147,7 +147,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                   onPressed: _isLoading ? null : _startAnnualTrial,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black54,
-                    foregroundColor: AppColors.goldText(context),
+                    foregroundColor: AppColors.accentText(context),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder( // 👈 was const StadiumBorder()
                       borderRadius: BorderRadius.circular(12),
@@ -160,7 +160,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
-                      color: AppColors.goldText(context),
+                      color: AppColors.accentText(context),
                       strokeWidth: 2,
                     ),
                   )
@@ -200,7 +200,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
             child: Text(
               'Learn More',
               style: GoogleFonts.poppins(
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),

@@ -141,7 +141,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
           height: 54,
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.gold(context)
+                ? AppColors.accent(context)
                 : AppColors.backgroundSubtle(context),
             shape: BoxShape.circle,
           ),
@@ -149,7 +149,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
             icon,
             size: 28,
             color: isActive
-                ? AppColors.goldText(context)
+                ? AppColors.accentText(context)
                 : AppColors.textSecondary(context),
           ),
         ),

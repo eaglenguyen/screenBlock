@@ -67,7 +67,7 @@ class _AppPickerScreenState
             child: state.isLoading
                 ? Center(
               child: CircularProgressIndicator(
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
               ),
             )
                 : state.isSearching
@@ -288,12 +288,12 @@ class _AppPickerScreenState
               height: 22,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.gold(context)
+                    ? AppColors.accent(context)
                     : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.gold(context)
+                      ? AppColors.accent(context)
                       : AppColors.border(context),
                   width: 1.5,
                 ),
@@ -301,7 +301,7 @@ class _AppPickerScreenState
               child: isSelected
                   ?  Icon(
                 Icons.check_rounded,
-                color: AppColors.goldText(context),
+                color: AppColors.accentText(context),
                 size: 14,
               )
                   : null,
@@ -333,7 +333,7 @@ class _AppPickerScreenState
               child: Text(
                 '${state.selectedCount} APP${state.selectedCount == 1 ? '' : 'S'} SELECTED',
                 style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                   letterSpacing: 0.1,
                 ),
               ),
@@ -349,8 +349,8 @@ class _AppPickerScreenState
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold(context),
-                    foregroundColor: AppColors.goldText(context),
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: AppColors.accentText(context),
                     padding: const EdgeInsets.symmetric(
                       vertical: 15,
                     ),

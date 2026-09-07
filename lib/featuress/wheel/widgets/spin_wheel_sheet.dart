@@ -133,9 +133,9 @@ class _SpinWheelSheetState extends ConsumerState<SpinWheelSheet>
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.gold(context).withValues(alpha: 0.12),
+                  color: AppColors.accent(context).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.gold(context).withValues(alpha: 0.3), width: 0.5),
+                  border: Border.all(color: AppColors.accent(context).withValues(alpha: 0.3), width: 0.5),
                 ),
                 child: Column(
                   children: [
@@ -145,7 +145,7 @@ class _SpinWheelSheetState extends ConsumerState<SpinWheelSheet>
                       state.lastResult!,
                       textAlign: TextAlign.center,
                       style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.gold(context),
+                        color: AppColors.accent(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
                       ),
@@ -158,8 +158,8 @@ class _SpinWheelSheetState extends ConsumerState<SpinWheelSheet>
             ElevatedButton(
               onPressed: state.isSpinning ? null : _spin,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: AppColors.accentText(context),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const StadiumBorder(),
                 textStyle: AppTextStyles.labelLarge,
@@ -184,8 +184,8 @@ class _SpinWheelSheetState extends ConsumerState<SpinWheelSheet>
         ElevatedButton(
           onPressed: () => EditWheelItemsSheet.show(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.gold(context),
-            foregroundColor: AppColors.goldText(context),
+            backgroundColor: AppColors.accent(context),
+            foregroundColor: AppColors.accentText(context),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
             shape: const StadiumBorder(),
           ),
@@ -225,7 +225,7 @@ class _SpinWheelSheetState extends ConsumerState<SpinWheelSheet>
           // pointer, fixed at top
           Positioned(
             top: -6,
-            child: Icon(Icons.arrow_drop_down_rounded, size: 40, color: AppColors.gold(context)),
+            child: Icon(Icons.arrow_drop_down_rounded, size: 40, color: AppColors.accent(context)),
           ),
         ],
       ),

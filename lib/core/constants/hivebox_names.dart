@@ -11,5 +11,6 @@ class HiveBoxNames {
   static const String blockingGoalHours = 'blockingGoalHours';
   static const String timeLimitConfigs = 'timeLimitConfigs';
   static const String hardModeEnabled = 'hardModeEnabled';
+  static const String quickBlocks = 'quickBlocks';
 
 }

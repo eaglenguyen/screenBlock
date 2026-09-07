@@ -152,7 +152,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
           padding: const EdgeInsets.symmetric(vertical: 11),
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.gold(context)
+                ? AppColors.accent(context)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(50),
           ),
@@ -164,7 +164,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                 textAlign: TextAlign.center,
                 style: AppTextStyles.labelMedium.copyWith(
                   color: isActive
-                      ? AppColors.goldText(context)
+                      ? AppColors.accentText(context)
                       : AppColors.textSecondary(context),
                   fontWeight: FontWeight.w600,
                 ),
@@ -178,16 +178,16 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                   ),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? AppColors.goldText(context).withValues(alpha: 0.15)
-                        : AppColors.gold(context).withValues(alpha: 0.15),
+                        ? AppColors.accentText(context).withValues(alpha: 0.15)
+                        : AppColors.accent(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     badge,
                     style: AppTextStyles.labelSmall.copyWith(
                       color: isActive
-                          ? AppColors.goldText(context)
-                          : AppColors.gold(context),
+                          ? AppColors.accentText(context)
+                          : AppColors.accent(context),
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                     ),
@@ -246,7 +246,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.gold(context)
+                            color: AppColors.accent(context)
                                 .withOpacity(0.15),
                             borderRadius:
                             BorderRadius.circular(50),
@@ -255,7 +255,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                             '$count',
                             style: AppTextStyles.bodySmall
                                 .copyWith(
-                              color: AppColors.gold(context),
+                              color: AppColors.accent(context),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -352,8 +352,8 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       child: ElevatedButton(
         onPressed: _onSetMode,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold(context),
-          foregroundColor: AppColors.goldText(context),
+          backgroundColor: AppColors.accent(context),
+          foregroundColor: AppColors.accentText(context),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: const StadiumBorder(),
           textStyle: AppTextStyles.labelLarge,

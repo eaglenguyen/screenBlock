@@ -257,7 +257,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _purchase,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.gold(context),
+                        backgroundColor: AppColors.accent(context),
                         foregroundColor: const Color(0xFF1A1208),
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder( // 👈 was const StadiumBorder()

@@ -20,6 +20,7 @@ import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
+import '../../featuress/quickblock/quick_block_viewmodel.dart';
 import '../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../providers/premium_provider.dart';
 import '../../services/notification_service.dart';
@@ -118,6 +119,13 @@ class HomeViewModel extends _$HomeViewModel {
       Future.microtask(() {
         ref.read(appPickerViewModelProvider.notifier).loadApps();
       });
+      final quickBlocked = ref.read(quickBlockViewModelProvider);
+      final svc = _blockingService;
+      if (svc is AndroidBlockingService) {
+        for (final pkg in quickBlocked) {
+          svc.setQuickBlocked(pkg, true);
+        }
+      }
     }
     _setupScheduleChecker();
     _setupPremiumListener();

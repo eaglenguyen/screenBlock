@@ -53,7 +53,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             child: state.isLoading
                 ?  Center(
               child: CircularProgressIndicator(
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
               ),
             )
                 : state.error != null
@@ -71,7 +71,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   Widget _buildContent(StatsState state) {
     return RefreshIndicator(
-      color: AppColors.gold(context),
+      color: AppColors.accent(context),
       backgroundColor: AppColors.backgroundCard(context),
       onRefresh: () => ref.read(statsViewModelProvider.notifier).loadStats(),
       child: SingleChildScrollView(
@@ -137,8 +137,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     .read(statsViewModelProvider.notifier)
                     .requestUsagePermission(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.gold(context),
-                  foregroundColor: AppColors.goldText(context),
+                  backgroundColor: AppColors.accent(context),
+                  foregroundColor: AppColors.accentText(context),
                   shape: const StadiumBorder(),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

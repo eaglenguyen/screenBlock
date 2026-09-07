@@ -17,12 +17,12 @@ Future<bool> showAccessibilityDialog(BuildContext context) async {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.gold(context).withValues(alpha: 0.1),
+              color: AppColors.accent(context).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.accessibility_new_rounded,
-              color: AppColors.gold(context),
+              color: AppColors.accent(context),
               size: 32,
             ),
           ),
@@ -53,8 +53,8 @@ Future<bool> showAccessibilityDialog(BuildContext context) async {
           child: ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true), // 👈 true = go to settings
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.gold(context),
-              foregroundColor: AppColors.goldText(context),
+              backgroundColor: AppColors.accent(context),
+              foregroundColor: AppColors.accentText(context),
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),

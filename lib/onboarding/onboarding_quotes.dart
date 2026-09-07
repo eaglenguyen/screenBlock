@@ -84,7 +84,7 @@ class QuotesScreen extends StatelessWidget {
                             child: Text(
                               t['name']!.substring(0, 1),
                               style: TextStyle(
-                                color: AppColors.gold(context),
+                                color: AppColors.accent(context),
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

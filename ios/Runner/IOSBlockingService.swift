@@ -631,5 +631,20 @@ class IOSBlockingService: NSObject {
     }
     
     
+    func setQuickBlocked(packageName: String, tokenData: Data, blocked: Bool) {
+        // Note: iOS identifies apps by ApplicationToken, not package name —
+        // this requires its own FamilyActivityPicker selection per quick-block app,
+        // saved similarly to how schedule/time-limit tokens are saved
+        guard let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: tokenData) else { return }
+        var currentlyShielded = store.shield.applications ?? []
+        if blocked {
+            currentlyShielded.formUnion(selection.applicationTokens)
+        } else {
+            currentlyShielded.subtract(selection.applicationTokens)
+        }
+        store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+    }
+    
+    
 
 }

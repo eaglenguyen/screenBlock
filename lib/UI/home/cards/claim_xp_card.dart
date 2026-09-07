@@ -154,7 +154,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
           emissionFrequency: 0.05,
           blastDirection: pi / 2,
           colors:  [
-            AppColors.gold(context),
+            AppColors.accent(context),
             Color(0xFFFF6B6B),
             Color(0xFF4ECDC4),
             Color(0xFF45B7D1),
@@ -177,12 +177,12 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                   width: 88,
                   height: 88,
                   decoration:  BoxDecoration(
-                    color: AppColors.gold(context),
+                    color: AppColors.accent(context),
                     shape: BoxShape.circle,
                   ),
                   child:  Icon(
                     Icons.bolt_rounded,
-                    color: AppColors.goldText(context),
+                    color: AppColors.accentText(context),
                     size: 48,
                   ),
                 ),
@@ -212,7 +212,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: '⭐️ this session',
                       value: '${widget.xpEarned}',
                       icon: Icons.star,
-                      iconColor: AppColors.gold(context),
+                      iconColor: AppColors.accent(context),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -221,7 +221,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: 'Total ⭐️',
                       value: '$_displayXp',
                       icon: Icons.stars_rounded,
-                      iconColor: AppColors.gold(context),
+                      iconColor: AppColors.accent(context),
                       highlight: _claiming,
                     ),
                   ),
@@ -235,7 +235,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: 'Time blocked',
                       value: '${widget.sessionMinutes}m',
                       icon: Icons.timer_rounded,
-                      iconColor: AppColors.gold(context),
+                      iconColor: AppColors.accent(context),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -244,7 +244,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: "Today's total",
                       value: widget.todayBlocked,
                       icon: Icons.lock_clock_rounded,
-                      iconColor: AppColors.gold(context),
+                      iconColor: AppColors.accent(context),
                     ),
                   ),
                 ],
@@ -259,8 +259,8 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _claiming
                         ? AppColors.backgroundSubtle(context)
-                        : AppColors.gold(context),
-                    foregroundColor: AppColors.goldText(context),
+                        : AppColors.accent(context),
+                    foregroundColor: AppColors.accentText(context),
                     disabledBackgroundColor:
                     AppColors.backgroundSubtle(context),
                     padding: const EdgeInsets.symmetric(
@@ -304,12 +304,12 @@ class _ClaimXpCardState extends State<ClaimXpCard>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: highlight
-            ? AppColors.gold(context).withValues(alpha: 0.1)
+            ? AppColors.accent(context).withValues(alpha: 0.1)
             : AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: highlight
-              ? AppColors.gold(context).withValues(alpha: 0.3)
+              ? AppColors.accent(context).withValues(alpha: 0.3)
               : AppColors.border(context),
           width: highlight ? 1 : 0.5,
         ),
@@ -333,7 +333,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                 value,
                 style: AppTextStyles.headlineSmall.copyWith(
                   fontSize: 18,
-                  color: highlight ? AppColors.gold(context) : null,
+                  color: highlight ? AppColors.accent(context) : null,
                 ),
               ),
             ],

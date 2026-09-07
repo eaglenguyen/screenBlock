@@ -8,6 +8,7 @@ import 'package:pausenow/UI/schedule/widgets/presets_section.dart';
 import 'package:pausenow/UI/schedule/widgets/session_bottom_sheet.dart';
 import 'package:pausenow/UI/schedule/widgets/session_card.dart';
 import 'package:pausenow/UI/schedule/widgets/session_mode_picker_sheet.dart';
+import 'package:pausenow/core/theme/lipped_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/schedule.dart';
@@ -16,6 +17,7 @@ import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
 import '../../data/models/time_limit_config.dart';
+import '../../featuress/quickblock/widgets/quick_block_row.dart';
 import '../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../featuress/timelimit/widget/time_limit_bottom_sheet.dart';
 import '../../featuress/timelimit/widget/time_limit_card.dart';
@@ -206,10 +208,10 @@ class ScheduleScreen extends ConsumerWidget {
                   ],
 
                   const SizedBox(height: 16),
-                  const PresetsSection(), // 👈 add this
+                  const QuickBlockRow()
 
                   // Removed
-                  // const BlockedAppsCard(),
+                  // const BlockedAppsCard(), and preset()
 
                 ],
               ),
@@ -234,7 +236,7 @@ class ScheduleScreen extends ConsumerWidget {
               angle: -0.6,
               child: Icon(
                 Icons.arrow_forward_rounded,
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
                 size: 48,
               ),
             ),
@@ -285,14 +287,14 @@ class ScheduleScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: isLocked
                     ? AppColors.backgroundSubtle(context) // 👈 grayed out
-                    : AppColors.gold(context),
+                    : AppColors.accent(context),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.add,
                 color: isLocked
                     ? AppColors.textSecondary(context) // 👈 muted icon
-                    : AppColors.goldText(context),
+                    : AppColors.accentText(context),
                 size: 20,
               ),
             ),
@@ -374,16 +376,8 @@ class _LockedScheduleCard extends StatelessWidget {
         // dimmed card
         Opacity(
           opacity: 0.4,
-          child: Container(
+          child: LippedCard(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundCard(context),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.border(context),
-                width: 0.5,
-              ),
-            ),
             child: Row(
               children: [
                 Container(
@@ -434,14 +428,14 @@ class _LockedScheduleCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.lock_rounded,
-                    color: AppColors.gold(context),
+                    color: AppColors.accent(context),
                     size: 16,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Upgrade to unlock',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.gold(context),
+                      color: AppColors.accent(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -466,20 +460,15 @@ class _LockedTimeLimitCard extends StatelessWidget {
       children: [
         Opacity(
           opacity: 0.4,
-          child: Container(
+          child: LippedCard(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundCard(context),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border(context), width: 0.5),
-            ),
             child: Row(
               children: [
                 Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.gold(context).withValues(alpha: 0.12),
+                    color: AppColors.accent(context).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Center(child: Text('⏱️', style: TextStyle(fontSize: 18))),
@@ -520,10 +509,10 @@ class _LockedTimeLimitCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_rounded, color: AppColors.gold(context), size: 16),
+                  Icon(Icons.lock_rounded, color: AppColors.accent(context), size: 16),
                   const SizedBox(width: 8),
                   Text('Upgrade to unlock', style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.gold(context),
+                    color: AppColors.accent(context),
                     fontWeight: FontWeight.w700,
                   )),
                 ],
@@ -569,12 +558,12 @@ Future<void> _checkAccessibilityAndProceed(
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.gold(context).withValues(alpha: 0.1),
+              color: AppColors.accent(context).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.accessibility_new_rounded,
-              color: AppColors.gold(context),
+              color: AppColors.accent(context),
               size: 32,
             ),
           ),
@@ -608,8 +597,8 @@ Future<void> _checkAccessibilityAndProceed(
               await service.requestAccessibilityPermission();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.gold(context),
-              foregroundColor: AppColors.goldText(context),
+              backgroundColor: AppColors.accent(context),
+              foregroundColor: AppColors.accentText(context),
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),

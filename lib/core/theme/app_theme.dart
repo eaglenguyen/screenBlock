@@ -98,16 +98,16 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      scaffoldBackgroundColor: const Color(0xFFF5F5F0),
+      scaffoldBackgroundColor: const Color(0xFFFFF7ED), // 👈 was F5F5F0
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFFEDB82A),
-        onPrimary: Color(0xFF1A1208),
-        secondary: Color(0xFFC49420),
+        primary: Color(0xFF7DD3B0), // 👈 was EDB82A
+        onPrimary: Color(0xFF0F4A32), // 👈 was 1A1208
+        secondary: Color(0xFF2D7A54), // 👈 was C49420
         surface: Color(0xFFFFFFFF),
         error: Color(0xFFE74C3C),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFFF5F5F0),
+        backgroundColor: Color(0xFFFFF7ED), // 👈 was F5F5F0
         elevation: 0,
         centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle(
@@ -115,16 +115,16 @@ class AppTheme {
           statusBarIconBrightness: Brightness.dark,
         ),
         titleTextStyle: TextStyle(
-          color: Color(0xFF1A1A1A),
+          color: Color(0xFF4A3728), // 👈 was 1A1A1A
           fontSize: 17,
           fontWeight: FontWeight.w700,
         ),
-        iconTheme: IconThemeData(color: Color(0xFF1A1A1A)),
+        iconTheme: IconThemeData(color: Color(0xFF4A3728)), // 👈 was 1A1A1A
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFEDB82A),
-          foregroundColor: const Color(0xFF1A1208),
+          backgroundColor: const Color(0xFF7DD3B0), // 👈 was EDB82A
+          foregroundColor: const Color(0xFF0F4A32), // 👈 was 1A1208
           minimumSize: const Size(double.infinity, 54),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.poppins(
@@ -136,10 +136,10 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF1A1A1A),
+          foregroundColor: const Color(0xFF4A3728), // 👈 was 1A1A1A
           minimumSize: const Size(double.infinity, 54),
           shape: const StadiumBorder(),
-          side: const BorderSide(color: Color(0xFFDDDDD8)),
+          side: const BorderSide(color: Color(0xFFF0E6D8)), // 👈 was DDDDD8
           textStyle: GoogleFonts.poppins(
             fontSize: AppTextStyles.bodyLarge.fontSize,
             fontWeight: AppTextStyles.bodyLarge.fontWeight,
@@ -148,11 +148,11 @@ class AppTheme {
         ),
       ),
       textTheme: _buildTextTheme(
-        const Color(0xFF1A1A1A),
-        const Color(0xFF666666),
+        const Color(0xFF4A3728), // 👈 was 1A1A1A
+        const Color(0xFFB08A5A), // 👈 was 666666
       ),
       dividerTheme: const DividerThemeData(
-        color: Color(0xFFDDDDD8),
+        color: Color(0xFFF0E6D8), // 👈 was DDDDD8
         thickness: 0.5,
         space: 0,
       ),
@@ -161,7 +161,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFDDDDD8), width: 0.5),
+          side: const BorderSide(color: Color(0xFFF0E6D8), width: 0.5), // 👈 was DDDDD8
         ),
         margin: EdgeInsets.zero,
       ),

@@ -151,7 +151,7 @@ class _PresetRow extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.border(context), width: 0.5), // 👈 new — subtle definition against the card
               ),
-              child: Icon(Icons.add, color: AppColors.gold(context), size: 18), // 👈 was Colors.white — now gold, matches your accent color scheme elsewhere
+              child: Icon(Icons.add, color: AppColors.accent(context), size: 18), // 👈 was Colors.white — now gold, matches your accent color scheme elsewhere
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/schedule.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/lipped_card.dart';
 import 'app_icon_stack.dart';
 import 'hold_to_confirm.dart';
 
@@ -112,249 +113,188 @@ class SessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // ── Main card ──────────────────────────────
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundCard(context),
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft: Radius.circular(isCurrentlyActive ? 0 : 16),
-                bottomRight: Radius.circular(isCurrentlyActive ? 0 : 16),
-              ),
-              border: Border.all(
-                color: isCurrentlyActive
-                    ? AppColors.gold(context).withValues(alpha: 0.4)
-                    : schedule.isActive
-                    ? AppColors.gold(context).withValues(alpha: 0.2)
-                    : AppColors.border(context),
-                width: 0.5,
-              ),
-            ),
-            child: Row(
-              children: [
-                // active indicator dot
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: isCurrentlyActive
-                        ? AppColors.gold(context)
-                        : schedule.isActive
-                        ? AppColors.gold(context).withValues(alpha: 0.4)
-                        : AppColors.textSecondary(context),
-                    shape: BoxShape.circle,
+    return LippedCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isCurrentlyActive
+                          ? AppColors.accent(context)
+                          : schedule.isActive
+                          ? AppColors.accent(context).withValues(alpha: 0.4)
+                          : AppColors.textSecondary(context),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-
-                AppIconStack(
-                  packageNames: _relevantApps,
-                  iosStorageKey: 'schedule_${schedule.id}_${schedule.blockingType}',
-                  refreshToken: schedule.updatedAt.millisecondsSinceEpoch,
-                  size: 40,
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            schedule.name,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              color: AppColors.textPrimary(context),
-                              fontWeight: FontWeight.w600,
-                            ),                          ),
-                          if (schedule.isActive) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                  const SizedBox(width: 10),
+                  AppIconStack(
+                    packageNames: _relevantApps,
+                    iosStorageKey: 'schedule_${schedule.id}_${schedule.blockingType}',
+                    refreshToken: schedule.updatedAt.millisecondsSinceEpoch,
+                    size: 40,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              schedule.name,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                color: AppColors.textPrimary(context),
+                                fontWeight: FontWeight.w600,
                               ),
-                              decoration: BoxDecoration(
-                                color: isCurrentlyActive
-                                    ? isPaused
-                                    ? Colors.orange.withValues(alpha: 0.15)
-                                    : AppColors.gold(context).withValues(alpha: 0.15)
-                                    : Colors.white.withValues(alpha: 0.05),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                isCurrentlyActive
-                                    ? isPaused
-                                    ? 'Paused'
-                                    : 'Active'
-                                    : 'Inactive',
-                                style: TextStyle(
+                            ),
+                            if (schedule.isActive) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
                                   color: isCurrentlyActive
                                       ? isPaused
-                                      ? Colors.orange
-                                      : AppColors.gold(context)
-                                      : Colors.white.withValues(alpha: 0.3),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
+                                      ? Colors.orange.withValues(alpha: 0.15)
+                                      : AppColors.accent(context).withValues(alpha: 0.15)
+                                      : Colors.white.withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  isCurrentlyActive
+                                      ? isPaused
+                                      ? 'Paused'
+                                      : 'Active'
+                                      : 'Inactive',
+                                  style: TextStyle(
+                                    color: isCurrentlyActive
+                                        ? isPaused
+                                        ? Colors.orange
+                                        : AppColors.accent(context)
+                                        : Colors.white.withValues(alpha: 0.3),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-
+                            ],
                           ],
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        '${schedule.timeRange} · ${schedule.daysDisplay}',
-                        style: AppTextStyles.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-                // toggle
-                Opacity(
-                  opacity: isHardModeLocked ? 0.35 : 1.0, // 👈 new — visually grayed when locked
-                  child: GestureDetector(
-                    onTap: isHardModeLocked // 👈 new — no-op when locked, ignores taps entirely
-                        ? null
-                        : () {
-                      if (schedule.isActive && isCurrentlyActive) {
-                        _showGiveUpConfirmation(context);
-                      } else {
-                        onToggle();
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: 44,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: schedule.isActive
-                              ? AppColors.gold(context)
-                              : AppColors.backgroundSubtle(context),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.border(context),
-                            width: 0.5,
-                          ),
                         ),
-                        child: AnimatedAlign(
-                          duration: const Duration(milliseconds: 200),
-                          alignment: schedule.isActive
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Container(
-                            margin: const EdgeInsets.all(2),
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              color: AppColors.textPrimary(context),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // ── Pause button — only shown when active ──
-        if (isCurrentlyActive)
-          Opacity( // 👈 new
-            opacity: isHardModeLocked ? 0.35 : 1.0,
-            child: GestureDetector(
-              onTap: isHardModeLocked ? null : onPause, // 👈 new — no-op when locked
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                decoration: BoxDecoration(
-                  color: isPaused
-                      ? Colors.orange.withValues(alpha: 0.1)
-                      : AppColors.backgroundSubtle(context),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                  border: Border(
-                    left: BorderSide(
-                      color: isPaused
-                          ? Colors.orange.withValues(alpha: 0.4)
-                          : AppColors.border(context),
-                      width: 0.5,
-                    ),
-                    right: BorderSide(
-                      color: isPaused
-                          ? Colors.orange.withValues(alpha: 0.4)
-                          : AppColors.border(context),
-                      width: 0.5,
-                    ),
-                    bottom: BorderSide(
-                      color: isPaused
-                          ? Colors.orange.withValues(alpha: 0.4)
-                          : AppColors.border(context),
-                      width: 0.5,
-                    ),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          isPaused
-                              ? Icons.play_arrow_rounded
-                              : Icons.pause_rounded,
-                          color: isPaused
-                              ? Colors.orange
-                              : AppColors.textSecondary(context),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 6),
+                        const SizedBox(height: 3),
                         Text(
-                          isPaused ? 'Pause Time Remaining...' : 'Pause blocking',
-                          style: TextStyle(
-                            color: isPaused
-                                ? Colors.orange
-                                : AppColors.textSecondary(context),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          '${schedule.timeRange} · ${schedule.daysDisplay}',
+                          style: AppTextStyles.bodySmall,
                         ),
                       ],
                     ),
-                    if (isPaused && pauseRemainingSeconds > 0) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        _formatRemaining(pauseRemainingSeconds),
-                        style: TextStyle(
-                          color: Colors.orange.withValues(alpha: 0.7),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                  ),
+                  Opacity(
+                    opacity: isHardModeLocked ? 0.35 : 1.0,
+                    child: GestureDetector(
+                      onTap: isHardModeLocked
+                          ? null
+                          : () {
+                        if (schedule.isActive && isCurrentlyActive) {
+                          _showGiveUpConfirmation(context);
+                        } else {
+                          onToggle();
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 44,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: schedule.isActive
+                                ? AppColors.accent(context)
+                                : AppColors.backgroundSubtle(context),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.border(context), width: 0.5),
+                          ),
+                          child: AnimatedAlign(
+                            duration: const Duration(milliseconds: 200),
+                            alignment: schedule.isActive ? Alignment.centerRight : Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.all(2),
+                              width: 18,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                color: AppColors.textPrimary(context),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ],
-                  ],
-                ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-      ],
+          if (isCurrentlyActive)
+            Opacity(
+              opacity: isHardModeLocked ? 0.35 : 1.0,
+              child: GestureDetector(
+                onTap: isHardModeLocked ? null : onPause,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  decoration: BoxDecoration(
+                    color: isPaused
+                        ? Colors.orange.withValues(alpha: 0.1)
+                        : AppColors.backgroundSubtle(context),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                            color: isPaused ? Colors.orange : AppColors.textSecondary(context),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            isPaused ? 'Pause Time Remaining...' : 'Pause blocking',
+                            style: TextStyle(
+                              color: isPaused ? Colors.orange : AppColors.textSecondary(context),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (isPaused && pauseRemainingSeconds > 0) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          _formatRemaining(pauseRemainingSeconds),
+                          style: TextStyle(
+                            color: Colors.orange.withValues(alpha: 0.7),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

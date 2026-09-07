@@ -80,13 +80,13 @@ class _SessionCompletedCardState
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.gold(context)
+                      color: AppColors.accent(context)
                           .withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child:  Icon(
                       Icons.star_rounded,
-                      color: AppColors.gold(context),
+                      color: AppColors.accent(context),
                       size: 40,
                     ),
                   ),
@@ -122,7 +122,7 @@ class _SessionCompletedCardState
                       backgroundColor: Colors.transparent,
                       valueColor:
                        AlwaysStoppedAnimation(
-                        AppColors.gold(context),
+                        AppColors.accent(context),
                       ),
                     ),
                   ),
@@ -153,8 +153,8 @@ class _SessionCompletedCardState
               child: ElevatedButton(
                 onPressed: widget.onFinish,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.gold(context),
-                  foregroundColor: AppColors.goldText(context),
+                  backgroundColor: AppColors.accent(context),
+                  foregroundColor: AppColors.accentText(context),
                   padding: const EdgeInsets.symmetric(
                     vertical: 16,
                   ),

@@ -165,7 +165,7 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
               Text(
                 _formatMinutes(_limitMinutes),
                 style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -185,10 +185,10 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
           const SizedBox(height: 12),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.gold(context),
-              inactiveTrackColor: AppColors.gold(context).withValues(alpha: 0.15),
-              thumbColor: AppColors.gold(context),
-              overlayColor: AppColors.gold(context).withValues(alpha: 0.15),
+              activeTrackColor: AppColors.accent(context),
+              inactiveTrackColor: AppColors.accent(context).withValues(alpha: 0.15),
+              thumbColor: AppColors.accent(context),
+              overlayColor: AppColors.accent(context).withValues(alpha: 0.15),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
               trackHeight: 4,
             ),
@@ -220,10 +220,10 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.gold(context) : AppColors.backgroundCard(context),
+          color: isSelected ? AppColors.accent(context) : AppColors.backgroundCard(context),
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: isSelected ? AppColors.gold(context) : AppColors.border(context),
+            color: isSelected ? AppColors.accent(context) : AppColors.border(context),
             width: isSelected ? 0 : 0.5,
           ),
         ),
@@ -231,7 +231,7 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
           child: Text(
             label,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: isSelected ? AppColors.goldText(context) : AppColors.textPrimary(context),
+              color: isSelected ? AppColors.accentText(context) : AppColors.textPrimary(context),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -314,13 +314,13 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.gold(context).withValues(alpha: 0.15),
+                            color: AppColors.accent(context).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Text(
                             '$count',
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.gold(context),
+                              color: AppColors.accent(context),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -361,7 +361,7 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
             children: [
               Text('On these days:', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context))),
               const Spacer(),
-              Text(_getDaysLabel(), style: AppTextStyles.bodySmall.copyWith(color: AppColors.gold(context))),
+              Text(_getDaysLabel(), style: AppTextStyles.bodySmall.copyWith(color: AppColors.accent(context))),
             ],
           ),
           const SizedBox(height: 12),
@@ -376,10 +376,10 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                   width: 34,
                   height: 34,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.gold(context) : AppColors.backgroundCard(context),
+                    color: isSelected ? AppColors.accent(context) : AppColors.backgroundCard(context),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? AppColors.gold(context) : AppColors.border(context),
+                      color: isSelected ? AppColors.accent(context) : AppColors.border(context),
                       width: 1.5,
                     ),
                   ),
@@ -387,7 +387,7 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                     child: Text(
                       days[index],
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: isSelected ? AppColors.goldText(context) : AppColors.textSecondary(context),
+                        color: isSelected ? AppColors.accentText(context) : AppColors.textSecondary(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -407,8 +407,8 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       child: ElevatedButton(
         onPressed: _onSave,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold(context),
-          foregroundColor: AppColors.goldText(context),
+          backgroundColor: AppColors.accent(context),
+          foregroundColor: AppColors.accentText(context),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: const StadiumBorder(),
           textStyle: AppTextStyles.labelLarge,

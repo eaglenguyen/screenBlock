@@ -95,10 +95,10 @@ class _EditWheelItemsSheetState extends ConsumerState<EditWheelItemsSheet> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.gold(context),
+                    color: AppColors.accent(context),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.add_rounded, color: AppColors.goldText(context)),
+                  child: Icon(Icons.add_rounded, color: AppColors.accentText(context)),
                 ),
               ),
             ],
@@ -111,14 +111,14 @@ class _EditWheelItemsSheetState extends ConsumerState<EditWheelItemsSheet> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: AppColors.gold(context).withValues(alpha: 0.12),
+                  color: AppColors.accent(context).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.gold(context).withValues(alpha: 0.3), width: 0.5),
+                  border: Border.all(color: AppColors.accent(context).withValues(alpha: 0.3), width: 0.5),
                 ),
                 child: Center(
                   child: Text(
                     'Use suggested list',
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gold(context), fontWeight: FontWeight.w700),
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.accent(context), fontWeight: FontWeight.w700),
                   ),
                 ),
               ),

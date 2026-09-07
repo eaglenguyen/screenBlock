@@ -103,7 +103,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
       return Container(
         padding: const EdgeInsets.all(24),
         alignment: Alignment.center,
-        child: CircularProgressIndicator(color: AppColors.gold(context)),
+        child: CircularProgressIndicator(color: AppColors.accent(context)),
       );
     }
 
@@ -139,8 +139,8 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                 _fetchWeek();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: AppColors.accentText(context),
                 shape: const StadiumBorder(),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
@@ -190,7 +190,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                       style: AppTextStyles.bodySmall.copyWith( // 👈 was fontSize: 10 — now 11 via bodySmall
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                         color: isSelected
-                            ? AppColors.gold(context)
+                            ? AppColors.accent(context)
                             : AppColors.textSecondary(context).withValues(alpha: isFuture ? 0.3 : 0.7),
                       ),
                     ),
@@ -200,7 +200,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                       height: 34,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isSelected ? AppColors.gold(context) : AppColors.backgroundSubtle(context),
+                        color: isSelected ? AppColors.accent(context) : AppColors.backgroundSubtle(context),
                         border: isFuture ? Border.all(color: AppColors.border(context), width: 1) : null,
                       ),
                       child: Center(
@@ -209,7 +209,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                           style: AppTextStyles.bodySmall.copyWith( // 👈 was fontSize: 12 — now 11
                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                             color: isSelected
-                                ? AppColors.goldText(context)
+                                ? AppColors.accentText(context)
                                 : AppColors.textSecondary(context).withValues(alpha: isFuture ? 0.3 : 0.7),
                           ),
                         ),
@@ -240,7 +240,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                   width: 20,
                   height: 80 * (isFuture ? 0.05 : heightFraction),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.gold(context) : AppColors.backgroundSubtle(context),
+                    color: isSelected ? AppColors.accent(context) : AppColors.backgroundSubtle(context),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 );

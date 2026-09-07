@@ -72,7 +72,7 @@ class _AppListSheetState extends ConsumerState<AppListSheet> {
           _buildSearchBar(context, state),
           Expanded(
             child: state.isLoading
-                ? Center(child: CircularProgressIndicator(color: AppColors.gold(context)))
+                ? Center(child: CircularProgressIndicator(color: AppColors.accent(context)))
                 : state.isSearching
                 ? _buildSearchResults(context, state)
                 : _buildCategorizedList(context, state),
@@ -115,13 +115,13 @@ class _AppListSheetState extends ConsumerState<AppListSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.gold(context).withValues(alpha: 0.15),
+              color: AppColors.accent(context).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(50),
             ),
             child: Text(
               '${state.selectedCount}/50',
               style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -254,15 +254,15 @@ class _AppListSheetState extends ConsumerState<AppListSheet> {
               width: 22,
               height: 22,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.gold(context) : Colors.transparent,
+                color: isSelected ? AppColors.accent(context) : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.gold(context) : AppColors.border(context),
+                  color: isSelected ? AppColors.accent(context) : AppColors.border(context),
                   width: 1.5,
                 ),
               ),
               child: isSelected
-                  ? Icon(Icons.check_rounded, color: AppColors.goldText(context), size: 14)
+                  ? Icon(Icons.check_rounded, color: AppColors.accentText(context), size: 14)
                   : null,
             ),
           ],
@@ -285,7 +285,7 @@ class _AppListSheetState extends ConsumerState<AppListSheet> {
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 '${state.selectedCount} APP${state.selectedCount == 1 ? '' : 'S'} SELECTED',
-                style: AppTextStyles.labelSmall.copyWith(color: AppColors.gold(context), letterSpacing: 0.1),
+                style: AppTextStyles.labelSmall.copyWith(color: AppColors.accent(context), letterSpacing: 0.1),
               ),
             ),
           Row(
@@ -317,8 +317,8 @@ class _AppListSheetState extends ConsumerState<AppListSheet> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold(context),
-                    foregroundColor: AppColors.goldText(context),
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: AppColors.accentText(context),
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: const StadiumBorder(),
                     textStyle: AppTextStyles.labelLarge,

@@ -5,48 +5,76 @@ class AppColors {
 
   // ── Backgrounds ────────────────────────────────
   static Color background(BuildContext context) =>
-      _isDark(context) ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F0);
+      _isDark(context) ? const Color(0xFF1A1A1A) : const Color(0xFFFFF7ED);
 
   static Color backgroundCard(BuildContext context) =>
       _isDark(context) ? const Color(0xFF252525) : const Color(0xFFFFFFFF);
 
   static Color backgroundSubtle(BuildContext context) =>
-      _isDark(context) ? const Color(0xFF2E2E2E) : const Color(0xFFEEEDE8);
+      _isDark(context) ? const Color(0xFF2E2E2E) : const Color(0xFFFFF0DA);
 
   static Color backgroundOverlay(BuildContext context) =>
-      _isDark(context) ? const Color(0xFF333333) : const Color(0xFFE5E4DF);
+      _isDark(context) ? const Color(0xFF333333) : const Color(0xFFFFE8B8);
 
-  // ── Gold / Primary ─────────────────────────────
-  static Color gold(BuildContext context) => const Color(0xFFEDB82A);
+  // ──  Primary ─────────────────────────────
+  static Color accent(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFD4CFC4) : const Color(0xFF7DD3B0);
 
-  static Color goldDark(BuildContext context) => const Color(0xFFC49420);
+  static Color accentDark(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFA8A296) : const Color(0xFF2D7A54);
 
-  static Color goldText(BuildContext context) => const Color(0xFF1A1208);
+  static Color accentText(BuildContext context) =>
+      _isDark(context) ? const Color(0xFF1A1A1A) : const Color(0xFF0F4A32);
 
   static Color primarySubtle(BuildContext context) =>
-      const Color(0xFFEDB82A).withValues(alpha: 0.15);
+      accent(context).withValues(alpha: 0.15);
 
+// ── Extra pastel accents (light mode variety) ──
+  static Color accentPink(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFE1306C) : const Color(0xFFFFE1EC);
+  static Color accentPinkText(BuildContext context) =>
+      _isDark(context) ? Colors.white : const Color(0xFFC2478B);
+
+  static Color accentBlue(BuildContext context) =>
+      _isDark(context) ? const Color(0xFF3D6FBF) : const Color(0xFFDCEBFF);
+  static Color accentBlueText(BuildContext context) =>
+      _isDark(context) ? Colors.white : const Color(0xFF3D6FBF);
+
+  static Color accentPeach(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFEDB8A0) : const Color(0xFFFFE8B8);
+  static Color accentPeachText(BuildContext context) =>
+      _isDark(context) ? Colors.white : const Color(0xFFB07A1E);
+
+// in AppColors
+  static Color cardLip(BuildContext context) =>
+      _isDark(context) ? const Color(0xFF141414) : const Color(0xFFE8DFD0);
   // ── Text ───────────────────────────────────────
   static Color textPrimary(BuildContext context) =>
-      _isDark(context) ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A);
+      _isDark(context) ? const Color(0xFFFFFFFF) : const Color(0xFF4A3728);
 
   static Color textSecondary(BuildContext context) =>
-      _isDark(context) ? const Color(0xFF9A9A9A) : const Color(0xFF666666);
+      _isDark(context) ? const Color(0xFF9A9A9A) : const Color(0xFFB08A5A);
 
   static Color textHint(BuildContext context) =>
-      _isDark(context) ? const Color(0xFF444466) : const Color(0xFFAAAAAA);
+      _isDark(context) ? const Color(0xFF444466) : const Color(0xFFD9C7B0);
 
   // ── Borders / Dividers ─────────────────────────
   static Color border(BuildContext context) =>
-      _isDark(context) ? const Color(0xFF333333) : const Color(0xFFDDDDD8);
+      _isDark(context) ? const Color(0xFF333333) : const Color(0xFFF0E6D8);
 
   static Color borderSubtle(BuildContext context) =>
-      _isDark(context) ? const Color(0xFF23233D) : const Color(0xFFE8E8E3);
+      _isDark(context) ? const Color(0xFF23233D) : const Color(0xFFF5EEE2);
 
   // ── Semantic ───────────────────────────────────
-  static Color success(BuildContext context) => const Color(0xFF2ECC71);
-  static Color error(BuildContext context) => const Color(0xFFE74C3C);
-  static Color warning(BuildContext context) => const Color(0xFFEDB82A);
+  static Color success(BuildContext context) =>
+      _isDark(context) ? const Color(0xFF2ECC71) : const Color(0xFF7DD3B0);
+
+  static Color error(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFE74C3C) : const Color(0xFFE8899E);
+
+  static Color warning(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFEDB82A) : const Color(0xFFEDB8A0);
+
   static Color pause(BuildContext context) => Colors.orange;
 
   static const Color faint = Color(0xFF2A2A48);

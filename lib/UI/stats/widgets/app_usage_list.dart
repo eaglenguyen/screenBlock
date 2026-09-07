@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:installed_apps/app_info.dart';
+import 'package:pausenow/core/theme/lipped_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../stats_state.dart';
@@ -19,13 +20,8 @@ class AppUsageList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (stats.isEmpty) {
       if (Platform.isAndroid) {
-        return Container(
+        return LippedCard(
           padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundCard(context),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border(context), width: 0.5),
-          ),
           child: Center(
             child: Text(
               'No usage data for this day',
@@ -40,7 +36,6 @@ class AppUsageList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 👇 new header row
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
           child: Row(
@@ -48,24 +43,24 @@ class AppUsageList extends StatelessWidget {
             children: [
               Text(
                 'Most Used',
-                style: AppTextStyles.headlineSmall.copyWith( // 👈 was labelMedium+fontSize:20 — now headlineSmall (18)
+                style: AppTextStyles.headlineSmall.copyWith(
                   color: AppColors.textPrimary(context),
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.gold(context).withValues(alpha: 0.15),
+                  color: AppColors.accent(context).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.gold(context).withValues(alpha: 0.4),
+                    color: AppColors.accent(context).withValues(alpha: 0.4),
                     width: 0.5,
                   ),
                 ),
                 child: Text(
                   'Screen Time',
-                  style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall+fontSize:12 — now bodyMedium (13)
-                    color: AppColors.gold(context),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.accent(context),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -73,15 +68,7 @@ class AppUsageList extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.backgroundCard(context),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: AppColors.border(context),
-              width: 0.5,
-            ),
-          ),
+        LippedCard(
           child: Column(
             children: List.generate(stats.length, (index) {
               final stat = stats[index];
@@ -219,7 +206,7 @@ class _AppUsageRowState extends State<_AppUsageRow>
                         width: constraints.maxWidth *
                             _widthAnimation.value,
                         decoration: BoxDecoration(
-                          color: AppColors.gold(context),
+                          color: AppColors.accent(context),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),

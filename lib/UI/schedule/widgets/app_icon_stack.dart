@@ -69,14 +69,14 @@ class AppIconStack extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.backgroundCard(context), width: 1.5),
                 ),
                 child: Text(
                   '+${packageNames.length - 1}',
                   style: TextStyle(
-                    color: AppColors.goldText(context),
+                    color: AppColors.accentText(context),
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                   ),

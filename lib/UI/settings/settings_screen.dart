@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:in_app_review/in_app_review.dart';
 import 'package:pausenow/UI/settings/settings_viewmodel.dart';
 import 'package:pausenow/UI/settings/widgets/acknowledgements_sheet.dart';
@@ -70,8 +69,8 @@ class SettingsScreen extends ConsumerWidget {
                         trailing: Switch(
                           value: isDark,
                           onChanged: (_) => ref.read(themeProvider.notifier).toggle(),
-                          activeColor: AppColors.gold(context),
-                          activeTrackColor: AppColors.gold(context).withValues(alpha: 0.3),
+                          activeColor: AppColors.accent(context),
+                          activeTrackColor: AppColors.accent(context).withValues(alpha: 0.3),
                           inactiveThumbColor: AppColors.textSecondary(context),
                           inactiveTrackColor: AppColors.backgroundSubtle(context),
                         ),
@@ -126,7 +125,7 @@ class SettingsScreen extends ConsumerWidget {
                     rows: [
                       SettingsRow(
                         icon: Icons.star_outline_rounded,
-                        iconColor: AppColors.gold(context),
+                        iconColor: AppColors.accent(context),
                         iconBgColor: AppColors.primarySubtle(context),
                         label: 'Rate the App  🙏',
                         onTap: () async {
@@ -149,7 +148,7 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       SettingsRow(
                         iconAsset: "assets/icons/mascot_face.png",
-                        iconColor: AppColors.gold(context),
+                        iconColor: AppColors.accent(context),
                         iconBgColor: Colors.transparent,
                         label: 'Get Help',
                         onTap: () => GetHelpSheet.show(context),
@@ -227,7 +226,7 @@ class SettingsScreen extends ConsumerWidget {
                       if (Platform.isAndroid)
                         SettingsRow(
                           icon: Icons.battery_charging_full_rounded,
-                          iconColor: AppColors.gold(context),
+                          iconColor: AppColors.accent(context),
                           iconBgColor: AppColors.primarySubtle(context),
                           label: 'Battery Optimization',
                           onTap: notifier.requestBatteryOptimization,
@@ -398,7 +397,7 @@ class SettingsScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: granted
             ? AppColors.success(context).withValues(alpha: 0.15)
-            : AppColors.gold(context).withValues(alpha: 0.15),
+            : AppColors.accent(context).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(50),
       ),
       child: Text(
@@ -406,7 +405,7 @@ class SettingsScreen extends ConsumerWidget {
         style: AppTextStyles.bodySmall.copyWith(
           color: granted
               ? AppColors.success(context)
-              : AppColors.gold(context),
+              : AppColors.accent(context),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -671,8 +670,8 @@ class SettingsScreen extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: AppColors.accentText(context),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: const StadiumBorder(),
               ),

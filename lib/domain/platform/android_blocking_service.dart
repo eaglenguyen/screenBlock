@@ -368,4 +368,23 @@ class AndroidBlockingService implements BlockingService {
       debugPrint('❌ savePauseEndTime error: $e');
     }
 }
+
+  final Set<String> _quickBlockedApps = {};
+
+  Future<void> setQuickBlocked(String packageName, bool blocked) async {
+    if (blocked) {
+      _quickBlockedApps.add(packageName);
+    } else {
+      _quickBlockedApps.remove(packageName);
+    }
+    try {
+      await _methodChannel.invokeMethod('syncQuickBlockedApps', {
+        'apps': _quickBlockedApps.toList(),
+      });
+    } catch (e) {
+      debugPrint('❌ syncQuickBlockedApps error: $e');
+    }
+  }
+
+
 }

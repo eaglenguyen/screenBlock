@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import '../../../core/constants/hivebox_names.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_card.dart';
 import '../../../onboarding/onboarding_viewmodel.dart';
 
 class SettingsProfileCard extends ConsumerWidget {
@@ -16,36 +17,28 @@ class SettingsProfileCard extends ConsumerWidget {
     final displayName = name.isEmpty ? 'You' : name;
     final initial = displayName[0].toUpperCase();
 
-    return Container(
+    return LippedCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border(context), width: 0.5),
-      ),
       child: Row(
         children: [
-          // avatar with initial
           Container(
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: AppColors.gold(context),
+              color: AppColors.accent(context),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 initial,
                 style: AppTextStyles.headlineSmall.copyWith(
-                  color: AppColors.goldText(context),
+                  color: AppColors.accentText(context),
                   fontSize: 22,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 12),
-
-          // name + subtitle
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,8 +55,6 @@ class SettingsProfileCard extends ConsumerWidget {
               ],
             ),
           ),
-
-          // edit button
           GestureDetector(
             onTap: () => _showEditNameDialog(context, ref, name),
             child: Container(
@@ -76,7 +67,7 @@ class SettingsProfileCard extends ConsumerWidget {
               child: Text(
                 'Change name',
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -161,8 +152,8 @@ class SettingsProfileCard extends ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: () => _saveName(ctx, ref, controller.text),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.gold(context),
-                        foregroundColor: AppColors.goldText(context),
+                        backgroundColor: AppColors.accent(context),
+                        foregroundColor: AppColors.accentText(context),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: const StadiumBorder(),
                         elevation: 0,
@@ -183,14 +174,9 @@ class SettingsProfileCard extends ConsumerWidget {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
     HapticFeedback.lightImpact();
-
-    // update viewmodel
     ref.read(onboardingViewModelProvider.notifier).setUserName(trimmed);
-
-    // persist to Hive
     final box = Hive.box(HiveBoxNames.settings);
     box.put('userName', trimmed);
-
     Navigator.pop(ctx);
   }
 }

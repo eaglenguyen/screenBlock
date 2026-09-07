@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pausenow/core/theme/lipped_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -85,7 +86,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
       return Container(
         padding: const EdgeInsets.all(24),
         alignment: Alignment.center,
-        child: CircularProgressIndicator(color: AppColors.gold(context)),
+        child: CircularProgressIndicator(color: AppColors.accent(context)),
       );
     }
 
@@ -97,12 +98,8 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
 
     return Stack(
       children: [
-        Container(
+        LippedCard(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundCard(context),
-            borderRadius: BorderRadius.circular(20),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -113,17 +110,17 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.gold(context).withValues(alpha: 0.15),
+                    color: AppColors.accent(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.gold(context).withValues(alpha: 0.4),
+                      color: AppColors.accent(context).withValues(alpha: 0.4),
                       width: 0.5,
                     ),
                   ),
                   child: Text(
                     'Beta',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.gold(context),
+                      color: AppColors.accent(context),
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                     ),
@@ -155,7 +152,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                             fontSize: 10,
                             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                             color: isSelected
-                                ? AppColors.gold(context)
+                                ? AppColors.accent(context)
                                 : AppColors.textSecondary(context).withValues(alpha: isFuture ? 0.3 : 0.7),
                           ),
                         ),
@@ -166,7 +163,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isSelected
-                                ? AppColors.gold(context)
+                                ? AppColors.accent(context)
                                 : AppColors.backgroundSubtle(context),
                             border: isFuture
                                 ? Border.all(color: AppColors.border(context), width: 1)
@@ -179,7 +176,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                                 fontSize: 12,
                                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                                 color: isSelected
-                                    ? AppColors.goldText(context)
+                                    ? AppColors.accentText(context)
                                     : AppColors.textSecondary(context).withValues(alpha: isFuture ? 0.3 : 0.7),
                               ),
                             ),
@@ -210,7 +207,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
               //         height: 80 * (isFuture ? 0.05 : heightFraction),
               //         decoration: BoxDecoration(
               //           color: isSelected
-              //               ? AppColors.gold(context)
+              //               ? AppColors.accent(context)
               //               : AppColors.backgroundSubtle(context),
               //           borderRadius: BorderRadius.circular(4),
               //         ),
@@ -245,7 +242,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                   child: Text(
                     'Full breakdown →',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.gold(context),
+                      color: AppColors.accent(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),

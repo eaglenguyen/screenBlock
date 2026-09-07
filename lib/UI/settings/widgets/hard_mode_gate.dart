@@ -171,8 +171,8 @@ class _HardModeMathSheetState extends State<_HardModeMathSheet> {
           ElevatedButton(
             onPressed: _submit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.gold(context),
-              foregroundColor: AppColors.goldText(context),
+              backgroundColor: AppColors.accent(context),
+              foregroundColor: AppColors.accentText(context),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: const StadiumBorder(),
               textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 20), // 👈 new

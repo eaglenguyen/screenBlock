@@ -132,17 +132,17 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.gold(context).withValues(alpha: 0.15),
+                    color: AppColors.accent(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(50),
                     border: Border.all(
-                      color: AppColors.gold(context).withValues(alpha: 0.3),
+                      color: AppColors.accent(context).withValues(alpha: 0.3),
                       width: 0.5,
                     ),
                   ),
                   child: Text(
                     'Pro',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.gold(context),
+                      color: AppColors.accent(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -164,7 +164,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 color: AppColors.backgroundSubtle(context),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.gold(context).withValues(alpha: 0.2),
+                  color: AppColors.accent(context).withValues(alpha: 0.2),
                   width: 0.5,
                 ),
               ),
@@ -202,8 +202,8 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.gold(context),
-                      foregroundColor: AppColors.goldText(context),
+                      backgroundColor: AppColors.accent(context),
+                      foregroundColor: AppColors.accentText(context),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: const StadiumBorder(),
                       minimumSize: const Size(double.infinity, 0),
@@ -281,8 +281,8 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: AppColors.accentText(context),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const StadiumBorder(),
                 textStyle: AppTextStyles.labelLarge,

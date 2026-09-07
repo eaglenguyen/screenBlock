@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pausenow/core/theme/lipped_card.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -121,16 +122,8 @@ class _TimerCardState extends State<TimerCard>
     final minutes = parts[1];
     final seconds = parts[2];
 
-    return Container(
+    return LippedCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.border(context),
-          width: 0.5,
-        ),
-      ),
       child: Column(
         children: [
           Text(
@@ -258,7 +251,7 @@ class _TimerCardState extends State<TimerCard>
           child: _selectorPill(
             icon: '⏱',
             label: _timerPillLabel(), // 👈 was _formatDuration(widget.selectedMinutes)
-            iconColor: AppColors.gold(context),
+            iconColor: AppColors.accent(context),
             onTap: widget.onTimerTapped,
           ),
         ),
@@ -299,7 +292,7 @@ class _TimerCardState extends State<TimerCard>
                   : Icons.play_arrow_rounded,
               color: isDisabled
                   ? AppColors.textSecondary(context)
-                  : AppColors.goldText(context),
+                  : AppColors.accentText(context),
               size: 30,
             ),
             label: Text(
@@ -309,10 +302,10 @@ class _TimerCardState extends State<TimerCard>
             style: ElevatedButton.styleFrom(
               backgroundColor: isDisabled
                   ? AppColors.backgroundSubtle(context)
-                  : AppColors.gold(context),
+                  : AppColors.accent(context),
               foregroundColor: isDisabled
                   ? AppColors.textSecondary(context)
-                  : AppColors.goldText(context),
+                  : AppColors.accentText(context),
               disabledBackgroundColor: AppColors.backgroundSubtle(context),
               padding: const EdgeInsets.symmetric(vertical: 15),
               shape: const StadiumBorder(),

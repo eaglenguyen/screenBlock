@@ -93,7 +93,7 @@ class _AcknowledgmentsSheet extends StatelessWidget {
                 Text(
                   'Mascot Illustration',
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.gold(context),
+                    color: AppColors.accent(context),
                     fontSize: 13,
                   ),
                 ),
@@ -170,13 +170,13 @@ class _LinkRow extends StatelessWidget {
           Icon(
             Icons.open_in_new_rounded,
             size: 16,
-            color: AppColors.gold(context),
+            color: AppColors.accent(context),
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.gold(context),
+              color: AppColors.accent(context),
               fontWeight: FontWeight.w600,
             ),
           ),

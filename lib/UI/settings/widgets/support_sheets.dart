@@ -205,20 +205,20 @@ class _GetHelpSheetState extends State<GetHelpSheet> {
               ),
               icon: Icon(
                 Icons.mail_outline_rounded,
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
                 size: 18,
               ),
               label: Text(
                 'Email Support',
                 style: AppTextStyles.labelMedium.copyWith(
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                 ),
               ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 shape: const StadiumBorder(),
                 side: BorderSide(
-                  color: AppColors.gold(context).withValues(alpha: 0.4),
+                  color: AppColors.accent(context).withValues(alpha: 0.4),
                 ),
               ),
             ),
@@ -334,7 +334,7 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
                     ),
                     child: Icon(
                       Icons.chat_bubble_outline_rounded,
-                      color: AppColors.gold(context),
+                      color: AppColors.accent(context),
                       size: 18,
                     ),
                   ),
@@ -380,13 +380,13 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
                       height: 56,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.gold(context)
+                            ? AppColors.accent(context)
                             .withValues(alpha: 0.12)
                             : AppColors.backgroundSubtle(context),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
-                              ? AppColors.gold(context)
+                              ? AppColors.accent(context)
                               .withValues(alpha: 0.5)
                               : AppColors.border(context),
                           width: isSelected ? 1.5 : 0.5,
@@ -404,7 +404,7 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
                             _ratings[i]['label']!,
                             style: AppTextStyles.labelSmall.copyWith(
                               color: isSelected
-                                  ? AppColors.gold(context)
+                                  ? AppColors.accent(context)
                                   : AppColors.textSecondary(context),
                               fontSize: 9,
                             ),
@@ -462,10 +462,10 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
                     ? _sendFeedback
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.gold(context),
-                  foregroundColor: AppColors.goldText(context),
+                  backgroundColor: AppColors.accent(context),
+                  foregroundColor: AppColors.accentText(context),
                   disabledBackgroundColor:
-                  AppColors.gold(context).withValues(alpha: 0.3),
+                  AppColors.accent(context).withValues(alpha: 0.3),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: const StadiumBorder(),
                   textStyle: AppTextStyles.labelLarge,
@@ -475,7 +475,7 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: AppColors.goldText(context),
+                    color: AppColors.accentText(context),
                     strokeWidth: 2,
                   ),
                 )

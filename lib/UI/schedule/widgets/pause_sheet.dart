@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_colors.dart';
 import 'hold_to_confirm.dart';
 
 class PauseScheduleSheet extends StatefulWidget {
-  final VoidCallback onResume; // resume immediately
+  final VoidCallback onResume;
   final Function(int minutes) onPause;
   final bool isPaused;
 
@@ -40,16 +40,7 @@ class PauseScheduleSheet extends StatefulWidget {
 }
 
 class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
-  double _selectedMinutes = 5;
-
-  String get _formattedDuration {
-    final mins = _selectedMinutes.round();
-    if (mins < 60) return '${mins}m';
-    final h = mins ~/ 60;
-    final m = mins % 60;
-    if (m == 0) return '${h}h';
-    return '${h}h ${m}m';
-  }
+  static const int _pauseMinutes = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -58,110 +49,64 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
         24, 20, 24,
         MediaQuery.of(context).padding.bottom + 100,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E1E35),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundCard(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // drag handle
           Container(
             width: 36,
             height: 4,
             margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppColors.border(context),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
 
           Text(
-            widget.isPaused ? 'Unpause Blocking' : 'Pause Blocking',
-            style: AppTextStyles.headlineSmall,
+            widget.isPaused ? 'Unpause Blocking' : 'Pause for $_pauseMinutes minutes?',
+            style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
           ),
           const SizedBox(height: 8),
           Text(
             widget.isPaused
                 ? 'Reblock Apps?'
-                : 'How long do you want to pause?',
+                : 'Make it quick!',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: AppColors.textSecondary(context),
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 32),
 
           if (!widget.isPaused) ...[
-            // duration display
             Text(
-              _formattedDuration,
+              '${_pauseMinutes}m',
               style: GoogleFonts.poppins(
-                color: Colors.orange,
+                color: AppColors.warning(context),
                 fontSize: 52,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -2,
               ),
             ),
-            const SizedBox(height: 8),
-
-
-            // slider
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: Colors.orange,
-                inactiveTrackColor: Colors.orange.withValues(alpha: 0.15),
-                thumbColor: Colors.orange,
-                overlayColor: Colors.orange.withValues(alpha: 0.15),
-                thumbShape:
-                const RoundSliderThumbShape(enabledThumbRadius: 10),
-                trackHeight: 5,
-              ),
-              child: Slider(
-                value: _selectedMinutes,
-                min: 3,
-                max: 30,
-                divisions: 27,
-                onChanged: (val) {
-                  HapticFeedback.selectionClick();
-                  setState(() => _selectedMinutes = val);
-                },
-              ),
-            ),
-
-            // min/max labels
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('3m',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        fontSize: 12,
-                      )),
-                  Text('30m',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        fontSize: 12,
-                      )),
-                ],
-              ),
-            ),
             const SizedBox(height: 28),
 
-            // pause button
             SizedBox(
               width: double.infinity,
               child: HoldToConfirmButton(
+                color: AppColors.warning(context),
+                fillColor: AppColors.accentDark(context),
+                textColor: AppColors.accentPeachText(context),
                 onConfirmed: () {
                   Navigator.pop(context);
-                  widget.onPause(_selectedMinutes.round());
+                  widget.onPause(_pauseMinutes);
                 },
               ),
             ),
           ] else ...[
-            // resume button when already paused
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -170,8 +115,8 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
                   widget.onResume();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // 👈 was AppColors.textSecondary(context).withValues(alpha: 0.4)
-                  foregroundColor: Colors.black, // 👈 was const Color(0xFF1A1208)
+                  backgroundColor: AppColors.warning(context),
+                  foregroundColor: AppColors.accentPeachText(context),
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: const StadiumBorder(),
                   textStyle: const TextStyle(
@@ -179,7 +124,7 @@ class _PauseScheduleSheetState extends State<PauseScheduleSheet> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                child: const Text('Yes, block apps'),
+                child: const Text('BLOCK'),
               ),
             ),
           ],

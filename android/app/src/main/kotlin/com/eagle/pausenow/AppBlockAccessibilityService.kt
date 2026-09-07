@@ -9,10 +9,7 @@ import android.view.accessibility.AccessibilityEvent
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-
 class AppBlockAccessibilityService : AccessibilityService() {
-
-
 
     companion object {
         private val systemWhitelist = setOf(
@@ -35,8 +32,6 @@ class AppBlockAccessibilityService : AccessibilityService() {
             "com.eagle.pausenow",
         )
 
-
-
         var eventCallback: ((String) -> Unit)? = null
         var isRunning = false
         private val exemptedPackages = mutableSetOf<String>()
@@ -50,17 +45,13 @@ class AppBlockAccessibilityService : AccessibilityService() {
             exemptedPackages.add(packageName)
             overlayResetCallback?.invoke()
             isOverlayShowing = false
-            lastBlockScreenLaunchTime = 0L // 👈 reset so next block launches immediately
-
+            lastBlockScreenLaunchTime = 0L
             android.util.Log.d("AccessibilityService", "exempting: $packageName")
-
             android.os.Handler(android.os.Looper.getMainLooper())
                 .postDelayed({
                     exemptedPackages.remove(packageName)
                     android.util.Log.d("AccessibilityService",
                         "exemption expired for: $packageName currentForegroundApp=$currentForegroundApp")
-
-                    // 👇 only fire if still on that exact app
                     if (currentForegroundApp == packageName) {
                         android.util.Log.d("AccessibilityService", "still on $packageName — re-blocking")
                         android.os.Handler(android.os.Looper.getMainLooper())
@@ -76,32 +67,26 @@ class AppBlockAccessibilityService : AccessibilityService() {
     }
 
     fun isSystemApp(packageName: String): Boolean {
-        // explicit whitelist
         if (systemWhitelist.contains(packageName)) return true
         if (packageName.contains("launcher")) return true
         if (packageName.contains("systemui")) return true
-
-        // 👇 use PackageManager to check if it's a real system app
         return try {
             val pm = applicationContext.packageManager
             val appInfo = pm.getApplicationInfo(packageName, 0)
-            // FLAG_SYSTEM means it's in /system/app or /system/priv-app
             (appInfo.flags.toLong() and android.content.pm.ApplicationInfo.FLAG_SYSTEM.toLong()) != 0L
         } catch (e: Exception) {
-            false // if we can't find the app, don't block it
+            false
         }
     }
 
     private lateinit var prefs: SharedPreferences
     private val pauseCheckHandler = android.os.Handler(android.os.Looper.getMainLooper())
 
-    // Runnable 1 — pause expiry check (runs always)
     private val pauseCheckRunnable = object : Runnable {
         override fun run() {
             if (isPauseExpired()) {
                 android.util.Log.d("pausenow", "⏰ Pause expired")
                 eventCallback?.invoke("__scheduleResumed__")
-                // immediately block if on a monitored app
                 val pkg = currentForegroundApp
                 if (pkg != null && pkg != "com.eagle.pausenow" && !isOverlayShowing) {
                     val isBlocking = prefs.getBoolean("isBlocking", false)
@@ -133,15 +118,12 @@ class AppBlockAccessibilityService : AccessibilityService() {
         }
     }
 
-    // Runnable 2 — safety poll (only when Flutter is killed/backgrounded)
     private val blockingPollRunnable = object : Runnable {
         override fun run() {
-            // 👇 only when Flutter is not connected
             if (eventCallback == null) {
                 val isBlocking = prefs.getBoolean("isBlocking", false)
                 val pauseActive = isPauseActive()
                 val pkg = currentForegroundApp
-
                 if (isBlocking && !pauseActive && pkg != null &&
                     !isOverlayShowing && pkg != "com.eagle.pausenow" &&
                     !exemptedPackages.contains(pkg)) {
@@ -173,7 +155,6 @@ class AppBlockAccessibilityService : AccessibilityService() {
         }
     }
 
-    // 👇 INSERT HERE — Runnable 3, time-limit checking
     private val timeLimitCheckRunnable = object : Runnable {
         override fun run() {
             val pkg = currentForegroundApp
@@ -184,11 +165,23 @@ class AppBlockAccessibilityService : AccessibilityService() {
         }
     }
 
+    // 👇 new — quick-block poll, independent of session/schedule/time-limit state
+    private val quickBlockCheckRunnable = object : Runnable {
+        override fun run() {
+            val pkg = currentForegroundApp
+            if (pkg != null && pkg != "com.eagle.pausenow" && !isOverlayShowing) {
+                checkQuickBlockForApp(pkg)
+            }
+            pauseCheckHandler.postDelayed(this, 3000) // 👈 shorter interval — quick-block should feel snappy
+        }
+    }
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         isRunning = true
         isOverlayShowing = false
         prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+
         val info = AccessibilityServiceInfo().apply {
             eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
@@ -196,9 +189,11 @@ class AppBlockAccessibilityService : AccessibilityService() {
             notificationTimeout = 100
         }
         serviceInfo = info
-        pauseCheckHandler.postDelayed(pauseCheckRunnable, 5000) // 👈 start 1
-        pauseCheckHandler.postDelayed(blockingPollRunnable, 5000) // 👈 Start 2
-        pauseCheckHandler.postDelayed(timeLimitCheckRunnable, 5000) //
+
+        pauseCheckHandler.postDelayed(pauseCheckRunnable, 5000)
+        pauseCheckHandler.postDelayed(blockingPollRunnable, 5000)
+        pauseCheckHandler.postDelayed(timeLimitCheckRunnable, 5000)
+        pauseCheckHandler.postDelayed(quickBlockCheckRunnable, 3000) // 👈 new
 
         android.util.Log.d("AccessibilityService", "onServiceConnected")
     }
@@ -206,35 +201,29 @@ class AppBlockAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         android.util.Log.d("pausenow", "🎯 onAccessibilityEvent pkg=$packageName eventCallback=${eventCallback != null} isOverlayShowing=$isOverlayShowing")
         if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-
         val packageName = event.packageName?.toString() ?: return
 
         if (packageName.contains("systemui") ||
             packageName == "android" ||
             packageName == "com.eagle.pausenow") return
 
-        // 👇 if user goes to launcher — clear foreground app
         if (packageName.contains("launcher") ||
             packageName.contains("nexuslauncher") ||
             packageName.contains("pixel") ||
             packageName == "com.google.android.apps.nexuslauncher") {
-            currentForegroundApp = null // 👈 clear it
+            currentForegroundApp = null
             return
         }
 
-
         currentForegroundApp = packageName
-
         checkTimeLimitForApp(packageName)
+        checkQuickBlockForApp(packageName) // 👈 new — checked on every foreground change too, not just the poll
 
-
-        // 👇 check pause expiry ALWAYS — regardless of Flutter state
         if (isPauseExpired()) {
             android.util.Log.d("pausenow", "⏰ Pause expired — notifying Flutter")
             eventCallback?.invoke("__scheduleResumed__")
         }
 
-        // 👇 skip if pause still active
         if (isPauseActive()) {
             android.util.Log.d("pausenow", "⏸ Pause active — skipping")
             return
@@ -250,33 +239,26 @@ class AppBlockAccessibilityService : AccessibilityService() {
             return
         }
 
-        // Flutter running — use Dart callback
         if (eventCallback != null) {
             eventCallback?.invoke(packageName)
             return
         }
 
-        // Flutter killed — read SharedPreferences directly
         android.util.Log.d("AccessibilityService",
             "Flutter not running — checking native prefs for: $packageName")
         checkAndBlockFromPrefs(packageName)
     }
 
-
     private fun checkAndBlockFromPrefs(packageName: String) {
-        if (isSystemApp(packageName)) return // 👈 add at top
-
+        if (isSystemApp(packageName)) return
         val isBlocking = prefs.getBoolean("isBlocking", false)
         if (!isBlocking) return
-
         val blockingMode = prefs.getString("blockingMode", "specific_apps") ?: "specific_apps"
         val monitoredApps = prefs.getStringSet("monitoredApps", emptySet()) ?: emptySet()
-
         val shouldBlock = when (blockingMode) {
             "specific_apps" -> monitoredApps.contains(packageName)
-            else -> !monitoredApps.contains(packageName) && !isSystemApp(packageName) // 👈 double check
+            else -> !monitoredApps.contains(packageName) && !isSystemApp(packageName)
         }
-
         if (shouldBlock) {
             val now = System.currentTimeMillis()
             if (now - lastBlockScreenLaunchTime < 4000) return
@@ -295,7 +277,6 @@ class AppBlockAccessibilityService : AccessibilityService() {
         return try {
             val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE)
                     as android.app.usage.UsageStatsManager
-
             val calendar = java.util.Calendar.getInstance()
             val endTime = calendar.timeInMillis
             calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
@@ -303,17 +284,14 @@ class AppBlockAccessibilityService : AccessibilityService() {
             calendar.set(java.util.Calendar.SECOND, 0)
             calendar.set(java.util.Calendar.MILLISECOND, 0)
             val startTime = calendar.timeInMillis
-
             val events = usageStatsManager.queryEvents(startTime, endTime)
             var totalMs = 0L
             var lastForegroundTime = 0L
             var inForeground = false
-
             val event = android.app.usage.UsageEvents.Event()
             while (events.hasNextEvent()) {
                 events.getNextEvent(event)
                 if (event.packageName != packageName) continue
-
                 when (event.eventType) {
                     android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND -> {
                         lastForegroundTime = event.timeStamp
@@ -327,13 +305,9 @@ class AppBlockAccessibilityService : AccessibilityService() {
                     }
                 }
             }
-
-            // 👇 if still in foreground right now (hasn't backgrounded yet),
-            // count time up to this very moment
             if (inForeground) {
                 totalMs += (endTime - lastForegroundTime)
             }
-
             if (totalMs == 0L) return null
             (totalMs / 1000 / 60).toInt()
         } catch (e: Exception) {
@@ -342,18 +316,15 @@ class AppBlockAccessibilityService : AccessibilityService() {
         }
     }
 
-    // 👇 INSERT HERE — new methods
     private fun checkTimeLimitForApp(packageName: String) {
         val configsJson = prefs.getString("timeLimitConfigs", null) ?: return
         val configs = parseTimeLimitConfigs(configsJson)
         val today = getDayOfWeekIndex()
-
         for (config in configs) {
             if (!config.packageNames.contains(packageName)) continue
             if (!config.days.contains(today)) continue
             if (!config.isActive) continue
             if (exemptedPackages.contains(packageName)) continue
-
             val usedMinutes = getTodayUsageMinutes(packageName) ?: continue
             if (usedMinutes >= config.limitMinutes) {
                 val now = System.currentTimeMillis()
@@ -370,6 +341,27 @@ class AppBlockAccessibilityService : AccessibilityService() {
                 return
             }
         }
+    }
+
+    // 👇 new — quick-block check, entirely separate from time-limit/session/schedule logic
+    private fun checkQuickBlockForApp(packageName: String) {
+        val quickBlocked = prefs.getStringSet("quickBlockedApps", emptySet()) ?: emptySet()
+        if (!quickBlocked.contains(packageName)) return
+        if (exemptedPackages.contains(packageName)) return
+
+        val now = System.currentTimeMillis()
+        if (now - lastBlockScreenLaunchTime < 4000) return
+        lastBlockScreenLaunchTime = now
+        isOverlayShowing = true
+
+        android.util.Log.d("pausenow", "🚫 quick-blocking: $packageName")
+        val intent = Intent(this, BlockActivity::class.java).apply {
+            putExtra("blocked_package", packageName)
+            putExtra("block_reason", "quick_block")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        }
+        startActivity(intent)
     }
 
     private fun getDayOfWeekIndex(): Int {
@@ -398,10 +390,9 @@ class AppBlockAccessibilityService : AccessibilityService() {
     private fun isPauseExpired(): Boolean {
         val prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
         val pauseEndTime = prefs.getLong("schedulePauseEndTime", 0L)
-        if (pauseEndTime == 0L) return false // no pause saved
+        if (pauseEndTime == 0L) return false
         val now = System.currentTimeMillis()
         if (now >= pauseEndTime) {
-            // pause expired — clear it
             prefs.edit().putLong("schedulePauseEndTime", 0L).apply()
             return true
         }
@@ -415,17 +406,15 @@ class AppBlockAccessibilityService : AccessibilityService() {
         return System.currentTimeMillis() < pauseEndTime
     }
 
-
     override fun onInterrupt() {}
 
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
         eventCallback = null
-        pauseCheckHandler.removeCallbacks(pauseCheckRunnable) // 👈 stop
-        pauseCheckHandler.removeCallbacks(blockingPollRunnable) // 👈 add
+        pauseCheckHandler.removeCallbacks(pauseCheckRunnable)
+        pauseCheckHandler.removeCallbacks(blockingPollRunnable)
         pauseCheckHandler.removeCallbacks(timeLimitCheckRunnable)
-
-
+        pauseCheckHandler.removeCallbacks(quickBlockCheckRunnable) // 👈 new
     }
 }

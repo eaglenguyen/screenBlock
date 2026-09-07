@@ -32,12 +32,12 @@ class PurchaseSuccessScreen extends StatelessWidget {
             width: 84,
             height: 84,
             decoration: BoxDecoration(
-              color: AppColors.gold(context).withValues(alpha: 0.15),
+              color: AppColors.accent(context).withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.check_rounded,
-              color: AppColors.gold(context),
+              color: AppColors.accent(context),
               size: 44,
             ),
           ),
@@ -67,8 +67,8 @@ class PurchaseSuccessScreen extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.gold(context),
-                foregroundColor: AppColors.goldText(context),
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: AppColors.accentText(context),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const StadiumBorder(),
                 elevation: 0,

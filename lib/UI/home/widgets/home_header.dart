@@ -83,10 +83,10 @@ class HomeHeader extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.gold(context).withValues(alpha: 0.08),
+                    color: AppColors.accent(context).withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(50),
                     border: Border.all(
-                      color: AppColors.gold(context).withValues(alpha: 0.2),
+                      color: AppColors.accent(context).withValues(alpha: 0.2),
                       width: 0.5,
                     ),
                   ),
@@ -96,7 +96,7 @@ class HomeHeader extends StatelessWidget {
                       Text(
                         '1 minute = 5 ⭐️',
                         style: TextStyle(
-                          color: AppColors.gold(context),
+                          color: AppColors.accent(context),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -112,8 +112,8 @@ class HomeHeader extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold(context),
-                    foregroundColor: AppColors.goldText(context),
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: AppColors.accentText(context),
                     shape: const StadiumBorder(),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -135,7 +135,7 @@ class HomeHeader extends StatelessWidget {
             Text('',
               style: TextStyle(
                 fontSize: 13,
-                color: AppColors.gold(context),
+                color: AppColors.accent(context),
               ),
             ),
             const SizedBox(width: 5),

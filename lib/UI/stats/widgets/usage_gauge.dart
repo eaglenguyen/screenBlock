@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:pausenow/core/theme/lipped_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../stats_state.dart';
@@ -92,13 +93,8 @@ class _UsageGaugeState extends State<UsageGauge>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return LippedCard(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border(context), width: 0.5),
-      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center, // 👈 new
         children: [

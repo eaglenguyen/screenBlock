@@ -89,16 +89,16 @@ class _TimeLimitOptionsSheetState extends State<TimeLimitOptionsSheet>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.gold(context).withValues(alpha: 0.15),
+                  color: AppColors.accent(context).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.shield_rounded, color: AppColors.gold(context), size: 22),
+                child: Icon(Icons.shield_rounded, color: AppColors.accent(context), size: 22),
               ),
               const SizedBox(height: 12),
               Text(
                 'Time Limit',
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.gold(context),
+                  color: AppColors.accent(context),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -124,7 +124,7 @@ class _TimeLimitOptionsSheetState extends State<TimeLimitOptionsSheet>
                   border: Border.all(
                     color: widget.isLimitReached
                         ? AppColors.error(context).withValues(alpha: 0.3)
-                        : AppColors.gold(context).withValues(alpha: 0.25),
+                        : AppColors.accent(context).withValues(alpha: 0.25),
                     width: 3,
                   ),
                 ),
@@ -177,8 +177,8 @@ class _TimeLimitOptionsSheetState extends State<TimeLimitOptionsSheet>
                     widget.onEdit();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold(context),
-                    foregroundColor: AppColors.goldText(context),
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: AppColors.accentText(context),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: const StadiumBorder(),
                     textStyle: AppTextStyles.labelLarge,

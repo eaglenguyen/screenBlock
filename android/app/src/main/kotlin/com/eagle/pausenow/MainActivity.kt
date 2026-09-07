@@ -52,6 +52,13 @@ class MainActivity : FlutterActivity() {
             METHOD_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "syncQuickBlockedApps" -> {
+                    val apps = (call.arguments as? Map<*, *>)?.get("apps") as? List<*>
+                    val set = apps?.map { it.toString() }?.toSet()?.toSet() ?: emptySet<String>()
+                    val prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+                    prefs.edit().putStringSet("quickBlockedApps", set).apply()
+                    result.success(null)
+                }
                 "getAppIcon" -> {
                     val packageName = call.argument<String>("packageName") ?: ""
                     try {
