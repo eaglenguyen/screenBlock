@@ -71,7 +71,7 @@ struct TotalActivityView: View {
                             }
                         }
                     }
-                    .background(cardColor) 
+                    .background(cardColor)
                     .cornerRadius(20)
                     .padding(.horizontal, 16)
                 }

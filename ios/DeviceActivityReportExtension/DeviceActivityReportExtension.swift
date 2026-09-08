@@ -8,8 +8,11 @@ struct TotalActivityReportExtension: DeviceActivityReportExtension {
         TotalActivityReport { configuration in
             TotalActivityView(configuration: configuration)
         }
-        CompactActivityReport { configuration in // 👈 new — add alongside the existing one
+        CompactActivityReport { configuration in
             CompactActivityDisplay(configuration: configuration)
+        }
+        TimeLimitUsageReport { configuration in
+            TimeLimitUsageView(configuration: configuration)
         }
     }
 }

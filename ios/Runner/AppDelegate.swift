@@ -29,6 +29,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         if #available(iOS 16.0, *) {
             setupChannel(engine: engine)
+            
+            if let timeLimitTriggerRegistrar = engine.registrar(forPlugin: "TimeLimitTriggerPlugin") {
+                timeLimitTriggerRegistrar.register(
+                    TimeLimitTriggerPlatformViewFactory(),
+                    withId: "com.eagle.pausenow/time_limit_trigger_view"
+                )
+            } else {
+                NSLog("❌ Failed to get plugin registrar for TimeLimitTriggerPlugin")
+            }
 
             // 👇 register platform view for inline screen time report
             if let registrar = engine.registrar(forPlugin: "ScreenTimeReportPlugin") {
@@ -315,6 +324,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
+        case "getTimeLimitDebugLog":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            let log = defaults?.string(forKey: "timeLimitDebugLog") ?? "no log yet"
+            let time = defaults?.double(forKey: "timeLimitDebugLogTime") ?? 0
+            result(["log": log, "time": time])
+        case "getTimeLimitUsage":
+            if let args = call.arguments as? [String: Any], let id = args["configId"] as? String {
+                let value = UserDefaults(suiteName: "group.com.eagle.pausenow")?.integer(forKey: "timeLimitUsed_\(id)") ?? 0
+                result(value)
+            } else {
+                result(0)
+            }
+        case "saveTimeLimitConfigIds":
+            if let args = call.arguments as? [String: Any], let ids = args["ids"] as? [String] {
+                UserDefaults(suiteName: "group.com.eagle.pausenow")?.set(ids, forKey: "timeLimitConfigIds")
+            }
+            result(nil)
         case "resetQuickBlockSelection":
             if let args = call.arguments as? [String: Any], let cardId = args["cardId"] as? String {
                 service.resetQuickBlockSelection(cardId: cardId)

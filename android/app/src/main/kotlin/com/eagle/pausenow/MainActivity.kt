@@ -52,6 +52,15 @@ class MainActivity : FlutterActivity() {
             METHOD_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "forceRecheckTimeLimit" -> {
+                    AppBlockAccessibilityService.forceRecheckTimeLimit()
+                    result.success(null)
+                }
+                "clearExemption" -> {
+                    val packageName = call.argument<String>("packageName") ?: ""
+                    AppBlockAccessibilityService.clearExemption(packageName)
+                    result.success(null)
+                }
                 "syncQuickBlockedApps" -> {
                     val apps = (call.arguments as? Map<*, *>)?.get("apps") as? List<*>
                     val set = apps?.map { it.toString() }?.toSet()?.toSet() ?: emptySet<String>()

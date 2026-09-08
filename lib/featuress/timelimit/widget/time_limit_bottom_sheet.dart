@@ -1,55 +1,58 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../data/models/time_limit_config.dart';
 import '../../../../domain/platform/ios_blocking_service.dart';
 import '../../../../providers/blocking_service_provider.dart';
 import '../../../UI/home/widgets/app_list_sheet.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../featuress/timelimit/time_limit_viewmodel.dart';
-import '../../../paywall/feature_paywall_screen.dart';
 
 class TimeLimitBottomSheet extends ConsumerStatefulWidget {
   const TimeLimitBottomSheet({
     super.key,
     this.existingConfig,
   });
-
   final TimeLimitConfig? existingConfig;
-
   @override
   ConsumerState<TimeLimitBottomSheet> createState() =>
       _TimeLimitBottomSheetState();
 }
 
 class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
-
   late TextEditingController _nameController;
   late int _limitMinutes;
   late List<int> _selectedDays;
   late List<String> _packageNames;
   late final String _configId;
-
-
   bool get isEditing => widget.existingConfig != null;
+
+  // 👇 new — allowed discrete values: 1 (testing only), 5–30 step 5, 60–480 step 30
+  final List<int> _limitValues = [
+    1,
+    5, 10, 15, 20, 25, 30,
+    60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 450, 480,
+  ];
+
+  int _nearestAllowedValue(int minutes) {
+    return _limitValues.reduce((a, b) => (minutes - a).abs() <= (minutes - b).abs() ? a : b);
+  }
 
   @override
   void initState() {
     super.initState();
     final c = widget.existingConfig;
-
     _nameController = TextEditingController(text: c?.name ?? '');
-    _limitMinutes = c?.limitMinutes ?? 30;
+    final loadedMinutes = c?.limitMinutes ?? 30;
+    // 👇 new — snap to nearest allowed value if the loaded config doesn't exactly match
+    _limitMinutes = _limitValues.contains(loadedMinutes)
+        ? loadedMinutes
+        : _nearestAllowedValue(loadedMinutes);
     _selectedDays = List.from(c?.days ?? [0, 1, 2, 3, 4]);
     _packageNames = List.from(c?.packageNames ?? []);
-
     _configId = c?.id ?? const Uuid().v4();
-
   }
 
   @override
@@ -145,6 +148,8 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
   }
 
   Widget _buildLimitCard(BuildContext context) {
+    final currentIndex = _limitValues.indexOf(_limitMinutes).clamp(0, _limitValues.length - 1);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -172,10 +177,9 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
             ],
           ),
           const SizedBox(height: 12),
-          // 👇 new — preset row
           Row(
             children: [
-              Expanded(child: _presetChip(context, label: '30m', minutes: 30)),
+              Expanded(child: _presetChip(context, label: '5m', minutes: 5)),
               const SizedBox(width: 8),
               Expanded(child: _presetChip(context, label: '1h', minutes: 60)),
               const SizedBox(width: 8),
@@ -193,18 +197,20 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
               trackHeight: 4,
             ),
             child: Slider(
-              value: _limitMinutes.toDouble(),
-              min: 1,
-              max: 240,
-              divisions: 239,
-              onChanged: (v) => setState(() => _limitMinutes = v.round()),
+              value: currentIndex.toDouble(),
+              min: 0,
+              max: (_limitValues.length - 1).toDouble(),
+              divisions: _limitValues.length - 1,
+              onChanged: (v) => setState(() => _limitMinutes = _limitValues[v.round()]),
             ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('1m', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context))),
-              Text('4h', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context))),
+              Text(_formatMinutes(_limitValues.first),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context))),
+              Text(_formatMinutes(_limitValues.last),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context))),
             ],
           ),
         ],
@@ -272,9 +278,7 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
     try {
       final service = ref.read(blockingServiceProvider) as IOSBlockingService;
       final count = await service.showTimeLimitAppPicker(configId: _configId);
-
       if (!mounted) return;
-
       setState(() {
         _packageNames = List.generate(count ?? 0, (i) => 'ios_app_$i');
       });
@@ -285,7 +289,6 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
 
   Widget _buildAppListRow(BuildContext context) {
     final count = _packageNames.length;
-
     return GestureDetector(
       onTap: _openAppPicker,
       child: Container(
@@ -437,83 +440,85 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
   void _showDeleteConfirmation() {
     final confirmController = TextEditingController();
     const confirmWord = 'delete';
-
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.backgroundCard(context),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Delete Time Limit', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)), textAlign: TextAlign.center),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Type Delete to confirm:',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '"$confirmWord"',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error(context), fontWeight: FontWeight.w700),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: confirmController,
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context)),
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: 'Type DELETE here',
-                  hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-                  filled: true,
-                  fillColor: AppColors.backgroundSubtle(context),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.error(context))),
-                ),
-                onChanged: (_) => setDialogState(() {}),
-              ),
-            ],
-          ),
-          actions: [
-            Column(
+        builder: (ctx, setDialogState) {
+          final isConfirmed = confirmController.text.trim().toLowerCase() == confirmWord.toLowerCase();
+          return AlertDialog(
+            backgroundColor: AppColors.backgroundCard(context),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text('Delete Time Limit', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)), textAlign: TextAlign.center),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: confirmController.text.trim().toLowerCase() == confirmWord.toLowerCase()
-                        ? () { Navigator.pop(ctx); _onDelete(); }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error(context),
-                      disabledBackgroundColor: AppColors.error(context).withValues(alpha: 0.3),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: const Text('Delete'),
-                  ),
+                Text(
+                  'Type Delete to confirm:',
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary(context),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: const StadiumBorder(),
-                      side: BorderSide(color: AppColors.border(context)),
-                    ),
-                    child: const Text('Cancel'),
+                Text(
+                  '"$confirmWord"',
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error(context), fontWeight: FontWeight.w700),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: confirmController,
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context)),
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Type DELETE here',
+                    hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+                    filled: true,
+                    fillColor: AppColors.backgroundSubtle(context),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.error(context))),
                   ),
+                  onChanged: (_) => setDialogState(() {}),
                 ),
               ],
             ),
-          ],
-        ),
+            actions: [
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: confirmController.text.trim().toLowerCase() == confirmWord.toLowerCase()
+                          ? () { Navigator.pop(ctx); _onDelete(); }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error(context),
+                        disabledBackgroundColor: AppColors.error(context).withValues(alpha: 0.3),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: const Text('Delete'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary(context),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: const StadiumBorder(),
+                        side: BorderSide(color: AppColors.border(context)),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -534,6 +539,59 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
     if (_selectedDays.length == 2 && _selectedDays.contains(5) && _selectedDays.contains(6)) return 'Weekends';
     return 'Custom';
   }
+
+  Future<void> _onSave() async {
+    if (_nameController.text.trim().isEmpty) {
+      _showValidationDialog(
+        context,
+        title: 'Name Required',
+        message: 'Please enter a name for this time limit!',
+      );
+      return;
+    }
+    if (_packageNames.isEmpty) {
+      _showValidationDialog(
+        context,
+        title: 'No Apps Selected',
+        message: 'Please pick at least 1 app to add a time limit to!',
+      );
+      return;
+    }
+
+    final notifier = ref.read(timeLimitViewModelProvider.notifier);
+
+    await notifier.saveConfig(
+      existingId: _configId,
+      name: _nameController.text.trim(),
+      packageNames: _packageNames,
+      limitMinutes: _limitMinutes,
+      days: _selectedDays,
+      isNew: !isEditing,
+    );
+
+    // 👇 new — silently save again when editing an existing config, so the shield
+    // actually applies/lifts without requiring the user to manually tap Save twice
+    if (isEditing) {
+      await notifier.saveConfig(
+        existingId: _configId,
+        name: _nameController.text.trim(),
+        packageNames: _packageNames,
+        limitMinutes: _limitMinutes,
+        days: _selectedDays,
+        isNew: false,
+      );
+    }
+
+    if (mounted) Navigator.pop(context);
+  }
+
+
+  Future<void> _onDelete() async {
+    if (widget.existingConfig == null) return;
+    await ref.read(timeLimitViewModelProvider.notifier).deleteConfig(widget.existingConfig!.id);
+    if (mounted) Navigator.pop(context);
+  }
+
 
 
   void _showValidationDialog(BuildContext context, {required String title, required String message}) {
@@ -576,41 +634,4 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       ),
     );
   }
-
-  Future<void> _onSave() async {
-    if (_nameController.text.trim().isEmpty) {
-      _showValidationDialog(
-        context,
-        title: 'Name Required',
-        message: 'Please enter a name for this time limit!',
-      );
-      return;
-    }
-    if (_packageNames.isEmpty) {
-      _showValidationDialog(
-        context,
-        title: 'No Apps Selected',
-        message: 'Please pick at least 1 app to add a time limit to!',
-      );
-      return;
-    }
-    await ref.read(timeLimitViewModelProvider.notifier).saveConfig(
-      existingId: _configId,
-      name: _nameController.text.trim(),
-      packageNames: _packageNames,
-      limitMinutes: _limitMinutes,
-      days: _selectedDays,
-      isNew: !isEditing,
-    );
-    if (mounted) Navigator.pop(context);
-  }
-
-
-  Future<void> _onDelete() async {
-    if (widget.existingConfig == null) return;
-    await ref.read(timeLimitViewModelProvider.notifier).deleteConfig(widget.existingConfig!.id);
-    if (mounted) Navigator.pop(context);
-  }
-
-
 }

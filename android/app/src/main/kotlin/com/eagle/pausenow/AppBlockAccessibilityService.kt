@@ -40,6 +40,14 @@ class AppBlockAccessibilityService : AccessibilityService() {
         var overlayDismissedCallback: (() -> Unit)? = null
         var isOverlayShowing = false
         var lastBlockScreenLaunchTime = 0L
+        var instance: AppBlockAccessibilityService? = null // 👈 new — needed to call the non-static checkTimeLimitForApp
+
+
+        fun forceRecheckTimeLimit() {
+            android.util.Log.d("pausenow", "🔍 forceRecheckTimeLimit — currentForegroundApp=$currentForegroundApp, instance=${instance != null}")
+            val pkg = currentForegroundApp ?: return
+            instance?.checkTimeLimitForApp(pkg)
+        }
 
         fun addExemption(packageName: String) {
             exemptedPackages.add(packageName)
@@ -63,6 +71,12 @@ class AppBlockAccessibilityService : AccessibilityService() {
                             "no longer on $packageName — skipping re-block")
                     }
                 }, 30000)
+        }
+
+        // AppBlockAccessibilityService.kt companion object, alongside addExemption
+        fun clearExemption(packageName: String) {
+            exemptedPackages.remove(packageName)
+            android.util.Log.d("AccessibilityService", "cleared exemption for: $packageName")
         }
     }
 
@@ -178,6 +192,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        instance = this // 👈 new
         isRunning = true
         isOverlayShowing = false
         prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
@@ -317,6 +332,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
     }
 
     private fun checkTimeLimitForApp(packageName: String) {
+        android.util.Log.d("pausenow", "🔍 checkTimeLimitForApp called for $packageName")
         val configsJson = prefs.getString("timeLimitConfigs", null) ?: return
         val configs = parseTimeLimitConfigs(configsJson)
         val today = getDayOfWeekIndex()
@@ -324,8 +340,12 @@ class AppBlockAccessibilityService : AccessibilityService() {
             if (!config.packageNames.contains(packageName)) continue
             if (!config.days.contains(today)) continue
             if (!config.isActive) continue
-            if (exemptedPackages.contains(packageName)) continue
+            if (exemptedPackages.contains(packageName)) {
+                android.util.Log.d("pausenow", "🔍 $packageName is still exempted — skipping")
+                continue
+            }
             val usedMinutes = getTodayUsageMinutes(packageName) ?: continue
+            android.util.Log.d("pausenow", "🔍 $packageName usedMinutes=$usedMinutes limit=${config.limitMinutes}")
             if (usedMinutes >= config.limitMinutes) {
                 val now = System.currentTimeMillis()
                 if (now - lastBlockScreenLaunchTime < 4000) return
@@ -410,6 +430,8 @@ class AppBlockAccessibilityService : AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        instance = null // 👈 new
+
         isRunning = false
         eventCallback = null
         pauseCheckHandler.removeCallbacks(pauseCheckRunnable)

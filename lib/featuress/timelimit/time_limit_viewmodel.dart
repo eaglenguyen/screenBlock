@@ -9,6 +9,8 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../data/models/time_limit_config.dart';
 import '../../../providers/repository_providers.dart';
 import '../../data/repositories/TimeLimitRepo.dart';
+import '../../domain/platform/android_blocking_service.dart';
+import '../../providers/blocking_service_provider.dart';
 import '../../providers/premium_provider.dart';
 import 'time_limit_state.dart';
 
@@ -44,29 +46,41 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
     bool isNew = false,
   }) async {
     try {
-
       final config = TimeLimitConfig(
         id: existingId ?? const Uuid().v4(),
         name: name,
         packageNames: packageNames,
         limitMinutes: limitMinutes,
         days: days,
-        updatedAt: DateTime.now(), // 👈 new — every save counts as an update
-
+        updatedAt: DateTime.now(),
       );
-
       await _repo.saveConfig(config);
-
       if (isNew) {
         await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstBlockCreated);
       }
 
-      await _syncToNative(); // 👈 new
+      if (!isNew && existingId != null) {
+        if (Platform.isIOS) {
+          await const MethodChannel('com.eagle.pausenow/ios_blocking')
+              .invokeMethod('unshieldConfigApps', {'configId': existingId});
+        } else if (Platform.isAndroid) {
+          final service = ref.read(blockingServiceProvider);
+          if (service is AndroidBlockingService) {
+            for (final pkg in packageNames) {
+              await service.clearExemption(pkg); // 👈 kept — this part worked correctly
+            }
+            // forceRecheckTimeLimit call removed — reverting to known-stable behavior
+          }
+        }
+      }
+
+      await _syncToNative();
       loadConfigs();
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
+
 
   Future<void> deleteConfig(String id) async {
     final config = _repo.getConfig(id);
@@ -95,8 +109,7 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
 
   // 👇 new — pushes current config list to native SharedPreferences (Android)
   Future<void> _syncToNative() async {
-    final configs = _getUnlockedConfigs(); // 👈 was _repo.getAllConfigs() — now only syncs unlocked configs
-
+    final configs = _getUnlockedConfigs();
     if (Platform.isAndroid) {
       final json = jsonEncode(configs.map((c) => {
         'packageNames': c.packageNames,
@@ -104,7 +117,6 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
         'days': c.days,
         'isActive': c.isActive,
       }).toList());
-
       await const MethodChannel('com.eagle.pausenow/accessibility')
           .invokeMethod('saveTimeLimitConfigs', {'configsJson': json});
     } else if (Platform.isIOS) {
@@ -116,6 +128,12 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
         });
       }
 
+      // 👇 new — tells the report extension which config IDs exist, so it knows what to compute usage for
+      await const MethodChannel('com.eagle.pausenow/ios_blocking')
+          .invokeMethod('saveTimeLimitConfigIds', {
+        'ids': configs.map((c) => c.id).toList(),
+      });
+
       await const MethodChannel('com.eagle.pausenow/ios_blocking')
           .invokeMethod('syncTimeLimitConfigs', {
         'configs': configs.map((c) => {
@@ -126,6 +144,7 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
       });
     }
   }
+
 
   List<TimeLimitConfig> _getUnlockedConfigs() {
     final isPremium = ref.read(isPremiumProvider);

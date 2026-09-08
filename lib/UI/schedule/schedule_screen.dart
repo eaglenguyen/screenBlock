@@ -189,7 +189,6 @@ class ScheduleScreen extends ConsumerWidget {
                               onTap: () => TimeLimitOptionsSheet.show(
                                 context,
                                 config: config,
-                                isLimitReached: false,
                                 onEdit: () => showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,

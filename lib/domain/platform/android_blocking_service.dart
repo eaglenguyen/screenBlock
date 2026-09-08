@@ -386,5 +386,21 @@ class AndroidBlockingService implements BlockingService {
     }
   }
 
+  Future<void> clearExemption(String packageName) async {
+    try {
+      await _methodChannel.invokeMethod('clearExemption', {'packageName': packageName});
+    } catch (e) {
+      debugPrint('❌ clearExemption error: $e');
+    }
+  }
+
+  Future<void> forceRecheckTimeLimit() async {
+    try {
+      await _methodChannel.invokeMethod('forceRecheckTimeLimit');
+    } catch (e) {
+      debugPrint('❌ forceRecheckTimeLimit error: $e');
+    }
+  }
+
 
 }

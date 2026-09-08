@@ -307,6 +307,28 @@ class SettingsScreen extends ConsumerWidget {
                         isDanger: true,
                         onTap: () => _showDeleteAccountDialog(context),
                       ),
+                      if (kDebugMode)
+                        SettingsRow(
+                          icon: Icons.bug_report_rounded,
+                          iconColor: AppColors.accent(context),
+                          iconBgColor: AppColors.primarySubtle(context),
+                          label: 'Debug: Force Premium',
+                          onTap: () {
+                            debugPremiumOverride = !debugPremiumOverride;
+                            ref.invalidate(isPremiumProvider);
+                          },
+                          trailing: Switch(
+                            value: debugPremiumOverride,
+                            onChanged: (val) {
+                              debugPremiumOverride = val;
+                              ref.invalidate(isPremiumProvider);
+                            },
+                            activeColor: AppColors.accent(context),
+                            activeTrackColor: AppColors.accent(context).withValues(alpha: 0.3),
+                            inactiveThumbColor: AppColors.textSecondary(context),
+                            inactiveTrackColor: AppColors.backgroundSubtle(context),
+                          ),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 20),
