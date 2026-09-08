@@ -128,12 +128,6 @@ class TimeLimitViewModel extends _$TimeLimitViewModel {
         });
       }
 
-      // 👇 new — tells the report extension which config IDs exist, so it knows what to compute usage for
-      await const MethodChannel('com.eagle.pausenow/ios_blocking')
-          .invokeMethod('saveTimeLimitConfigIds', {
-        'ids': configs.map((c) => c.id).toList(),
-      });
-
       await const MethodChannel('com.eagle.pausenow/ios_blocking')
           .invokeMethod('syncTimeLimitConfigs', {
         'configs': configs.map((c) => {

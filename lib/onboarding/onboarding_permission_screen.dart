@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -465,6 +466,24 @@ class _OnboardingPermissionsScreenState
               ],
             ),
           ),
+
+          if (kDebugMode) // 👈 new
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Center(
+                child: GestureDetector(
+                  onTap: widget.onNext,
+                  child: Text(
+                    'Skip (Debug)',
+                    style: GoogleFonts.poppins(
+                      color: Colors.redAccent.withValues(alpha: 0.6),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
           const Spacer(),
         ],

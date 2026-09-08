@@ -2,6 +2,7 @@
 //  FamilyActivityPickerViewController.swift
 //  Runner
 //
+
 import UIKit
 import SwiftUI
 import FamilyControls
@@ -12,20 +13,23 @@ class FamilyActivityPickerViewController: UIViewController {
     private let onDismiss: () -> Void
     private let saveKey: String
     private let pickerTitle: String
-    private let requireSelection: Bool // 👈 new
+    private let requireSelection: Bool
+    private let maxSelectionCount: Int?
 
     init(
         service: IOSBlockingService,
         onDismiss: @escaping () -> Void,
         saveKey: String = "blockedApps",
         pickerTitle: String = "Select Apps",
-        requireSelection: Bool = false // 👈 new
+        requireSelection: Bool = false,
+        maxSelectionCount: Int? = nil
     ) {
         self.service = service
         self.onDismiss = onDismiss
         self.saveKey = saveKey
         self.pickerTitle = pickerTitle
-        self.requireSelection = requireSelection // 👈 new
+        self.requireSelection = requireSelection
+        self.maxSelectionCount = maxSelectionCount
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -44,7 +48,8 @@ class FamilyActivityPickerViewController: UIViewController {
             },
             saveKey: saveKey,
             title: pickerTitle,
-            requireSelection: requireSelection // 👈 new
+            requireSelection: requireSelection,
+            maxSelectionCount: maxSelectionCount
         )
         let hostingController = UIHostingController(
             rootView: pickerView
@@ -60,29 +65,21 @@ class FamilyActivityPickerViewController: UIViewController {
     }
 }
 
-
-
 @available(iOS 16.0, *)
 struct FamilyActivityPickerView: View {
     let service: IOSBlockingService
     let onDismiss: () -> Void
     let saveKey: String
     let title: String
-    let requireSelection: Bool // 👈 new — defaults false to preserve existing pickers' behavior
+    let requireSelection: Bool
+    let maxSelectionCount: Int?
     @State private var selection = FamilyActivitySelection()
 
-    init(
-        service: IOSBlockingService,
-        onDismiss: @escaping () -> Void,
-        saveKey: String,
-        title: String,
-        requireSelection: Bool = false // 👈 new
-    ) {
-        self.service = service
-        self.onDismiss = onDismiss
-        self.saveKey = saveKey
-        self.title = title
-        self.requireSelection = requireSelection
+    private var isSaveDisabled: Bool {
+        let count = selection.applicationTokens.count
+        if requireSelection && count == 0 { return true }
+        if let max = maxSelectionCount, count > max { return true }
+        return false
     }
 
     var body: some View {
@@ -106,7 +103,7 @@ struct FamilyActivityPickerView: View {
                             onDismiss()
                         }
                         .fontWeight(.semibold)
-                        .disabled(requireSelection && selection.applicationTokens.isEmpty) // 👈 new
+                        .disabled(isSaveDisabled)
                     }
                 }
                 .onAppear {

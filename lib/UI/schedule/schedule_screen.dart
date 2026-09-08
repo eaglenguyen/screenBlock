@@ -16,11 +16,13 @@ import '../../../providers/premium_provider.dart';
 import '../../../services/schedule_checker.dart';
 import '../../core/utils/permission_dialogs.dart';
 import '../../data/models/time_limit_config.dart';
+import '../../domain/platform/android_blocking_service.dart';
 import '../../featuress/quickblock/widgets/quick_block_row.dart';
 import '../../featuress/timelimit/time_limit_viewmodel.dart';
 import '../../featuress/timelimit/widget/time_limit_bottom_sheet.dart';
 import '../../featuress/timelimit/widget/time_limit_card.dart';
 import '../../featuress/timelimit/widget/time_limit_option_sheet.dart';
+import '../../providers/blocking_service_provider.dart';
 import '../home/home_state.dart';
 import '../home/home_viewmodel.dart';
 import '../settings/settings_viewmodel.dart';
@@ -186,18 +188,32 @@ class ScheduleScreen extends ConsumerWidget {
                             ignoring: isManualBlocking || isPaused,
                             child: TimeLimitCard(
                               config: config,
-                              onTap: () => TimeLimitOptionsSheet.show(
-                                context,
-                                config: config,
-                                onEdit: () => showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  useRootNavigator: true,
-                                  builder: (_) => TimeLimitBottomSheet(existingConfig: config),
-                                ),
-                                onDelete: () => ref.read(timeLimitViewModelProvider.notifier).deleteConfig(config.id),
-                              ),
+                              onTap: () async {
+                                final blockingService = ref.read(blockingServiceProvider);
+                                bool isLimitReached = false;
+                                if (blockingService is AndroidBlockingService) {
+                                  int usedMinutes = 0;
+                                  for (final pkg in config.packageNames) {
+                                    usedMinutes += await blockingService.getUsedMinutesToday(pkg);
+                                  }
+                                  isLimitReached = usedMinutes >= config.limitMinutes;
+                                }
+                                if (context.mounted) {
+                                  TimeLimitOptionsSheet.show(
+                                    context,
+                                    config: config,
+                                    isLimitReached: isLimitReached,
+                                    onEdit: () => showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      useRootNavigator: true,
+                                      builder: (_) => TimeLimitBottomSheet(existingConfig: config),
+                                    ),
+                                    onDelete: () => ref.read(timeLimitViewModelProvider.notifier).deleteConfig(config.id),
+                                  );
+                                }
+                              },
                             ),
                           ),
                         ),

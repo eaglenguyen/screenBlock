@@ -11,8 +11,5 @@ struct TotalActivityReportExtension: DeviceActivityReportExtension {
         CompactActivityReport { configuration in
             CompactActivityDisplay(configuration: configuration)
         }
-        TimeLimitUsageReport { configuration in
-            TimeLimitUsageView(configuration: configuration)
-        }
     }
 }

@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
+import 'package:pausenow/featuress/quickblock/widgets/quick_block_tutorial.dart';
+import '../../../core/constants/hivebox_names.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/pressable_scale.dart';
@@ -56,11 +59,14 @@ class QuickBlockRow extends ConsumerWidget {
                   final service = ref.read(blockingServiceProvider) as IOSBlockingService;
                   final hasSelection = await service.hasQuickBlockSelection(app.packageName);
                   if (!hasSelection) {
-                    final count = await service.showQuickBlockPicker(cardId: app.packageName, appLabel: app.name);
-                    if (count == null || count == 0) {
-                      // 👈 new — user cancelled or saved empty; don't toggle anything
-                      return;
+                    final box = Hive.box(HiveBoxNames.settings);
+                    final seenTutorial = box.get('seenQuickBlockTutorial', defaultValue: false) as bool;
+                    if (!seenTutorial) {
+                      await QuickBlockPickerTutorialOverlay.show(context, appName: app.name);
+                      /* set seenTutorial = true in storage */
                     }
+                    final count = await service.showQuickBlockPicker(cardId: app.packageName, appLabel: app.name);
+                    if (count == null || count == 0) return;
                   }
                 }
                 notifier.toggle(app.packageName);

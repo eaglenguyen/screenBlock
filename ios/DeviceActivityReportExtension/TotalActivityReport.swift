@@ -7,7 +7,6 @@ import ManagedSettings
 extension DeviceActivityReport.Context {
     static let totalActivity = Self("Total Activity")
     static let compactActivity = Self("Compact Activity") // 👈 new
-    static let timeLimitUsage = Self("Time Limit Usage")
 }
 
 struct AppUsageData: Identifiable {
@@ -119,36 +118,4 @@ struct CompactActivityReport: DeviceActivityReportScene {
 }
 
 
-struct TimeLimitUsageReport: DeviceActivityReportScene {
-    let context: DeviceActivityReport.Context = .timeLimitUsage
-    let content: (ActivityConfiguration) -> TimeLimitUsageView
-    func body(for configuration: ActivityConfiguration) -> TimeLimitUsageView {
-        TimeLimitUsageView(configuration: configuration)
-    }
-    func makeConfiguration(
-        representing data: DeviceActivityResults<DeviceActivityData>
-    ) async -> ActivityConfiguration {
-        var appUsages: [AppUsageData] = []
-        var totalDuration: TimeInterval = 0
-        for await activityData in data {
-            for await segment in activityData.activitySegments {
-                for await category in segment.categories {
-                    for await app in category.applications {
-                        let duration = app.totalActivityDuration
-                        guard duration > 0 else { continue }
-                        totalDuration += duration
-                        appUsages.append(AppUsageData(
-                            name: app.application.localizedDisplayName ?? "Unknown",
-                            duration: duration,
-                            token: app.application.token
-                        ))
-                    }
-                }
-            }
-        }
-        return ActivityConfiguration(
-            appUsages: appUsages,
-            totalDuration: totalDuration
-        )
-    }
-}
+

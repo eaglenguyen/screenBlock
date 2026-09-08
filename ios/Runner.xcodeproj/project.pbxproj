@@ -36,8 +36,6 @@
 		74EC2F6330031AE10024CD2F /* ScreenTimeReportPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */; };
 		74EC30363006BF9B0024CD2F /* AppIconStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC30353006BF9B0024CD2F /* AppIconStackView.swift */; };
 		74EC30383006C12D0024CD2F /* AppIconStackPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */; };
-		74EEFE6A304FA4B30001AD1C /* TimeLimitTriggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EEFE69304FA4B30001AD1C /* TimeLimitTriggerView.swift */; };
-		74EEFE6C304FA4E10001AD1C /* TimeLimitTriggerPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EEFE6B304FA4E10001AD1C /* TimeLimitTriggerPlatformView.swift */; };
 		74EF0487300916F500157C22 /* CompactScreenTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF0486300916F500157C22 /* CompactScreenTimeView.swift */; };
 		74EF04893009173B00157C22 /* CompactScreenTimePlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF04883009173B00157C22 /* CompactScreenTimePlatformView.swift */; };
 		74EF04DA3009212B00157C22 /* CompactActivityDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF04D630091EFD00157C22 /* CompactActivityDisplay.swift */; };
@@ -177,8 +175,6 @@
 		74EC2F6230031AE10024CD2F /* ScreenTimeReportPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeReportPlatformView.swift; sourceTree = "<group>"; };
 		74EC30353006BF9B0024CD2F /* AppIconStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconStackView.swift; sourceTree = "<group>"; };
 		74EC30373006C12D0024CD2F /* AppIconStackPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconStackPlatformView.swift; sourceTree = "<group>"; };
-		74EEFE69304FA4B30001AD1C /* TimeLimitTriggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeLimitTriggerView.swift; sourceTree = "<group>"; };
-		74EEFE6B304FA4E10001AD1C /* TimeLimitTriggerPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeLimitTriggerPlatformView.swift; sourceTree = "<group>"; };
 		74EF0486300916F500157C22 /* CompactScreenTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactScreenTimeView.swift; sourceTree = "<group>"; };
 		74EF04883009173B00157C22 /* CompactScreenTimePlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactScreenTimePlatformView.swift; sourceTree = "<group>"; };
 		74EF04D630091EFD00157C22 /* CompactActivityDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactActivityDisplay.swift; sourceTree = "<group>"; };
@@ -470,8 +466,6 @@
 				74EF0486300916F500157C22 /* CompactScreenTimeView.swift */,
 				74EF04883009173B00157C22 /* CompactScreenTimePlatformView.swift */,
 				74EF04D630091EFD00157C22 /* CompactActivityDisplay.swift */,
-				74EEFE69304FA4B30001AD1C /* TimeLimitTriggerView.swift */,
-				74EEFE6B304FA4E10001AD1C /* TimeLimitTriggerPlatformView.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -1034,8 +1028,6 @@
 				74FD88B42FEC78BE002FD59F /* ScreenTimeReportView.swift in Sources */,
 				74E130A42FC0E7BA00D45757 /* FamilyActivityPickerViewController.swift in Sources */,
 				74E130A52FC0E7BA00D45757 /* IOSBlockingService.swift in Sources */,
-				74EEFE6A304FA4B30001AD1C /* TimeLimitTriggerView.swift in Sources */,
-				74EEFE6C304FA4E10001AD1C /* TimeLimitTriggerPlatformView.swift in Sources */,
 				7470385630080E7D00F67387 /* WeeklyDataTriggerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

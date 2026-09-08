@@ -1,22 +1,19 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../UI/schedule/widgets/hold_to_confirm.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/time_limit_config.dart';
-import '../../../domain/platform/android_blocking_service.dart';
-import '../../../providers/blocking_service_provider.dart';
 
-class TimeLimitOptionsSheet extends ConsumerStatefulWidget {
+class TimeLimitOptionsSheet extends StatefulWidget {
   final TimeLimitConfig config;
+  final bool isLimitReached;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const TimeLimitOptionsSheet({
     super.key,
     required this.config,
+    required this.isLimitReached,
     required this.onEdit,
     required this.onDelete,
   });
@@ -24,6 +21,7 @@ class TimeLimitOptionsSheet extends ConsumerStatefulWidget {
   static void show(
       BuildContext context, {
         required TimeLimitConfig config,
+        required bool isLimitReached,
         required VoidCallback onEdit,
         required VoidCallback onDelete,
       }) {
@@ -34,6 +32,7 @@ class TimeLimitOptionsSheet extends ConsumerStatefulWidget {
       useRootNavigator: true,
       builder: (_) => TimeLimitOptionsSheet(
         config: config,
+        isLimitReached: isLimitReached,
         onEdit: onEdit,
         onDelete: onDelete,
       ),
@@ -41,51 +40,13 @@ class TimeLimitOptionsSheet extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<TimeLimitOptionsSheet> createState() => _TimeLimitOptionsSheetState();
+  State<TimeLimitOptionsSheet> createState() => _TimeLimitOptionsSheetState();
 }
 
-class _TimeLimitOptionsSheetState extends ConsumerState<TimeLimitOptionsSheet> {
-  Timer? _refreshTimer;
-  int _usedMinutes = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUsage();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) => _loadUsage());
-  }
-
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _loadUsage() async {
-    final service = ref.read(blockingServiceProvider);
-    if (service is! AndroidBlockingService) return;
-
-    int total = 0;
-    for (final pkg in widget.config.packageNames) {
-      total += await service.getUsedMinutesToday(pkg);
-    }
-    if (mounted) setState(() => _usedMinutes = total);
-  }
-
-  String _formatMinutes(int minutes) {
-    if (minutes < 60) return '${minutes}m';
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    if (m == 0) return '${h}h';
-    return '${h}h${m.toString().padLeft(2, '0')}';
-  }
-
+class _TimeLimitOptionsSheetState extends State<TimeLimitOptionsSheet> {
   @override
   Widget build(BuildContext context) {
-    final showMeter = Platform.isAndroid;
-    final isLimitReached = showMeter && _usedMinutes >= widget.config.limitMinutes; // 👈 derived, not passed in
     final screenHeight = MediaQuery.of(context).size.height;
-
     return Container(
       height: screenHeight,
       decoration: BoxDecoration(
@@ -142,7 +103,7 @@ class _TimeLimitOptionsSheetState extends ConsumerState<TimeLimitOptionsSheet> {
                   shape: BoxShape.circle,
                   color: AppColors.backgroundCard(context),
                   border: Border.all(
-                    color: isLimitReached
+                    color: widget.isLimitReached
                         ? AppColors.error(context).withValues(alpha: 0.3)
                         : AppColors.accent(context).withValues(alpha: 0.25),
                     width: 3,
@@ -152,28 +113,18 @@ class _TimeLimitOptionsSheetState extends ConsumerState<TimeLimitOptionsSheet> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      isLimitReached ? Icons.block_rounded : Icons.check_circle_rounded,
-                      color: isLimitReached ? AppColors.error(context) : AppColors.success(context),
+                      widget.isLimitReached ? Icons.block_rounded : Icons.check_circle_rounded,
+                      color: widget.isLimitReached ? AppColors.error(context) : AppColors.success(context),
                       size: 56,
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      isLimitReached ? 'Blocked' : 'Monitoring',
+                      widget.isLimitReached ? 'Blocked' : 'Monitoring',
                       style: AppTextStyles.bodyLarge.copyWith(
-                        color: isLimitReached ? AppColors.error(context) : AppColors.success(context),
+                        color: widget.isLimitReached ? AppColors.error(context) : AppColors.success(context),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    if (showMeter) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        '${_formatMinutes(_usedMinutes)} / ${_formatMinutes(widget.config.limitMinutes)}',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: isLimitReached ? AppColors.error(context) : AppColors.textSecondary(context),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -182,13 +133,13 @@ class _TimeLimitOptionsSheetState extends ConsumerState<TimeLimitOptionsSheet> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    isLimitReached ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    widget.isLimitReached ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                     color: AppColors.textSecondary(context),
                     size: 16,
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    isLimitReached ? 'Limit has been reached' : 'Limit is not reached',
+                    widget.isLimitReached ? 'Limit has been reached' : 'Limit is not reached',
                     style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
                   ),
                 ],

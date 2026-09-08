@@ -124,13 +124,26 @@ class LastChanceOfferSheet extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Text(
-                  lifetimePackage.storeProduct.priceString,
-                  style: GoogleFonts.poppins(
-                    color: AppColors.accent(context),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
+                Row( // 👈 new — struck-through + new price
+                  children: [
+                    Text(
+                      '\$59.99',
+                      style: GoogleFonts.poppins(
+                        color: AppColors.textSecondary(context),
+                        fontSize: 13,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      lifetimePackage.storeProduct.priceString,
+                      style: GoogleFonts.poppins(
+                        color: AppColors.accent(context),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

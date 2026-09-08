@@ -55,15 +55,10 @@ class _TimeLimitCardState extends ConsumerState<TimeLimitCard> {
 
   Future<void> _loadUsage() async {
     final service = ref.read(blockingServiceProvider);
+    if (service is! AndroidBlockingService) return; // 👈 iOS no longer attempts a fetch at all
     int total = 0;
-    if (service is AndroidBlockingService) {
-      for (final pkg in widget.config.packageNames) {
-        total += await service.getUsedMinutesToday(pkg);
-      }
-    } else if (Platform.isIOS) {
-      total = await const MethodChannel('com.eagle.pausenow/ios_blocking')
-          .invokeMethod<int>('getTimeLimitUsage', {'configId': widget.config.id}) ??
-          0;
+    for (final pkg in widget.config.packageNames) {
+      total += await service.getUsedMinutesToday(pkg);
     }
     if (mounted) setState(() => _usedMinutes = total);
   }
@@ -86,8 +81,9 @@ class _TimeLimitCardState extends ConsumerState<TimeLimitCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isOverLimit = _usedMinutes >= widget.config.limitMinutes;
-    final progress = (_usedMinutes / widget.config.limitMinutes).clamp(0.0, 1.0);
+    final showMeter = Platform.isAndroid; // 👈 was true for both platforms
+    final isOverLimit = showMeter && _usedMinutes >= widget.config.limitMinutes;
+    final progress = showMeter ? (_usedMinutes / widget.config.limitMinutes).clamp(0.0, 1.0) : 0.0;
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -131,33 +127,37 @@ class _TimeLimitCardState extends ConsumerState<TimeLimitCard> {
                     ],
                   ),
                 ),
-                Text(
-                  '${_formatMinutes(_usedMinutes)} / ${_formatMinutes(widget.config.limitMinutes)}',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: isOverLimit ? AppColors.error(context) : AppColors.textPrimary(context),
-                    fontWeight: FontWeight.w800,
+                if (showMeter) // 👈 only shown on Android now
+                  Text(
+                    '${_formatMinutes(_usedMinutes)} / ${_formatMinutes(widget.config.limitMinutes)}',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: isOverLimit ? AppColors.error(context) : AppColors.textPrimary(context),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
+                if (showMeter) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _loadUsage,
+                    child: Icon(Icons.refresh_rounded, size: 16, color: AppColors.textSecondary(context)),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: AppColors.backgroundSubtle(context),
-                valueColor: AlwaysStoppedAnimation(
-                  isOverLimit ? AppColors.error(context) : AppColors.accent(context),
+            if (showMeter) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: AppColors.backgroundSubtle(context),
+                  valueColor: AlwaysStoppedAnimation(
+                    isOverLimit ? AppColors.error(context) : AppColors.accent(context),
+                  ),
                 ),
               ),
-            ),
-            if (Platform.isIOS)
-              const SizedBox(
-                width: 1,
-                height: 1,
-                child: UiKitView(viewType: 'com.eagle.pausenow/time_limit_trigger_view'),
-              ),
+            ],
           ],
         ),
       ),

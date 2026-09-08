@@ -132,7 +132,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                         priceLine: '${annual.storeProduct.priceString}/year',
                         badge: 'Free Trial',
                         discountBadge: '-58%',
-                        subLine: 'One Week Free, then ${_monthlyEquivalent(annual)}',
+                        subLine: '1 Week Free, then ${_monthlyEquivalent(annual)}',
                         isSelected: _localSelected?.identifier == annual.identifier,
                         onTap: () => setState(() => _localSelected = annual),
                       ),
@@ -142,8 +142,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                       _PlanOptionRow(
                         label: 'Monthly',
                         priceLine: '${monthly.storeProduct.priceString}/month',
-                        badge: 'Free Trial',
-                        subLine: 'One Week Free, then ${monthly.storeProduct.priceString}/month.',
+                        subLine: '1 Week Free, then ${monthly.storeProduct.priceString} billed monthly.', // 👈 was "One Week Free, then ..."
                         isSelected: _localSelected?.identifier == monthly.identifier,
                         onTap: () => setState(() => _localSelected = monthly),
                       ),
@@ -152,8 +151,10 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                     if (lifetime != null)
                       _PlanOptionRow(
                         label: 'Lifetime Unlock',
-                        priceLine: '',
-                        subLine: 'One-time payment of ${lifetime.storeProduct.priceString}.',
+                        priceLine: lifetime.storeProduct.priceString, // will show $39.99 once you update the store price
+                        originalPrice: '\$59.99', // 👈 new — hardcoded, since RevenueCat doesn't track "previous price"
+                        discountBadge: '-33%', // 👈 new — (59.99-39.99)/59.99 ≈ 33%
+                        subLine: 'One-time payment, limited-time price.',
                         isSelected: _localSelected?.identifier == lifetime.identifier,
                         onTap: () => setState(() => _localSelected = lifetime),
                       )
@@ -196,7 +197,11 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                   textStyle: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800),
                 ),
                 child: Text(
-                  _tabIndex == 0 ? 'Get Lifetime Access' : 'Redeem Your Free Week',
+                  _localSelected?.packageType == PackageType.monthly
+                      ? 'Subscribe Now' // 👈 new — monthly no longer says "Redeem Your Free Week"
+                      : _tabIndex == 0
+                      ? 'Get Lifetime Access'
+                      : 'Redeem Your Free Week',
                 ),
               ),
             ),
@@ -259,6 +264,7 @@ class _PlanOptionRow extends StatelessWidget {
   final String subLine;
   final String? badge;
   final String? discountBadge;
+  final String? originalPrice; // 👈 new
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -268,6 +274,7 @@ class _PlanOptionRow extends StatelessWidget {
     required this.subLine,
     this.badge,
     this.discountBadge,
+    this.originalPrice, // 👈 new
     required this.isSelected,
     required this.onTap,
   });
@@ -324,14 +331,14 @@ class _PlanOptionRow extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppColors.accent(context).withValues(alpha: 0.15),
+                            color: AppColors.error(context).withValues(alpha: 0.15), // 👈 red-ish, reads as "deal" more than accent green
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.accent(context).withValues(alpha: 0.4), width: 0.5),
+                            border: Border.all(color: AppColors.error(context).withValues(alpha: 0.4), width: 0.5),
                           ),
                           child: Text(
                             discountBadge!,
                             style: GoogleFonts.poppins(
-                              color: AppColors.accent(context),
+                              color: AppColors.error(context),
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
                             ),
@@ -342,12 +349,28 @@ class _PlanOptionRow extends StatelessWidget {
                   ),
                   if (priceLine.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(
-                      priceLine,
-                      style: GoogleFonts.poppins(
-                        color: AppColors.textSecondary(context),
-                        fontSize: 13,
-                      ),
+                    Row( // 👈 new — struck-through original + new price side by side
+                      children: [
+                        if (originalPrice != null) ...[
+                          Text(
+                            originalPrice!,
+                            style: GoogleFonts.poppins(
+                              color: AppColors.textSecondary(context),
+                              fontSize: 13,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        Text(
+                          priceLine,
+                          style: GoogleFonts.poppins(
+                            color: originalPrice != null ? AppColors.error(context) : AppColors.textSecondary(context),
+                            fontSize: 13,
+                            fontWeight: originalPrice != null ? FontWeight.w700 : FontWeight.w400,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                   const SizedBox(height: 2),

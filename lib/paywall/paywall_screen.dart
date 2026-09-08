@@ -132,7 +132,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
-  String get _ctaLabel => 'Start My 7-Day Free Trial';
+  String get _ctaLabel {
+    if (_selectedPackage?.packageType == PackageType.monthly) {
+      return 'Subscribe Now'; // 👈 new — monthly has no trial anymore
+    }
+    return 'Start My 7-Day Free Trial';
+  }
+
   String get _billingDate {
     final date = DateTime.now().add(const Duration(days: 7));
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -151,6 +157,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final annual = packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
     final monthly = packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
     final isAnnualSelected = _selectedPackage?.packageType == PackageType.annual;
+    final isMonthlySelected = _selectedPackage?.packageType == PackageType.monthly;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -255,20 +262,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.check_rounded, color: AppColors.accent(context), size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            'No Payment Due Now',
-                            style: GoogleFonts.poppins(
-                              color: AppColors.textSecondary(context),
-                              fontSize: 15,
+                      if (!isMonthlySelected) // 👈 new — hide "no payment due now" when monthly (no trial) is selected
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_rounded, color: AppColors.accent(context), size: 14),
+                            const SizedBox(width: 4),
+                            Text(
+                              'No Payment Due Now',
+                              style: GoogleFonts.poppins(
+                                color: AppColors.textSecondary(context),
+                                fontSize: 15,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                       const SizedBox(height: 16),
                       if (_error != null)
                         Padding(
@@ -302,7 +310,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         isAnnualSelected && annual != null
                             ? '7 days free, then ${annual.storeProduct.priceString} per year (${_monthlyEquivalent(annual)})'
                             : monthly != null
-                            ? '7 days free, then ${monthly.storeProduct.priceString} per month'
+                            ? '${monthly.storeProduct.priceString} billed monthly' // 👈 was "7 days free, then ..."
                             : '',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
