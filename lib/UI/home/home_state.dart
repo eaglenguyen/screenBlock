@@ -49,7 +49,7 @@ class HomeState {
   final bool pendingCheckIn;
   final bool isPaused;
   final DateTime? pausedAt;
-
+  final ({String configId, String packageName, String appName})? pendingLockAppConfirm;
 
   const HomeState({
     this.trackedApps = const [],
@@ -75,12 +75,12 @@ class HomeState {
     this.isSchedulePaused = false,
     this.schedulePauseRemainingSeconds = 0,
     this.isAppLimitActiveToday = false,
-
     this.pomodoroConfig = const PomodoroConfig(),
     this.pomodoroRoundCount = 0,
     this.pendingCheckIn = false,
     this.isPaused = false,      // 👈 new
     this.pausedAt,
+    this.pendingLockAppConfirm
   });
 
 
@@ -116,6 +116,8 @@ class HomeState {
     bool? isPaused,               // 👈 new
     DateTime? pausedAt,
     bool clearPausedAt = false, // 👈 new
+    ({String configId, String packageName,String appName})? pendingLockAppConfirm, // 👈 new
+    bool clearPendingLockAppConfirm = false, // 👈 new
 
   }) {
     return HomeState(
@@ -148,6 +150,9 @@ class HomeState {
       pendingCheckIn: pendingCheckIn ?? this.pendingCheckIn, // 👈 new
       isPaused: isPaused ?? this.isPaused,
       pausedAt: clearPausedAt ? null : (pausedAt ?? this.pausedAt),
+      pendingLockAppConfirm: clearPendingLockAppConfirm // 👈 new
+          ? null
+          : (pendingLockAppConfirm ?? this.pendingLockAppConfirm),
 
     );
   }
@@ -155,16 +160,11 @@ class HomeState {
 
   // formatted for display HH:MM:SS
   String get formattedBlockedTime {
-    final h = todayBlockedTime.inHours
-        .toString().padLeft(2, '0');
-    final m = (todayBlockedTime.inMinutes % 60)
-        .toString().padLeft(2, '0');
-    final s = (todayBlockedTime.inSeconds % 60)
-        .toString().padLeft(2, '0');
+    final h = todayBlockedTime.inHours.toString().padLeft(2, '0');
+    final m = (todayBlockedTime.inMinutes % 60).toString().padLeft(2, '0');
+    final s = (todayBlockedTime.inSeconds % 60).toString().padLeft(2, '0');
     return '$h:$m:$s';
   }
-
-
 
   String get formattedPauseRemaining {
     final s = schedulePauseRemainingSeconds;

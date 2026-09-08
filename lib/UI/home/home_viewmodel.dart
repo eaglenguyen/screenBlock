@@ -20,8 +20,8 @@ import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
-import '../../featuress/quickblock/quick_block_viewmodel.dart';
-import '../../featuress/timelimit/time_limit_viewmodel.dart';
+import '../../features/quickblock/quick_block_viewmodel.dart';
+import '../../features/timelimit/time_limit_viewmodel.dart';
 import '../../providers/premium_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/schedule_checker.dart';
@@ -1211,6 +1211,7 @@ class HomeViewModel extends _$HomeViewModel {
       await _checkLiveActivityPauseSync(); // 👈 new
 
     }
+    await _checkPendingLockAppConfirm(); // 👈 new — works on Android
     if (state.isSchedulePaused) {
       final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
       if (pauseEndTime != null && DateTime.now().isAfter(pauseEndTime)) {
@@ -1298,6 +1299,26 @@ class HomeViewModel extends _$HomeViewModel {
     }
   }
 
+  Future<void> _checkPendingLockAppConfirm() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final result = await const MethodChannel('com.eagle.pausenow/accessibility')
+          .invokeMethod<Map>('checkPendingLockAppConfirm');
+      if (result != null) {
+        state = state.copyWith(
+          pendingLockAppConfirm: (
+          configId: result['configId'] as String,
+          packageName: result['packageName'] as String,
+          appName: result['appName'] as String,
+
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ checkPendingLockAppConfirm error: $e');
+    }
+  }
+
   Future<void> _restoreSession() async {
     try {
       if (Platform.isIOS) {
@@ -1382,6 +1403,10 @@ class HomeViewModel extends _$HomeViewModel {
         state = state.copyWith(remainingSeconds: remaining);
       }
     });
+  }
+
+  void clearPendingLockAppConfirm() {
+    state = state.copyWith(clearPendingLockAppConfirm: true);
   }
 
   // ══════════════════════════════════════════════════

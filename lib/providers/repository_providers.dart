@@ -6,6 +6,7 @@ import '../data/repositories/BlockingRepo.dart';
 import '../data/repositories/ScheduleRepo.dart';
 import '../data/repositories/SettingsRepo.dart';
 import '../data/repositories/TimeLimitRepo.dart';
+import '../data/repositoryImpl/LockAppRepoImpl.dart';
 import '../data/repositoryImpl/QuickBlockRepoImpl.dart';
 import '../data/repositoryImpl/ScheduleRepoImpl.dart';
 import '../data/repositoryImpl/SettingsRepoImpl.dart';
@@ -43,4 +44,8 @@ final timeLimitRepositoryProvider = Provider<TimeLimitRepository>((ref) {
 
 final quickBlockRepositoryProvider = Provider<QuickBlockRepository>((ref) {
   return QuickBlockRepository();
+});
+
+final lockAppRepositoryProvider = Provider<LockAppRepository>((ref) {
+  return LockAppRepository();
 });

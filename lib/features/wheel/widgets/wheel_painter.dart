@@ -1,4 +1,4 @@
-// lib/featuress/wheel/widgets/wheel_painter.dart
+// lib/features/wheel/widgets/wheel_painter.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
 

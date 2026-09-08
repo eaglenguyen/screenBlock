@@ -13,14 +13,16 @@ import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/permission_dialogs.dart';
-import '../../featuress/wheel/widgets/spin_wheel_card.dart';
+import '../../domain/platform/android_blocking_service.dart';
+import '../../features/lockapp/lock_app_viewmodel.dart';
+import '../../features/lockapp/widget/lock_app_confirm_sheet.dart';
+import '../../features/wheel/widgets/spin_wheel_card.dart';
 import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../settings/settings_viewmodel.dart';
 import 'cards/active_blocking_card.dart';
 import 'cards/break_confirmation_card.dart';
 import 'cards/countdown_card.dart';
-import 'checkIn/check_in_slider_screen.dart';
 import 'widgets/xp_animation.dart';
 import 'cards/claim_xp_card.dart';
 import 'cards/session_completed_card.dart';
@@ -57,6 +59,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeViewModelProvider);
+
+    // 👇 add this ref.listen call inside build(), alongside any other ref.listen calls you may already have
+    ref.listen(homeViewModelProvider.select((s) => s.pendingLockAppConfirm), (previous, next) {
+      if (next != null) {
+        LockAppConfirmSheet.show(
+          context,
+          configId: next.configId,
+          packageName: next.packageName,
+          appName: next.appName,
+          onConfirm: () async {
+            final service = ref.read(blockingServiceProvider);
+            await ref.read(lockAppViewModelProvider.notifier).consumeUnlock(next.configId);
+            if (service is AndroidBlockingService) {
+              await service.pauseLockAppFor(configId: next.configId, packageName: next.packageName);
+              await service.launchApp(next.packageName);
+            }
+          },
+        );
+        ref.read(homeViewModelProvider.notifier).clearPendingLockAppConfirm();
+      }
+    });
 
     ref.listen(homeViewModelProvider, (previous, next) {
       if (previous?.phase == BlockingPhase.claimXp &&

@@ -1,4 +1,4 @@
-// lib/featuress/wheel/wheel_state.dart
+// lib/features/wheel/wheel_state.dart
 class WheelState {
   final List<String> items;
   final bool isSpinning;

@@ -50,6 +50,10 @@ class BlockActivity : AppCompatActivity() {
     private var breatheIndex = 0
     private val breatheCycle = listOf("Breathe in", "Hold", "Breathe out")
     private val breatheDurations = listOf(4000L, 7000L, 8000L)
+    private var isLockAppBlock = false
+    private var lockAppConfigId: String? = null
+    private var lockAppRemaining = 0
+    private var lockAppMax = 0
 
     private val dismissReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -104,6 +108,16 @@ class BlockActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
 
         val packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
+
+        // 👇 add this — currently missing
+        val blockReason = intent.getStringExtra("block_reason")
+        isLockAppBlock = blockReason == "lock_app"
+        if (isLockAppBlock) {
+            lockAppConfigId = intent.getStringExtra("lock_app_config_id")
+            lockAppRemaining = intent.getIntExtra("lock_app_remaining", 0)
+            lockAppMax = intent.getIntExtra("lock_app_max", 0)
+        }
+
         updateTopBar(packageName)
 
         setupButtons()
@@ -138,7 +152,33 @@ class BlockActivity : AppCompatActivity() {
 
         openButton.setOnClickListener {
             if (!countdownComplete || isDismissing) return@setOnClickListener
+            if (isLockAppBlock && lockAppRemaining <= 0) return@setOnClickListener
+
             isDismissing = true
+
+            if (isLockAppBlock) {
+                val configId = lockAppConfigId ?: return@setOnClickListener
+                val pkg = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: "" // 👈 declared HERE, inside this branch
+                val prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+                prefs.edit()
+                    .putString("pendingLockAppConfirmId", configId)
+                    .putString("pendingLockAppPackage", intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: "")
+                    .putString("pendingLockAppName", getAppName(pkg)) // 👈 new
+                    .apply()
+
+                AppBlockAccessibilityService.isOverlayShowing = false
+                sendBroadcast(Intent("com.eagle.pausenow.BLOCK_DISMISSED"))
+
+                val pauseNowIntent = packageManager.getLaunchIntentForPackage(this.packageName)?.apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                }
+                if (pauseNowIntent != null) startActivity(pauseNowIntent)
+                finish()
+                return@setOnClickListener
+            }
+
+            // 👇 original flow — unchanged, only runs when it's NOT a lock-app block
             val blockedPackage = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
             AppBlockAccessibilityService.isOverlayShowing = false
             AppBlockAccessibilityService.addExemption(blockedPackage)

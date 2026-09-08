@@ -18,7 +18,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/theme.notifier.dart';
-import '../../featuress/quickblock/quick_block_viewmodel.dart';
+import '../../features/quickblock/quick_block_viewmodel.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/premium_provider.dart';
 import '../stats/widgets/goal_settings_sheet.dart';

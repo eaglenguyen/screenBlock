@@ -1,4 +1,4 @@
-// lib/featuress/wheel/wheel_presets.dart
+// lib/features/wheel/wheel_presets.dart
 class WheelPresets {
   static const List<String> defaultList = [
     'Read for 10 minutes',

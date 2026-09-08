@@ -52,6 +52,52 @@ class MainActivity : FlutterActivity() {
             METHOD_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "launchApp" -> {
+                    val packageName = call.argument<String>("packageName") ?: ""
+                    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                    if (launchIntent != null) {
+                        startActivity(launchIntent)
+                        result.success(true)
+                    } else {
+                        result.success(false)
+                    }
+                }
+                "checkPendingLockAppConfirm" -> {
+                    val nativePrefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+                    val configId = nativePrefs.getString("pendingLockAppConfirmId", null)
+                    val packageName = nativePrefs.getString("pendingLockAppPackage", null)
+                    val appName = nativePrefs.getString("pendingLockAppName", null)
+                    if (configId != null && packageName != null) {
+                        nativePrefs.edit()
+                            .remove("pendingLockAppConfirmId")
+                            .remove("pendingLockAppPackage")
+                            .remove("pendingLockAppName")
+                            .apply()
+                        result.success(mapOf("configId" to configId, "packageName" to packageName, "appName" to (appName ?: packageName)))
+                    } else {
+                        result.success(null)
+                    }
+                }
+                "saveLockAppConfigs" -> {
+                    val configsJson = call.argument<String>("configsJson") ?: "[]"
+                    val nativePrefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+                    nativePrefs.edit().putString("lockAppConfigs", configsJson).apply()
+                    result.success(null)
+                }
+                "consumeLockAppUnlock" -> {
+                    val configId = call.argument<String>("configId") ?: ""
+                    AppBlockAccessibilityService.markUnlockConsumed(configId)
+                    result.success(null)
+                }
+                "pauseLockAppFor" -> {
+                    val configId = call.argument<String>("configId") ?: ""
+                    val packageName = call.argument<String>("packageName") ?: ""
+                    AppBlockAccessibilityService.pauseLockAppFor(configId, packageName)
+                    result.success(null)
+                }
                 "forceRecheckTimeLimit" -> {
                     AppBlockAccessibilityService.forceRecheckTimeLimit()
                     result.success(null)

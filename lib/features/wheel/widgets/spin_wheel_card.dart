@@ -1,4 +1,4 @@
-// lib/featuress/wheel/widgets/spin_wheel_card.dart
+// lib/features/wheel/widgets/spin_wheel_card.dart
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';

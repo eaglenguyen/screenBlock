@@ -41,7 +41,15 @@ class AppBlockAccessibilityService : AccessibilityService() {
         var isOverlayShowing = false
         var lastBlockScreenLaunchTime = 0L
         var instance: AppBlockAccessibilityService? = null // 👈 new — needed to call the non-static checkTimeLimitForApp
+        private val lockAppExempted = mutableMapOf<String, Long>() // packageName -> pauseEndsAtMillis
 
+        fun markUnlockConsumed(configId: String) {
+            instance?.consumeLockAppUnlockInternal(configId)
+        }
+
+        fun pauseLockAppFor(configId: String, packageName: String) {
+            instance?.pauseLockAppInternal(configId, packageName)
+        }
 
         fun forceRecheckTimeLimit() {
             android.util.Log.d("pausenow", "🔍 forceRecheckTimeLimit — currentForegroundApp=$currentForegroundApp, instance=${instance != null}")
@@ -78,6 +86,79 @@ class AppBlockAccessibilityService : AccessibilityService() {
             exemptedPackages.remove(packageName)
             android.util.Log.d("AccessibilityService", "cleared exemption for: $packageName")
         }
+    }
+
+    private fun consumeLockAppUnlockInternal(configId: String) {
+        val configs = getLockAppConfigs().toMutableList()
+        val index = configs.indexOfFirst { it.id == configId }
+        if (index == -1) return
+        configs[index] = configs[index].copy(unlocksUsedToday = configs[index].unlocksUsedToday + 1)
+        saveLockAppConfigsInternal(configs)
+    }
+
+    private fun pauseLockAppInternal(configId: String, packageName: String) {
+        val pauseEndsAt = System.currentTimeMillis() + (5 * 60 * 1000)
+        lockAppExempted[packageName] = pauseEndsAt
+        consumeLockAppUnlockInternal(configId)
+
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            lockAppExempted.remove(packageName)
+            // reblock happens automatically — next checkLockAppForApp() call will re-shield since exemption is gone
+            if (currentForegroundApp == packageName) {
+                checkLockAppForApp(packageName)
+            }
+        }, 5 * 60 * 1000)
+    }
+
+    private data class LockAppConfigNative(
+        val id: String,
+        val packageName: String,
+        val maxUnlocks: Int,
+        val unlocksUsedToday: Int,
+        val isActive: Boolean
+    )
+
+    private fun getLockAppConfigs(): List<LockAppConfigNative> {
+        val json = prefs.getString("lockAppConfigs", null) ?: return emptyList()
+        return try {
+            val type = object : TypeToken<List<LockAppConfigNative>>() {}.type
+            Gson().fromJson(json, type)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun saveLockAppConfigsInternal(configs: List<LockAppConfigNative>) {
+        val json = Gson().toJson(configs)
+        prefs.edit().putString("lockAppConfigs", json).apply()
+    }
+
+    private fun checkLockAppForApp(packageName: String) {
+        val configs = getLockAppConfigs()
+        val config = configs.firstOrNull { it.packageName == packageName && it.isActive } ?: return
+
+        if (lockAppExempted.containsKey(packageName)) {
+            val pauseEndsAt = lockAppExempted[packageName] ?: 0L
+            if (System.currentTimeMillis() < pauseEndsAt) return // still within the 5-min pause window
+            lockAppExempted.remove(packageName)
+        }
+
+        val now = System.currentTimeMillis()
+        if (now - lastBlockScreenLaunchTime < 4000) return
+        lastBlockScreenLaunchTime = now
+        isOverlayShowing = true
+
+        val remaining = (config.maxUnlocks - config.unlocksUsedToday).coerceAtLeast(0)
+        val intent = Intent(this, BlockActivity::class.java).apply {
+            putExtra("blocked_package", packageName)
+            putExtra("block_reason", "lock_app")
+            putExtra("lock_app_config_id", config.id)
+            putExtra("lock_app_remaining", remaining)
+            putExtra("lock_app_max", config.maxUnlocks)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        }
+        startActivity(intent)
     }
 
     fun isSystemApp(packageName: String): Boolean {
@@ -232,7 +313,8 @@ class AppBlockAccessibilityService : AccessibilityService() {
 
         currentForegroundApp = packageName
         checkTimeLimitForApp(packageName)
-        checkQuickBlockForApp(packageName) // 👈 new — checked on every foreground change too, not just the poll
+        checkQuickBlockForApp(packageName)
+        checkLockAppForApp(packageName) // 👈 new
 
         if (isPauseExpired()) {
             android.util.Log.d("pausenow", "⏰ Pause expired — notifying Flutter")

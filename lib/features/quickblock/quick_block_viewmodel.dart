@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:pausenow/featuress/quickblock/widgets/quick_block_row.dart';
+import 'package:pausenow/features/quickblock/widgets/quick_block_row.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:io';
 import '../../data/repositoryImpl/QuickBlockRepoImpl.dart';

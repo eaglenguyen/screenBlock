@@ -402,5 +402,24 @@ class AndroidBlockingService implements BlockingService {
     }
   }
 
+  Future<void> pauseLockAppFor({required String configId, required String packageName}) async {
+    try {
+      await _methodChannel.invokeMethod('pauseLockAppFor', {
+        'configId': configId,
+        'packageName': packageName,
+      });
+    } catch (e) {
+      debugPrint('❌ pauseLockAppFor error: $e');
+    }
+  }
+
+  Future<void> launchApp(String packageName) async {
+    try {
+      await _methodChannel.invokeMethod('launchApp', {'packageName': packageName});
+    } catch (e) {
+      debugPrint('❌ launchApp error: $e');
+    }
+  }
+
 
 }

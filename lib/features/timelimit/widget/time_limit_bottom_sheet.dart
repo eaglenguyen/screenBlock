@@ -8,7 +8,7 @@ import '../../../../data/models/time_limit_config.dart';
 import '../../../../domain/platform/ios_blocking_service.dart';
 import '../../../../providers/blocking_service_provider.dart';
 import '../../../UI/home/widgets/app_list_sheet.dart';
-import '../../../featuress/timelimit/time_limit_viewmodel.dart';
+import '../../../features/timelimit/time_limit_viewmodel.dart';
 
 class TimeLimitBottomSheet extends ConsumerStatefulWidget {
   const TimeLimitBottomSheet({

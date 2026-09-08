@@ -5,20 +5,23 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../paywall/feature_paywall_screen.dart';
 
-class SessionModePickerSheet extends ConsumerStatefulWidget { // 👈 needs to become Consumer to read premium status
+class SessionModePickerSheet extends ConsumerStatefulWidget {
   final VoidCallback onScheduleTap;
   final VoidCallback onTimeLimitTap;
+  final VoidCallback onLockAppTap; // 👈 new
 
   const SessionModePickerSheet({
     super.key,
     required this.onScheduleTap,
     required this.onTimeLimitTap,
+    required this.onLockAppTap, // 👈 new
   });
 
   static void show(
       BuildContext context, {
         required VoidCallback onScheduleTap,
         required VoidCallback onTimeLimitTap,
+        required VoidCallback onLockAppTap, // 👈 new
       }) {
     showModalBottomSheet(
       context: context,
@@ -28,6 +31,7 @@ class SessionModePickerSheet extends ConsumerStatefulWidget { // 👈 needs to b
       builder: (_) => SessionModePickerSheet(
         onScheduleTap: onScheduleTap,
         onTimeLimitTap: onTimeLimitTap,
+        onLockAppTap: onLockAppTap, // 👈 new
       ),
     );
   }
@@ -41,7 +45,6 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
   late AnimationController _controller;
   late List<Animation<double>> _cardAnims;
   late Animation<double> _dividerAnim;
-
   static const int _cardCount = 3;
 
   @override
@@ -51,7 +54,6 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-
     _cardAnims = List.generate(_cardCount, (i) {
       final start = (i * 0.3).clamp(0.0, 0.7);
       final end = (start + 0.45).clamp(0.0, 1.0);
@@ -60,12 +62,10 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
         curve: Interval(start, end, curve: Curves.easeOutCubic),
       );
     });
-
     _dividerAnim = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.15, 0.55, curve: Curves.easeOutCubic),
     );
-
     Future.delayed(const Duration(milliseconds: 350), () {
       if (mounted) _controller.forward();
     });
@@ -108,8 +108,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
 
   @override
   Widget build(BuildContext context) {
-    final isPremium = ref.watch(isPremiumProvider); // 👈 new
-
+    final isPremium = ref.watch(isPremiumProvider);
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 32,
@@ -190,7 +189,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                     context,
                     title: 'Time Limit',
                     subtitle: 'Daily usage cap',
-                    isLocked: !isPremium, // 👈 new
+                    isLocked: !isPremium,
                     onTap: isPremium
                         ? () {
                       Navigator.pop(context);
@@ -215,15 +214,29 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                   2,
                   _modeCard(
                     context,
-                    title: 'Open Limit',
-                    subtitle: 'Coming soon',
-                    onTap: null,
+                    title: 'Lock an App', // 👈 renamed from 'Open Limit'
+                    subtitle: 'Limit unlocks per day', // 👈 new
+                    isLocked: !isPremium, // 👈 assumed premium-gated same as Time Limit — adjust if not
+                    onTap: isPremium
+                        ? () {
+                      Navigator.pop(context);
+                      widget.onLockAppTap();
+                    }
+                        : () {
+                      Navigator.pop(context);
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        useRootNavigator: true,
+                        builder: (_) => const FeaturePaywallScreen(source: 'lock_app_mode_card'),
+                      );
+                    },
                   ),
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 60),
         ],
       ),
@@ -235,15 +248,13 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
         required String title,
         required String subtitle,
         required VoidCallback? onTap,
-        bool isLocked = false, // 👈 new — distinct from "disabled" (Open Limit)
+        bool isLocked = false,
       }) {
     final isDisabled = onTap == null;
-
     return GestureDetector(
       onTap: onTap,
       child: Stack(
         children: [
-          // dimmed card content — same treatment whether disabled or locked
           Opacity(
             opacity: (isDisabled || isLocked) ? 0.4 : 1.0,
             child: Container(
@@ -281,8 +292,6 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
               ),
             ),
           ),
-
-          // 👇 lock overlay — only for isLocked (premium-gated), not for isDisabled (Open Limit "coming soon")
           if (isLocked)
             Positioned.fill(
               child: Container(
@@ -291,7 +300,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 16), // 👈 adjust this to push content down
+                  padding: const EdgeInsets.only(top: 16),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
