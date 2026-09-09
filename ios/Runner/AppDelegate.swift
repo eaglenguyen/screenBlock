@@ -316,7 +316,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
-
+        case "saveLockAppConfigIds":
+            if let args = call.arguments as? [String: Any], let ids = args["ids"] as? [String] {
+                UserDefaults(suiteName: "group.com.eagle.pausenow")?.set(ids, forKey: "lockAppConfigIds")
+            }
+            result(nil)
+        case "applyLockAppShield":
+            if let args = call.arguments as? [String: Any], let configId = args["configId"] as? String {
+                service.applyLockAppShield(configId: configId)
+            }
+            result(nil)
+        case "removeLockAppShield":
+            if let args = call.arguments as? [String: Any], let configId = args["configId"] as? String {
+                service.removeLockAppShield(configId: configId)
+            }
+            result(nil)
+        case "showLockAppPicker":
+            if let args = call.arguments as? [String: Any],
+               let configId = args["configId"] as? String {
+                let appLabel = args["appLabel"] as? String ?? ""
+                await showLockAppPicker(configId: configId, appLabel: appLabel, result: result)
+            } else {
+                result(FlutterError(code: "BAD_ARGS", message: "configId required", details: nil))
+            }
         case "resetQuickBlockSelection":
             if let args = call.arguments as? [String: Any], let cardId = args["cardId"] as? String {
                 service.resetQuickBlockSelection(cardId: cardId)
@@ -978,6 +1000,49 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 }
             },
             saveKey: saveKey
+        )
+        rootVC.present(picker, animated: true)
+    }
+    
+    @available(iOS 16.0, *)
+    @MainActor
+    private func showLockAppPicker(configId: String, appLabel: String, result: @escaping FlutterResult) async {
+        guard let windowScene = UIApplication.shared
+            .connectedScenes
+            .first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?
+            .rootViewController
+        else {
+            result(FlutterError(
+                code: "NO_VIEW",
+                message: "No view controller",
+                details: nil
+            ))
+            return
+        }
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        let saveKey = "lockApp_\(configId)"
+
+        let picker = FamilyActivityPickerViewController(
+            service: IOSBlockingService.shared,
+            onDismiss: {
+                if let data = sharedDefaults?.data(forKey: saveKey),
+                   let selection = try? JSONDecoder().decode(
+                       FamilyActivitySelection.self,
+                       from: data
+                   ) {
+                    let count = selection.applicationTokens.count
+                    NSLog("✅ lock-app picker dismissed for \(configId) with \(count) apps saved")
+                    result(count)
+                } else {
+                    NSLog("✅ lock-app picker dismissed for \(configId) with 0 apps saved")
+                    result(0)
+                }
+            },
+            saveKey: saveKey,
+            pickerTitle: appLabel.isEmpty ? "Choose an app" : "Choose \(appLabel)",
+            requireSelection: true,
+            maxSelectionCount: 1
         )
         rootVC.present(picker, animated: true)
     }

@@ -1,4 +1,3 @@
-// lib/features/lockapp/lock_app_viewmodel.dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,6 +7,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/lock_app_config.dart';
 import '../../data/repositoryImpl/LockAppRepoImpl.dart';
+import '../../domain/platform/android_blocking_service.dart';
+import '../../domain/platform/ios_blocking_service.dart';
+import '../../providers/blocking_service_provider.dart';
 import '../../providers/repository_providers.dart';
 import 'lock_app_state.dart';
 
@@ -62,25 +64,49 @@ class LockAppViewModel extends _$LockAppViewModel {
 
   Future<void> consumeUnlock(String id) async {
     await _repo.consumeUnlock(id);
-    loadConfigs(); // 👈 before sync
+    await _repo.startPause(id, const Duration(minutes: 5)); // 👈 new — tracks the pause in Dart too
+    loadConfigs();
     await _syncToNative();
   }
 
+  Future<void> endPauseEarly(String id, String packageName) async {
+    await _repo.clearPause(id);
+    loadConfigs();
+    final service = ref.read(blockingServiceProvider);
+    if (service is AndroidBlockingService) {
+      await service.endLockAppPauseEarly(packageName); // 👈 new native call
+    }
+  }
+
+
   Future<void> _syncToNative() async {
-    if (!Platform.isAndroid) return;
-    final configsJson = jsonEncode(state.configs.map((c) => {
-      'id': c.id,
-      'packageName': c.packageName,
-      'appName': c.appName, // 👈 new
-      'maxUnlocks': c.maxUnlocks,
-      'unlocksUsedToday': c.unlocksUsedToday,
-      'isActive': c.isActive,
-    }).toList());
-    try {
-      await const MethodChannel('com.eagle.pausenow/accessibility')
-          .invokeMethod('saveLockAppConfigs', {'configsJson': configsJson});
-    } catch (e) {
-      debugPrint('❌ saveLockAppConfigs error: $e');
+    if (Platform.isAndroid) {
+      final configsJson = jsonEncode(state.configs.map((c) => {
+        'id': c.id,
+        'packageName': c.packageName,
+        'appName': c.appName,
+        'maxUnlocks': c.maxUnlocks,
+        'unlocksUsedToday': c.unlocksUsedToday,
+        'isActive': c.isActive,
+      }).toList());
+      try {
+        await const MethodChannel('com.eagle.pausenow/accessibility')
+            .invokeMethod('saveLockAppConfigs', {'configsJson': configsJson});
+      } catch (e) {
+        debugPrint('❌ saveLockAppConfigs error: $e');
+      }
+    } else if (Platform.isIOS) {
+      final service = ref.read(blockingServiceProvider);
+      if (service is IOSBlockingService) {
+        await service.saveLockAppConfigIds(state.configs.map((c) => c.id).toList()); // 👈 new
+        for (final config in state.configs) {
+          if (config.isActive) {
+            await service.applyLockAppShield(config.id);
+          } else {
+            await service.removeLockAppShield(config.id);
+          }
+        }
+      }
     }
   }
 }

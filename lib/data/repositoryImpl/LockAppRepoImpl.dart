@@ -44,4 +44,18 @@ class LockAppRepository {
     config.unlocksUsedToday += 1;
     await config.save();
   }
+
+  Future<void> startPause(String id, Duration duration) async {
+    final config = _box.get(id);
+    if (config == null) return;
+    config.pauseEndsAt = DateTime.now().add(duration);
+    await config.save();
+  }
+
+  Future<void> clearPause(String id) async {
+    final config = _box.get(id);
+    if (config == null) return;
+    config.pauseEndsAt = null;
+    await config.save();
+  }
 }

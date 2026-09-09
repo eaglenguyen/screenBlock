@@ -422,4 +422,12 @@ class AndroidBlockingService implements BlockingService {
   }
 
 
+  Future<void> endLockAppPauseEarly(String packageName) async {
+    try {
+      await _methodChannel.invokeMethod('endLockAppPauseEarly', {'packageName': packageName});
+    } catch (e) {
+      debugPrint('❌ endLockAppPauseEarly error: $e');
+    }
+  }
+
 }

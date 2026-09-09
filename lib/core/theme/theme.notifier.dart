@@ -21,11 +21,20 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
     _syncThemeToNative(); // 👈 new — sync the loaded value on startup
   }
 
-  void toggle() {
+  Future<void> toggle() async {
     state = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     final box = Hive.box(HiveBoxNames.settings);
     box.put('themeMode', state == ThemeMode.light ? 'light' : 'dark');
-    _syncThemeToNative(); // 👈 new
+    _syncThemeToNative();
+
+    if (Platform.isAndroid) {
+      try {
+        await const MethodChannel('com.eagle.pausenow/accessibility')
+            .invokeMethod('saveThemePreference', {'isDark': state == ThemeMode.dark});
+      } catch (e) {
+        debugPrint('❌ saveThemePreference error: $e');
+      }
+    }
   }
 
   void setDark() {

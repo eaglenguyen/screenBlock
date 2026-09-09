@@ -668,6 +668,24 @@ class IOSBlockingService: NSObject {
         sharedDefaults?.removeObject(forKey: "quickblock_\(cardId)")
         sharedDefaults?.synchronize()
     }
+    
+    func applyLockAppShield(configId: String) {
+        guard let data = sharedDefaults?.data(forKey: "lockApp_\(configId)"),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else { return }
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.formUnion(selection.applicationTokens)
+        store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+    }
+
+    func removeLockAppShield(configId: String) {
+        guard let data = sharedDefaults?.data(forKey: "lockApp_\(configId)"),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else { return }
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.subtract(selection.applicationTokens)
+        store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+    }
 
     
     

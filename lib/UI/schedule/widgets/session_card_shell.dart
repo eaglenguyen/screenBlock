@@ -69,23 +69,24 @@ class SessionCardShell extends StatelessWidget {
               child: SizedBox(width: 48, height: 48, child: icon),
             ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.shield_rounded, size: 14, color: AppColors.accent(context)),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    name,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary(context),
-                      fontWeight: FontWeight.w700,
+            if (name.isNotEmpty) // 👈 new — hides the whole row when name is empty (iOS)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shield_rounded, size: 14, color: AppColors.accent(context)),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      name,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textPrimary(context),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             const SizedBox(height: 12),
             bottomAction, // still its own tappable widget for the Unlock button specifically
           ],

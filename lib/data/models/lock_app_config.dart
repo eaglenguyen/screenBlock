@@ -32,6 +32,9 @@ class LockAppConfig extends HiveObject {
   @HiveField(8)
   String appName; // 👈 new — resolved display name, e.g. "Discord"
 
+  @HiveField(9)
+  DateTime? pauseEndsAt;
+
 
   LockAppConfig({
     required this.id,
@@ -43,9 +46,11 @@ class LockAppConfig extends HiveObject {
     this.isActive = true,
     required this.updatedAt,
     required this.appName,
+    this.pauseEndsAt, // 👈 new
 
   });
 
   int get remaining => (maxUnlocks - unlocksUsedToday).clamp(0, maxUnlocks);
   bool get isExhausted => remaining <= 0;
+  bool get isPausing => pauseEndsAt != null && DateTime.now().isBefore(pauseEndsAt!);
 }

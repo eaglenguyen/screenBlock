@@ -22,6 +22,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import android.view.ViewGroup // 👈 new
+
 
 class BlockActivity : AppCompatActivity() {
 
@@ -54,6 +56,45 @@ class BlockActivity : AppCompatActivity() {
     private var lockAppConfigId: String? = null
     private var lockAppRemaining = 0
     private var lockAppMax = 0
+
+
+    private fun isDarkMode(): Boolean {
+        val prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+        return prefs.getBoolean("appIsDarkMode", true)
+    }
+
+    private fun applyTheme() {
+        val isDark = isDarkMode()
+        val root = findViewById<View>(android.R.id.content)
+        val bgColor = if (isDark) android.graphics.Color.parseColor("#1A1A1A") else android.graphics.Color.parseColor("#FFF7ED")
+        (root as? ViewGroup)?.getChildAt(0)?.setBackgroundColor(bgColor)
+
+        val blob = findViewById<View>(R.id.blob)
+        blob.setBackgroundResource(
+            if (isDark) R.drawable.blob_background else R.drawable.blob_background_light
+        )
+
+        val topBarText = findViewById<TextView>(R.id.topBarText)
+        topBarText.setTextColor(
+            if (isDark) android.graphics.Color.parseColor("#99FFFFFF")
+            else android.graphics.Color.parseColor("#99B08A5A")
+        )
+
+        val breatheText = findViewById<TextView>(R.id.breatheText)
+        breatheText.setTextColor(
+            if (isDark) android.graphics.Color.parseColor("#1A1208")
+            else android.graphics.Color.parseColor("#0F4A32")
+        )
+
+        val dontOpenButton = findViewById<Button>(R.id.dontOpenButton)
+        dontOpenButton.setBackgroundResource(
+            if (isDark) R.drawable.button_dark_background else R.drawable.button_dark_background_light
+        )
+        dontOpenButton.setTextColor(
+            if (isDark) android.graphics.Color.parseColor("#FFFFFF")
+            else android.graphics.Color.parseColor("#4A3728")
+        )
+    }
 
     private val dismissReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -93,6 +134,7 @@ class BlockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_block)
+        applyTheme()
 
         // hide system UI
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -194,29 +236,43 @@ class BlockActivity : AppCompatActivity() {
 
     private fun updateCountdownButton() {
         val openButton = findViewById<Button>(R.id.openButton)
+        val isDark = isDarkMode()
+        val goldOrMint = if (isDark) "#EDB82A" else "#2D7A54" // 👈 accentDark equivalent per theme
+        val mutedText = if (isDark) "#7070A0" else "#B08A5A"
+
         if (countdownComplete) {
             if (isLockAppBlock) {
                 if (lockAppRemaining <= 0) {
-                    openButton.visibility = View.GONE
+                    openButton.visibility = View.INVISIBLE
                 } else {
                     openButton.visibility = View.VISIBLE
                     openButton.text = "Unblock ($lockAppRemaining/$lockAppMax left)"
-                    openButton.setTextColor(android.graphics.Color.parseColor("#EDB82A"))
-                    openButton.background = getDrawable(R.drawable.button_outline_gold_background)
+                    openButton.setTextColor(android.graphics.Color.parseColor(goldOrMint))
+                    openButton.setBackgroundResource(
+                        if (isDark) R.drawable.button_outline_gold_background else R.drawable.button_outline_gold_background_light
+                    )
                 }
             } else {
-                openButton.text = "Open app (30s)"
-                openButton.setTextColor(android.graphics.Color.parseColor("#EDB82A"))
-                openButton.background = getDrawable(R.drawable.button_outline_gold_background)
+                openButton.text = "Unblock in (30s)"
+                openButton.setTextColor(android.graphics.Color.parseColor(goldOrMint))
+                openButton.setBackgroundResource(
+                    if (isDark) R.drawable.button_outline_gold_background else R.drawable.button_outline_gold_background_light
+                )
             }
         } else {
             if (isLockAppBlock && lockAppRemaining <= 0) {
-                openButton.visibility = View.GONE
+                openButton.visibility = View.INVISIBLE
             } else {
                 openButton.text = "Unblock in ${countdown}s"
+                openButton.setTextColor(android.graphics.Color.parseColor(mutedText))
+                openButton.setBackgroundResource(
+                    if (isDark) R.drawable.button_outline_background else R.drawable.button_outline_background_light
+                )
             }
         }
     }
+
+
     private fun startBlobAnimation() {
         if (blobAnimator?.isRunning == true) return
 

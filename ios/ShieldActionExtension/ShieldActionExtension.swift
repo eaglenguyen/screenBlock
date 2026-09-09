@@ -4,7 +4,6 @@ import Foundation
 import FamilyControls
 
 class ShieldActionExtension: ShieldActionDelegate {
-
     override func handle(
         action: ShieldAction,
         for application: ApplicationToken,
@@ -12,11 +11,16 @@ class ShieldActionExtension: ShieldActionDelegate {
     ) {
         switch action {
         case .primaryButtonPressed:
-            markUnblockReset() // 👈 new
+            markUnblockReset()
             completionHandler(.close)
         case .secondaryButtonPressed:
-            markUnblockTapped()
-            sendUnblockNotification()
+            if let configId = findLockAppConfigId(for: application) {
+                markLockAppUnblockTapped(configId: configId, token: application)
+                sendLockAppUnblockNotification()
+            } else {
+                markUnblockTapped()
+                sendUnblockNotification()
+            }
             completionHandler(.defer)
         case .firstSecondarySubmenuItemPressed:
             completionHandler(.close)
@@ -36,7 +40,7 @@ class ShieldActionExtension: ShieldActionDelegate {
     ) {
         switch action {
         case .primaryButtonPressed:
-            markUnblockReset() // 👈 new
+            markUnblockReset()
             completionHandler(.close)
         case .secondaryButtonPressed:
             markUnblockTapped()
@@ -60,7 +64,7 @@ class ShieldActionExtension: ShieldActionDelegate {
     ) {
         switch action {
         case .primaryButtonPressed:
-            markUnblockReset() // 👈 new
+            markUnblockReset()
             completionHandler(.close)
         case .secondaryButtonPressed:
             markUnblockTapped()
@@ -77,13 +81,51 @@ class ShieldActionExtension: ShieldActionDelegate {
         }
     }
 
+    // 👇 new — reverse-lookup: does this token belong to a Lock App config?
+    private func findLockAppConfigId(for token: ApplicationToken) -> String? {
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        let configIds = sharedDefaults?.stringArray(forKey: "lockAppConfigIds") ?? []
+        for configId in configIds {
+            guard let data = sharedDefaults?.data(forKey: "lockApp_\(configId)"),
+                  let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+            else { continue }
+            if selection.applicationTokens.contains(token) {
+                return configId
+            }
+        }
+        return nil
+    }
+
+    private func markLockAppUnblockTapped(configId: String, token: ApplicationToken) {
+        let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+        sharedDefaults?.set(configId, forKey: "pendingLockAppConfirmId")
+        sharedDefaults?.synchronize()
+    }
+
+    private func sendLockAppUnblockNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Ready to unlock?"
+        content.body = "Tap to confirm and use your app."
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.5, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "com.eagle.pausenow.lockAppUnlockNudge",
+            content: content,
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                NSLog("❌ failed to schedule lock-app unblock notification: \(error)")
+            }
+        }
+    }
+
     private func markUnblockTapped() {
         let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
         sharedDefaults?.set(true, forKey: "unblockButtonTapped")
         sharedDefaults?.synchronize()
     }
 
-    // 👇 new — resets the flag when the user exits the shield
     private func markUnblockReset() {
         let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
         sharedDefaults?.set(false, forKey: "unblockButtonTapped")

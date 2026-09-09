@@ -319,6 +319,37 @@ class IOSBlockingService implements BlockingService {
     await _channel.invokeMethod('resetQuickBlockSelection', {'cardId': cardId});
   }
 
+  Future<int?> showLockAppPicker({required String configId, String appLabel = ''}) async {
+    final count = await _channel.invokeMethod<int>('showLockAppPicker', {
+      'configId': configId,
+      'appLabel': appLabel,
+    });
+    return count;
+  }
+
+  Future<void> applyLockAppShield(String configId) async {
+    try {
+      await _channel.invokeMethod('applyLockAppShield', {'configId': configId});
+    } catch (e) {
+      debugPrint('❌ applyLockAppShield error: $e');
+    }
+  }
+
+  Future<void> removeLockAppShield(String configId) async {
+    try {
+      await _channel.invokeMethod('removeLockAppShield', {'configId': configId});
+    } catch (e) {
+      debugPrint('❌ removeLockAppShield error: $e');
+    }
+  }
+
+  Future<void> saveLockAppConfigIds(List<String> ids) async {
+    try {
+      await _channel.invokeMethod('saveLockAppConfigIds', {'ids': ids});
+    } catch (e) {
+      debugPrint('❌ saveLockAppConfigIds error: $e');
+    }
+  }
 
   @override
   Stream<AppUsageEvent> get usageEvents =>

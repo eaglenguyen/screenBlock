@@ -52,6 +52,17 @@ class MainActivity : FlutterActivity() {
             METHOD_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "saveThemePreference" -> {
+                    val isDark = call.argument<Boolean>("isDark") ?: true
+                    val nativePrefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
+                    nativePrefs.edit().putBoolean("appIsDarkMode", isDark).apply()
+                    result.success(null)
+                }
+                "endLockAppPauseEarly" -> {
+                    val packageName = call.argument<String>("packageName") ?: ""
+                    AppBlockAccessibilityService.endLockAppPauseEarly(packageName)
+                    result.success(null)
+                }
                 "launchApp" -> {
                     val packageName = call.argument<String>("packageName") ?: ""
                     val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {

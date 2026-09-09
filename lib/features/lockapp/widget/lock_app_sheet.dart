@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pausenow/features/lockapp/widget/single_app_picker_sheet.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/lock_app_config.dart';
-import '../../../UI/home/widgets/app_list_sheet.dart';
+import '../../../domain/platform/ios_blocking_service.dart';
+import '../../../providers/blocking_service_provider.dart';
 import '../lock_app_viewmodel.dart';
 
 class LockAppSheet extends ConsumerStatefulWidget {
@@ -21,6 +25,8 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
   String? _packageName;
   String? _appName;
   int _maxUnlocks = 3;
+  String? _pendingConfigId; // 👈 new — stable configId used for iOS token storage, generated once on first picker open
+
 
   bool get isEditing => widget.existingConfig != null;
 
@@ -31,24 +37,39 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
     _packageName = c?.packageName;
     _appName = c?.appName;
     _maxUnlocks = c?.maxUnlocks ?? 3;
-  }
-  void _openAppPicker() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (_) => SingleAppPickerSheet(
-        onSelected: (packageName, appName) {
-          setState(() {
-            _packageName = packageName;
-            _appName = appName;
-          });
-        },
-      ),
-    );
+    _pendingConfigId = c?.id; // 👈 new — reuse existing config's id if editing
+
   }
 
+
+  Future<void> _openAppPicker() async {
+    if (Platform.isIOS) {
+      final service = ref.read(blockingServiceProvider) as IOSBlockingService;
+      _pendingConfigId ??= widget.existingConfig?.id ?? const Uuid().v4();
+      final count = await service.showLockAppPicker(configId: _pendingConfigId!);
+      if (count != null && count > 0) {
+        setState(() {
+          _packageName = _pendingConfigId!; // iOS: this becomes the token lookup key
+          _appName = ''; // 👈 no name needed on iOS — icon alone is sufficient
+        });
+      }
+    } else {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        useRootNavigator: true,
+        builder: (_) => SingleAppPickerSheet(
+          onSelected: (packageName, appName) {
+            setState(() {
+              _packageName = packageName;
+              _appName = appName;
+            });
+          },
+        ),
+      );
+    }
+  }
   int get _dailyTotalMinutes => _maxUnlocks * 5;
 
   @override
@@ -256,15 +277,24 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
   }
 
   Future<void> _save() async {
-    if (_packageName == null || _appName == null) return;
-    await ref.read(lockAppViewModelProvider.notifier).saveConfig(
-      existingId: widget.existingConfig?.id,
-      name: _appName!,
-      packageName: _packageName!,
-      appName: _appName!,
-      maxUnlocks: _maxUnlocks,
-    );
-    if (mounted) Navigator.pop(context);
+    if (_packageName == null) return;
+    try {
+      await ref.read(lockAppViewModelProvider.notifier).saveConfig(
+        existingId: _pendingConfigId ?? widget.existingConfig?.id,
+        name: _appName ?? '',
+        packageName: _packageName!,
+        appName: _appName ?? '',
+        maxUnlocks: _maxUnlocks,
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (e, st) {
+      debugPrint('❌ LockAppSheet save error: $e\n$st');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Save failed: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _delete() async {

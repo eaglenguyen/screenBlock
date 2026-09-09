@@ -43,6 +43,12 @@ class AppBlockAccessibilityService : AccessibilityService() {
         var instance: AppBlockAccessibilityService? = null // 👈 new — needed to call the non-static checkTimeLimitForApp
         private val lockAppExempted = mutableMapOf<String, Long>() // packageName -> pauseEndsAtMillis
 
+
+        fun endLockAppPauseEarly(packageName: String) {
+            lockAppExempted.remove(packageName)
+            android.util.Log.d("pausenow", "⏹ ended lock-app pause early for: $packageName")
+        }
+
         fun markUnlockConsumed(configId: String) {
             instance?.consumeLockAppUnlockInternal(configId)
         }
@@ -99,7 +105,6 @@ class AppBlockAccessibilityService : AccessibilityService() {
     private fun pauseLockAppInternal(configId: String, packageName: String) {
         val pauseEndsAt = System.currentTimeMillis() + (5 * 60 * 1000)
         lockAppExempted[packageName] = pauseEndsAt
-        consumeLockAppUnlockInternal(configId)
 
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             lockAppExempted.remove(packageName)
