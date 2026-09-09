@@ -13,10 +13,6 @@ import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/permission_dialogs.dart';
-import '../../domain/platform/android_blocking_service.dart';
-import '../../features/lockapp/lock_app_viewmodel.dart';
-import '../../features/lockapp/widget/lock_app_confirm_sheet.dart';
-import '../../features/wheel/widgets/spin_wheel_card.dart';
 import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../settings/settings_viewmodel.dart';
@@ -240,7 +236,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 },
 
               const SizedBox(height: 12),
-              const SpinWheelCard(),
             ],
           ),
         ),

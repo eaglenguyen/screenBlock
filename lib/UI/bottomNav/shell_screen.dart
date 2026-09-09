@@ -11,11 +11,7 @@ import '../home/checkIn/check_in_slider_screen.dart';
 import '../home/home_viewmodel.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
-  const ShellScreen({
-    super.key,
-    required this.child,
-  });
-
+  const ShellScreen({super.key, required this.child});
   final Widget child;
 
   @override
@@ -23,19 +19,24 @@ class ShellScreen extends ConsumerStatefulWidget {
 }
 
 class _ShellScreenState extends ConsumerState<ShellScreen>
-    with WidgetsBindingObserver { // 👈 new
-
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin { // 👈 added ticker mixin
   int _selectedIndex = 0;
+  late AnimationController _wheelSpinController; // 👈 new
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _wheelSpinController = AnimationController( // 👈 new — continuous spin
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _wheelSpinController.dispose(); // 👈 new
     super.dispose();
   }
 
@@ -50,14 +51,16 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
   int _getIndexFromLocation(String location) {
     if (location.startsWith('/home')) return 0;
     if (location.startsWith('/schedule')) return 1;
-    if (location.startsWith('/stats')) return 2;
-    if (location.startsWith('/settings')) return 3;
+    if (location.startsWith('/wheel')) return 2; // 👈 new — middle tab
+    if (location.startsWith('/stats')) return 3;
+    if (location.startsWith('/settings')) return 4;
     return 0;
   }
 
   final List<String> _routes = [
     '/home',
     '/schedule',
+    '/wheel', // 👈 new
     '/stats',
     '/settings',
   ];
@@ -122,39 +125,91 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
       left: 0,
       right: 0,
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundCard(context),
-            borderRadius: BorderRadius.circular(50),
-            border: Border.all(
-              color: AppColors.border(context),
-              width: 0.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min, // 👈 key — pill shrinks to content
+        child: SizedBox(
+          height: 84, // 👈 taller to give the arched button room to poke above
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.bottomCenter,
             children: [
-              _navBtn(0, Icons.home_rounded),
-              _navBtn(1, Icons.calendar_today_rounded),
-              _navBtn(2, Icons.bar_chart_rounded),
-              _navBtn(3, Icons.settings_rounded),
+              // ── the pill bar itself ──
+              Container(
+                height: 70,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundCard(context),
+                  borderRadius: BorderRadius.circular(50),
+                  border: Border.all(color: AppColors.border(context), width: 0.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _navBtn(0, Icons.home_rounded),
+                    _navBtn(1, Icons.calendar_today_rounded),
+                    const SizedBox(width: 58), // 👈 gap reserved for the arched wheel button
+                    _navBtn(3, Icons.bar_chart_rounded),
+                    _navBtn(4, Icons.settings_rounded),
+                  ],
+                ),
+              ),
+              // ── the arched, elevated wheel button ──
+              Positioned(
+                top: -14, // 👈 pokes above the bar
+                child: GestureDetector(
+                  onTap: () => _onNavTapped(2),
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: AppColors.background(context), // matches page bg, creates the "cutout" ring look
+                      shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _selectedIndex == 2
+                            ? AppColors.accent(context)
+                            : AppColors.backgroundSubtle(context),
+                        shape: BoxShape.circle,
+                        boxShadow: _selectedIndex == 2
+                            ? [
+                          BoxShadow(
+                            color: AppColors.accent(context).withValues(alpha: 0.4),
+                            blurRadius: 16,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                            : null,
+                      ),
+                      child: Center(
+                        child: RotationTransition( // 👈 constantly spinning
+                          turns: _wheelSpinController,
+                          child: Icon(
+                            Icons.donut_large_rounded, // wheel-like icon — swap for a custom asset if you have one
+                            size: 30,
+                            color: _selectedIndex == 2
+                                ? AppColors.accentText(context)
+                                : AppColors.textSecondary(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
 
   Widget _navBtn(int index, IconData icon) {
     final isActive = _selectedIndex == index;
@@ -167,17 +222,13 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
           width: 54,
           height: 54,
           decoration: BoxDecoration(
-            color: isActive
-                ? AppColors.accent(context)
-                : AppColors.backgroundSubtle(context),
+            color: isActive ? AppColors.accent(context) : AppColors.backgroundSubtle(context),
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
             size: 28,
-            color: isActive
-                ? AppColors.accentText(context)
-                : AppColors.textSecondary(context),
+            color: isActive ? AppColors.accentText(context) : AppColors.textSecondary(context),
           ),
         ),
       ),

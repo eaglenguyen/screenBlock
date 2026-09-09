@@ -7,6 +7,7 @@ import 'UI/home/home_screen.dart';
 import 'UI/schedule/schedule_screen.dart';
 import 'UI/settings/settings_screen.dart';
 import 'UI/stats/stats_screen.dart';
+import 'UI/wheel/wheel_screen.dart'; // 👈 new
 import 'core/constants/hivebox_names.dart';
 import 'onboarding/onboarding_welcome_flow.dart';
 
@@ -17,13 +18,10 @@ class AppRouter {
     initialLocation: '/home',
     redirect: (context, state) {
       final box = Hive.box(HiveBoxNames.settings);
-
       final onboardingComplete = box.get(
         'onboardingComplete',
         defaultValue: false,
       ) as bool;
-
-      // redirect to onboarding if not complete
       if (!onboardingComplete &&
           !state.matchedLocation.startsWith('/onboarding')) {
         return '/onboarding';
@@ -31,14 +29,11 @@ class AppRouter {
       return null;
     },
     routes: [
-      // onboarding outside shell
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
         builder: (context, state) => const OnboardingWelcomeFlow(),
       ),
-
-      // shell wraps tab screens
       ShellRoute(
         builder: (context, state, child) => ShellScreen(child: child),
         routes: [
@@ -59,6 +54,17 @@ class AppRouter {
             pageBuilder: (context, state) => CustomTransitionPage(
               key: state.pageKey,
               child: const ScheduleScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, _, child) =>
+                  FadeTransition(opacity: animation, child: child),
+            ),
+          ),
+          GoRoute(
+            path: '/wheel', // 👈 new
+            name: 'wheel',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: const WheelScreen(),
               transitionDuration: const Duration(milliseconds: 200),
               transitionsBuilder: (context, animation, _, child) =>
                   FadeTransition(opacity: animation, child: child),
@@ -88,15 +94,14 @@ class AppRouter {
           ),
         ],
       ),
-
-      // paywall outside shell — hard gate after onboarding
       GoRoute(
         path: '/paywall',
         name: 'paywall',
         builder: (context, state) {
-          final source = (state.extra as String?) ?? 'onboarding'; // 👈
+          final source = (state.extra as String?) ?? 'onboarding';
           return PaywallScreen(source: source);
-        },      ),
+        },
+      ),
     ],
   );
 }

@@ -77,7 +77,7 @@ class QuickBlockPickerTutorialOverlay extends StatelessWidget {
                     border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1),
                   ),
                   child: const Center(
-                    child: Text('⏫', style: TextStyle(fontSize: 30)),
+                    child: Text('☝', style: TextStyle(fontSize: 30)),
                   ),
                 ),
               ),
