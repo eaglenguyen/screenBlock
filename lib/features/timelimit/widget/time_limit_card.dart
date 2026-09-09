@@ -93,6 +93,7 @@ class _TimeLimitCardState extends ConsumerState<TimeLimitCard> {
       ),
       name: widget.config.name,
       onOptionsTap: widget.onTap ?? () {},
+      showBetaFlair: Platform.isIOS, // 👈 new
       bottomAction: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 10),

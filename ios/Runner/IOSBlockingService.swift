@@ -685,9 +685,82 @@ class IOSBlockingService: NSObject {
         var currentlyShielded = store.shield.applications ?? []
         currentlyShielded.subtract(selection.applicationTokens)
         store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+
+        let center = DeviceActivityCenter()
+        let activityName = DeviceActivityName("com.eagle.pausenow.lockapp.\(configId)")
+        center.stopMonitoring([activityName]) // 👈 clear any stale prior interval for this config first
+
+        let calendar = Calendar.current
+        let now = Date()
+        let roundedStart = calendar.date(bySetting: .second, value: 0, of: now.addingTimeInterval(60)) ?? now
+        let startComponents = calendar.dateComponents([.hour, .minute], from: roundedStart)
+
+        let endDate = now.addingTimeInterval(30 * 60) // 👈 same 30-min window trick as pauseBlocking()
+        let endComponents = calendar.dateComponents([.hour, .minute], from: endDate)
+        let pauseMinutes = 5
+        let warningMinutes = 30 - pauseMinutes // 👈 fires intervalWillEndWarning at the real 5-min mark
+
+        let schedule = DeviceActivitySchedule(
+            intervalStart: startComponents,
+            intervalEnd: endComponents,
+            repeats: false,
+            warningTime: DateComponents(minute: warningMinutes)
+        )
+
+        do {
+            try center.startMonitoring(activityName, during: schedule)
+            NSLog("✅ lock-app pause scheduled for \(configId), warningTime trick: 30min window, warning at \(pauseMinutes) min")
+        } catch {
+            NSLog("❌ failed to start lock-app pause monitoring: \(error)")
+        }
     }
+    
+    func saveLockAppRemaining(configId: String, remaining: Int, max: Int) {
+        sharedDefaults?.set(remaining, forKey: "lockAppRemaining_\(configId)")
+        sharedDefaults?.set(max, forKey: "lockAppMax_\(configId)")
+        sharedDefaults?.synchronize()
+    }
+    
+    
 
     
+    func endLockAppPauseEarly(configId: String) {
+        let center = DeviceActivityCenter()
+        let activityName = DeviceActivityName("com.eagle.pausenow.lockapp.\(configId)")
+        center.stopMonitoring([activityName]) // 👈 cancels the pending interval — won't fire intervalDidEnd later
+        applyLockAppShield(configId: configId) // 👈 re-shield immediately, right now
+    }
     
+    private func reshieldIfStillPaused(configId: String) {
+        // only re-shield if the pause window hasn't already been cleared (e.g. via endLockAppPauseEarly, or the config was deleted)
+        guard let pauseEndsAt = sharedDefaults?.double(forKey: "lockAppPauseEndsAt_\(configId)"), pauseEndsAt > 0 else {
+            return
+        }
+        sharedDefaults?.removeObject(forKey: "lockAppPauseEndsAt_\(configId)")
+        sharedDefaults?.synchronize()
+        applyLockAppShield(configId: configId)
+    }
+    
+    func deleteLockAppConfig(configId: String) {
+        let center = DeviceActivityCenter()
+        let activityName = DeviceActivityName("com.eagle.pausenow.lockapp.\(configId)")
+        center.stopMonitoring([activityName]) // 👈 cancels any pending pause-reshield interval
+
+        // 👇 unshield immediately, in case it's currently shielded
+        if let data = sharedDefaults?.data(forKey: "lockApp_\(configId)"),
+           let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
+            var currentlyShielded = store.shield.applications ?? []
+            currentlyShielded.subtract(selection.applicationTokens)
+            store.shield.applications = currentlyShielded.isEmpty ? nil : currentlyShielded
+        }
+
+        // 👇 clear all stored state for this config so nothing can reference it again
+        sharedDefaults?.removeObject(forKey: "lockApp_\(configId)")
+        sharedDefaults?.removeObject(forKey: "lockAppRemaining_\(configId)")
+        sharedDefaults?.removeObject(forKey: "lockAppMax_\(configId)")
+        sharedDefaults?.synchronize()
+
+        NSLog("🗑 lock-app config \(configId) fully deleted — monitoring stopped, tokens cleared")
+    }
 
 }

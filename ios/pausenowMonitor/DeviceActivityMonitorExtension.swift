@@ -46,7 +46,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         sharedDefaults?.set(activity.rawValue, forKey: "extensionLastActivity")
         sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")
         sharedDefaults?.synchronize()
-        
+
         if activity.rawValue == "com.eagle.pausenow.pause" {
             if sharedDefaults?.object(forKey: "schedulePauseEndTime") != nil {
                 reshieldApps()
@@ -56,25 +56,24 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             sharedDefaults?.removeObject(forKey: "schedulePauseEndTime")
             sharedDefaults?.synchronize()
         }
-        
+
+        // 👈 Lock App branch removed — reshield now happens via intervalWillEndWarning instead
+
         if activity.rawValue.hasPrefix("com.eagle.pausenow.schedule.") {
             let scheduleId = activity.rawValue.replacingOccurrences(
                 of: "com.eagle.pausenow.schedule.", with: ""
             )
-            store.clearAllSettings() // 👈 replaces unshieldScheduleAppsInExtension(scheduleId:) — full clear instead of token-subtract, since subtract silently fails when tokens rotate
-
+            store.clearAllSettings()
             sharedDefaults?.set(false, forKey: "isScheduleCurrentlyActive")
             sharedDefaults?.synchronize()
-
             store.application.denyAppRemoval = false
-
             os_log("✅ schedule ended, full shield cleared for %{public}@", log: logger, type: .fault, scheduleId)
         }
     }
     
     override func intervalWillEndWarning(for activity: DeviceActivityName) {
         super.intervalWillEndWarning(for: activity)
-        
+
         if activity.rawValue == "com.eagle.pausenow.pause" {
             NSLog("⏰ pause warning fired — re-shielding now")
             sharedDefaults?.set("intervalWillEndWarning", forKey: "extensionLastEvent")
@@ -82,6 +81,33 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             sharedDefaults?.synchronize()
             reshieldApps()
         }
+
+        // 👇 new — Lock App uses the same warningTime trick
+        if activity.rawValue.hasPrefix("com.eagle.pausenow.lockapp.") {
+            let configId = activity.rawValue.replacingOccurrences(
+                of: "com.eagle.pausenow.lockapp.", with: ""
+            )
+            NSLog("⏰ [LockApp] pause warning fired for \(configId) — re-shielding now")
+            sharedDefaults?.set("intervalWillEndWarning", forKey: "extensionLastEvent")
+            sharedDefaults?.set(activity.rawValue, forKey: "extensionLastActivity")
+            sharedDefaults?.set(Date().timeIntervalSince1970, forKey: "extensionLastRan")
+            sharedDefaults?.synchronize()
+            reshieldLockApp(configId: configId)
+        }
+    }
+    
+    // 👇 new — re-apply a single Lock App config's shield when its pause interval ends
+    private func reshieldLockApp(configId: String) {
+        guard let data = sharedDefaults?.data(forKey: "lockApp_\(configId)"),
+              let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+        else {
+            os_log("❌ reshieldLockApp: no tokens for %{public}@", log: logger, type: .fault, configId)
+            return
+        }
+        var currentlyShielded = store.shield.applications ?? []
+        currentlyShielded.formUnion(selection.applicationTokens)
+        store.shield.applications = currentlyShielded
+        os_log("🛡 lock-app re-shielded for %{public}@, %d apps", log: logger, type: .fault, configId, selection.applicationTokens.count)
     }
     
     private func reshieldApps() {

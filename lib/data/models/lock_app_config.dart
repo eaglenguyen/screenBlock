@@ -35,6 +35,9 @@ class LockAppConfig extends HiveObject {
   @HiveField(9)
   DateTime? pauseEndsAt;
 
+  @HiveField(10)
+  String? iconUrl; // 👈 new — App Store artwork URL, iOS only
+
 
   LockAppConfig({
     required this.id,
@@ -47,6 +50,7 @@ class LockAppConfig extends HiveObject {
     required this.updatedAt,
     required this.appName,
     this.pauseEndsAt, // 👈 new
+    this.iconUrl, //
 
   });
 

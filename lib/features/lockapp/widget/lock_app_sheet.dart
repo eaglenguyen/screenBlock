@@ -11,6 +11,8 @@ import '../../../data/models/lock_app_config.dart';
 import '../../../domain/platform/ios_blocking_service.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../lock_app_viewmodel.dart';
+import '../service/app_store_search_result.dart';
+import 'app_store_search_sheet.dart';
 
 class LockAppSheet extends ConsumerStatefulWidget {
   final LockAppConfig? existingConfig;
@@ -26,7 +28,7 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
   String? _appName;
   int _maxUnlocks = 3;
   String? _pendingConfigId; // 👈 new — stable configId used for iOS token storage, generated once on first picker open
-
+  String? _iconUrl;
 
   bool get isEditing => widget.existingConfig != null;
 
@@ -38,6 +40,7 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
     _appName = c?.appName;
     _maxUnlocks = c?.maxUnlocks ?? 3;
     _pendingConfigId = c?.id; // 👈 new — reuse existing config's id if editing
+    _iconUrl = c?.iconUrl;
 
   }
 
@@ -47,11 +50,21 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
       final service = ref.read(blockingServiceProvider) as IOSBlockingService;
       _pendingConfigId ??= widget.existingConfig?.id ?? const Uuid().v4();
       final count = await service.showLockAppPicker(configId: _pendingConfigId!);
-      if (count != null && count > 0) {
-        setState(() {
-          _packageName = _pendingConfigId!; // iOS: this becomes the token lookup key
-          _appName = ''; // 👈 no name needed on iOS — icon alone is sufficient
-        });
+      if (count != null && count > 0 && mounted) {
+        final result = await showModalBottomSheet<AppStoreSearchResult>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          useRootNavigator: true,
+          builder: (_) => const AppStoreSearchSheet(), // 👈 no onSelected needed
+        );
+        if (result != null) {
+          setState(() {
+            _packageName = _pendingConfigId!;
+            _appName = result.trackName;
+            _iconUrl = result.artworkUrl;
+          });
+        }
       }
     } else {
       showModalBottomSheet(
@@ -131,8 +144,7 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
                 const SizedBox(width: 32),
             ],
           ),
-          const SizedBox(height: 20),
-          Image.asset('assets/icons/mascot_face.png', height: 56),
+
           const SizedBox(height: 24),
           Container(
             width: double.infinity,
@@ -285,6 +297,8 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
         packageName: _packageName!,
         appName: _appName ?? '',
         maxUnlocks: _maxUnlocks,
+        iconUrl: _iconUrl ?? '',
+
       );
       if (mounted) Navigator.pop(context);
     } catch (e, st) {
@@ -302,4 +316,5 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
     await ref.read(lockAppViewModelProvider.notifier).deleteConfig(widget.existingConfig!.id);
     if (mounted) Navigator.pop(context);
   }
+
 }

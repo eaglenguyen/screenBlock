@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -19,7 +19,6 @@
 		7470385630080E7D00F67387 /* WeeklyDataTriggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7470385530080E7D00F67387 /* WeeklyDataTriggerView.swift */; };
 		7470385830080EB000F67387 /* WeeklyDataTriggerPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		74A56F1D2FF62CD500D0D988 /* ShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */; };
 		74A56F1E2FF62CD500D0D988 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A56F1B2FF62CD500D0D988 /* ShieldConfigurationExtension.swift */; };
 		74A56F202FF62D8B00D0D988 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74A56F1F2FF62D8B00D0D988 /* Assets.xcassets */; };
 		74BFE2BA2FDA037A0028C86B /* pausenowMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 74365F012FD9F0D8008C1DEC /* pausenowMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -156,7 +155,6 @@
 		7470385730080EB000F67387 /* WeeklyDataTriggerPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyDataTriggerPlatformView.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionExtension.swift; sourceTree = "<group>"; };
 		74A56F1A2FF62CD500D0D988 /* ShieldConfigurationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShieldConfigurationExtension.entitlements; sourceTree = "<group>"; };
 		74A56F1B2FF62CD500D0D988 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		74A56F1F2FF62D8B00D0D988 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -390,7 +388,6 @@
 		74A56F1C2FF62CD500D0D988 /* ShieldConfigurationExtension */ = {
 			isa = PBXGroup;
 			children = (
-				74A56F192FF62CD500D0D988 /* ShieldActionExtension.swift */,
 				74A56F1A2FF62CD500D0D988 /* ShieldConfigurationExtension.entitlements */,
 				74A56F1B2FF62CD500D0D988 /* ShieldConfigurationExtension.swift */,
 				74A56F1F2FF62D8B00D0D988 /* Assets.xcassets */,
@@ -993,7 +990,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				74A56F1D2FF62CD500D0D988 /* ShieldActionExtension.swift in Sources */,
 				74A56F1E2FF62CD500D0D988 /* ShieldConfigurationExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

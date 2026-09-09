@@ -351,6 +351,34 @@ class IOSBlockingService implements BlockingService {
     }
   }
 
+  Future<void> saveLockAppRemaining(String configId, int remaining, int max) async {
+    try {
+      await _channel.invokeMethod('saveLockAppRemaining', {
+        'configId': configId,
+        'remaining': remaining,
+        'max': max,
+      });
+    } catch (e) {
+      debugPrint('❌ saveLockAppRemaining error: $e');
+    }
+  }
+
+  Future<void> endLockAppPauseEarly(String configId) async {
+    try {
+      await _channel.invokeMethod('endLockAppPauseEarly', {'configId': configId});
+    } catch (e) {
+      debugPrint('❌ endLockAppPauseEarly error: $e');
+    }
+  }
+
+  Future<void> deleteLockAppConfig(String configId) async {
+    try {
+      await _channel.invokeMethod('deleteLockAppConfig', {'configId': configId});
+    } catch (e) {
+      debugPrint('❌ deleteLockAppConfig error: $e');
+    }
+  }
+
   @override
   Stream<AppUsageEvent> get usageEvents =>
       _eventController.stream;

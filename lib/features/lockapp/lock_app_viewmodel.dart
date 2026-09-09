@@ -40,6 +40,7 @@ class LockAppViewModel extends _$LockAppViewModel {
     required String packageName,
     required String appName,
     required int maxUnlocks,
+    required String iconUrl,
   }) async {
     final config = LockAppConfig(
       id: existingId ?? const Uuid().v4(),
@@ -50,15 +51,20 @@ class LockAppViewModel extends _$LockAppViewModel {
       unlocksUsedToday: 0,
       lastResetDate: DateTime.now(),
       updatedAt: DateTime.now(),
+      iconUrl: iconUrl.isEmpty ? null : iconUrl, // 👈 missing — add this
+
     );
     await _repo.saveConfig(config);
     loadConfigs(); // 👈 moved up — refreshes state.configs first
     await _syncToNative(); // 👈 now reads the correct, up-to-date state
   }
-
   Future<void> deleteConfig(String id) async {
+    final service = ref.read(blockingServiceProvider);
+    if (Platform.isIOS && service is IOSBlockingService) {
+      await service.deleteLockAppConfig(id); // 👈 was removeLockAppShield — now the full cleanup version
+    }
     await _repo.deleteConfig(id);
-    loadConfigs(); // 👈 before sync
+    loadConfigs();
     await _syncToNative();
   }
 
@@ -74,7 +80,9 @@ class LockAppViewModel extends _$LockAppViewModel {
     loadConfigs();
     final service = ref.read(blockingServiceProvider);
     if (service is AndroidBlockingService) {
-      await service.endLockAppPauseEarly(packageName); // 👈 new native call
+      await service.endLockAppPauseEarly(packageName);
+    } else if (service is IOSBlockingService) { // 👈 new
+      await service.endLockAppPauseEarly(id);
     }
   }
 
@@ -98,10 +106,11 @@ class LockAppViewModel extends _$LockAppViewModel {
     } else if (Platform.isIOS) {
       final service = ref.read(blockingServiceProvider);
       if (service is IOSBlockingService) {
-        await service.saveLockAppConfigIds(state.configs.map((c) => c.id).toList()); // 👈 new
+        await service.saveLockAppConfigIds(state.configs.map((c) => c.id).toList());
         for (final config in state.configs) {
           if (config.isActive) {
             await service.applyLockAppShield(config.id);
+            await service.saveLockAppRemaining(config.id, config.remaining, config.maxUnlocks); // 👈 new
           } else {
             await service.removeLockAppShield(config.id);
           }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../domain/platform/android_blocking_service.dart';
+import '../../domain/platform/ios_blocking_service.dart';
 import '../../features/lockapp/lock_app_viewmodel.dart';
 import '../../features/lockapp/widget/lock_app_confirm_sheet.dart';
 import '../../providers/blocking_service_provider.dart';
@@ -86,6 +87,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
             if (service is AndroidBlockingService) {
               await service.pauseLockAppFor(configId: next.configId, packageName: next.packageName);
               await service.launchApp(next.packageName);
+            } else if (service is IOSBlockingService) {
+              await service.removeLockAppShield(next.configId);
+              // no auto-open — URL scheme lookup deferred per your earlier decision
             }
           },
         );

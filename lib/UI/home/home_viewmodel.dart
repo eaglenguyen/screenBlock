@@ -20,6 +20,7 @@ import '../../data/repositories/BlockingRepo.dart';
 import '../../data/repositoryImpl/block_session_repository.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
+import '../../features/lockapp/lock_app_viewmodel.dart';
 import '../../features/quickblock/quick_block_viewmodel.dart';
 import '../../features/timelimit/time_limit_viewmodel.dart';
 import '../../providers/premium_provider.dart';
@@ -769,7 +770,15 @@ class HomeViewModel extends _$HomeViewModel {
       await _sessionRepo.endSession(key: state.activeSessionKey!, completed: true);
     }
     await AnalyticsService.instance.captureOnce(AnalyticsEvents.firstPomodoroCompleted);
-    final xpThisRound = state.pomodoroConfig.workMinutes * 5;
+
+    // 👇 new — XP scales with actual elapsed time, not the round's full configured length,
+    // so skipping early no longer awards full XP
+    final elapsedMinutes = state.sessionStartTime != null
+        ? (DateTime.now().difference(state.sessionStartTime!).inSeconds / 60)
+        .clamp(0, state.pomodoroConfig.workMinutes)
+        : state.pomodoroConfig.workMinutes.toDouble();
+    final xpThisRound = (elapsedMinutes * 5).round();
+
     final totalXpEarned = state.xpEarned + xpThisRound;
     final newRoundCount = state.pomodoroRoundCount + 1;
     state = state.copyWith(
@@ -1072,20 +1081,7 @@ class HomeViewModel extends _$HomeViewModel {
 
   Future<void> declineStartBreak() async {
     if (state.phase != BlockingPhase.awaitingBreakConfirmation) return;
-    await NotificationService.instance.cancelNotification(200);
-    await NotificationService.instance.cancelNotification(201);
-    await NotificationService.instance.cancelNotification(202);
-    // 👇 fully exit Pomodoro, same end-state as giveUp() but shield's already lifted
-    state = state.copyWith(
-      phase: state.xpEarned > 0 ? BlockingPhase.completed : BlockingPhase.idle,
-      remainingSeconds: 0,
-      breakRemainingSeconds: 0,
-      activeSessionKey: null,
-      pomodoroRoundCount: 0,
-      isPaused: false,
-      clearPausedAt: true,
-    );
-    ScheduleChecker.instance.checkNow();
+    await giveUp();
   }
 
 // Shield and Block Logic
@@ -1201,17 +1197,19 @@ class HomeViewModel extends _$HomeViewModel {
   void onAppResumed() async {
     debugPrint('🔄 onAppResumed — phase: ${state.phase} isScheduleActive: ${state.isScheduleActive}');
     if (Platform.isIOS) {
-      final debugTapped = await const MethodChannel('com.eagle.pausenow/ios_blocking')
-          .invokeMethod<bool>('checkDebugPauseTapped');
-      debugPrint('🔍 debugPauseTapped: $debugTapped');
-
-      _checkPendingXpClaim();
-      await _checkPendingCheckInFlow();
-      await _resetUnblockButtonFlag();
-      await _checkLiveActivityPauseSync(); // 👈 new
-
+      try {
+        final debugTapped = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+            .invokeMethod<bool>('checkDebugPauseTapped');
+        debugPrint('🔍 debugPauseTapped: $debugTapped');
+        _checkPendingXpClaim();
+        await _checkPendingCheckInFlow();
+        await _resetUnblockButtonFlag();
+        await _checkLiveActivityPauseSync();
+      } catch (e, st) {
+        debugPrint('❌ iOS resume block failed: $e\n$st');
+      }
     }
-    await _checkPendingLockAppConfirm(); // 👈 new — works on Android
+    await _checkPendingLockAppConfirm();
     if (state.isSchedulePaused) {
       final pauseEndTime = ScheduleChecker.instance.pauseEndsAt;
       if (pauseEndTime != null && DateTime.now().isAfter(pauseEndTime)) {
@@ -1219,11 +1217,8 @@ class HomeViewModel extends _$HomeViewModel {
         ScheduleChecker.instance.resumeNow();
       }
     }
-
-    ScheduleChecker.instance.checkNow(); // 👈 new — force a schedule re-check on resume, closing out any session that ended while backgrounded
-    loadTodayBlockedTime(); // 👈 new — refresh HomeState's own blocked-time total right after
-
-
+    ScheduleChecker.instance.checkNow();
+    loadTodayBlockedTime();
     switch (state.phase) {
       case BlockingPhase.active:
         if (state.isPaused) return;
@@ -1300,19 +1295,35 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   Future<void> _checkPendingLockAppConfirm() async {
-    if (!Platform.isAndroid) return;
     try {
-      final result = await const MethodChannel('com.eagle.pausenow/accessibility')
-          .invokeMethod<Map>('checkPendingLockAppConfirm');
-      if (result != null) {
-        state = state.copyWith(
-          pendingLockAppConfirm: (
-          configId: result['configId'] as String,
-          packageName: result['packageName'] as String,
-          appName: result['appName'] as String,
-
-          ),
-        );
+      if (Platform.isAndroid) {
+        final result = await const MethodChannel('com.eagle.pausenow/accessibility')
+            .invokeMethod<Map>('checkPendingLockAppConfirm');
+        if (result != null) {
+          state = state.copyWith(
+            pendingLockAppConfirm: (
+            configId: result['configId'] as String,
+            packageName: result['packageName'] as String,
+            appName: result['appName'] as String,
+            ),
+          );
+        }
+      } else if (Platform.isIOS) {
+        final result = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+            .invokeMethod<Map>('checkPendingLockAppConfirm');
+        if (result != null) {
+          final configId = result['configId'] as String;
+          // iOS has no packageName/appName string — look up the config locally for display purposes
+          final configs = ref.read(lockAppViewModelProvider).configs;
+          final config = configs.where((c) => c.id == configId).firstOrNull;
+          state = state.copyWith(
+            pendingLockAppConfirm: (
+            configId: configId,
+            packageName: '', // unused on iOS
+            appName: config?.appName ?? '',
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('❌ checkPendingLockAppConfirm error: $e');

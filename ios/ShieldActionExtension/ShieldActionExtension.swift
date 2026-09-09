@@ -14,10 +14,19 @@ class ShieldActionExtension: ShieldActionDelegate {
             markUnblockReset()
             completionHandler(.close)
         case .secondaryButtonPressed:
+            let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow") 
             if let configId = findLockAppConfigId(for: application) {
+                let remaining = sharedDefaults?.integer(forKey: "lockAppRemaining_\(configId)") ?? 0
+                if remaining <= 0 {
+                    NSLog("🔍 [LockApp] secondaryButtonPressed — no unlocks remaining, ignoring tap")
+                    completionHandler(.none) // 👈 do nothing at all
+                    return
+                }
+                NSLog("🔍 [LockApp] secondaryButtonPressed — found configId=\(configId)")
                 markLockAppUnblockTapped(configId: configId, token: application)
                 sendLockAppUnblockNotification()
             } else {
+                NSLog("🔍 [LockApp] secondaryButtonPressed — NO matching configId found for this token")
                 markUnblockTapped()
                 sendUnblockNotification()
             }
@@ -100,6 +109,7 @@ class ShieldActionExtension: ShieldActionDelegate {
         let sharedDefaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
         sharedDefaults?.set(configId, forKey: "pendingLockAppConfirmId")
         sharedDefaults?.synchronize()
+        NSLog("🔍 [LockApp] wrote pendingLockAppConfirmId=\(configId)")
     }
 
     private func sendLockAppUnblockNotification() {

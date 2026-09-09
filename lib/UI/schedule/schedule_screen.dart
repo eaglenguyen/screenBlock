@@ -17,6 +17,7 @@ import '../../core/utils/permission_dialogs.dart';
 import '../../data/models/time_limit_config.dart';
 import '../../data/models/lock_app_config.dart';
 import '../../domain/platform/android_blocking_service.dart';
+import '../../domain/platform/ios_blocking_service.dart';
 import '../../features/lockapp/lock_app_viewmodel.dart';
 import '../../features/lockapp/widget/lock_app_sheet.dart';
 import '../../features/lockapp/widget/lock_app_card.dart';
@@ -312,6 +313,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         if (service is AndroidBlockingService) {
           await service.pauseLockAppFor(configId: config.id, packageName: config.packageName);
           await service.launchApp(config.packageName);
+        } else if (service is IOSBlockingService) { // 👈 add this
+          await service.removeLockAppShield(config.id);
         }
       },
     );
@@ -397,14 +400,19 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
   void _openCreateSession(BuildContext context, WidgetRef ref) {
     checkAccessibilityAndProceed(context, ref, () {
+      final hasTimeLimitConfig = ref.read(timeLimitViewModelProvider).configs.isNotEmpty; // 👈 new
+      final hasLockAppConfig = ref.read(lockAppViewModelProvider).configs.isNotEmpty; // 👈 new
       SessionModePickerSheet.show(
         context,
+        hasTimeLimitConfig: hasTimeLimitConfig, // 👈 new
+        hasLockAppConfig: hasLockAppConfig, // 👈 new
         onScheduleTap: () {
           final isPremium = ref.read(isPremiumProvider);
           final scheduleCount = ref.read(scheduleViewModelProvider).schedules.length;
           if (!isPremium && scheduleCount >= 1) {
             showModalBottomSheet(
               context: context,
+
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
               useRootNavigator: true,

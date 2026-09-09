@@ -118,7 +118,12 @@ class _LockAppCardState extends State<LockAppCard> {
         final isPausing = widget.config.isPausing;
 
         return SessionCardShell(
-          icon: AppIconStack(
+          icon: widget.config.iconUrl != null
+              ? ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.network(widget.config.iconUrl!, fit: BoxFit.cover),
+          )
+              : AppIconStack(
             packageNames: [widget.config.packageName],
             iosStorageKey: 'lockApp_${widget.config.id}',
             refreshToken: widget.config.updatedAt.millisecondsSinceEpoch,

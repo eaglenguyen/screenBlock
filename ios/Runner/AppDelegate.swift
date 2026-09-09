@@ -154,6 +154,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if response.notification.request.identifier == "scheduleResume" {
             handleScheduleResume()
         }
+        if response.notification.request.identifier == "com.eagle.pausenow.lockAppUnlockNudge" {
+            NSLog("🔔 lock-app unlock notification tapped")
+            // pendingLockAppConfirmId was already written by ShieldActionExtension — nothing more needed here,
+            // Dart will read it on resume via checkPendingLockAppConfirm
+        }
 
         if response.notification.request.identifier == "com.eagle.pausenow.unblockNudge" {
             NSLog("🔔 unblock nudge notification tapped — setting pending check-in flag")
@@ -316,6 +321,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
+        case "deleteLockAppConfig":
+            if let args = call.arguments as? [String: Any], let configId = args["configId"] as? String {
+                service.deleteLockAppConfig(configId: configId)
+            }
+            result(nil)
+        case "endLockAppPauseEarly":
+            if let args = call.arguments as? [String: Any], let configId = args["configId"] as? String {
+                service.endLockAppPauseEarly(configId: configId) // 👈 now takes configId, not packageName
+            }
+            result(nil)
+        case "saveLockAppRemaining":
+            if let args = call.arguments as? [String: Any],
+               let configId = args["configId"] as? String,
+               let remaining = args["remaining"] as? Int,
+               let max = args["max"] as? Int {
+                service.saveLockAppRemaining(configId: configId, remaining: remaining, max: max)
+            }
+            result(nil)
+        case "checkPendingLockAppConfirm":
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            let configId = defaults?.string(forKey: "pendingLockAppConfirmId")
+            NSLog("🔍 [LockApp] checkPendingLockAppConfirm called — configId=\(configId ?? "nil")")
+            if let configId = configId {
+                defaults?.removeObject(forKey: "pendingLockAppConfirmId")
+                defaults?.synchronize()
+                result(["configId": configId])
+            } else {
+                result(nil)
+            }
         case "saveLockAppConfigIds":
             if let args = call.arguments as? [String: Any], let ids = args["ids"] as? [String] {
                 UserDefaults(suiteName: "group.com.eagle.pausenow")?.set(ids, forKey: "lockAppConfigIds")

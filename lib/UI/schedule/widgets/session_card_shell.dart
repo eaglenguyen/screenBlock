@@ -1,13 +1,16 @@
-// lib/UI/schedule/widgets/session_card_shell.dart
+
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+
+
 class SessionCardShell extends StatelessWidget {
   final Widget icon;
   final String name;
   final int? streakCount;
   final VoidCallback onOptionsTap;
   final Widget bottomAction;
+  final bool showBetaFlair; // 👈 new
 
   const SessionCardShell({
     super.key,
@@ -16,11 +19,12 @@ class SessionCardShell extends StatelessWidget {
     this.streakCount,
     required this.onOptionsTap,
     required this.bottomAction,
+    this.showBetaFlair = false, // 👈 new
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector( // 👈 new — wraps everything
+    return GestureDetector(
       onTap: onOptionsTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -37,7 +41,25 @@ class SessionCardShell extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (streakCount != null && streakCount! > 0)
+                if (showBetaFlair) // 👈 new — takes priority over streak badge in this corner
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.4), width: 0.5),
+                    ),
+                    child: Text(
+                      'BETA',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 9,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  )
+                else if (streakCount != null && streakCount! > 0)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
@@ -61,7 +83,7 @@ class SessionCardShell extends StatelessWidget {
                   )
                 else
                   const SizedBox(width: 1),
-                Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textSecondary(context)), // 👈 no longer its own GestureDetector, purely visual now
+                Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textSecondary(context)),
               ],
             ),
             const SizedBox(height: 16),
@@ -69,26 +91,25 @@ class SessionCardShell extends StatelessWidget {
               child: SizedBox(width: 48, height: 48, child: icon),
             ),
             const SizedBox(height: 12),
-            if (name.isNotEmpty) // 👈 new — hides the whole row when name is empty (iOS)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shield_rounded, size: 14, color: AppColors.accent(context)),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      name,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textPrimary(context),
-                        fontWeight: FontWeight.w700,
-                      ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shield_rounded, size: 14, color: AppColors.accent(context)),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    name,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textPrimary(context),
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
-            bottomAction, // still its own tappable widget for the Unlock button specifically
+            bottomAction,
           ],
         ),
       ),

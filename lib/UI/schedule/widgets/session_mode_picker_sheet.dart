@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
@@ -8,20 +10,26 @@ import '../../../paywall/feature_paywall_screen.dart';
 class SessionModePickerSheet extends ConsumerStatefulWidget {
   final VoidCallback onScheduleTap;
   final VoidCallback onTimeLimitTap;
-  final VoidCallback onLockAppTap; // 👈 new
+  final VoidCallback onLockAppTap;
+  final bool hasTimeLimitConfig; // 👈 new
+  final bool hasLockAppConfig; // 👈 new
 
   const SessionModePickerSheet({
     super.key,
     required this.onScheduleTap,
     required this.onTimeLimitTap,
-    required this.onLockAppTap, // 👈 new
+    required this.onLockAppTap,
+    this.hasTimeLimitConfig = false, // 👈 new
+    this.hasLockAppConfig = false, // 👈 new
   });
 
   static void show(
       BuildContext context, {
         required VoidCallback onScheduleTap,
         required VoidCallback onTimeLimitTap,
-        required VoidCallback onLockAppTap, // 👈 new
+        required VoidCallback onLockAppTap,
+        bool hasTimeLimitConfig = false, // 👈 new
+        bool hasLockAppConfig = false, // 👈 new
       }) {
     showModalBottomSheet(
       context: context,
@@ -31,7 +39,9 @@ class SessionModePickerSheet extends ConsumerStatefulWidget {
       builder: (_) => SessionModePickerSheet(
         onScheduleTap: onScheduleTap,
         onTimeLimitTap: onTimeLimitTap,
-        onLockAppTap: onLockAppTap, // 👈 new
+        onLockAppTap: onLockAppTap,
+        hasTimeLimitConfig: hasTimeLimitConfig, // 👈 new
+        hasLockAppConfig: hasLockAppConfig, // 👈 new
       ),
     );
   }
@@ -182,42 +192,19 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(
+              Expanded( // 👈 Lock an App now goes second (index 1)
                 child: _animatedCard(
                   1,
                   _modeCard(
                     context,
-                    title: 'Time Limit',
-                    subtitle: 'Daily usage cap',
-                    isLocked: !isPremium,
-                    onTap: isPremium
-                        ? () {
-                      Navigator.pop(context);
-                      widget.onTimeLimitTap();
-                    }
-                        : () {
-                      Navigator.pop(context);
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        useRootNavigator: true,
-                        builder: (_) => const FeaturePaywallScreen(source: 'time_limit_mode_card'),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _animatedCard(
-                  2,
-                  _modeCard(
-                    context,
-                    title: 'Lock an App', // 👈 renamed from 'Open Limit'
-                    subtitle: 'Limit unlocks per day', // 👈 new
-                    isLocked: !isPremium, // 👈 assumed premium-gated same as Time Limit — adjust if not
-                    onTap: isPremium
+                    title: 'Lock an App',
+                    subtitle: widget.hasLockAppConfig ? 'Already created' : 'Limit unlocks per day',
+                    isLocked: !isPremium || widget.hasLockAppConfig,
+                    isAlreadyCreated: widget.hasLockAppConfig,
+                    lockMessage: widget.hasLockAppConfig ? 'Session already created' : 'Upgrade to unlock',
+                    onTap: widget.hasLockAppConfig
+                        ? null
+                        : isPremium
                         ? () {
                       Navigator.pop(context);
                       widget.onLockAppTap();
@@ -230,6 +217,38 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                         backgroundColor: Colors.transparent,
                         useRootNavigator: true,
                         builder: (_) => const FeaturePaywallScreen(source: 'lock_app_mode_card'),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded( // 👈 Time Limit now goes third (index 2)
+                child: _animatedCard(
+                  2,
+                  _modeCard(
+                    context,
+                    title: 'Time Limit',
+                    subtitle: widget.hasTimeLimitConfig ? 'Already created' : 'Daily usage cap',
+                    isLocked: !isPremium || widget.hasTimeLimitConfig,
+                    isAlreadyCreated: widget.hasTimeLimitConfig,
+                    lockMessage: widget.hasTimeLimitConfig ? 'Session already created' : 'Upgrade to unlock',
+                    showBetaFlair: Platform.isIOS && !widget.hasTimeLimitConfig,
+                    onTap: widget.hasTimeLimitConfig
+                        ? null
+                        : isPremium
+                        ? () {
+                      Navigator.pop(context);
+                      widget.onTimeLimitTap();
+                    }
+                        : () {
+                      Navigator.pop(context);
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        useRootNavigator: true,
+                        builder: (_) => const FeaturePaywallScreen(source: 'time_limit_mode_card'),
                       );
                     },
                   ),
@@ -249,6 +268,9 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
         required String subtitle,
         required VoidCallback? onTap,
         bool isLocked = false,
+        bool isAlreadyCreated = false, // 👈 new
+        bool showBetaFlair = false,
+        String lockMessage = 'Upgrade to unlock', // 👈 new
       }) {
     final isDisabled = onTap == null;
     return GestureDetector(
@@ -292,6 +314,28 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
               ),
             ),
           ),
+          if (showBetaFlair && !isLocked)
+            Positioned(
+              top: 6,
+              right: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(50),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.4), width: 0.5),
+                ),
+                child: Text(
+                  'BETA',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 9,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ),
           if (isLocked)
             Positioned.fill(
               child: Container(
@@ -304,14 +348,15 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.lock_rounded,
-                        color: AppColors.accent(context),
-                        size: 16,
-                      ),
-                      const SizedBox(height: 4),
+                      if (!isAlreadyCreated) // 👈 new — hide the lock icon for this case
+                        Icon(
+                          Icons.lock_rounded,
+                          color: AppColors.accent(context),
+                          size: 16,
+                        ),
+                      if (!isAlreadyCreated) const SizedBox(height: 4), // 👈 new — keep spacing only when icon present
                       Text(
-                        'Upgrade to unlock',
+                        lockMessage,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.accent(context),
@@ -327,4 +372,5 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
       ),
     );
   }
+
 }
