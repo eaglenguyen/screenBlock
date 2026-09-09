@@ -135,7 +135,9 @@ class AppBlockAccessibilityService : AccessibilityService() {
 
     private fun checkLockAppForApp(packageName: String) {
         val configs = getLockAppConfigs()
+        android.util.Log.d("pausenow", "🔍 checkLockAppForApp($packageName) — configs found: ${configs.size}")
         val config = configs.firstOrNull { it.packageName == packageName && it.isActive } ?: return
+        android.util.Log.d("pausenow", "🔍 matched config: ${config.id}, remaining=${config.maxUnlocks - config.unlocksUsedToday}")
 
         if (lockAppExempted.containsKey(packageName)) {
             val pauseEndsAt = lockAppExempted[packageName] ?: 0L

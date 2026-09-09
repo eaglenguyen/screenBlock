@@ -158,12 +158,13 @@ class BlockActivity : AppCompatActivity() {
 
             if (isLockAppBlock) {
                 val configId = lockAppConfigId ?: return@setOnClickListener
-                val pkg = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: "" // 👈 declared HERE, inside this branch
+                val pkg = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
+                android.util.Log.d("pausenow", "🔍 writing pending lock app confirm — configId=$configId pkg=$pkg") // 👈 new
                 val prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
                 prefs.edit()
                     .putString("pendingLockAppConfirmId", configId)
-                    .putString("pendingLockAppPackage", intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: "")
-                    .putString("pendingLockAppName", getAppName(pkg)) // 👈 new
+                    .putString("pendingLockAppPackage", pkg)
+                    .putString("pendingLockAppName", getAppName(pkg))
                     .apply()
 
                 AppBlockAccessibilityService.isOverlayShowing = false
@@ -194,14 +195,28 @@ class BlockActivity : AppCompatActivity() {
     private fun updateCountdownButton() {
         val openButton = findViewById<Button>(R.id.openButton)
         if (countdownComplete) {
-            openButton.text = "Open app (30s)"
-            openButton.setTextColor(android.graphics.Color.parseColor("#EDB82A"))
-            openButton.background = getDrawable(R.drawable.button_outline_gold_background)
+            if (isLockAppBlock) {
+                if (lockAppRemaining <= 0) {
+                    openButton.visibility = View.GONE
+                } else {
+                    openButton.visibility = View.VISIBLE
+                    openButton.text = "Unblock ($lockAppRemaining/$lockAppMax left)"
+                    openButton.setTextColor(android.graphics.Color.parseColor("#EDB82A"))
+                    openButton.background = getDrawable(R.drawable.button_outline_gold_background)
+                }
+            } else {
+                openButton.text = "Open app (30s)"
+                openButton.setTextColor(android.graphics.Color.parseColor("#EDB82A"))
+                openButton.background = getDrawable(R.drawable.button_outline_gold_background)
+            }
         } else {
-            openButton.text = "Open in ${countdown}s"
+            if (isLockAppBlock && lockAppRemaining <= 0) {
+                openButton.visibility = View.GONE
+            } else {
+                openButton.text = "Unblock in ${countdown}s"
+            }
         }
     }
-
     private fun startBlobAnimation() {
         if (blobAnimator?.isRunning == true) return
 
@@ -343,9 +358,12 @@ class BlockActivity : AppCompatActivity() {
     private fun updateTopBar(packageName: String) {
         val topBarText = findViewById<TextView>(R.id.topBarText)
         val appName = getAppName(packageName)
-        val attemptCount = incrementAndGetOpenAttemptCount(appName) // 👈 new
-
-        topBarText.text = "$appName blocked 🔒 · ${attemptCount}x today" // 👈 was minutes-based text
+        if (isLockAppBlock) {
+            topBarText.text = "$appName locked 🔒 · $lockAppRemaining/$lockAppMax unlocks left"
+        } else {
+            val attemptCount = incrementAndGetOpenAttemptCount(appName)
+            topBarText.text = "$appName blocked 🔒 · ${attemptCount}x today"
+        }
     }
 
     private fun incrementAndGetOpenAttemptCount(appName: String): Int {

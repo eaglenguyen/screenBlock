@@ -68,6 +68,7 @@ class MainActivity : FlutterActivity() {
                 "checkPendingLockAppConfirm" -> {
                     val nativePrefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
                     val configId = nativePrefs.getString("pendingLockAppConfirmId", null)
+                    android.util.Log.d("pausenow", "🔍 checkPendingLockAppConfirm — configId=$configId") // 👈 new
                     val packageName = nativePrefs.getString("pendingLockAppPackage", null)
                     val appName = nativePrefs.getString("pendingLockAppName", null)
                     if (configId != null && packageName != null) {

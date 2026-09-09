@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../UI/schedule/widgets/hold_to_confirm.dart';
 import '../../../core/theme/app_colors.dart';
@@ -7,6 +8,7 @@ import '../../../data/models/time_limit_config.dart';
 class TimeLimitOptionsSheet extends StatefulWidget {
   final TimeLimitConfig config;
   final bool isLimitReached;
+  final int usedMinutes; // 👈 new
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -14,6 +16,7 @@ class TimeLimitOptionsSheet extends StatefulWidget {
     super.key,
     required this.config,
     required this.isLimitReached,
+    this.usedMinutes = 0, // 👈 new — defaults to 0 for iOS callers that don't compute it
     required this.onEdit,
     required this.onDelete,
   });
@@ -22,6 +25,7 @@ class TimeLimitOptionsSheet extends StatefulWidget {
       BuildContext context, {
         required TimeLimitConfig config,
         required bool isLimitReached,
+        int usedMinutes = 0, // 👈 new
         required VoidCallback onEdit,
         required VoidCallback onDelete,
       }) {
@@ -33,6 +37,7 @@ class TimeLimitOptionsSheet extends StatefulWidget {
       builder: (_) => TimeLimitOptionsSheet(
         config: config,
         isLimitReached: isLimitReached,
+        usedMinutes: usedMinutes, // 👈 new
         onEdit: onEdit,
         onDelete: onDelete,
       ),
@@ -125,6 +130,16 @@ class _TimeLimitOptionsSheetState extends State<TimeLimitOptionsSheet> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                    if (Platform.isAndroid) ...[ // 👈 new
+                      const SizedBox(height: 8),
+                      Text(
+                        '${widget.usedMinutes}m / ${widget.config.limitMinutes}m',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: widget.isLimitReached ? AppColors.error(context) : AppColors.textSecondary(context),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

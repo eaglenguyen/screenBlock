@@ -36,34 +36,34 @@ class LockAppViewModel extends _$LockAppViewModel {
     String? existingId,
     required String name,
     required String packageName,
-    required String appName, // 👈 new
+    required String appName,
     required int maxUnlocks,
   }) async {
     final config = LockAppConfig(
       id: existingId ?? const Uuid().v4(),
       name: name,
       packageName: packageName,
-      appName: appName, // 👈 new
+      appName: appName,
       maxUnlocks: maxUnlocks,
       unlocksUsedToday: 0,
       lastResetDate: DateTime.now(),
       updatedAt: DateTime.now(),
     );
     await _repo.saveConfig(config);
-    await _syncToNative();
-    loadConfigs();
+    loadConfigs(); // 👈 moved up — refreshes state.configs first
+    await _syncToNative(); // 👈 now reads the correct, up-to-date state
   }
 
   Future<void> deleteConfig(String id) async {
     await _repo.deleteConfig(id);
+    loadConfigs(); // 👈 before sync
     await _syncToNative();
-    loadConfigs();
   }
 
   Future<void> consumeUnlock(String id) async {
     await _repo.consumeUnlock(id);
+    loadConfigs(); // 👈 before sync
     await _syncToNative();
-    loadConfigs();
   }
 
   Future<void> _syncToNative() async {

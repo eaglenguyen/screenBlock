@@ -252,8 +252,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                         onTap: () async {
                           final blockingService = ref.read(blockingServiceProvider);
                           bool isLimitReached = false;
+                          int usedMinutes = 0; // 👈 moved outside the if-block
                           if (blockingService is AndroidBlockingService) {
-                            int usedMinutes = 0;
                             for (final pkg in timeLimitConfig.packageNames) {
                               usedMinutes += await blockingService.getUsedMinutesToday(pkg);
                             }
@@ -264,6 +264,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                               context,
                               config: timeLimitConfig,
                               isLimitReached: isLimitReached,
+                              usedMinutes: usedMinutes, // 👈 new
                               onEdit: () => showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,

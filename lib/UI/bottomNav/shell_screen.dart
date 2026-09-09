@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../domain/platform/android_blocking_service.dart';
+import '../../features/lockapp/lock_app_viewmodel.dart';
+import '../../features/lockapp/widget/lock_app_confirm_sheet.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../home/checkIn/check_in_slider_screen.dart';
 import '../home/home_viewmodel.dart';
@@ -69,6 +72,26 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     _selectedIndex = _getIndexFromLocation(
       GoRouterState.of(context).uri.toString(),
     );
+
+    ref.listen(homeViewModelProvider.select((s) => s.pendingLockAppConfirm), (previous, next) {
+      if (next != null) {
+        LockAppConfirmSheet.show(
+          context,
+          configId: next.configId,
+          packageName: next.packageName,
+          appName: next.appName,
+          onConfirm: () async {
+            final service = ref.read(blockingServiceProvider);
+            await ref.read(lockAppViewModelProvider.notifier).consumeUnlock(next.configId);
+            if (service is AndroidBlockingService) {
+              await service.pauseLockAppFor(configId: next.configId, packageName: next.packageName);
+              await service.launchApp(next.packageName);
+            }
+          },
+        );
+        ref.read(homeViewModelProvider.notifier).clearPendingLockAppConfirm();
+      }
+    });
 
     ref.listen(homeViewModelProvider, (previous, next) {
       if (next.pendingCheckIn && !(previous?.pendingCheckIn ?? false)) {

@@ -60,26 +60,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(homeViewModelProvider);
 
-    // 👇 add this ref.listen call inside build(), alongside any other ref.listen calls you may already have
-    ref.listen(homeViewModelProvider.select((s) => s.pendingLockAppConfirm), (previous, next) {
-      if (next != null) {
-        LockAppConfirmSheet.show(
-          context,
-          configId: next.configId,
-          packageName: next.packageName,
-          appName: next.appName,
-          onConfirm: () async {
-            final service = ref.read(blockingServiceProvider);
-            await ref.read(lockAppViewModelProvider.notifier).consumeUnlock(next.configId);
-            if (service is AndroidBlockingService) {
-              await service.pauseLockAppFor(configId: next.configId, packageName: next.packageName);
-              await service.launchApp(next.packageName);
-            }
-          },
-        );
-        ref.read(homeViewModelProvider.notifier).clearPendingLockAppConfirm();
-      }
-    });
 
     ref.listen(homeViewModelProvider, (previous, next) {
       if (previous?.phase == BlockingPhase.claimXp &&
