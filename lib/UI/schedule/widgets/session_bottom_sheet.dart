@@ -82,54 +82,46 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height, // 👈 new — fills the screen
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 12, // 👈 new — respects the status bar/notch
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        // 👈 removed: borderRadius — full screen has no rounded corners
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 👇 removed the drag-handle bar — doesn't make sense full-screen, replace with a close button instead
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundSubtle(context),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 18),
+    return SafeArea( // 👈 new — wraps everything, guarantees content clears the notch/camera
+      child: Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundCard(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border(context),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            _buildNameRow(context),
-            const SizedBox(height: 8),
-            _buildAllDayToggle(context),
-            const SizedBox(height: 8),
-            if (!_isAllDay) ...[
-              _buildTimeCard(context),
+              const SizedBox(height: 20),
+              _buildNameRow(context),
               const SizedBox(height: 8),
+              _buildAllDayToggle(context),
+              const SizedBox(height: 8),
+              if (!_isAllDay) ...[
+                _buildTimeCard(context),
+                const SizedBox(height: 8),
+              ],
+              _buildBlockingTypeRow(context),
+              const SizedBox(height: 8),
+              _buildListRow(context),
+              const SizedBox(height: 8),
+              _buildDayPicker(context),
+              const SizedBox(height: 16),
+              _buildSaveRow(context),
             ],
-            _buildBlockingTypeRow(context),
-            const SizedBox(height: 8),
-            _buildListRow(context),
-            const SizedBox(height: 8),
-            _buildDayPicker(context),
-            const SizedBox(height: 16),
-            _buildSaveRow(context),
-          ],
+          ),
         ),
       ),
     );
