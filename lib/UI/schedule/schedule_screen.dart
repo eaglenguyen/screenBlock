@@ -170,7 +170,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                   const SizedBox(height: 20),
                   _buildSessionsSection(context, ref, timeLimitState, lockAppState, isManualBlocking, isPaused),
                   const SizedBox(height: 16),
-                  const QuickBlockRow(),
                 ],
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
 import '../../features/lockapp/lock_app_viewmodel.dart';
@@ -124,9 +125,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
       bottom: 24,
       left: 0,
       right: 0,
-      child: Center(
+      child: Center( // 👈 reverted — pill shrinks to content width again
         child: SizedBox(
-          height: 84, // 👈 taller to give the arched button room to poke above
+          height: 88,
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.bottomCenter,
@@ -148,39 +149,47 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                   ],
                 ),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min, // 👈 reverted — no spaceBetween/full-width stretching
                   children: [
-                    _navBtn(0, Icons.home_rounded),
-                    _navBtn(1, Icons.calendar_today_rounded),
+                    _labeledNavBtn(0, Icons.home_rounded, const Color(0xFF3FB68A)),
+                    _labeledNavBtn(1, Icons.calendar_today_rounded, const Color(0xFFB39DDB)),
                     const SizedBox(width: 58), // 👈 gap reserved for the arched wheel button
-                    _navBtn(3, Icons.bar_chart_rounded),
-                    _navBtn(4, Icons.settings_rounded),
+                    _labeledNavBtn(3, Icons.bar_chart_rounded, const Color(0xFF4A9EFF)),
+                    _labeledNavBtn(4, Icons.settings_rounded, const Color(0xFFEDB82A)),
                   ],
                 ),
               ),
-              // ── the arched, elevated wheel button ──
+              // ── the arched, elevated wheel button — full ring wraps the icon ──
               Positioned(
-                top: -14, // 👈 pokes above the bar
+                top: -18, // 👈 higher, so the full ring clears the bar's top edge
                 child: GestureDetector(
                   onTap: () => _onNavTapped(2),
                   child: Container(
-                    width: 64,
-                    height: 64,
+                    width: 68,
+                    height: 68,
                     decoration: BoxDecoration(
-                      color: AppColors.background(context), // matches page bg, creates the "cutout" ring look
+                      color: AppColors.backgroundCard(context), // 👈 full ring now matches the bar itself, not page bg
                       shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.border(context), width: 0.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(5),
                     child: Container(
                       decoration: BoxDecoration(
                         color: _selectedIndex == 2
-                            ? AppColors.accent(context)
+                            ? const Color(0xFF7C6CF0)
                             : AppColors.backgroundSubtle(context),
                         shape: BoxShape.circle,
                         boxShadow: _selectedIndex == 2
                             ? [
                           BoxShadow(
-                            color: AppColors.accent(context).withValues(alpha: 0.4),
+                            color: const Color(0xFF7C6CF0).withValues(alpha: 0.4),
                             blurRadius: 16,
                             spreadRadius: 1,
                           ),
@@ -188,13 +197,13 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                             : null,
                       ),
                       child: Center(
-                        child: RotationTransition( // 👈 constantly spinning
+                        child: RotationTransition(
                           turns: _wheelSpinController,
                           child: Icon(
-                            Icons.donut_large_rounded, // wheel-like icon — swap for a custom asset if you have one
-                            size: 30,
+                            Icons.donut_large_rounded,
+                            size: 28,
                             color: _selectedIndex == 2
-                                ? AppColors.accentText(context)
+                                ? Colors.white
                                 : AppColors.textSecondary(context),
                           ),
                         ),
@@ -210,28 +219,29 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     );
   }
 
-
-  Widget _navBtn(int index, IconData icon) {
+  Widget _labeledNavBtn(int index, IconData icon, Color accentColor) {
     final isActive = _selectedIndex == index;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: GestureDetector(
         onTap: () => _onNavTapped(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+        child: Container(
           width: 54,
           height: 54,
           decoration: BoxDecoration(
-            color: isActive ? AppColors.accent(context) : AppColors.backgroundSubtle(context),
+            color: isActive ? accentColor : accentColor.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
             size: 28,
-            color: isActive ? AppColors.accentText(context) : AppColors.textSecondary(context),
+            color: isActive ? Colors.white : accentColor,
           ),
         ),
       ),
     );
   }
+
+
+
 }

@@ -9,6 +9,8 @@ import '../../../../domain/platform/ios_blocking_service.dart';
 import '../../../../providers/blocking_service_provider.dart';
 import '../../../UI/home/widgets/app_list_sheet.dart';
 import '../../../features/timelimit/time_limit_viewmodel.dart';
+import '../../../paywall/feature_paywall_screen.dart';
+import '../../../providers/premium_provider.dart';
 
 class TimeLimitBottomSheet extends ConsumerStatefulWidget {
   const TimeLimitBottomSheet({
@@ -28,11 +30,11 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
   late List<String> _packageNames;
   late final String _configId;
   bool get isEditing => widget.existingConfig != null;
+  bool get _isOverFreeLimit => _limitMinutes > 240; // 👈 new — 4 hours = free cap
 
   // 👇 new — allowed discrete values: 1 (testing only), 5–30 step 5, 60–480 step 30
   final List<int> _limitValues = [
-    1,
-    5, 10, 15, 20, 25, 30,
+    5, 10, 15, 20, 25, 30, // 👈 removed leading 1
     60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 450, 480,
   ];
 
@@ -87,12 +89,6 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
             const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Time Limit',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary(context),
-                ),
-              ),
             ),
             const SizedBox(height: 8),
             _buildNameRow(context),
@@ -133,7 +129,7 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                 color: AppColors.textPrimary(context),
               ),
               decoration: InputDecoration(
-                hintText: 'Limit name',
+                hintText: 'Enter name',
                 hintStyle: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary(context),
                 ),
@@ -167,10 +163,30 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                 style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context)),
               ),
               const Spacer(),
+              if (_isOverFreeLimit) ...[ // 👈 new — Pro flair
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.4), width: 0.5),
+                  ),
+                  child: Text(
+                    'PRO',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 9,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               Text(
                 _formatMinutes(_limitMinutes),
                 style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.accent(context),
+                  color: AppColors.accent(context), // 👈 tint the value itself too
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -179,19 +195,19 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _presetChip(context, label: '5m', minutes: 5)),
+              Expanded(child: _presetChip(context, label: '30m', minutes: 30)),
               const SizedBox(width: 8),
               Expanded(child: _presetChip(context, label: '1h', minutes: 60)),
               const SizedBox(width: 8),
-              Expanded(child: _presetChip(context, label: '2h', minutes: 120)),
+              Expanded(child: _presetChip(context, label: '4h', minutes: 240)),
             ],
           ),
           const SizedBox(height: 12),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.accent(context),
+              activeTrackColor: AppColors.accent(context), // 👈 new
               inactiveTrackColor: AppColors.accent(context).withValues(alpha: 0.15),
-              thumbColor: AppColors.accent(context),
+              thumbColor: AppColors.accent(context), // 👈 new
               overlayColor: AppColors.accent(context).withValues(alpha: 0.15),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
               trackHeight: 4,
@@ -558,6 +574,19 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       return;
     }
 
+    // 👇 new — gate anything over 4 hours behind premium
+    final isPremium = ref.read(isPremiumProvider);
+    if (_isOverFreeLimit && !isPremium) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        useRootNavigator: true,
+        builder: (_) => const FeaturePaywallScreen(source: 'time_limit_over_4h'),
+      );
+      return;
+    }
+
     final notifier = ref.read(timeLimitViewModelProvider.notifier);
 
     await notifier.saveConfig(
@@ -569,8 +598,6 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       isNew: !isEditing,
     );
 
-    // 👇 new — silently save again when editing an existing config, so the shield
-    // actually applies/lifts without requiring the user to manually tap Save twice
     if (isEditing) {
       await notifier.saveConfig(
         existingId: _configId,
@@ -584,7 +611,6 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
 
     if (mounted) Navigator.pop(context);
   }
-
 
   Future<void> _onDelete() async {
     if (widget.existingConfig == null) return;

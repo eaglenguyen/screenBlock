@@ -13,8 +13,10 @@ import '../../core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/permission_dialogs.dart';
+import '../../features/quickblock/widgets/quick_block_row.dart';
 import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
+import '../../providers/home_ui_state.dart';
 import '../settings/settings_viewmodel.dart';
 import 'cards/active_blocking_card.dart';
 import 'cards/break_confirmation_card.dart';
@@ -37,6 +39,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _hasShownXpAnimation = false;
+  bool _quickBlocksCollapsing = false;
+  Key? _quickBlocksKey;
 
   @override
   void initState() {
@@ -55,6 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeViewModelProvider);
+    final quickBlocksExpanded = ref.watch(quickBlocksExpandedProvider); // 👈 new
 
 
     ref.listen(homeViewModelProvider, (previous, next) {
@@ -95,6 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 100),
           child: Column(
             children: [
+
               // ── Schedule banner ─────────────────────────
               if (state.isScheduleActive || state.isAppLimitActiveToday)
                 Container(
@@ -235,7 +241,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _ => const SizedBox.shrink(),
                 },
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () async {
+                  if (quickBlocksExpanded) { // 👈 was _quickBlocksExpanded
+                    setState(() => _quickBlocksCollapsing = true);
+                    await Future.delayed(const Duration(milliseconds: 900));
+                    ref.read(quickBlocksExpandedProvider.notifier).set(false); // 👈 new
+                    setState(() => _quickBlocksCollapsing = false);
+                  } else {
+                    ref.read(quickBlocksExpandedProvider.notifier).set(true); // 👈 new
+                    setState(() => _quickBlocksKey = UniqueKey());
+                  }
+                },
+                child: Row(
+                  children: [
+                    AnimatedRotation(
+                      turns: quickBlocksExpanded ? 0 : -0.25, // 👈 was _quickBlocksExpanded
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSecondary(context)),
+                    ),
+                    const SizedBox(width: 4),
+                    Text('Quick Blocks', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textSecondary(context))),
+                  ],
+                ),
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: quickBlocksExpanded // 👈 was _quickBlocksExpanded
+                    ? Column(
+                  key: _quickBlocksKey,
+                  children: [
+                    const SizedBox(height: 12),
+                    QuickBlockRow(reverseOnBuild: _quickBlocksCollapsing),
+                  ],
+                )
+                    : const SizedBox(width: double.infinity),
+              ),
             ],
           ),
         ),

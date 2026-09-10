@@ -126,11 +126,6 @@ class _TimerCardState extends State<TimerCard>
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          Text(
-            'Focus Session',
-            style: AppTextStyles.headlineSmall.copyWith(fontSize: 25),
-          ),
-          const SizedBox(height: 8),
           _buildRecordPill(),
           const SizedBox(height: 16),
           _buildTimerDisplay(hours, minutes, seconds),

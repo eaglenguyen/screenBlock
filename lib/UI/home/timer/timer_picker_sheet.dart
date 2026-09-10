@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../paywall/feature_paywall_screen.dart';
+import '../../../providers/premium_provider.dart';
 
 
-class TimerPickerSheet extends StatefulWidget {
+class TimerPickerSheet extends ConsumerStatefulWidget {
   const TimerPickerSheet({
     super.key,
     required this.selectedMinutes,
@@ -12,11 +15,12 @@ class TimerPickerSheet extends StatefulWidget {
   final int selectedMinutes;
 
   @override
-  State<TimerPickerSheet> createState() => _TimerPickerSheetState();
+  ConsumerState<TimerPickerSheet> createState() => _TimerPickerSheetState();
 }
-
-class _TimerPickerSheetState extends State<TimerPickerSheet> {
+class _TimerPickerSheetState extends ConsumerState<TimerPickerSheet> {
   late int _selected;
+
+  bool get _isOverFreeLimit => _selected > 240;
 
   @override
   void initState() {
@@ -27,10 +31,20 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: false, // 👈 always intercept — we decide what happens manually
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          Navigator.pop(context, _selected);
+        if (didPop) return;
+        final isPremium = ref.read(isPremiumProvider);
+        if (_isOverFreeLimit && !isPremium) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            useRootNavigator: true,
+            builder: (_) => const FeaturePaywallScreen(source: 'manual_timer_over_4h'),
+          );
+        } else {
+          Navigator.pop(context, _selected); // 👈 this is the actual save — restored
         }
       },
       child: Container(
@@ -55,7 +69,25 @@ class _TimerPickerSheetState extends State<TimerPickerSheet> {
               step: 5,
               onChanged: (v) => setState(() => _selected = v),
             ),
-            const SizedBox(height: 12), // 👈 was 28 — smaller now that there's no button below
+            if (_isOverFreeLimit && !ref.watch(isPremiumProvider)) ...[ // 👈 added premium check
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(50),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.4), width: 0.5),
+                ),
+                child: Text(
+                  'Upgrade to PRO for longer timers!',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
           ],
         ),
       ),

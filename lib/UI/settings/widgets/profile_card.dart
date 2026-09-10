@@ -66,7 +66,7 @@ class SettingsProfileCard extends ConsumerWidget {
               ),
               child: Text(
                 'Change name',
-                style: AppTextStyles.bodySmall.copyWith(
+                style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.accent(context),
                   fontWeight: FontWeight.w600,
                 ),

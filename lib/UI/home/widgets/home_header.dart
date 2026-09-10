@@ -37,6 +37,7 @@ class HomeHeader extends StatelessWidget {
     ),
     child: Row(
       children: [
+        Text('Focus Session', style: AppTextStyles.headlineMedium),
         const Spacer(),
         _buildXpBadge(state, context),
       ],

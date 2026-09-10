@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../core/analytics/analytics_events.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../paywall/purchase_success_screen.dart';
 import '../../../providers/premium_provider.dart';
-
 
 class SettingsUpgradeCard extends ConsumerStatefulWidget {
   const SettingsUpgradeCard({super.key});
@@ -81,7 +80,6 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── the card, orange gradient ──
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
@@ -89,9 +87,9 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFFE8623D), // deep coral-orange
-                Color(0xFFF2A340), // warm orange
-                Color(0xFFF7C948), // golden yellow
+                Color(0xFFE8623D),
+                Color(0xFFF2A340),
+                Color(0xFFF7C948),
               ],
               stops: [0.0, 0.55, 1.0],
             ),
@@ -112,7 +110,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(9),
                       child: Image.asset(
-                        'assets/icons/pauseIcon.png', // 👈 adjust to your actual asset path
+                        'assets/icons/pauseIcon.png',
                         width: 32,
                         height: 32,
                         fit: BoxFit.cover,
@@ -122,9 +120,8 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                   const SizedBox(width: 10),
                   Text(
                     'Try Pause Now Pro',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 16,
+                    style: AppTextStyles.bodyLarge.copyWith( // 👈 was GoogleFonts.poppins
+                      color: Colors.white, // kept white — intentional, fixed gradient bg needs guaranteed contrast, not a theme-dependent token
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -133,14 +130,12 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
               const SizedBox(height: 10),
               Text(
                 'Includes 1 week of pause now Pro - unlocking every feature for you to try, for free!',
-                style: GoogleFonts.poppins(
+                style: AppTextStyles.bodyMedium.copyWith( // 👈 was GoogleFonts.poppins
                   color: Colors.white,
-                  fontSize: 13,
                   height: 1.4,
                 ),
               ),
               const SizedBox(height: 16),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -149,11 +144,10 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                     backgroundColor: Colors.black54,
                     foregroundColor: AppColors.accentText(context),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder( // 👈 was const StadiumBorder()
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                    textStyle: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800),
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(20), // usually needs a slightly larger value to look right
+                    ),                    elevation: 0,
+                    textStyle: AppTextStyles.labelLarge, // 👈 was GoogleFonts.poppins
                   ),
                   child: _isLoading
                       ? SizedBox(
@@ -166,42 +160,34 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                   )
                       : Text(
                     'Redeem Your Free Week',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white.withValues(alpha: 0.9), // 👈 change this to whatever color you want
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                    style: AppTextStyles.labelLarge.copyWith( // 👈 was GoogleFonts.poppins
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
-
-              // 👇 price disclaimer, now directly under the button, inside the card
               Center(
                 child: Text(
                   _annualPackage != null
                       ? 'Then ${_annualPackage!.storeProduct.priceString} every year'
                       : 'Then billed annually',
-                  style: GoogleFonts.poppins(
+                  style: AppTextStyles.bodySmall.copyWith( // 👈 was GoogleFonts.poppins
                     color: Colors.white,
-                    fontSize: 12.5,
                   ),
                 ),
               ),
             ],
           ),
         ),
-
-        // 👇 "Learn More" now sits outside/below the card
         const SizedBox(height: 12),
         Center(
           child: GestureDetector(
             onTap: () => context.push('/paywall', extra: 'settings_upgrade'),
             child: Text(
               'Learn More',
-              style: GoogleFonts.poppins(
-                color: AppColors.accent(context),
-                fontSize: 13,
+              style: AppTextStyles.bodyMedium.copyWith( // 👈 was GoogleFonts.poppins
+                color: AppColors.textPrimary(context),
                 fontWeight: FontWeight.w600,
               ),
             ),
