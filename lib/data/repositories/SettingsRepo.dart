@@ -30,4 +30,12 @@ abstract class SettingsRepository {
   // ── Uninstall Protection ───────────────────────
   bool getUninstallProtectionEnabled();
   Future<void> setUninstallProtectionEnabled(bool enabled);
+
+  // ── Accent color ───────────────────────
+  String getAccentColorId();
+  Future<void> setAccentColorId(String id);
+
+
+  String getDarkAccentColorId(); // 👈 new
+  Future<void> setDarkAccentColorId(String id); // 👈 new
 }

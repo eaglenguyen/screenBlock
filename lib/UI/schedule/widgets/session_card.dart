@@ -200,7 +200,7 @@ class SessionCard extends StatelessWidget {
                   Opacity(
                     opacity: isHardModeLocked ? 0.35 : 1.0,
                     child: GestureDetector(
-                      behavior: HitTestBehavior.opaque, // 👈 new
+                      behavior: HitTestBehavior.opaque,
                       onTap: isHardModeLocked
                           ? null
                           : () {
@@ -214,25 +214,29 @@ class SessionCard extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          width: 44,
-                          height: 24,
+                          width: 48, // 👈 was 44
+                          height: 28, // 👈 was 24
                           decoration: BoxDecoration(
                             color: schedule.isActive
                                 ? AppColors.accent(context)
-                                : AppColors.backgroundSubtle(context),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.border(context), width: 0.5),
+                                : AppColors.border(context), // 👈 was AppColors.backgroundSubtle(context) — matches "create session" toggle's off-state
+                            borderRadius: BorderRadius.circular(14), // 👈 was 12
+                            // 👈 removed the border: Border.all(...) entirely — "create session" toggle has no border on the track
                           ),
                           child: AnimatedAlign(
                             duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutBack, // 👈 new — bouncy, matches "create session"
                             alignment: schedule.isActive ? Alignment.centerRight : Alignment.centerLeft,
                             child: Container(
-                              margin: const EdgeInsets.all(2),
-                              width: 18,
-                              height: 18,
+                              margin: const EdgeInsets.all(3), // 👈 was 2
+                              width: 22, // 👈 was 18
+                              height: 22, // 👈 was 18
                               decoration: BoxDecoration(
-                                color: AppColors.textPrimary(context),
+                                color: Colors.white, // 👈 was AppColors.textPrimary(context)
                                 shape: BoxShape.circle,
+                                boxShadow: [ // 👈 new — matches "create session" toggle's thumb shadow
+                                  BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 3, offset: const Offset(0, 1)),
+                                ],
                               ),
                             ),
                           ),

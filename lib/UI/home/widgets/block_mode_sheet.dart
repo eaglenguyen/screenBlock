@@ -45,11 +45,9 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration:  BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
@@ -58,16 +56,65 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
           children: [
             _buildHandle(),
             const SizedBox(height: 16),
-            _buildTitle(),
+            _buildHeaderRow(), // 👈 new — replaces _buildTitle()
             const SizedBox(height: 20),
             _buildSegmentedControl(),
             const SizedBox(height: 20),
             _buildAppListRow(),
-            const SizedBox(height: 20),
-            _buildSetModeButton(),
+            // 👈 removed: SizedBox(height: 20) + _buildSetModeButton()
           ],
         ),
       ),
+    );
+  }
+
+// ── Header row — Cancel / title / Save ───────────
+  Widget _buildHeaderRow() {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundSubtle(context),
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(color: AppColors.border(context), width: 0.5),
+            ),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            'Block Mode',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.headlineSmall,
+          ),
+        ),
+        GestureDetector(
+          onTap: _onSetMode,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.accent(context),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Text(
+              'Save',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.accentText(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -83,13 +130,6 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
     );
   }
 
-  // ── Title ────────────────────────────────────────
-  Widget _buildTitle() {
-    return Text(
-      'Block Mode',
-      style: AppTextStyles.headlineMedium,
-    );
-  }
 
   // ── Segmented control ────────────────────────────
   Widget _buildSegmentedControl() {
@@ -204,10 +244,10 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
   // ── App list row ─────────────────────────────────
   Widget _buildAppListRow() {
     final isAllApps = _isAllApps;
-    final title = isAllApps ? 'Allowed Apps List' : 'Blocked Apps List';
+    final title = isAllApps ? 'App List' : 'App List';
     final subtitle = isAllApps
-        ? 'All apps except these will be blocked'
-        : 'Only these apps will be blocked';
+        ? 'These apps will NOT be blocked'
+        : 'These apps will be blocked';
     final count = isAllApps
         ? _allowedApps.length
         : _blockedApps.length;
@@ -358,7 +398,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
           shape: const StadiumBorder(),
           textStyle: AppTextStyles.labelLarge,
         ),
-        child: const Text('Set Mode'),
+        child: const Text('SAVE'),
       ),
     );
   }

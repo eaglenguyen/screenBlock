@@ -35,7 +35,7 @@ class StatsHeader extends ConsumerWidget {
           GestureDetector(
             onTap: () => GoalSettingsSheet.show(context, ref),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10), // 👈 was 14/8 — bigger
               decoration: BoxDecoration(
                 color: AppColors.backgroundCard(context),
                 borderRadius: BorderRadius.circular(50),
@@ -44,9 +44,9 @@ class StatsHeader extends ConsumerWidget {
               ),
               child: Text(
                 'Goals',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary(context),
-                  fontWeight: FontWeight.w600,
+                style: AppTextStyles.bodyLarge.copyWith( // 👈 was bodySmall — bumped up
+                  color: AppColors.textPrimary(context), // 👈 was textSecondary — darker/bolder
+                  fontWeight: FontWeight.w800, // 👈 was w600 — bolder
                 ),
               ),
             ),

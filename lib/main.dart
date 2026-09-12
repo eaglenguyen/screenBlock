@@ -16,6 +16,7 @@ import 'package:rive/rive.dart';
 import 'UI/home/widgets/xp_animation.dart';
 import 'app_router.dart';
 import 'core/constants/hivebox_names.dart';
+import 'core/theme/accent_color_notifier.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme.notifier.dart';
 import 'data/models/block_session.dart';
@@ -98,17 +99,16 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // start schedule checker
     final blockingService = ref.read(blockingServiceProvider);
-    final sessionRepo = ref.read(blockSessionRepositoryProvider); // 👈 new
-    ScheduleChecker.instance.start(blockingService, sessionRepo); // 👈 updated
+    final sessionRepo = ref.read(blockSessionRepositoryProvider);
+    ScheduleChecker.instance.start(blockingService, sessionRepo);
 
-    final themeMode = ref.watch(themeProvider); // 👈 add this
-
+    final themeMode = ref.watch(themeProvider);
+    ref.watch(accentColorProvider); // 👈 new — just watching triggers a rebuild when it changes; AppColors reads the static field directly
+    ref.watch(darkAccentColorProvider); // 👈 new
 
     ref.listen(premiumProvider, (prev, next) {
       final isPremium = next.valueOrNull ?? false;
-      // sync to native
       if (Platform.isIOS) {
         const channel = MethodChannel('com.eagle.pausenow/ios_blocking');
         channel.invokeMethod('setPremiumStatus', {'isPremium': isPremium});

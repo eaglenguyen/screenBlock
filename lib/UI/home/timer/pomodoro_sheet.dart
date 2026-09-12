@@ -7,33 +7,35 @@ import '../../../paywall/feature_paywall_screen.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../services/notification_service.dart';
 
+const _proOrange = Color(0xFFF2A340);
+
 // ── Pomodoro config ──────────────────────────────────────────────────────────
 class PomodoroConfig {
   final int workMinutes;
   final int shortBreakMinutes;
   final bool isPomodoroMode;
-  final bool autoStartBreak; // 👈 new, defaults true — no behavior change for existing users
+  final bool autoStartBreak;
   const PomodoroConfig({
     this.workMinutes = 25,
     this.shortBreakMinutes = 5,
     this.isPomodoroMode = false,
-    this.autoStartBreak = true, // 👈 new
+    this.autoStartBreak = true,
   });
   PomodoroConfig copyWith({
     int? workMinutes,
     int? shortBreakMinutes,
     bool? isPomodoroMode,
-    bool? autoStartBreak, // 👈 new
+    bool? autoStartBreak,
   }) {
     return PomodoroConfig(
       workMinutes: workMinutes ?? this.workMinutes,
       shortBreakMinutes: shortBreakMinutes ?? this.shortBreakMinutes,
       isPomodoroMode: isPomodoroMode ?? this.isPomodoroMode,
-      autoStartBreak: autoStartBreak ?? this.autoStartBreak, // 👈 new
+      autoStartBreak: autoStartBreak ?? this.autoStartBreak,
     );
   }
 }
-// ── Duration formatter ────────────────────────────────
+
 String formatDuration(int minutes) {
   if (minutes < 60) return '${minutes}m';
   final hours = minutes ~/ 60;
@@ -42,7 +44,6 @@ String formatDuration(int minutes) {
   return '${hours}h ${mins}m';
 }
 
-// ── Pomodoro sheet ───────────────────────────────────────────────────────────
 class PomodoroSheet extends ConsumerStatefulWidget {
   final PomodoroConfig config;
   final ValueChanged<PomodoroConfig> onSave;
@@ -72,9 +73,9 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
   late int _workMinutes;
   late int _shortBreakMinutes;
   late bool _isPomodoroMode;
-  late bool _autoStartBreak; // 👈 new
+  late bool _autoStartBreak;
 
-  String? _expandedRow; // 👈 new — null means none expanded; otherwise 'work' / 'rest' / 'longRest'
+  String? _expandedRow;
 
   @override
   void initState() {
@@ -82,8 +83,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
     _workMinutes = widget.config.workMinutes;
     _shortBreakMinutes = widget.config.shortBreakMinutes;
     _isPomodoroMode = widget.config.isPomodoroMode;
-    _autoStartBreak = widget.config.autoStartBreak; // 👈 new
-
+    _autoStartBreak = widget.config.autoStartBreak;
   }
 
   @override
@@ -125,27 +125,27 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   color: AppColors.textPrimary(context),
                 ),
               ),
-              const Spacer(),
+              const Spacer(),// "Pro" badge in the header row
               if (!isPremium)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.accent(context).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(
-                      color: AppColors.accent(context).withValues(alpha: 0.3),
-                      width: 0.5,
+                    gradient: const LinearGradient( // 👈 was color: _proOrange
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFE8623D), Color(0xFFF2A340)],
                     ),
+                    borderRadius: BorderRadius.circular(50),
                   ),
                   child: Text(
                     'Pro',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.accent(context),
-                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 )
-              else if (_isPomodoroMode) // 👈 new — only show when Pomodoro is actually enabled
+              else if (_isPomodoroMode)
                 GestureDetector(
                   onTap: () => setState(() => _autoStartBreak = !_autoStartBreak),
                   child: Container(
@@ -171,7 +171,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                           width: 32,
                           height: 18,
                           decoration: BoxDecoration(
-                            color: _autoStartBreak ? AppColors.accent(context) : AppColors.backgroundCard(context),
+                            color: _autoStartBreak ? _proOrange : AppColors.backgroundCard(context), // 👈 was AppColors.accent(context)
                             borderRadius: BorderRadius.circular(9),
                             border: Border.all(color: AppColors.border(context), width: 0.5),
                           ),
@@ -210,7 +210,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 color: AppColors.backgroundSubtle(context),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.accent(context).withValues(alpha: 0.2),
+                  color: _proOrange.withValues(alpha: 0.3), // 👈 was AppColors.accent(context)
                   width: 0.5,
                 ),
               ),
@@ -236,27 +236,40 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        useRootNavigator: true,
-                        builder: (_) => const FeaturePaywallScreen(source: 'pomodoro',),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent(context),
-                      foregroundColor: AppColors.accentText(context),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: const StadiumBorder(),
-                      minimumSize: const Size(double.infinity, 0),
+                  // "Upgrade to Pro" button
+                  Container( // 👈 wraps the button so we can apply a gradient (ElevatedButton itself doesn't support gradient fills directly)
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFE8623D), Color(0xFFF2A340)],
+                      ),
+                      borderRadius: BorderRadius.circular(50),
                     ),
-                    child: Text(
-                      'Upgrade to Pro',
-                      style: AppTextStyles.labelLarge,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          useRootNavigator: true,
+                          builder: (_) => const FeaturePaywallScreen(source: 'pomodoro',),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent, // 👈 was _proOrange — transparent so the gradient behind shows through
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent, // 👈 new — avoids a double-shadow look from the ElevatedButton's own elevation
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: const StadiumBorder(),
+                        minimumSize: const Size(double.infinity, 0),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Upgrade to Pro',
+                        style: AppTextStyles.labelLarge,
+                      ),
                     ),
                   ),
                 ],
@@ -274,9 +287,9 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 min: 5,
                 max: 480,
                 step: 5,
-                isExpanded: _expandedRow == 'work', // 👈 new
+                isExpanded: _expandedRow == 'work',
                 onToggle: () => setState(() {
-                  _expandedRow = _expandedRow == 'work' ? null : 'work'; // 👈 tap again to collapse
+                  _expandedRow = _expandedRow == 'work' ? null : 'work';
                 }),
                 onChanged: (v) => setState(() => _workMinutes = v),
               ),
@@ -288,7 +301,7 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                 min: 5,
                 max: 480,
                 step: 5,
-                isExpanded: _expandedRow == 'rest', // 👈 new
+                isExpanded: _expandedRow == 'rest',
                 onToggle: () => setState(() {
                   _expandedRow = _expandedRow == 'rest' ? null : 'rest';
                 }),
@@ -297,7 +310,6 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
 
               const SizedBox(height: 12),
             ],
-            // save button
             ElevatedButton(
               onPressed: () async {
                 HapticFeedback.mediumImpact();
@@ -309,19 +321,18 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   workMinutes: _workMinutes,
                   shortBreakMinutes: _shortBreakMinutes,
                   isPomodoroMode: _isPomodoroMode,
-                  autoStartBreak: _autoStartBreak, // 👈 new
-
+                  autoStartBreak: _autoStartBreak,
                 ));
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent(context),
-                foregroundColor: AppColors.accentText(context),
+                backgroundColor: _proOrange, // 👈 was AppColors.accent(context)
+                foregroundColor: Colors.white, // 👈 was AppColors.accentText(context)
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const StadiumBorder(),
                 textStyle: AppTextStyles.labelLarge,
               ),
-              child: const Text('Save'),
+              child: const Text('Save Settings'),
             ),
           ],
         ],
@@ -394,15 +405,15 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
 }
 
 // ── Expandable picker row ─────────────────────────────
-class ExpandablePickerRow extends StatelessWidget { // 👈 was StatefulWidget
+class ExpandablePickerRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final int value;
   final int min;
   final int max;
   final int step;
-  final bool isExpanded; // 👈 new — controlled by parent
-  final VoidCallback onToggle; // 👈 new — tells parent "I was tapped"
+  final bool isExpanded;
+  final VoidCallback onToggle;
   final ValueChanged<int> onChanged;
 
   const ExpandablePickerRow({
@@ -427,7 +438,7 @@ class ExpandablePickerRow extends StatelessWidget { // 👈 was StatefulWidget
           behavior: HitTestBehavior.opaque,
           onTap: () {
             HapticFeedback.lightImpact();
-            onToggle(); // 👈 was setState(() => _expanded = !_expanded)
+            onToggle();
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -451,7 +462,7 @@ class ExpandablePickerRow extends StatelessWidget { // 👈 was StatefulWidget
                 ),
                 const SizedBox(width: 6),
                 AnimatedRotation(
-                  turns: isExpanded ? 0.5 : 0, // 👈 was _expanded
+                  turns: isExpanded ? 0.5 : 0,
                   duration: const Duration(milliseconds: 200),
                   child: Icon(
                     Icons.keyboard_arrow_down_rounded,
@@ -465,7 +476,7 @@ class ExpandablePickerRow extends StatelessWidget { // 👈 was StatefulWidget
         ),
         AnimatedCrossFade(
           duration: const Duration(milliseconds: 250),
-          crossFadeState: isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond, // 👈 was _expanded
+          crossFadeState: isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
           firstChild: Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: HorizontalRulerPicker(

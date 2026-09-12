@@ -17,7 +17,7 @@ class WeeklyScreenTimeCardAndroid extends ConsumerStatefulWidget {
 class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCardAndroid> {
   Map<String, double> _weekData = {};
   bool _isLoading = true;
-  bool _hasPermission = true; // 👈 new
+  bool _hasPermission = true;
   late DateTime _selectedDay;
   late List<DateTime> _weekDays;
 
@@ -44,7 +44,6 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
   Future<void> _fetchWeek() async {
     final notifier = ref.read(statsViewModelProvider.notifier);
 
-    // check permission once, up front — don't let 7 individual calls each discover it's missing
     final hasPermission = await notifier.hasUsagePermission();
     if (!hasPermission) {
       if (mounted) {
@@ -53,7 +52,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
           _isLoading = false;
         });
       }
-      return; // bail — don't loop through 7 days that would all fail the same way
+      return;
     }
 
     final Map<String, double> result = {};
@@ -108,7 +107,6 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
       );
     }
 
-    // New
     if (!_hasPermission) {
       return LippedCard(
         padding: const EdgeInsets.all(24),
@@ -124,7 +122,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
             const SizedBox(height: 6),
             Text(
               'Grant usage access to see your weekly screen time',
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)), // 👈 was bodySmall
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -158,7 +156,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('This Week', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textPrimary(context))),
+          Text('This Week', style: AppTextStyles.labelLarge.copyWith(color: AppColors.textPrimary(context))), // 👈 was labelMedium
           const SizedBox(height: 16),
 
           Row(
@@ -179,7 +177,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                   children: [
                     Text(
                       dayLabels[i],
-                      style: AppTextStyles.bodySmall.copyWith( // 👈 was fontSize: 10 — now 11 via bodySmall
+                      style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall (11px) — bumped to bodyMedium (13px)
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                         color: isSelected
                             ? AppColors.accent(context)
@@ -188,8 +186,8 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      width: 34,
-                      height: 34,
+                      width: 38, // 👈 was 34
+                      height: 38, // 👈 was 34
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isSelected ? AppColors.accent(context) : AppColors.backgroundSubtle(context),
@@ -198,7 +196,7 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
                       child: Center(
                         child: Text(
                           '${day.day}',
-                          style: AppTextStyles.bodySmall.copyWith( // 👈 was fontSize: 12 — now 11
+                          style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall (11px) — bumped to bodyMedium (13px)
                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                             color: isSelected
                                 ? AppColors.accentText(context)
@@ -249,16 +247,16 @@ class _WeeklyScreenTimeCardAndroidState extends ConsumerState<WeeklyScreenTimeCa
               children: [
                 Text(
                   _formatDuration(_secondsFor(_selectedDay)),
-                  style: AppTextStyles.displayMedium.copyWith( // 👈 was fontSize: 38 — now 32
+                  style: AppTextStyles.displayMedium.copyWith(
                     color: AppColors.textPrimary(context),
                     fontWeight: FontWeight.w800,
-                    fontSize: 32,
+                    fontSize: 38, // 👈 was 32
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _formatSelectedDayLabel(),
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)), // already 11
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)), // 👈 was bodySmall
                 ),
               ],
             ),

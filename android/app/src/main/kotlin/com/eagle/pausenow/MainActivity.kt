@@ -302,6 +302,20 @@ class MainActivity : FlutterActivity() {
             IntentFilter("com.eagle.pausenow.BLOCK_FOR_DAY"),
             RECEIVER_NOT_EXPORTED
         )
+        handleWheelTabIntent(intent) // 👈 new — covers cold launch
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleWheelTabIntent(intent) // 👈 new — covers already-running app
+    }
+
+    private fun handleWheelTabIntent(intent: Intent?) { // 👈 new
+        if (intent?.getBooleanExtra("open_wheel_tab", false) == true) {
+            intent.removeExtra("open_wheel_tab") // 👈 prevents re-firing on later intent reuse
+            blockMethodChannel?.invokeMethod("openWheelTab", null)
+        }
     }
 
     override fun onDestroy() {

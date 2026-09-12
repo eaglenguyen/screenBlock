@@ -30,11 +30,56 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
   late List<String> _packageNames;
   late final String _configId;
   bool get isEditing => widget.existingConfig != null;
-  bool get _isOverFreeLimit => _limitMinutes > 240; // 👈 new — 4 hours = free cap
+  bool get _isOverFreeLimit => _limitMinutes > 240;
+  bool get _canSave => _nameController.text.trim().isNotEmpty && _packageNames.isNotEmpty;
 
-  // 👇 new — allowed discrete values: 1 (testing only), 5–30 step 5, 60–480 step 30
+  final FocusNode _nameFocusNode = FocusNode();
+
+  static const _everyDayColor = Color(0xFFA8DCC6);
+  static const _weekdaysColor = Color(0xFF6BAED6);
+  static const _weekendsColor = Color(0xFFF0B27A);
+  static const _customDayColors = [
+    Color(0xFFD4C9F0),
+    Color(0xFFA8DCC6),
+    Color(0xFFF5C4B3),
+    Color(0xFFF4C0D1),
+    Color(0xFFB5D4F4),
+    Color(0xFFC0DD97),
+    Color(0xFFFAC775),
+  ];
+
+  Color _colorForDay(int index) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (isDark) return AppColors.accent(context);
+    switch (_getDaysLabel()) {
+      case 'Every day':
+        return _everyDayColor;
+      case 'Weekdays':
+        return _weekdaysColor;
+      case 'Weekends':
+        return _weekendsColor;
+      default:
+        return _customDayColors[index];
+    }
+  }
+
+  Color get _currentComboColor {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (isDark) return AppColors.accent(context);
+    switch (_getDaysLabel()) {
+      case 'Every day':
+        return _everyDayColor;
+      case 'Weekdays':
+        return _weekdaysColor;
+      case 'Weekends':
+        return _weekendsColor;
+      default:
+        return _customDayColors.first;
+    }
+  }
+
   final List<int> _limitValues = [
-    5, 10, 15, 20, 25, 30, // 👈 removed leading 1
+    5, 10, 15, 20, 25, 30,
     60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 450, 480,
   ];
 
@@ -46,98 +91,146 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
   void initState() {
     super.initState();
     final c = widget.existingConfig;
-    _nameController = TextEditingController(text: c?.name ?? '');
+    _nameController = TextEditingController(text: c?.name ?? 'Blocked Apps');
     final loadedMinutes = c?.limitMinutes ?? 30;
-    // 👇 new — snap to nearest allowed value if the loaded config doesn't exactly match
     _limitMinutes = _limitValues.contains(loadedMinutes)
         ? loadedMinutes
         : _nearestAllowedValue(loadedMinutes);
     _selectedDays = List.from(c?.days ?? [0, 1, 2, 3, 4]);
     _packageNames = List.from(c?.packageNames ?? []);
     _configId = c?.id ?? const Uuid().v4();
+    _nameController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _nameFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.border(context),
-                borderRadius: BorderRadius.circular(2),
+    return FractionallySizedBox(
+      heightFactor: 0.95,
+      child: Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundCard(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.border(context),
+                  borderRadius: BorderRadius.circular(3),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-            ),
-            const SizedBox(height: 8),
-            _buildNameRow(context),
-            const SizedBox(height: 8),
-            _buildLimitCard(context),
-            const SizedBox(height: 8),
-            _buildAppListRow(context),
-            const SizedBox(height: 8),
-            _buildDayPicker(context),
-            const SizedBox(height: 16),
-            _buildSaveButton(context),
-            if (isEditing) ...[
-              const SizedBox(height: 10),
-              _buildDeleteButton(context),
+              const SizedBox(height: 16),
+              _buildHeader(context),
+              const SizedBox(height: 20),
+              _buildNameRow(context),
+              const SizedBox(height: 12),
+              _buildLimitCard(context),
+              const SizedBox(height: 12),
+              _buildAppListRow(context),
+              const SizedBox(height: 12),
+              _buildDayPicker(context),
+              const SizedBox(height: 20),
+              _buildSaveRow(context),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNameRow(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
+        const Text('⏱️', style: TextStyle(fontSize: 32)),
+        const SizedBox(height: 6),
+        Text(
+          isEditing ? 'Edit time limit' : 'Set a time limit',
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: AppColors.textPrimary(context),
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          _buildSubtitle(),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _customDaysLabel() {
+    const dayAbbrev = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final sorted = List<int>.from(_selectedDays)..sort();
+    return sorted.map((i) => dayAbbrev[i]).join(', ');
+  }
+
+  String _buildSubtitle() {
+    final daysLabel = _getDaysLabel() == 'Custom'
+        ? _customDaysLabel()
+        : _getDaysLabel().toLowerCase();
+    return 'Cap usage at ${_formatMinutes(_limitMinutes)}/day, $daysLabel.';
+  }
+
+  Widget _bubbleCard({
+    required BuildContext context,
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    final content = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.backgroundSubtle(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border(context), width: 0.5),
       ),
+      child: child,
+    );
+    if (onTap == null) return content;
+    return GestureDetector(onTap: onTap, child: content);
+  }
+
+  Widget _buildNameRow(BuildContext context) {
+    return _bubbleCard(
+      context: context,
+      onTap: () => FocusScope.of(context).requestFocus(_nameFocusNode),
       child: Row(
         children: [
-          const Text('⏱️', style: TextStyle(fontSize: 18)),
-          const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: _nameController,
+              focusNode: _nameFocusNode,
               style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.textPrimary(context),
+                fontWeight: FontWeight.w700,
               ),
               decoration: InputDecoration(
-                hintText: 'Enter name',
-                hintStyle: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary(context),
-                ),
+                hintText: 'Name your limit',
+                hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
                 border: InputBorder.none,
+                isCollapsed: true,
               ),
             ),
           ),
-          Icon(Icons.edit_outlined, color: AppColors.textSecondary(context), size: 16),
+          const SizedBox(width: 8),
+          const _PulsingPencil(),
         ],
       ),
     );
@@ -146,13 +239,8 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
   Widget _buildLimitCard(BuildContext context) {
     final currentIndex = _limitValues.indexOf(_limitMinutes).clamp(0, _limitValues.length - 1);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle(context),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border(context), width: 0.5),
-      ),
+    return _bubbleCard(
+      context: context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -160,10 +248,10 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
             children: [
               Text(
                 'Daily limit',
-                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context)),
+                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context), fontWeight: FontWeight.w700),
               ),
               const Spacer(),
-              if (_isOverFreeLimit) ...[ // 👈 new — Pro flair
+              if (_isOverFreeLimit) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
@@ -183,11 +271,18 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                 ),
                 const SizedBox(width: 8),
               ],
-              Text(
-                _formatMinutes(_limitMinutes),
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.accent(context), // 👈 tint the value itself too
-                  fontWeight: FontWeight.w700,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _isOverFreeLimit ? Colors.orange.withValues(alpha: 0.15) : _currentComboColor.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Text(
+                  _formatMinutes(_limitMinutes),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: _isOverFreeLimit ? Colors.orange : const Color(0xFF2C2C2A),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -205,10 +300,10 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
           const SizedBox(height: 12),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.accent(context), // 👈 new
-              inactiveTrackColor: AppColors.accent(context).withValues(alpha: 0.15),
-              thumbColor: AppColors.accent(context), // 👈 new
-              overlayColor: AppColors.accent(context).withValues(alpha: 0.15),
+              activeTrackColor: _isOverFreeLimit ? Colors.orange : _currentComboColor,
+              inactiveTrackColor: _currentComboColor.withValues(alpha: 0.15),
+              thumbColor: _isOverFreeLimit ? Colors.orange : _currentComboColor,
+              overlayColor: _currentComboColor.withValues(alpha: 0.15),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
               trackHeight: 4,
             ),
@@ -240,12 +335,13 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       onTap: () => setState(() => _limitMinutes = minutes),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutBack,
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent(context) : AppColors.backgroundCard(context),
+          color: isSelected ? _currentComboColor : AppColors.backgroundCard(context),
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: isSelected ? AppColors.accent(context) : AppColors.border(context),
+            color: isSelected ? _currentComboColor : AppColors.border(context),
             width: isSelected ? 0 : 0.5,
           ),
         ),
@@ -253,7 +349,7 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
           child: Text(
             label,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: isSelected ? AppColors.accentText(context) : AppColors.textPrimary(context),
+              color: isSelected ? const Color(0xFF2C2C2A) : AppColors.textPrimary(context),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -305,100 +401,106 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
 
   Widget _buildAppListRow(BuildContext context) {
     final count = _packageNames.length;
-    return GestureDetector(
+    return _bubbleCard(
+      context: context,
       onTap: _openAppPicker,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle(context),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.border(context), width: 0.5),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Apps',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: AppColors.textPrimary(context),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Apps',
+                      style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context), fontWeight: FontWeight.w700),
+                    ),
+                    if (count > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent(context).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          '$count',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.accent(context),
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      if (count > 0) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.accent(context).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: Text(
-                            '$count',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.accent(context),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Each app gets its own daily limit',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary(context),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Each app gets its own daily limit',
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
+                ),
+              ],
+            ),
+          ),
+          if (count == 0) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Text(
+                'Required',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Colors.amber.shade800,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 10,
+                ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary(context), size: 20),
+            const SizedBox(width: 8),
           ],
-        ),
+          Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary(context), size: 20),
+        ],
       ),
     );
   }
 
   Widget _buildDayPicker(BuildContext context) {
     const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle(context),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border(context), width: 0.5),
-      ),
+    final comboLabel = _getDaysLabel();
+    return _bubbleCard(
+      context: context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text('On these days:', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context))),
+              Text('Repeat on', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context), fontWeight: FontWeight.w700)),
               const Spacer(),
-              Text(_getDaysLabel(), style: AppTextStyles.bodySmall.copyWith(color: AppColors.accent(context))),
+              Text(comboLabel, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context), fontWeight: FontWeight.w600)),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
               final isSelected = _selectedDays.contains(index);
+              final dayColor = _colorForDay(index);
               return GestureDetector(
                 onTap: () => _toggleDay(index),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  width: 34,
-                  height: 34,
+                  curve: Curves.easeOutBack,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.accent(context) : AppColors.backgroundCard(context),
+                    color: isSelected ? dayColor : AppColors.backgroundCard(context),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? AppColors.accent(context) : AppColors.border(context),
+                      color: isSelected ? dayColor : AppColors.border(context),
                       width: 1.5,
                     ),
                   ),
@@ -406,8 +508,8 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                     child: Text(
                       days[index],
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: isSelected ? AppColors.accentText(context) : AppColors.textSecondary(context),
-                        fontWeight: FontWeight.w700,
+                        color: isSelected ? const Color(0xFF2C2C2A) : AppColors.textSecondary(context),
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -420,36 +522,42 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
     );
   }
 
-  Widget _buildSaveButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _onSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accent(context),
-          foregroundColor: AppColors.accentText(context),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: const StadiumBorder(),
-          textStyle: AppTextStyles.labelLarge,
+  Widget _buildSaveRow(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _canSave ? _onSave : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent(context),
+              foregroundColor: AppColors.accentText(context),
+              disabledBackgroundColor: AppColors.backgroundSubtle(context),
+              disabledForegroundColor: AppColors.textSecondary(context),
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              shape: const StadiumBorder(),
+              elevation: 0,
+              textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 18, fontWeight: FontWeight.w800),
+            ),
+            child: const Text('Set Limit'),
+          ),
         ),
-        child: const Text('Save'),
-      ),
-    );
-  }
-
-  Widget _buildDeleteButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: _showDeleteConfirmation,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.error(context),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: const StadiumBorder(),
-          side: BorderSide(color: AppColors.error(context), width: 0.5),
-        ),
-        child: const Text('Delete Time Limit'),
-      ),
+        if (isEditing) ...[
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: _showDeleteConfirmation,
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.error(context).withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.error(context).withValues(alpha: 0.3), width: 0.5),
+              ),
+              child: Icon(Icons.delete_outline_outlined, color: AppColors.error(context), size: 24),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -460,10 +568,9 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) {
-          final isConfirmed = confirmController.text.trim().toLowerCase() == confirmWord.toLowerCase();
           return AlertDialog(
             backgroundColor: AppColors.backgroundCard(context),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             title: Text('Delete Time Limit', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)), textAlign: TextAlign.center),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -489,9 +596,9 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
                     hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
                     filled: true,
                     fillColor: AppColors.backgroundSubtle(context),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.border(context))),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.error(context))),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border(context))),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border(context))),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.error(context))),
                   ),
                   onChanged: (_) => setDialogState(() {}),
                 ),
@@ -574,7 +681,6 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
       return;
     }
 
-    // 👇 new — gate anything over 4 hours behind premium
     final isPremium = ref.read(isPremiumProvider);
     if (_isOverFreeLimit && !isPremium) {
       showModalBottomSheet(
@@ -618,29 +724,21 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
     if (mounted) Navigator.pop(context);
   }
 
-
-
   void _showValidationDialog(BuildContext context, {required String title, required String message}) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.backgroundCard(context),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           title,
           textAlign: TextAlign.center,
-          style: AppTextStyles.headlineSmall.copyWith(
-            color: AppColors.textPrimary(context),
-          ),
+          style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
         ),
         content: Text(
           message,
           textAlign: TextAlign.center,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary(context),
-          ),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
         ),
         actions: [
           SizedBox(
@@ -658,6 +756,55 @@ class _TimeLimitBottomSheetState extends ConsumerState<TimeLimitBottomSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PulsingPencil extends StatefulWidget {
+  const _PulsingPencil();
+
+  @override
+  State<_PulsingPencil> createState() => _PulsingPencilState();
+}
+
+class _PulsingPencilState extends State<_PulsingPencil> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+  late Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+    _scale = Tween<double>(begin: 0.9, end: 1.15).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _opacity = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => Opacity(
+        opacity: _opacity.value,
+        child: Transform.scale(
+          scale: _scale.value,
+          child: child,
+        ),
+      ),
+      child: Icon(Icons.edit_rounded, color: AppColors.accent(context), size: 16),
     );
   }
 }

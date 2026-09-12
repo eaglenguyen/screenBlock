@@ -159,9 +159,9 @@ class _UsageGaugeState extends State<UsageGauge>
       children: [
         Text(
           label,
-          style: AppTextStyles.bodySmall.copyWith(
+          style: AppTextStyles.bodyLarge.copyWith( // 👈 was bodySmall (11px) — bumped to bodyMedium (13px)
             color: AppColors.textSecondary(context),
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w800,
             letterSpacing: 0.5,
           ),
         ),
@@ -171,11 +171,10 @@ class _UsageGaugeState extends State<UsageGauge>
             children: [
               TextSpan(
                 text: value,
-                style: AppTextStyles.displayMedium.copyWith(color: color, fontSize: 32, letterSpacing: -1),
-              ),
+                style: AppTextStyles.displaySmall.copyWith(color: color, letterSpacing: -1, fontWeight: FontWeight.w800),              ),
               TextSpan(
                 text: ' / ${goal.replaceAll(' goal', '')}',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary(context)), // 👈 was bodyMedium (13px) — bumped to bodyLarge (15px)
               ),
             ],
           ),
@@ -183,9 +182,9 @@ class _UsageGaugeState extends State<UsageGauge>
         const SizedBox(height: 4),
         Text(
           suffix,
-          style: AppTextStyles.bodySmall.copyWith(
+          style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall (11px) — bumped to bodyMedium (13px)
             color: isOverGoal ? AppColors.error(context) : color.withValues(alpha: 0.7),
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],

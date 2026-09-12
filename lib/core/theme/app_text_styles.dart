@@ -19,6 +19,13 @@ class AppTextStyles {
     height: 1,
   );
 
+  static TextStyle get displaySmall => GoogleFonts.poppins(
+    fontSize: 34,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -1,
+    height: 1,
+  );
+
   // ── Headlines ──────────────────────────────────
   static TextStyle get headlineLarge => GoogleFonts.poppins(
     fontSize: 28,

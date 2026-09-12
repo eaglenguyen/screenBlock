@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widget/sparkle_burst_button.dart';
 
 class PasteListTutorialOverlay extends StatefulWidget {
   final VoidCallback onDismiss;
@@ -13,7 +14,7 @@ class PasteListTutorialOverlay extends StatefulWidget {
   static Future<void> show(BuildContext context) {
     return showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.6),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (ctx) => PasteListTutorialOverlay(
         onDismiss: () => Navigator.pop(ctx),
       ),
@@ -29,6 +30,7 @@ class _PasteListTutorialOverlayState extends State<PasteListTutorialOverlay> {
   String _displayText = '';
   bool _showAddAll = false;
   Timer? _timer;
+  final _iconKey = GlobalKey<_TutorialAddIconState>(); // 👈 lets the auto-loop trigger presses on the icon widget below
 
   @override
   void initState() {
@@ -45,10 +47,21 @@ class _PasteListTutorialOverlayState extends State<PasteListTutorialOverlay> {
   Future<void> _wait(int ms) => Future.delayed(Duration(milliseconds: ms));
 
   Future<void> _typeLine(String text) async {
-    for (int i = 0; i < text.length; i++) {
+    final words = text.split(' ');
+    for (int w = 0; w < words.length; w++) {
       if (!mounted) return;
-      setState(() => _displayText += text[i]);
-      await _wait(70);
+      HapticFeedback.mediumImpact();
+      final word = words[w];
+      for (int i = 0; i < word.length; i++) {
+        if (!mounted) return;
+        setState(() => _displayText += word[i]);
+        await _wait(70);
+      }
+      if (w < words.length - 1) {
+        if (!mounted) return;
+        setState(() => _displayText += ' ');
+        await _wait(70);
+      }
     }
   }
 
@@ -71,7 +84,14 @@ class _PasteListTutorialOverlayState extends State<PasteListTutorialOverlay> {
       if (!mounted) return;
       await _wait(500);
       setState(() => _showAddAll = true);
-      await _wait(1800);
+      await _loopIconPress(); // 👈 replaces the old flat `await _wait(1800)`
+    }
+  }
+
+  Future<void> _loopIconPress() async {
+    while (mounted && _showAddAll) {
+      _iconKey.currentState?.press();
+      await _wait(900);
     }
   }
 
@@ -95,7 +115,7 @@ class _PasteListTutorialOverlayState extends State<PasteListTutorialOverlay> {
           Text(
             'Each line becomes its own entry',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -104,30 +124,29 @@ class _PasteListTutorialOverlayState extends State<PasteListTutorialOverlay> {
             width: 280,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF111111),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF3A3A5C), width: 2.5),
+              border: Border.all(color: const Color(0xFFE0E0E0), width: 2),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 8)),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Paste or type a list — one item per line...',
-                  style: AppTextStyles.bodySmall.copyWith(color: Colors.grey),
-                ),
-                const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
-                  constraints: const BoxConstraints(minHeight: 100),
+                  constraints: const BoxConstraints(minHeight: 90),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E35),
+                    color: const Color(0xFFF3F3F3),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     _displayText,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.white,
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: const Color(0xFF1A1A1A),
+                      fontWeight: FontWeight.w600,
                       height: 1.3,
                     ),
                   ),
@@ -136,22 +155,9 @@ class _PasteListTutorialOverlayState extends State<PasteListTutorialOverlay> {
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
                   opacity: _showAddAll ? 1.0 : 0.0,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF7DD3B0),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Add all',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: const Color(0xFF0F4A32),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: _TutorialAddIcon(key: _iconKey),
                   ),
                 ),
               ],
@@ -182,6 +188,67 @@ class _PasteListTutorialOverlayState extends State<PasteListTutorialOverlay> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// 👇 small dedicated widget — owns the press-bounce animation, wraps SparkleBurstButton for the burst
+class _TutorialAddIcon extends StatefulWidget {
+  const _TutorialAddIcon({super.key});
+
+  @override
+  State<_TutorialAddIcon> createState() => _TutorialAddIconState();
+}
+
+class _TutorialAddIconState extends State<_TutorialAddIcon> with SingleTickerProviderStateMixin {
+  late AnimationController _pressController;
+  late Animation<double> _scale;
+  final _sparkleKey = GlobalKey<SparkleBurstButtonState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _pressController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    _scale = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.8).chain(CurveTween(curve: Curves.easeOut)), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 0.8, end: 1.15).chain(CurveTween(curve: Curves.easeOutBack)), weight: 60),
+    ]).animate(_pressController);
+  }
+
+  @override
+  void dispose() {
+    _pressController.dispose();
+    super.dispose();
+  }
+
+  // 👇 called both by direct taps (via SparkleBurstButton's onTap) and the tutorial's auto-loop
+  void press() {
+    _pressController.forward(from: 0);
+    _sparkleKey.currentState?.fire();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: SparkleBurstButton(
+        key: _sparkleKey,
+        onTap: () => _pressController.forward(from: 0), // sparkle already fires itself; just add the bounce
+        child: AnimatedBuilder(
+          animation: _scale,
+          builder: (context, child) => Transform.scale(scale: _scale.value, child: child),
+          child: Container(
+            width: 30,
+            height: 30,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF3F3F3),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.add_rounded, color: Color(0xFF6B6B6B), size: 16),
+          ),
+        ),
       ),
     );
   }

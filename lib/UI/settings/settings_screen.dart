@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hive/hive.dart';
 
 import 'package:in_app_review/in_app_review.dart';
 import 'package:pausenow/UI/settings/settings_viewmodel.dart';
+import 'package:pausenow/UI/settings/widgets/accent_color_sheet.dart';
 import 'package:pausenow/UI/settings/widgets/acknowledgements_sheet.dart';
 import 'package:pausenow/UI/settings/widgets/hard_mode_gate.dart';
 import 'package:pausenow/UI/settings/widgets/profile_card.dart';
@@ -17,8 +19,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/hivebox_names.dart';
+import '../../core/theme/accent_color_notifier.dart';
 import '../../core/theme/theme.notifier.dart';
 import '../../features/quickblock/quick_block_viewmodel.dart';
+import '../../paywall/feature_paywall_screen.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/premium_provider.dart';
 import '../stats/widgets/goal_settings_sheet.dart';
@@ -31,6 +36,8 @@ class SettingsScreen extends ConsumerWidget {
     final state = ref.watch(settingsViewModelProvider);
     final notifier = ref.read(settingsViewModelProvider.notifier);
     final isDark = ref.watch(themeProvider) == ThemeMode.dark;
+    ref.watch(accentColorProvider); // 👈 new — forces this widget to rebuild whenever accent color changes, even though we read the color via AppColors.accent(context) rather than the provider's value directly
+
 
     return Scaffold(
       backgroundColor: AppColors.background(context),
@@ -70,10 +77,33 @@ class SettingsScreen extends ConsumerWidget {
                         trailing: Switch(
                           value: isDark,
                           onChanged: (_) => ref.read(themeProvider.notifier).toggle(),
-                          activeColor: AppColors.accent(context),
+                          activeThumbColor: AppColors.accent(context),
                           activeTrackColor: AppColors.accent(context).withValues(alpha: 0.3),
                           inactiveThumbColor: AppColors.textSecondary(context),
                           inactiveTrackColor: AppColors.backgroundSubtle(context),
+                        ),
+                      ),
+                      SettingsRow( // 👈 new — App Theme (accent color) row
+                        icon: Icons.palette_rounded,
+                        iconColor: AppColors.textSecondary(context),
+                        iconBgColor: AppColors.backgroundSubtle(context),
+                        label: 'Theme',
+                        onTap: () => AccentColorSheet.show(context),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container( // 👈 small live preview of the current accent
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: AppColors.accent(context),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.border(context), width: 0.5),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary(context), size: 20),
+                          ],
                         ),
                       ),
                     ],
@@ -94,7 +124,7 @@ class SettingsScreen extends ConsumerWidget {
                         trailing: Switch(
                           value: state.hardModeEnabled,
                           onChanged: (_) => _handleHardModeToggle(context, ref, state.hardModeEnabled),
-                          activeColor: AppColors.error(context),
+                          activeThumbColor: AppColors.error(context),
                           activeTrackColor: AppColors.error(context).withValues(alpha: 0.3),
                           inactiveThumbColor: AppColors.textSecondary(context),
                           inactiveTrackColor: AppColors.backgroundSubtle(context),
@@ -110,7 +140,7 @@ class SettingsScreen extends ConsumerWidget {
                           trailing: Switch(
                             value: state.uninstallProtectionEnabled,
                             onChanged: (_) => _handleUninstallProtectionToggle(context, ref, state.uninstallProtectionEnabled),
-                            activeColor: AppColors.error(context),
+                            activeThumbColor: AppColors.error(context),
                             activeTrackColor: AppColors.error(context).withValues(alpha: 0.3),
                             inactiveThumbColor: AppColors.textSecondary(context),
                             inactiveTrackColor: AppColors.backgroundSubtle(context),
@@ -329,8 +359,33 @@ class SettingsScreen extends ConsumerWidget {
                             inactiveTrackColor: AppColors.backgroundSubtle(context),
                           ),
                         ),
+                      if (kDebugMode) // 👈 new
+                        SettingsRow(
+                          icon: Icons.replay_rounded,
+                          iconColor: AppColors.accent(context),
+                          iconBgColor: AppColors.primarySubtle(context),
+                          label: 'Restart Onboarding',
+                          onTap: () async {
+                            final box = Hive.box(HiveBoxNames.settings);
+                            await box.delete('seenHomeTutorial');
+                            await box.delete('seenQuickBlockTutorial');
+                            await box.delete('seenPasteListTutorial');
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Onboarding will show again', style: TextStyle(color: AppColors.textPrimary(context))),
+                                  backgroundColor: AppColors.backgroundCard(context),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                     ],
                   ),
+
                   const SizedBox(height: 20),
 
                   // legal
@@ -493,18 +548,39 @@ class SettingsScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Hard Mode',
-                style: AppTextStyles.headlineSmall.copyWith(
-                  color: AppColors.textPrimary(context),
-                  fontWeight: FontWeight.w800,
-                ),
-                textAlign: TextAlign.center,
+              Row( // 👈 new — wraps title + PRO badge
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Hard Mode',
+                    style: AppTextStyles.headlineSmall.copyWith(
+                      color: AppColors.textPrimary(context),
+                      fontWeight: FontWeight.w800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(width: 8),
+                  Container( // 👈 new — PRO flair, orange
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2A340),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Text(
+                      'PRO',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               Text(
                 'Hard Mode locks manual sessions and schedules — no pausing or editing once a block session starts.',
-                style: AppTextStyles.bodyLarge.copyWith( // 👈 bigger than the title's relative weight, matches reference
+                style: AppTextStyles.bodyLarge.copyWith(
                   color: AppColors.textPrimary(context),
                   height: 1.5,
                 ),
@@ -522,7 +598,7 @@ class SettingsScreen extends ConsumerWidget {
                       child: Text(
                         'Cancel',
                         style: AppTextStyles.bodyLarge.copyWith(
-                          fontSize: 18, // 👈 new
+                          fontSize: 18,
                           color: AppColors.textSecondary(context),
                           fontWeight: FontWeight.w700,
                         ),
@@ -546,7 +622,7 @@ class SettingsScreen extends ConsumerWidget {
                       child: Text(
                         'Enable',
                         style: AppTextStyles.bodyLarge.copyWith(
-                          fontSize: 18, // 👈 new
+                          fontSize: 18,
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
                         ),
@@ -645,7 +721,18 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _handleHardModeToggle(BuildContext context, WidgetRef ref, bool currentlyEnabled) async {
     final notifier = ref.read(settingsViewModelProvider.notifier);
     if (!currentlyEnabled) {
-      _showHardModeEnableConfirmation(context, () {
+      _showHardModeEnableConfirmation(context, () { // 👈 no premium check before this anymore
+        final isPremium = ref.read(isPremiumProvider); // 👈 new — checked when Enable is actually pressed
+        if (!isPremium) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            useRootNavigator: true,
+            builder: (_) => const FeaturePaywallScreen(source: 'hard_mode'),
+          );
+          return;
+        }
         notifier.setHardMode(true);
       });
     } else {
@@ -752,6 +839,56 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAccentColorPicker(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(accentColorProvider);
+    final swatches = {
+      AccentColorOption.teal: const Color(0xFF7DD3B0),
+      AccentColorOption.pink: const Color(0xFFEE8FA8),
+      AccentColorOption.blue: const Color(0xFF7FB4E8),
+      AccentColorOption.peach: const Color(0xFFEDA574),
+      AccentColorOption.purple: const Color(0xFFB398E8),
+      AccentColorOption.gold: const Color(0xFFF8D35A),
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Accent Color',
+          style: AppTextStyles.bodyLarge.copyWith(
+            color: AppColors.textPrimary(context),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: swatches.entries.map((entry) {
+            final isSelected = selected == entry.key;
+            return GestureDetector(
+              onTap: () => ref.read(accentColorProvider.notifier).setAccent(entry.key),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: entry.value,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? AppColors.textPrimary(context) : Colors.transparent,
+                    width: 2.5,
+                  ),
+                ),
+                child: isSelected
+                    ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                    : null,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 

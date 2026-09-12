@@ -23,7 +23,6 @@ class NotificationService {
     );
     await _plugin.initialize(settings: initSettings);
 
-    // 👇 create channels for Android 8+ (API 26+)
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     await androidPlugin?.createNotificationChannel(
@@ -39,6 +38,14 @@ class NotificationService {
         'pomodoro',
         'Pomodoro Timer',
         description: 'Notifies when Pomodoro work or break ends',
+        importance: Importance.high,
+      ),
+    );
+    await androidPlugin?.createNotificationChannel( // 👈 new — dedicated channel
+      const AndroidNotificationChannel(
+        'session_complete',
+        'Session Complete',
+        description: 'Notifies when a focus session finishes',
         importance: Importance.high,
       ),
     );
@@ -66,11 +73,18 @@ class NotificationService {
     required DateTime scheduledTime,
     String? categoryIdentifier,
   }) async {
-    final channelId = (id == 200 || id == 201) ? 'pomodoro' : 'subscription_expiry';
-    final channelName = (id == 200 || id == 201) ? 'Pomodoro Timer' : 'Subscription Expiry';
+    final channelId = switch (id) { // 👈 was a two-way ternary — now explicit per-ID routing
+      200 || 201 => 'pomodoro',
+      202 => 'session_complete', // 👈 new — was falling into subscription_expiry
+      _ => 'subscription_expiry',
+    };
+    final channelName = switch (id) {
+      200 || 201 => 'Pomodoro Timer',
+      202 => 'Session Complete',
+      _ => 'Subscription Expiry',
+    };
 
-    // 👇 only Pomodoro transitions need exact timing
-    final isPomodoroTransition = id == 200 || id == 201;
+    final isTimeCritical = id == 200 || id == 201 || id == 202; // 👈 was isPomodoroTransition — now includes 202
 
     await _plugin.zonedSchedule(
       id: id,
@@ -91,12 +105,11 @@ class NotificationService {
           categoryIdentifier: categoryIdentifier,
         ),
       ),
-      androidScheduleMode: isPomodoroTransition
+      androidScheduleMode: isTimeCritical
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
-
   Future<void> requestPermission() async {
     if (Platform.isIOS) {
       await _plugin

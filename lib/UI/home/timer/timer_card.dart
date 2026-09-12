@@ -24,6 +24,10 @@ class TimerCard extends StatefulWidget {
   final bool isPomodoroMode;
   final int? pomodoroRestMinutes; // 👈 new
 
+  final GlobalKey? blockModeKey; // 👈 new
+  final GlobalKey? timerModeKey; // 👈 new
+  final GlobalKey? startButtonKey; // 👈 new
+
   const TimerCard({
     super.key,
     required this.onBlockNow,
@@ -41,6 +45,9 @@ class TimerCard extends StatefulWidget {
     required this.onPomodoroTapped,
     this.isPomodoroMode = false,
     this.pomodoroRestMinutes, // 👈 new
+    this.blockModeKey,
+    this.timerModeKey,
+    this.startButtonKey,
   });
 
   @override
@@ -122,22 +129,50 @@ class _TimerCardState extends State<TimerCard>
     final minutes = parts[1];
     final seconds = parts[2];
 
-    return LippedCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          _buildRecordPill(),
-          const SizedBox(height: 16),
-          _buildTimerDisplay(hours, minutes, seconds),
-          const SizedBox(height: 16),
-          _buildSelectorRow(),
-          const SizedBox(height: 14),
-          _buildBlockNowButton(),
-        ],
-      ),
+    return Stack( // 👈 new wrapper
+      children: [
+        LippedCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              _buildRecordPill(),
+              const SizedBox(height: 16),
+              _buildTimerDisplay(hours, minutes, seconds),
+              const SizedBox(height: 16),
+              _buildSelectorRow(),
+              const SizedBox(height: 14),
+              _buildBlockNowButton(),
+            ],
+          ),
+        ),
+        Positioned( // 👈 new — "?" pinned to top-right of the whole card
+          top: 12,
+          right: 12,
+          child: GestureDetector(
+            onTap: widget.onTutorialTap,
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundSubtle(context),
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border(context), width: 0.5),
+              ),
+              child: Center(
+                child: Text(
+                  '?',
+                  style: AppTextStyles.bodyLarge.copyWith( // 👈 was GoogleFonts.poppins directly
+                    color: AppColors.textSecondary(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
-
   Widget _buildRecordPill() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
@@ -230,24 +265,29 @@ class _TimerCardState extends State<TimerCard>
   }
 
   Widget _buildSelectorRow() {
-    final isAllApps =
-        widget.blockingType == AppConstants.blockingTypeAllApps;
+    final isAllApps = widget.blockingType == AppConstants.blockingTypeAllApps;
     return Row(
       children: [
         Expanded(
-          child: _selectorPill(
-            icon: '',
-            label: isAllApps ? 'All Apps' : 'Blocked Apps',
-            onTap: widget.onBlockModeTapped,
+          child: KeyedSubtree( // 👈 new
+            key: widget.blockModeKey,
+            child: _selectorPill(
+              icon: '',
+              label: isAllApps ? 'All Apps' : 'Blocked Apps',
+              onTap: widget.onBlockModeTapped,
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: _selectorPill(
-            icon: '⏱',
-            label: _timerPillLabel(), // 👈 was _formatDuration(widget.selectedMinutes)
-            iconColor: AppColors.accent(context),
-            onTap: widget.onTimerTapped,
+          child: KeyedSubtree( // 👈 new
+            key: widget.timerModeKey,
+            child: _selectorPill(
+              icon: '⏱',
+              label: _timerPillLabel(),
+              iconColor: AppColors.accent(context),
+              onTap: widget.onTimerTapped,
+            ),
           ),
         ),
       ],
@@ -279,83 +319,60 @@ class _TimerCardState extends State<TimerCard>
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton.icon(
-            onPressed: isDisabled ? null : widget.onBlockNow,
-            icon: Icon(
-              isDisabled
-                  ? Icons.lock_clock_rounded
-                  : Icons.play_arrow_rounded,
-              color: isDisabled
-                  ? AppColors.textSecondary(context)
-                  : AppColors.accentText(context),
-              size: 30,
-            ),
-            label: Text(
-              isDisabled ? '' : 'Start',
-              style: const TextStyle(fontSize: 19),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isDisabled
-                  ? AppColors.backgroundSubtle(context)
-                  : AppColors.accent(context),
-              foregroundColor: isDisabled
-                  ? AppColors.textSecondary(context)
-                  : AppColors.accentText(context),
-              disabledBackgroundColor: AppColors.backgroundSubtle(context),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              shape: const StadiumBorder(),
-              textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 25),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        // 👇 Pomodoro button
-        GestureDetector(
-          onTap: widget.onPomodoroTapped,
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: widget.isPomodoroMode
-                  ? const Color(0xFFE74C3C).withValues(alpha: 0.15)
-                  : AppColors.backgroundSubtle(context),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: widget.isPomodoroMode
-                    ? const Color(0xFFE74C3C).withValues(alpha: 0.5)
-                    : AppColors.border(context),
-                width: widget.isPomodoroMode ? 1.5 : 0.5,
+          flex: 75, // 👈 new — 75% of the row width
+          child: KeyedSubtree(
+            key: widget.startButtonKey,
+            child: ElevatedButton.icon(
+              onPressed: isDisabled ? null : widget.onBlockNow,
+              icon: Icon(
+                isDisabled ? Icons.lock_clock_rounded : Icons.play_arrow_rounded,
+                color: isDisabled ? AppColors.textSecondary(context) : AppColors.accentText(context),
+                size: 30,
+              ),
+              label: Text(
+                isDisabled ? '' : 'Start',
+                style: const TextStyle(fontSize: 19),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDisabled ? AppColors.backgroundSubtle(context) : AppColors.accent(context),
+                foregroundColor: isDisabled ? AppColors.textSecondary(context) : AppColors.accentText(context),
+                disabledBackgroundColor: AppColors.backgroundSubtle(context),
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                shape: const StadiumBorder(),
+                textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 25),
               ),
             ),
-            child: const Center(
-              child: Text('🍅', style: TextStyle(fontSize: 20)),
-            ),
           ),
         ),
         const SizedBox(width: 8),
-        // 👇 ? button
-        GestureDetector(
-          onTap: widget.onTutorialTap,
-          child: Container(
-            width: 34,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.backgroundSubtle(context),
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border(context), width: 0.5),
-            ),
-            child: Center(
-              child: Text('?', style: GoogleFonts.poppins(
-                color: AppColors.textSecondary(context),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              )),
+        Expanded( // 👈 new — was a fixed-size GestureDetector, now flexes to fill remaining width
+          flex: 25, // 👈 new — 25% of the row width
+          child: GestureDetector(
+            onTap: widget.onPomodoroTapped,
+            child: Container(
+              height: 60, // 👈 new — matches the Start button's approximate height, since width is now flexible instead of fixed
+              decoration: BoxDecoration(
+                color: widget.isPomodoroMode
+                    ? const Color(0xFFE74C3C).withValues(alpha: 0.15)
+                    : AppColors.backgroundSubtle(context),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: widget.isPomodoroMode
+                      ? const Color(0xFFE74C3C).withValues(alpha: 0.5)
+                      : AppColors.border(context),
+                  width: widget.isPomodoroMode ? 1.5 : 0.5,
+                ),
+              ),
+              child: const Center(
+                child: Text('🍅', style: TextStyle(fontSize: 28)),
+              ),
             ),
           ),
         ),
       ],
     );
   }
+
 
   Widget _selectorPill({
     required String icon,

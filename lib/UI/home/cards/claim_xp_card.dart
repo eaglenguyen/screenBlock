@@ -7,6 +7,9 @@ import 'package:just_audio/just_audio.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+const _pastelYellow = Color(0xFFFFE4A3);
+const _pastelYellowText = Color(0xFF6B5417);
+
 class ClaimXpCard extends StatefulWidget {
   const ClaimXpCard({
     super.key,
@@ -51,7 +54,6 @@ class _ClaimXpCardState extends State<ClaimXpCard>
       _tickPlayer.setVolume(0.5);
     });
 
-
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 2),
     );
@@ -63,7 +65,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
 
     _bounceAnim = CurvedAnimation(
       parent: _controller,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOutBack, // 👈 was Curves.elasticOut — matches tonight's standard bounce
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -91,7 +93,6 @@ class _ClaimXpCardState extends State<ClaimXpCard>
     }
   }
 
-
   @override
   void dispose() {
     _successPlayer.dispose();
@@ -105,14 +106,13 @@ class _ClaimXpCardState extends State<ClaimXpCard>
     if (_claiming) return;
     setState(() => _claiming = true);
 
-    // play tick once at start
     try {
       await _tickPlayer.seek(Duration.zero);
       _tickPlayer.play();
     } catch (_) {}
 
-    final startXp = widget.totalXp; // 30
-    final earnedXp = widget.xpEarned; // 10
+    final startXp = widget.totalXp;
+    final earnedXp = widget.xpEarned;
     final finalTotal = startXp + earnedXp;
 
     final steps = finalTotal.clamp(1, 30);
@@ -128,7 +128,6 @@ class _ClaimXpCardState extends State<ClaimXpCard>
         _displayXp = startXp + ((finalTotal - startXp) * progress).round();
       });
       HapticFeedback.lightImpact();
-      // no sound per tick
     }
 
     await Future.delayed(const Duration(milliseconds: 100));
@@ -137,15 +136,12 @@ class _ClaimXpCardState extends State<ClaimXpCard>
 
     widget.onClaim();
   }
-// ... rest of build method unchanged
-
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.topCenter,
       children: [
-        // confetti
         ConfettiWidget(
           confettiController: _confettiController,
           blastDirectionality: BlastDirectionality.explosive,
@@ -153,8 +149,8 @@ class _ClaimXpCardState extends State<ClaimXpCard>
           gravity: 0.3,
           emissionFrequency: 0.05,
           blastDirection: pi / 2,
-          colors:  [
-            AppColors.accent(context),
+          colors: const [
+            _pastelYellow, // 👈 was AppColors.accent(context)
             Color(0xFFFF6B6B),
             Color(0xFF4ECDC4),
             Color(0xFF45B7D1),
@@ -163,7 +159,6 @@ class _ClaimXpCardState extends State<ClaimXpCard>
           ],
         ),
 
-        // main content
         SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -174,32 +169,29 @@ class _ClaimXpCardState extends State<ClaimXpCard>
               ScaleTransition(
                 scale: _bounceAnim,
                 child: Container(
-                  width: 88,
-                  height: 88,
-                  decoration:  BoxDecoration(
-                    color: AppColors.accent(context),
+                  width: 92, // 👈 was 88 — slightly bigger
+                  height: 92,
+                  decoration: BoxDecoration(
+                    color: _pastelYellow, // 👈 was AppColors.accent(context)
                     shape: BoxShape.circle,
+                    boxShadow: [ // 👈 new — soft glow, matches the other celebratory cards tonight
+                      BoxShadow(color: _pastelYellow.withValues(alpha: 0.4), blurRadius: 16, spreadRadius: 2),
+                    ],
                   ),
-                  child:  Icon(
+                  child: Icon(
                     Icons.bolt_rounded,
-                    color: AppColors.accentText(context),
+                    color: _pastelYellowText, // 👈 was AppColors.accentText(context)
                     size: 48,
                   ),
                 ),
               ),
 
               const SizedBox(height: 24),
-
               Text(
-                'Session complete!',
-                style: AppTextStyles.headlineMedium
-                    .copyWith(fontSize: 24),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Great job staying present',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary(context),
+                'Great Focus!',
+                style: AppTextStyles.headlineLarge.copyWith( // 👈 was headlineMedium — bigger
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary(context),
                 ),
               ),
 
@@ -212,7 +204,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: '⭐️ this session',
                       value: '${widget.xpEarned}',
                       icon: Icons.star,
-                      iconColor: AppColors.accent(context),
+                      iconColor: _pastelYellowText, // 👈 was AppColors.accent(context)
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -221,7 +213,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: 'Total ⭐️',
                       value: '$_displayXp',
                       icon: Icons.stars_rounded,
-                      iconColor: AppColors.accent(context),
+                      iconColor: _pastelYellowText, // 👈 was AppColors.accent(context)
                       highlight: _claiming,
                     ),
                   ),
@@ -235,7 +227,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: 'Time blocked',
                       value: '${widget.sessionMinutes}m',
                       icon: Icons.timer_rounded,
-                      iconColor: AppColors.accent(context),
+                      iconColor: _pastelYellowText, // 👈 was AppColors.accent(context)
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -244,7 +236,7 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                       label: "Today's total",
                       value: widget.todayBlocked,
                       icon: Icons.lock_clock_rounded,
-                      iconColor: AppColors.accent(context),
+                      iconColor: _pastelYellowText, // 👈 was AppColors.accent(context)
                     ),
                   ),
                 ],
@@ -259,27 +251,18 @@ class _ClaimXpCardState extends State<ClaimXpCard>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _claiming
                         ? AppColors.backgroundSubtle(context)
-                        : AppColors.accent(context),
-                    foregroundColor: AppColors.accentText(context),
-                    disabledBackgroundColor:
-                    AppColors.backgroundSubtle(context),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    textStyle: AppTextStyles.labelLarge,
+                        : _pastelYellow, // 👈 was AppColors.accent(context)
+                    foregroundColor: _pastelYellowText, // 👈 was AppColors.accentText(context)
+                    disabledBackgroundColor: AppColors.backgroundSubtle(context),
+                    padding: const EdgeInsets.symmetric(vertical: 18), // 👈 was 16 — taller
+                    shape: const StadiumBorder(), // 👈 was RoundedRectangleBorder(16) — matches bubbly convention
+                    elevation: 0,
+                    textStyle: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w800, fontSize: 18),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _claiming
-                            ? 'Claiming...'
-                            : 'Claim ${widget.xpEarned} ⭐️',
-                      ),
-                    ],
+                  child: Text(
+                    _claiming
+                        ? 'Claiming...'
+                        : 'Claim ${widget.xpEarned} ⭐️',
                   ),
                 ),
               ),
@@ -304,12 +287,12 @@ class _ClaimXpCardState extends State<ClaimXpCard>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: highlight
-            ? AppColors.accent(context).withValues(alpha: 0.1)
+            ? _pastelYellow.withValues(alpha: 0.15) // 👈 was AppColors.accent(context)
             : AppColors.backgroundCard(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: highlight
-              ? AppColors.accent(context).withValues(alpha: 0.3)
+              ? _pastelYellow.withValues(alpha: 0.5) // 👈 was AppColors.accent(context)
               : AppColors.border(context),
           width: highlight ? 1 : 0.5,
         ),
@@ -319,9 +302,9 @@ class _ClaimXpCardState extends State<ClaimXpCard>
         children: [
           Text(
             label,
-            style: AppTextStyles.bodySmall.copyWith(
+            style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall — bumped up
               color: AppColors.textSecondary(context),
-              fontSize: 11,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
@@ -332,8 +315,9 @@ class _ClaimXpCardState extends State<ClaimXpCard>
               Text(
                 value,
                 style: AppTextStyles.headlineSmall.copyWith(
-                  fontSize: 18,
-                  color: highlight ? AppColors.accent(context) : null,
+                  fontSize: 19, // 👈 was 18 — slightly bigger
+                  fontWeight: FontWeight.w800,
+                  color: highlight ? _pastelYellowText : null, // 👈 was AppColors.accent(context)
                 ),
               ),
             ],

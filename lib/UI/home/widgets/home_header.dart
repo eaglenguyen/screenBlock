@@ -37,8 +37,10 @@ class HomeHeader extends StatelessWidget {
     ),
     child: Row(
       children: [
-        Text('Focus Session', style: AppTextStyles.headlineMedium),
-        const Spacer(),
+        Text(
+          state.pomodoroConfig.isPomodoroMode ? 'Pomodoro Session' : 'Focus Session', // 👈 was Text('Focus Session', ...)
+          style: AppTextStyles.headlineMedium,
+        ),        const Spacer(),
         _buildXpBadge(state, context),
       ],
     ),
@@ -95,7 +97,7 @@ class HomeHeader extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '1 minute = 5 ⭐️',
+                        '1 minute = 1 ⭐️',
                         style: TextStyle(
                           color: AppColors.accent(context),
                           fontSize: 13,
@@ -108,19 +110,22 @@ class HomeHeader extends StatelessWidget {
               ],
             ),
             actions: [
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent(context),
-                    foregroundColor: AppColors.accentText(context),
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: const Text('👌🏾',
-                      style: TextStyle(fontWeight: FontWeight.w700,
-                      fontSize: 25)
+              Center( // 👈 new — centers the circle since it's no longer full-width
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: Container(
+                    width: 56, // 👈 new — replaces the stadium button's dimensions
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: AppColors.accent(context),
+                      shape: BoxShape.circle, // 👈 was StadiumBorder()
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '👌🏾',
+                        style: TextStyle(fontSize: 26), // 👈 slightly adjusted to fit the circle nicely
+                      ),
+                    ),
                   ),
                 ),
               ),

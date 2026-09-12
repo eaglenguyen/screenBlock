@@ -164,7 +164,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             NSLog("🔔 unblock nudge notification tapped — setting pending check-in flag")
             let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
             defaults?.set(true, forKey: "pendingCheckInFlow")
+            defaults?.set(true, forKey: "pendingOpenWheelTab")
             defaults?.synchronize()
+
+            // 👇 new — push directly to Flutter, bypassing the resume-timing race entirely
+            DispatchQueue.main.async { [weak self] in
+                self?.flutterChannel?.invokeMethod("openWheelTab", arguments: nil)
+            }
         }
         
         if #available(iOS 16.0, *) {
@@ -321,6 +327,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     ) async {
         let service = IOSBlockingService.shared
         switch call.method {
+        case "checkAndClearPendingOpenWheelTab": // 👈 new
+            let defaults = UserDefaults(suiteName: "group.com.eagle.pausenow")
+            let pending = defaults?.bool(forKey: "pendingOpenWheelTab") ?? false
+            if pending {
+                defaults?.set(false, forKey: "pendingOpenWheelTab")
+                defaults?.synchronize()
+            }
+            result(pending)
         case "deleteLockAppConfig":
             if let args = call.arguments as? [String: Any], let configId = args["configId"] as? String {
                 service.deleteLockAppConfig(configId: configId)
@@ -1035,6 +1049,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             },
             saveKey: saveKey
         )
+        picker.modalPresentationStyle = .fullScreen // 👈 new — this is the fix
         rootVC.present(picker, animated: true)
     }
     

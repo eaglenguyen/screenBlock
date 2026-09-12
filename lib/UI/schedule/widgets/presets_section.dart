@@ -91,6 +91,7 @@ class _PresetRow extends StatelessWidget {
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           useRootNavigator: true,
+          useSafeArea: true, // 👈 restore
           builder: (_) => SessionBottomSheet(preset: preset),
         );
       },

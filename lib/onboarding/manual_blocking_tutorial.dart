@@ -617,11 +617,12 @@ class _AppItem {
 class _AppPickerMockup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark; // 👈 new
     final apps = [
       _AppItem(name: 'Instagram', selected: true,
           icon: 'assets/icons/instagram.svg', color: const Color(0xFFE1306C)),
       _AppItem(name: 'TikTok', selected: true,
-          icon: 'assets/icons/tiktok.svg', color: Colors.white),
+          icon: 'assets/icons/tiktok.svg', color: isDark ? Colors.white : Colors.black), // 👈 was Colors.white unconditionally
       _AppItem(name: 'YouTube', selected: false,
           icon: 'assets/icons/youtube.svg', color: const Color(0xFFFF0000)),
       _AppItem(name: 'Twitter', selected: false,
@@ -973,8 +974,7 @@ class _ClaimStarsMockupState extends State<_ClaimStarsMockup> {
             ),
           ),
           const SizedBox(height: 10),
-          const BouncingArrowUp(),
-          const SizedBox(height: 4),
+          BouncingArrowUp(color: AppColors.textPrimary(context)), // 👈 explicit, matches surrounding text color          const SizedBox(height: 4),
           Text(
             'Tap to claim!',
             textAlign: TextAlign.center,

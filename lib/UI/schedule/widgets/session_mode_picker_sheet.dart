@@ -285,10 +285,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
               decoration: BoxDecoration(
                 color: AppColors.backgroundSubtle(context),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: AppColors.accent(context).withValues(alpha: 0.8),
-                  width: 1,
-                ),
+
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -317,7 +314,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
           if (showBetaFlair && !isLocked)
             Positioned(
               top: 6,
-              right: 6,
+              right: 44,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -344,14 +341,14 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 16),
+                  padding: const EdgeInsets.only(top: 1),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (!isAlreadyCreated) // 👈 new — hide the lock icon for this case
                         Icon(
                           Icons.lock_rounded,
-                          color: AppColors.accent(context),
+                          color: AppColors.accentDark(context),
                           size: 16,
                         ),
                       if (!isAlreadyCreated) const SizedBox(height: 4), // 👈 new — keep spacing only when icon present
@@ -359,7 +356,7 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                         lockMessage,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.accent(context),
+                          color: AppColors.accentDark(context),
                           fontWeight: FontWeight.w700,
                         ),
                       ),

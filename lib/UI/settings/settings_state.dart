@@ -21,7 +21,7 @@ class SettingsState {
     this.hasBatteryOptimization = false,
     this.hasAccessibilityPermission = false,
     this.isPremium = false,
-    this.appVersion = '1.0.0',
+    this.appVersion = '2.0.0',
     this.hasNotificationPermission = false, // 👈 add
     this.hardModeEnabled = false,
     this.uninstallProtectionEnabled = false

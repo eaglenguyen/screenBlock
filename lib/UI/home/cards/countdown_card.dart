@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_card.dart';
 
 class CountdownCard extends StatelessWidget {
   const CountdownCard({
@@ -14,74 +15,82 @@ class CountdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox( // 👈 new — forces LippedCard to actually span full width
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context), // 👈 was hardcoded dark gradient
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: AppColors.border(context),
-          width: 0.5,
+      child: LippedCard(
+        padding: const EdgeInsets.symmetric(
+          vertical: 44,
+          horizontal: 24,
         ),
-      ),
-      padding: const EdgeInsets.symmetric(
-        vertical: 40,
-        horizontal: 24,
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Blocking apps in',
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: AppColors.textSecondary(context), // 👈 was Colors.white.withOpacity(0.6)
-            ),
-          ),
-          const SizedBox(height: 16),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              return ScaleTransition(
-                scale: animation,
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
-                ),
-              );
-            },
-            child: Text(
-              '$count',
-              key: ValueKey(count),
-              style: TextStyle( // 👈 no longer const — needs context now
-                fontSize: 100,
-                fontWeight: FontWeight.w900,
-                color: AppColors.textPrimary(context), // 👈 was Colors.white
-                height: 1,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch, // 👈 new — keeps children from shrinking to their own content width
+          children: [
+            Text(
+              'Blocking apps in',
+              textAlign: TextAlign.center, // 👈 new — since the column now stretches, center the text explicitly
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: AppColors.textSecondary(context),
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-          const SizedBox(height: 32),
-          GestureDetector(
-            onTap: onCancel,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.close_rounded,
-                  color: AppColors.textSecondary(context), // 👈 was Colors.white54
-                  size: 18,
+            const SizedBox(height: 16),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(
+                  scale: animation,
+                  child: FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                );
+              },
+              child: Text(
+                '$count',
+                key: ValueKey(count),
+                textAlign: TextAlign.center, // 👈 new
+                style: TextStyle(
+                  fontSize: 110,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary(context),
+                  height: 1,
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  'Cancel',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.textSecondary(context), // 👈 was Colors.white54
-                    fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 36),
+            GestureDetector(
+              onTap: onCancel,
+              child: Center( // 👈 new — since the column now stretches, center this button explicitly
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundSubtle(context),
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(color: AppColors.border(context), width: 0.5),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.close_rounded,
+                        color: AppColors.textSecondary(context),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Cancel',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: AppColors.textSecondary(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

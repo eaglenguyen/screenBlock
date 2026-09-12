@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../../domain/platform/android_blocking_service.dart';
 import '../../domain/platform/ios_blocking_service.dart';
 import '../../features/lockapp/lock_app_viewmodel.dart';
@@ -93,7 +92,6 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
               await service.launchApp(next.packageName);
             } else if (service is IOSBlockingService) {
               await service.removeLockAppShield(next.configId);
-              // no auto-open — URL scheme lookup deferred per your earlier decision
             }
           },
         );
@@ -109,6 +107,14 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
       }
     });
 
+    ref.listen(homeViewModelProvider.select((s) => s.pendingOpenWheelTab), (previous, next) { // 👈 new
+      if (next == true) {
+        ref.read(homeViewModelProvider.notifier).clearPendingOpenWheelTab();
+        setState(() => _selectedIndex = 2);
+        GoRouter.of(context).go('/wheel');
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background(context),
       body: Stack(
@@ -119,7 +125,6 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
       ),
     );
   }
-
   Widget _buildBottomNav() {
     return Positioned(
       bottom: 24,

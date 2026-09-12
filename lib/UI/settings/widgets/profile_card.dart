@@ -25,14 +25,14 @@ class SettingsProfileCard extends ConsumerWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: AppColors.accent(context),
+              color: AppColors.backgroundSubtle(context),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 initial,
                 style: AppTextStyles.headlineSmall.copyWith(
-                  color: AppColors.accentText(context),
+                  color: AppColors.textPrimary(context),
                   fontSize: 22,
                 ),
               ),
@@ -67,7 +67,6 @@ class SettingsProfileCard extends ConsumerWidget {
               child: Text(
                 'Change name',
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.accent(context),
                   fontWeight: FontWeight.w600,
                 ),
               ),

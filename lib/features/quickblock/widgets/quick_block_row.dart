@@ -13,6 +13,7 @@ import '../../../core/utils/permission_dialogs.dart';
 import '../../../domain/platform/ios_blocking_service.dart';
 import '../../../providers/blocking_service_provider.dart';
 import '../quick_block_viewmodel.dart';
+import 'dialog_unblock.dart';
 
 class QuickBlockApp {
   final String name;
@@ -40,7 +41,7 @@ const quickBlockApps = [
 ];
 
 class QuickBlockRow extends ConsumerStatefulWidget {
-  final bool reverseOnBuild; // 👈 new
+  final bool reverseOnBuild;
   const QuickBlockRow({super.key, this.reverseOnBuild = false});
 
   @override
@@ -56,7 +57,7 @@ class _QuickBlockRowState extends ConsumerState<QuickBlockRow> with SingleTicker
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
-      reverseDuration: const Duration(milliseconds: 900), // 👈 new — reverse (pop-out) speed, independent
+      reverseDuration: const Duration(milliseconds: 900),
     );
     _itemAnims = List.generate(quickBlockApps.length, (i) {
       final start = (i * 0.1).clamp(0.0, 0.7);
@@ -67,12 +68,12 @@ class _QuickBlockRowState extends ConsumerState<QuickBlockRow> with SingleTicker
       );
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.forward(); // 👈 first mount always pops in
+      _controller.forward();
     });
   }
 
   @override
-  void didUpdateWidget(QuickBlockRow oldWidget) { // 👈 new — add this method right here
+  void didUpdateWidget(QuickBlockRow oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.reverseOnBuild && !oldWidget.reverseOnBuild) {
       _controller.reverse();
@@ -118,6 +119,14 @@ class _QuickBlockRowState extends ConsumerState<QuickBlockRow> with SingleTicker
                 context,
                 ref,
                     () async {
+                  if (isBlocked) { // 👈 new — about to unblock, show the choice dialog first
+                    final shouldUnblock = await QuickBlockUnblockDialog.show(context, appName: app.name);
+                    if (!shouldUnblock) return; // user chose to spin instead, or dialog was dismissed
+                    notifier.toggle(app.packageName);
+                    return;
+                  }
+
+                  // 👇 existing block-flow logic unchanged, only runs when currently unblocked (about to block)
                   if (Platform.isIOS) {
                     final service = ref.read(blockingServiceProvider) as IOSBlockingService;
                     final hasSelection = await service.hasQuickBlockSelection(app.packageName);
@@ -181,12 +190,12 @@ class _QuickBlockRowState extends ConsumerState<QuickBlockRow> with SingleTicker
                                   SvgPicture.asset(app.iconAsset, width: 24, height: 24,
                                       colorFilter: ColorFilter.mode(app.iconColor, BlendMode.srcIn)),
                                   const SizedBox(height: 6),
-                                  Text(app.name, style: AppTextStyles.bodySmall.copyWith(fontSize: 11)),
+                                  Text(app.name, style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w600)), // 👈 was bodySmall fontSize:11
                                   const SizedBox(height: 4),
                                   Text(
                                     isBlocked ? 'Blocked' : 'Tap to block',
                                     style: AppTextStyles.bodySmall.copyWith(
-                                      fontSize: 9,
+                                      fontSize: 10, // 👈 was 9
                                       color: isBlocked ? AppColors.error(context) : AppColors.textSecondary(context),
                                       fontWeight: FontWeight.w700,
                                     ),

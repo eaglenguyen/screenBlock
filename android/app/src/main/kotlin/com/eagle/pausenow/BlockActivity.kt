@@ -201,7 +201,7 @@ class BlockActivity : AppCompatActivity() {
             if (isLockAppBlock) {
                 val configId = lockAppConfigId ?: return@setOnClickListener
                 val pkg = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
-                android.util.Log.d("pausenow", "🔍 writing pending lock app confirm — configId=$configId pkg=$pkg") // 👈 new
+                android.util.Log.d("pausenow", "🔍 writing pending lock app confirm — configId=$configId pkg=$pkg")
                 val prefs = getSharedPreferences("pausenow_native", Context.MODE_PRIVATE)
                 prefs.edit()
                     .putString("pendingLockAppConfirmId", configId)
@@ -221,11 +221,16 @@ class BlockActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 👇 original flow — unchanged, only runs when it's NOT a lock-app block
-            val blockedPackage = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
+            // 👇 replaced sendSpinWheelNotification() — dismiss the block screen and launch straight into the Wheel tab
             AppBlockAccessibilityService.isOverlayShowing = false
-            AppBlockAccessibilityService.addExemption(blockedPackage)
             sendBroadcast(Intent("com.eagle.pausenow.BLOCK_DISMISSED"))
+
+            val wheelIntent = packageManager.getLaunchIntentForPackage(this.packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra("open_wheel_tab", true)
+            }
+            if (wheelIntent != null) startActivity(wheelIntent)
             finish()
         }
     }
@@ -237,7 +242,7 @@ class BlockActivity : AppCompatActivity() {
     private fun updateCountdownButton() {
         val openButton = findViewById<Button>(R.id.openButton)
         val isDark = isDarkMode()
-        val goldOrMint = if (isDark) "#EDB82A" else "#2D7A54" // 👈 accentDark equivalent per theme
+        val goldOrMint = if (isDark) "#EDB82A" else "#2D7A54"
         val mutedText = if (isDark) "#7070A0" else "#B08A5A"
 
         if (countdownComplete) {
@@ -253,17 +258,16 @@ class BlockActivity : AppCompatActivity() {
                     )
                 }
             } else {
-                openButton.text = "Unblock in (30s)"
-                openButton.setTextColor(android.graphics.Color.parseColor(goldOrMint))
-                openButton.setBackgroundResource(
-                    if (isDark) R.drawable.button_outline_gold_background else R.drawable.button_outline_gold_background_light
-                )
+                openButton.text = "Spin the Wheel" // 👈 was "Unblock in (30s)"
+                openButton.setTextColor(android.graphics.Color.WHITE) // 👈 new — white text for contrast against the orange gradient
+                openButton.setBackgroundResource(R.drawable.button_gradient_orange) // 👈 new — replaces the gold outline drawable
+
             }
         } else {
             if (isLockAppBlock && lockAppRemaining <= 0) {
                 openButton.visibility = View.INVISIBLE
             } else {
-                openButton.text = "Unblock in ${countdown}s"
+                openButton.text = if (isLockAppBlock) "Unblock in ${countdown}s" else "Spin the Wheel in ${countdown}s" // 👈 was "Unblock in ${countdown}s" unconditionally
                 openButton.setTextColor(android.graphics.Color.parseColor(mutedText))
                 openButton.setBackgroundResource(
                     if (isDark) R.drawable.button_outline_background else R.drawable.button_outline_background_light
@@ -449,9 +453,13 @@ class BlockActivity : AppCompatActivity() {
         return currentCount
     }
 
+
+
     override fun onBackPressed() {
         // prevent back
     }
+
+
 
     override fun onDestroy() {
         super.onDestroy()

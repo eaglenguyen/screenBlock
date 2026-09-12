@@ -50,6 +50,7 @@ class HomeState {
   final bool isPaused;
   final DateTime? pausedAt;
   final ({String configId, String packageName, String appName})? pendingLockAppConfirm;
+  final bool pendingOpenWheelTab;
 
   const HomeState({
     this.trackedApps = const [],
@@ -80,7 +81,8 @@ class HomeState {
     this.pendingCheckIn = false,
     this.isPaused = false,      // 👈 new
     this.pausedAt,
-    this.pendingLockAppConfirm
+    this.pendingLockAppConfirm,
+    this.pendingOpenWheelTab = false,
   });
 
 
@@ -118,6 +120,8 @@ class HomeState {
     bool clearPausedAt = false, // 👈 new
     ({String configId, String packageName,String appName})? pendingLockAppConfirm, // 👈 new
     bool clearPendingLockAppConfirm = false, // 👈 new
+    bool? pendingOpenWheelTab, // 👈 new
+    bool clearPendingOpenWheelTab = false, // 👈 new
 
   }) {
     return HomeState(
@@ -153,6 +157,7 @@ class HomeState {
       pendingLockAppConfirm: clearPendingLockAppConfirm // 👈 new
           ? null
           : (pendingLockAppConfirm ?? this.pendingLockAppConfirm),
+      pendingOpenWheelTab: clearPendingOpenWheelTab ? false : (pendingOpenWheelTab ?? this.pendingOpenWheelTab),
 
     );
   }

@@ -144,9 +144,10 @@ class ShieldActionExtension: ShieldActionDelegate {
 
     private func sendUnblockNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "your apps are currently blocked!"
-        content.body = "take a small break"
+        content.title = "Trying to unblock?"
+        content.body = "Spin the wheel instead — tap to open!"
         content.sound = .default
+        content.categoryIdentifier = "OPEN_WHEEL_TAB" // 👈 new — lets AppDelegate/Flutter identify this tap specifically
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.5, repeats: false)
         let request = UNNotificationRequest(
             identifier: "com.eagle.pausenow.unblockNudge",

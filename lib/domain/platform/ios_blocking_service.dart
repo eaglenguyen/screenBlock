@@ -11,11 +11,11 @@ class IOSBlockingService implements BlockingService {
   static void listenForNativeEvents({
     required VoidCallback onPauseEnded,
     required VoidCallback onSessionComplete,
-    required VoidCallback onNotificationStartBreak, // 👈 add
-    required VoidCallback onNotificationStartWork,  // 👈 add
-    required VoidCallback onNotificationExtendBreak, // 👈 add
-    required VoidCallback? onShowCheckInFlow, // 👈 new
-
+    required VoidCallback onNotificationStartBreak,
+    required VoidCallback onNotificationStartWork,
+    required VoidCallback onNotificationExtendBreak,
+    required VoidCallback? onShowCheckInFlow,
+    required VoidCallback? onOpenWheelTab, // 👈 new
   }) {
     const channel = MethodChannel('com.eagle.pausenow/ios_blocking');
     channel.setMethodCallHandler((call) async {
@@ -26,24 +26,26 @@ class IOSBlockingService implements BlockingService {
         case 'showCheckInFlow':
           onShowCheckInFlow?.call();
           break;
+        case 'openWheelTab': // 👈 new
+          onOpenWheelTab?.call();
+          break;
         case 'onSessionComplete':
           onSessionComplete();
           break;
-        case 'onNotificationStartBreak': // 👈 add
+        case 'onNotificationStartBreak':
           onNotificationStartBreak();
           break;
-        case 'onNotificationStartWork': // 👈 add
+        case 'onNotificationStartWork':
           onNotificationStartWork();
           break;
-        case 'onNotificationExtendBreak': // 👈 add
+        case 'onNotificationExtendBreak':
           onNotificationExtendBreak();
           break;
       }
     });
   }
-  static VoidCallback? onShowCheckInFlow; // 👈 new
-
-
+  static VoidCallback? onShowCheckInFlow;
+  static VoidCallback? onOpenWheelTab; //
 
   final _eventController =
   StreamController<AppUsageEvent>.broadcast();

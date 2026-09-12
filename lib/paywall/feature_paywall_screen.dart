@@ -10,6 +10,10 @@ import '../../providers/premium_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../core/analytics/analytics_events.dart';
 import '../core/analytics/analytics_service.dart';
+import '../core/theme/app_text_styles.dart';
+
+const _orangeAccent = Color(0xFFF2A340);
+const _orangeAccentText = Colors.white;
 
 class FeaturePaywallScreen extends ConsumerStatefulWidget {
   final String source;
@@ -24,6 +28,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   Offerings? _offerings;
   Package? _selectedPackage;
 
+
   final List<_FeatureItem> _features = [
     _FeatureItem(label: 'Manual blocking', free: true, pro: true),
     _FeatureItem(label: '1 schedule', free: true, pro: true),
@@ -32,6 +37,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
     _FeatureItem(label: 'Unlimited apps per session', free: false, pro: true),
     _FeatureItem(label: '\'Block All Apps\' Mode', free: false, pro: true),
     _FeatureItem(label: 'Time & Open Limits', free: false, pro: true),
+    _FeatureItem(label: 'Hard & Strict Mode', free: false, pro: true), // 👈 new
     _FeatureItem(label: 'Pomodoro Mode 🍅', free: false, pro: true),
   ];
 
@@ -200,20 +206,20 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                                     ),
                                     TextSpan(
                                       text: 'pause now ',
-                                      style: TextStyle(color: AppColors.accent(context)),
+                                      style: TextStyle(color: _orangeAccent), // 👈 was AppColors.accent(context)
                                     ),
                                     WidgetSpan(
                                       child: Container(
                                         margin: const EdgeInsets.only(left: 4),
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: AppColors.accent(context),
+                                          color: _orangeAccent, // 👈 was AppColors.accent(context)
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: Text(
                                           'Pro',
                                           style: GoogleFonts.poppins(
-                                            color: AppColors.accentText(context),
+                                            color: _orangeAccentText, // 👈 was AppColors.accentText(context)
                                             fontSize: 14,
                                             fontWeight: FontWeight.w800,
                                           ),
@@ -245,8 +251,8 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _purchase,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent(context),
-                        foregroundColor: AppColors.accentText(context),
+                        backgroundColor: _orangeAccent, // 👈 was AppColors.accent(context) — change to whatever color you want
+                        foregroundColor: _orangeAccentText, //
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -365,12 +371,12 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppColors.accent(context),
+                            color: _orangeAccent, // 👈 was AppColors.accent(context)
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text('Pro',
                               style: GoogleFonts.poppins(
-                                color: AppColors.accentText(context),
+                                color: _orangeAccentText, // 👈 was AppColors.accentText(context)
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                               )),
@@ -401,12 +407,14 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(f.label,
-                            style: GoogleFonts.poppins(
-                              color: AppColors.textPrimary(context),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            )),
+                        child: Text(
+                          f.label,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontSize: 15,// 👈 was GoogleFonts.poppins
+                            color: AppColors.textPrimary(context),
+                            fontWeight: FontWeight.w700, // 👈 was w500 — bolder, matches convention
+                          ),
+                        ),
                       ),
                       SizedBox(
                         width: 64,

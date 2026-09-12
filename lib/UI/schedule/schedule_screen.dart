@@ -270,6 +270,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
                                 useRootNavigator: true,
+                                useSafeArea: true, // 👈 restore
                                 builder: (_) => TimeLimitBottomSheet(existingConfig: timeLimitConfig),
                               ),
                               onDelete: () => ref.read(timeLimitViewModelProvider.notifier).deleteConfig(timeLimitConfig.id),
@@ -285,6 +286,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
                           useRootNavigator: true,
+                          useSafeArea: true, // 👈 restore
                           builder: (_) => const TimeLimitBottomSheet(),
                         ),
                       ),
@@ -331,7 +333,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               angle: -0.6,
               child: Icon(
                 Icons.arrow_forward_rounded,
-                color: AppColors.accent(context),
+                color: AppColors.textPrimary(context),
                 size: 48,
               ),
             ),
@@ -373,22 +375,18 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
           const Spacer(),
           GestureDetector(
             onTap: isLocked ? null : () => _openCreateSession(context, ref),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+            child: Container(
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: isLocked
-                    ? AppColors.backgroundSubtle(context)
-                    : AppColors.accent(context),
+                color: AppColors.backgroundSubtle(context),
                 shape: BoxShape.circle,
+                border: Border.all(color: AppColors.textSecondary(context), width: 1.5), // 👈 was AppColors.border, width 0.5
               ),
               child: Icon(
-                Icons.add,
-                color: isLocked
-                    ? AppColors.textSecondary(context)
-                    : AppColors.accentText(context),
-                size: 20,
+                Icons.add_rounded,
+                color: AppColors.textSecondary(context),
+                size: 18,
               ),
             ),
           ),
@@ -424,6 +422,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
             useRootNavigator: true,
+            useSafeArea: true, // 👈 restore
             builder: (_) => const SessionBottomSheet(),
           );
         },
@@ -433,6 +432,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
             useRootNavigator: true,
+            useSafeArea: true, // 👈 restore
             builder: (_) => const TimeLimitBottomSheet(),
           );
         },
@@ -457,6 +457,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       useRootNavigator: true,
+      useSafeArea: true, // 👈 restore
       builder: (_) => SessionBottomSheet(
         existingSchedule: schedule,
       ),

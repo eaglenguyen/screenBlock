@@ -108,6 +108,10 @@ class HomeViewModel extends _$HomeViewModel {
           debugPrint('🔔 showing check-in flow from unblock nudge');
           state = state.copyWith(pendingCheckIn: true);
         },
+        onOpenWheelTab: () { // 👈 new
+          debugPrint('🎡 opening wheel tab from notification');
+          state = state.copyWith(pendingOpenWheelTab: true);
+        },
       );
     }
     _setupStreams();
@@ -233,6 +237,10 @@ class HomeViewModel extends _$HomeViewModel {
         case 'onBlockDismissed':
           _blockingService.resetOverlayState();
           break;
+        case 'openWheelTab':
+          debugPrint('🎡 openWheelTab received in HomeViewModel'); // 👈 new
+          state = state.copyWith(pendingOpenWheelTab: true);
+          break;
       }
     });
   }
@@ -240,12 +248,20 @@ class HomeViewModel extends _$HomeViewModel {
   // ══════════════════════════════════════════════════
   // iOS NATIVE SYNC HELPERS
   // ══════════════════════════════════════════════════
+// HomeViewModel._checkPendingCheckInFlow() — extend it
   Future<void> _checkPendingCheckInFlow() async {
     if (!Platform.isIOS) return;
     final hasPending = await const MethodChannel('com.eagle.pausenow/ios_blocking')
         .invokeMethod<bool>('checkAndClearPendingCheckIn') ?? false;
     if (hasPending) {
       state = state.copyWith(pendingCheckIn: true);
+    }
+
+    // 👇 new
+    final hasPendingWheel = await const MethodChannel('com.eagle.pausenow/ios_blocking')
+        .invokeMethod<bool>('checkAndClearPendingOpenWheelTab') ?? false;
+    if (hasPendingWheel) {
+      state = state.copyWith(pendingOpenWheelTab: true);
     }
   }
 
@@ -603,7 +619,7 @@ class HomeViewModel extends _$HomeViewModel {
       phase: BlockingPhase.completed,
       remainingSeconds: 0,
       activeSessionKey: null,
-      xpEarned: state.selectedMinutes * 5,
+      xpEarned: state.selectedMinutes * 1,
       isPaused: false,
       clearPausedAt: true,
     );
@@ -777,7 +793,7 @@ class HomeViewModel extends _$HomeViewModel {
         ? (DateTime.now().difference(state.sessionStartTime!).inSeconds / 60)
         .clamp(0, state.pomodoroConfig.workMinutes)
         : state.pomodoroConfig.workMinutes.toDouble();
-    final xpThisRound = (elapsedMinutes * 5).round();
+    final xpThisRound = (elapsedMinutes * 1).round();
 
     final totalXpEarned = state.xpEarned + xpThisRound;
     final newRoundCount = state.pomodoroRoundCount + 1;
@@ -1419,6 +1435,12 @@ class HomeViewModel extends _$HomeViewModel {
   void clearPendingLockAppConfirm() {
     state = state.copyWith(clearPendingLockAppConfirm: true);
   }
+
+  void clearPendingOpenWheelTab() { // 👈 add this
+    state = state.copyWith(clearPendingOpenWheelTab: true);
+  }
+
+
 
   // ══════════════════════════════════════════════════
   // GETTERS

@@ -6,13 +6,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:flutter_svg/svg.dart';
 
-/// A looping, animated mockup of the iOS FamilyActivityPicker flow:
-/// sheet opens -> tap a category to expand it -> tap the target app -> checkmark -> Choose tapped.
-/// Not real footage of the system picker (can't be captured) — an illustrative walkthrough
-/// so first-time users understand what they'll see and what to do.
-
-
-
 class QuickBlockPickerTutorialOverlay extends StatelessWidget {
   final String appName;
   final VoidCallback onDismiss;
@@ -26,7 +19,7 @@ class QuickBlockPickerTutorialOverlay extends StatelessWidget {
   static Future<void> show(BuildContext context, {required String appName}) {
     return showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.6),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (ctx) => QuickBlockPickerTutorialOverlay(
         appName: appName,
         onDismiss: () => Navigator.pop(ctx),
@@ -53,7 +46,7 @@ class QuickBlockPickerTutorialOverlay extends StatelessWidget {
           Text(
             'Reset in settings if you made a mistake',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -92,7 +85,7 @@ class QuickBlockPickerTutorialOverlay extends StatelessWidget {
 class _AppIconSpec {
   final String asset;
   final Color color;
-  final Color? bg; // 👈 null = transparent, only set for icons that need contrast
+  final Color? bg;
   const _AppIconSpec(this.asset, this.color, {this.bg});
 }
 
@@ -169,29 +162,29 @@ class _PickerAnimationState extends State<_PickerAnimation> {
   Widget build(BuildContext context) {
     final targetCategory = _context.category;
     final targetIndex = _categories.indexOf(targetCategory);
-    final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark; // 👈 new — device-level, not app theme
 
-    final navBg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7);
-    final navBorder = isDark ? const Color(0xFF38383A) : const Color(0xFFDDDDE3);
-    final linkColor = isDark ? const Color(0xFF4A9EFF) : const Color(0xFF3478F6);
-    final titleColor = isDark ? Colors.white : Colors.black87;
-    final listBg = isDark ? Colors.black : const Color(0xFFF2F2F7);
-    final rowBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
-    final rowDivider = isDark ? const Color(0xFF2C2C2E) : Colors.transparent;
-    final labelColor = isDark ? Colors.white : Colors.black87;
-    final siblingLabelColor = isDark ? const Color(0xFFE5E5E7) : const Color(0xFF333333);
-    final chevronColor = isDark ? const Color(0xFF8E8E93) : const Color(0xFF8A8A8E);
-    final radioBorder = isDark ? const Color(0xFF48484A) : const Color(0xFFC7C7CC);
+    // 👇 forced light-mode palette — no longer reads device/app brightness
+    const navBg = Color(0xFFF2F2F7);
+    const navBorder = Color(0xFFDDDDE3);
+    const linkColor = Color(0xFF3478F6);
+    const titleColor = Colors.black87;
+    const listBg = Color(0xFFF2F2F7);
+    const rowBg = Colors.white;
+    const rowDivider = Colors.transparent;
+    const labelColor = Colors.black87;
+    const siblingLabelColor = Color(0xFF333333);
+    const chevronColor = Color(0xFF8A8A8E);
+    const radioBorder = Color(0xFFC7C7CC);
 
     return Container(
       width: 260,
       height: 340,
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: Colors.white, // 👈 was Color(0xFF1A1A1A)
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.border(context), width: 2.5),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 2.5), // 👈 was AppColors.border(context)
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 2),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, spreadRadius: 2), // 👈 lighter shadow, was 0.4
         ],
       ),
       child: ClipRRect(
@@ -202,7 +195,7 @@ class _PickerAnimationState extends State<_PickerAnimation> {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: navBg,
                     border: Border(bottom: BorderSide(color: navBorder, width: 0.5)),
                   ),
@@ -286,10 +279,10 @@ class _PickerAnimationState extends State<_PickerAnimation> {
     final categoryTop = 55.0 + (45.0 * targetIndex);
     switch (_step) {
       case _Step.categoryTap:
-        return categoryTop + 8.0; // 👈 nudge down, adjust the +8 as needed
+        return categoryTop + 8.0;
       case _Step.appTap:
       case _Step.checked:
-      return categoryTop + 76.5 + 8.0; // 👈 same nudge applied
+        return categoryTop + 76.5 + 8.0;
       case _Step.saveTap:
         return 8.0;
       default:
@@ -320,6 +313,9 @@ class _PickerAnimationState extends State<_PickerAnimation> {
       decoration: BoxDecoration(
         color: rowBg,
         borderRadius: BorderRadius.circular(8),
+        boxShadow: [ // 👈 new — subtle shadow so white rows read distinctly against the light list background
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 4, offset: const Offset(0, 1)),
+        ],
       ),
       child: Row(
         children: [
@@ -397,14 +393,8 @@ class _PickerAnimationState extends State<_PickerAnimation> {
       ),
     );
   }
+
   TextStyle _uiText({required Color color, required double size, FontWeight weight = FontWeight.w400}) {
-    return TextStyle(color: color, fontSize: size, fontWeight: weight);
-  }
-}
-/// Tiny inline text-style helper so this file has no external font dependency beyond
-/// what's already used elsewhere in the app.
-class GoogleFontsFallback {
-  static TextStyle text({required Color color, required double size, FontWeight weight = FontWeight.w400}) {
     return TextStyle(color: color, fontSize: size, fontWeight: weight);
   }
 }

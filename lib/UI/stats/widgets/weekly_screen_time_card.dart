@@ -26,15 +26,13 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
     _weekDays = _buildWeekDays(_selectedDay);
     _fetchWeek();
 
-    // 👇 re-fetch once more after giving the trigger view time to compute and write
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) _fetchWeek();
     });
   }
 
   List<DateTime> _buildWeekDays(DateTime anyDayInWeek) {
-    // Dart's DateTime.weekday: Mon=1...Sun=7 → convert so Sunday is day 0 of our week
-    final daysSinceSunday = anyDayInWeek.weekday % 7; // Sun(7)->0, Mon(1)->1, ... Sat(6)->6
+    final daysSinceSunday = anyDayInWeek.weekday % 7;
     final sunday = anyDayInWeek.subtract(Duration(days: daysSinceSunday));
     return List.generate(7, (i) => DateTime(sunday.year, sunday.month, sunday.day + i));
   }
@@ -103,33 +101,33 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Row(
-              children: [
-                Text('This Week', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textPrimary(context))),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent(context).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.accent(context).withValues(alpha: 0.4),
-                      width: 0.5,
+              Row(
+                children: [
+                  Text('This Week', style: AppTextStyles.labelLarge.copyWith(color: AppColors.textPrimary(context))),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent(context).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.accent(context).withValues(alpha: 0.4),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Text(
+                      'Beta',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.accent(context),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                  child: Text(
-                    'Beta',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.accent(context),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // day chips
+              // day chips
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(7, (i) {
@@ -142,14 +140,14 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                         ? null
                         : () => setState(() {
                       _selectedDay = day;
-                      _showScreenTime = false; // 👈 new — require a fresh tap for the new day
+                      _showScreenTime = false;
                     }),
                     child: Column(
                       children: [
                         Text(
                           dayLabels[i],
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                             color: isSelected
                                 ? AppColors.accent(context)
@@ -158,8 +156,8 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                         ),
                         const SizedBox(height: 6),
                         Container(
-                          width: 34,
-                          height: 34,
+                          width: 38,
+                          height: 38,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isSelected
@@ -173,7 +171,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                             child: Text(
                               '${day.day}',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 14,
                                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                                 color: isSelected
                                     ? AppColors.accentText(context)
@@ -188,48 +186,19 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                 }),
               ),
 
-              // bar chart
-              // SizedBox(
-              //   height: 80,
-              //   child: Row(
-              //     crossAxisAlignment: CrossAxisAlignment.end,
-              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //     children: List.generate(7, (i) {
-              //       final day = _weekDays[i];
-              //       final isSelected = _isSameDay(day, _selectedDay);
-              //       final isFuture = _isFuture(day);
-              //       final seconds = _secondsFor(day);
-              //       final heightFraction = maxSeconds > 0 ? (seconds / maxSeconds).clamp(0.05, 1.0) : 0.05;
-              //
-              //       return AnimatedContainer(
-              //         duration: const Duration(milliseconds: 200),
-              //         width: 20,
-              //         height: 80 * (isFuture ? 0.05 : heightFraction),
-              //         decoration: BoxDecoration(
-              //           color: isSelected
-              //               ? AppColors.accent(context)
-              //               : AppColors.backgroundSubtle(context),
-              //           borderRadius: BorderRadius.circular(4),
-              //         ),
-              //       );
-              //     }),
-              //   ),
-              // ),
-
               const SizedBox(height: 20),
               Divider(color: AppColors.border(context), height: 1),
               const SizedBox(height: 20),
 
               _buildScreenTimeReveal(context),
 
-              // selected day total
               Center(
                 child: Column(
                   children: [
                     const SizedBox(height: 4),
                     Text(
                       _formatSelectedDayLabel(),
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary(context)),
+                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
                     ),
                   ],
                 ),
@@ -241,14 +210,14 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                   onTap: () => _openDetailForSelectedDay(context),
                   child: Text(
                     'Full breakdown →',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.accent(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ),
-                    ],
+            ],
           ),
         ),
         const SizedBox(
@@ -265,13 +234,11 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
   String _formatSelectedDayLabel() {
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    final weekdayIndex = _selectedDay.weekday % 7; // Mon=1..Sun=7 -> Sun=0
+    final weekdayIndex = _selectedDay.weekday % 7;
     return '${weekdays[weekdayIndex]}, ${months[_selectedDay.month - 1]} ${_selectedDay.day}';
   }
 
   void _openDetailForSelectedDay(BuildContext context) {
-    // opens the native per-app breakdown for _selectedDay specifically —
-    // requires passing the selected date to the native report view
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -281,7 +248,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
         height: MediaQuery.of(context).size.height * 0.8,
         child: UiKitView(
           viewType: 'com.eagle.pausenow/screen_time_report_view',
-          creationParams: {'date': _dateKey(_selectedDay)}, // 👈 new — tells native which day to show
+          creationParams: {'date': _dateKey(_selectedDay)},
           creationParamsCodec: const StandardMessageCodec(),
         ),
       ),
@@ -297,7 +264,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
               '? ? ?',
               style: AppTextStyles.displayMedium.copyWith(
                 color: AppColors.textSecondary(context),
-                fontSize: 32,
+                fontSize: 36,
               ),
             ),
             const SizedBox(height: 8),
@@ -312,7 +279,7 @@ class _WeeklyScreenTimeCardState extends State<WeeklyScreenTimeCard> {
                 ),
                 child: Text(
                   "Show screen time",
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.textSecondary(context),
                     fontWeight: FontWeight.w700,
                   ),

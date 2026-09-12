@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_card.dart';
 import '../home_state.dart';
+
+const _pastelYellow = Color(0xFFFFE4A3);
+const _pastelYellowText = Color(0xFF6B5417);
 
 class ActiveBlockingCard extends StatelessWidget {
   final HomeState state;
@@ -16,7 +20,7 @@ class ActiveBlockingCard extends StatelessWidget {
   final VoidCallback onPauseToggle;
   final VoidCallback onRestart;
   final VoidCallback onSkipRound;
-  final bool isHardMode; // 👈 new
+  final bool isHardMode;
 
   const ActiveBlockingCard({
     super.key,
@@ -31,32 +35,23 @@ class ActiveBlockingCard extends StatelessWidget {
     required this.onPauseToggle,
     required this.onRestart,
     required this.onSkipRound,
-    this.isHardMode = false, // 👈 new
+    this.isHardMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: AppColors.accent(context).withOpacity(0.3),
-          width: 0.5,
-        ),
-      ),
+    return LippedCard( // 👈 was Container — now uses the shared bubbly-card offset-shadow treatment
+      padding: const EdgeInsets.all(28), // 👈 was 20 — bigger overall
       child: Stack(
         children: [
           Column(
-            crossAxisAlignment: CrossAxisAlignment.center, // 👈 new
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 4),
+              const SizedBox(height: 8), // 👈 was 4 — a bit more room now that the close button is bigger
               _buildTimer(context),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16), // 👈 was 12
               _buildXpBar(context),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20), // 👈 was 16
               if (isPomodoroMode)
                 _buildPomodoroControls(context)
               else ...[
@@ -74,8 +69,8 @@ class ActiveBlockingCard extends StatelessWidget {
               child: GestureDetector(
                 onTap: isHardMode ? null : onGiveUp,
                 child: Container(
-                  width: 32,
-                  height: 32,
+                  width: 36, // 👈 was 32 — bigger
+                  height: 36,
                   decoration: BoxDecoration(
                     color: AppColors.backgroundSubtle(context),
                     shape: BoxShape.circle,
@@ -83,7 +78,7 @@ class ActiveBlockingCard extends StatelessWidget {
                   ),
                   child: Icon(
                     Icons.close_rounded,
-                    size: 18,
+                    size: 20, // 👈 was 18
                     color: AppColors.textSecondary(context),
                   ),
                 ),
@@ -215,8 +210,9 @@ class ActiveBlockingCard extends StatelessWidget {
         if (isOnBreak)
           Text(
             'Break',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.accent(context),
+            style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall — bumped up
+              color: _pastelYellowText,
+              fontWeight: FontWeight.w700,
             ),
           ),
         if (isPaused)
@@ -224,21 +220,21 @@ class ActiveBlockingCard extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 4),
             child: Text(
               'Paused',
-              style: AppTextStyles.bodySmall.copyWith(
+              style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall
                 color: AppColors.textSecondary(context),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
         Text(
           '$h:$m:$s',
           style: TextStyle(
-            fontSize: 48,
+            fontSize: 56, // 👈 was 48 — bigger, more commanding
             fontWeight: FontWeight.w900,
             color: isPaused
                 ? AppColors.textSecondary(context)
                 : AppColors.textPrimary(context),
-            letterSpacing: -1,
+            letterSpacing: -1.5,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -252,26 +248,26 @@ class ActiveBlockingCard extends StatelessWidget {
     final progress = totalSeconds > 0
         ? (elapsed / totalSeconds).clamp(0.0, 1.0)
         : 0.0;
-    final xpSoFar = (elapsed / 60).floor() * 5;
+    final xpSoFar = (elapsed / 60).floor() * 1;
     return Row(
       children: [
         Expanded(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(50),
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.backgroundSubtle(context),
-              valueColor: AlwaysStoppedAnimation(AppColors.accent(context)),
-              minHeight: 6,
+              valueColor: const AlwaysStoppedAnimation(_pastelYellow),
+              minHeight: 10, // 👈 was 8 — chunkier
             ),
           ),
         ),
         const SizedBox(width: 10),
         Text(
           '+$xpSoFar ⭐️',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.accent(context),
-            fontWeight: FontWeight.w600,
+          style: AppTextStyles.bodyLarge.copyWith( // 👈 was bodyMedium — bumped up
+            color: _pastelYellowText,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
@@ -290,37 +286,33 @@ class ActiveBlockingCard extends StatelessWidget {
 
   Widget _buildPomodoroControls(BuildContext context) {
     if (!isPaused) {
-      return Opacity( // 👈 new
+      return Opacity(
         opacity: isHardMode ? 0.35 : 1.0,
         child: SizedBox(
           width: double.infinity,
           child: TextButton.icon(
-            onPressed: isHardMode ? null : onPauseToggle, // 👈 new
+            onPressed: isHardMode ? null : onPauseToggle,
             icon: Icon(
               Icons.pause_rounded,
               color: AppColors.textPrimary(context),
-              size: 20,
+              size: 22, // 👈 was 20
             ),
             label: Text(
               'Pause',
-              style: AppTextStyles.labelMedium.copyWith(
+              style: AppTextStyles.labelLarge.copyWith( // 👈 was labelMedium
                 color: AppColors.textPrimary(context),
-                fontSize: 15,
+                fontSize: 17, // 👈 was 15
               ),
             ),
             style: TextButton.styleFrom(
               backgroundColor: AppColors.backgroundSubtle(context),
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 16), // 👈 was 14
               shape: const StadiumBorder(),
             ),
           ),
         ),
       );
     }
-    // ── paused — Resume, then Restart + Skip Round side by side ──
-    // note: reaching this state at all under Hard Mode shouldn't be possible
-    // (since pausing is itself locked above), but the same guards are applied
-    // here defensively in case of a pre-existing pause when Hard Mode gets enabled
     return Opacity(
       opacity: isHardMode ? 0.35 : 1.0,
       child: Column(
@@ -331,19 +323,19 @@ class ActiveBlockingCard extends StatelessWidget {
               onPressed: isHardMode ? null : onPauseToggle,
               icon: Icon(
                 Icons.play_arrow_rounded,
-                color: AppColors.accent(context),
-                size: 20,
+                color: _pastelYellowText,
+                size: 22,
               ),
               label: Text(
                 'Resume',
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: AppColors.accent(context),
-                  fontSize: 15,
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: _pastelYellowText,
+                  fontSize: 17,
                 ),
               ),
               style: TextButton.styleFrom(
-                backgroundColor: AppColors.backgroundSubtle(context),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                backgroundColor: _pastelYellow.withValues(alpha: 0.15),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const StadiumBorder(),
               ),
             ),
@@ -357,18 +349,18 @@ class ActiveBlockingCard extends StatelessWidget {
                   icon: Icon(
                     Icons.refresh_rounded,
                     color: AppColors.textSecondary(context),
-                    size: 18,
+                    size: 20, // 👈 was 18
                   ),
                   label: Text(
                     'Restart',
                     style: AppTextStyles.labelMedium.copyWith(
                       color: AppColors.textSecondary(context),
-                      fontSize: 14,
+                      fontSize: 15, // 👈 was 14
                     ),
                   ),
                   style: TextButton.styleFrom(
                     backgroundColor: AppColors.backgroundSubtle(context),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 14), // 👈 was 12
                     shape: const StadiumBorder(),
                   ),
                 ),
@@ -380,18 +372,18 @@ class ActiveBlockingCard extends StatelessWidget {
                   icon: Icon(
                     Icons.skip_next_rounded,
                     color: AppColors.textSecondary(context),
-                    size: 18,
+                    size: 20,
                   ),
                   label: Text(
                     'Skip Round',
                     style: AppTextStyles.labelMedium.copyWith(
                       color: AppColors.textSecondary(context),
-                      fontSize: 14,
+                      fontSize: 15,
                     ),
                   ),
                   style: TextButton.styleFrom(
                     backgroundColor: AppColors.backgroundSubtle(context),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: const StadiumBorder(),
                   ),
                 ),
@@ -405,31 +397,30 @@ class ActiveBlockingCard extends StatelessWidget {
 
   Widget _buildTakeBreakButton(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
-    return Opacity( // 👈 new
+    return Opacity(
       opacity: isHardMode ? 0.35 : 1.0,
       child: SizedBox(
         width: double.infinity,
         child: TextButton.icon(
-          onPressed: isHardMode ? null : (isOnBreak ? onEndBreak : onTakeBreak), // 👈 new
+          onPressed: isHardMode ? null : (isOnBreak ? onEndBreak : onTakeBreak),
           icon: Icon(
-            isOnBreak ? null : Icons.pause_rounded,
+            isOnBreak ? Icons.stop : Icons.pause_rounded,
             color: isOnBreak
-                ? AppColors.accent(context)
+                ? _pastelYellowText
                 : AppColors.textPrimary(context),
-            size: 20,
+            size: 22, // 👈 was 20
           ),
           label: Text(
-            isOnBreak ? 'End Break Now' : 'Take A Break',
-            style: AppTextStyles.labelMedium.copyWith(
-              color: isOnBreak
-                  ? AppColors.accent(context)
-                  : AppColors.textPrimary(context),
-              fontSize: 18,
+            isOnBreak ? 'End Break' : 'Take A Break',
+            style: AppTextStyles.labelLarge.copyWith( // 👈 was labelMedium
+              color: AppColors.textPrimary(context),
+              fontSize: 19, // 👈 was 18
+              fontWeight: FontWeight.w700, // 👈 new
             ),
           ),
           style: TextButton.styleFrom(
-            backgroundColor: AppColors.backgroundSubtle(context),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            backgroundColor:AppColors.backgroundSubtle(context),
+            padding: const EdgeInsets.symmetric(vertical: 16), // 👈 was 14
             shape: const StadiumBorder(),
           ),
         ),

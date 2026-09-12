@@ -112,4 +112,26 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<void> setUninstallProtectionEnabled(bool enabled) async {
     await _box.put('uninstallProtectionEnabled', enabled);
   }
+
+  // ── Accent color ───────────────────────
+  @override
+  String getAccentColorId() {
+    return _box.get('accentColorId', defaultValue: 'teal') as String;
+  }
+
+  @override
+  Future<void> setAccentColorId(String id) async {
+    await _box.put('accentColorId', id);
+  }
+
+
+  @override
+  String getDarkAccentColorId() { // 👈 new
+    return _box.get('darkAccentColorId', defaultValue: 'dark_warm_gray') as String;
+  }
+
+  @override
+  Future<void> setDarkAccentColorId(String id) async { // 👈 new
+    await _box.put('darkAccentColorId', id);
+  }
 }

@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../core/theme/app_colors.dart';
 
+const _orangeAccent = Color(0xFFF2A340); // 👈 new
+const _orangeAccentText = Colors.white; // 👈 new
+
 class AllPlansSheet extends StatefulWidget {
   final List<Package> packages;
   final Package? selectedPackage;
@@ -142,7 +145,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                       _PlanOptionRow(
                         label: 'Monthly',
                         priceLine: '${monthly.storeProduct.priceString}/month',
-                        subLine: '1 Week Free, then ${monthly.storeProduct.priceString} billed monthly.', // 👈 was "One Week Free, then ..."
+                        subLine: '1 Week Free, then ${monthly.storeProduct.priceString} billed monthly.',
                         isSelected: _localSelected?.identifier == monthly.identifier,
                         onTap: () => setState(() => _localSelected = monthly),
                       ),
@@ -151,9 +154,9 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                     if (lifetime != null)
                       _PlanOptionRow(
                         label: 'Lifetime Unlock',
-                        priceLine: lifetime.storeProduct.priceString, // will show $39.99 once you update the store price
-                        originalPrice: '\$59.99', // 👈 new — hardcoded, since RevenueCat doesn't track "previous price"
-                        discountBadge: '-33%', // 👈 new — (59.99-39.99)/59.99 ≈ 33%
+                        priceLine: lifetime.storeProduct.priceString,
+                        originalPrice: '\$59.99',
+                        discountBadge: '-33%',
                         subLine: 'One-time payment, limited-time price.',
                         isSelected: _localSelected?.identifier == lifetime.identifier,
                         onTap: () => setState(() => _localSelected = lifetime),
@@ -189,8 +192,8 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                   widget.onPurchase();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent(context),
-                  foregroundColor: AppColors.accentText(context),
+                  backgroundColor: _orangeAccent, // 👈 was AppColors.accent(context)
+                  foregroundColor: _orangeAccentText, // 👈 was AppColors.accentText(context)
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: const StadiumBorder(),
                   elevation: 0,
@@ -198,7 +201,7 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
                 ),
                 child: Text(
                   _localSelected?.packageType == PackageType.monthly
-                      ? 'Subscribe Now' // 👈 new — monthly no longer says "Redeem Your Free Week"
+                      ? 'Subscribe Now'
                       : _tabIndex == 0
                       ? 'Get Lifetime Access'
                       : 'Redeem Your Free Week',
@@ -223,14 +226,14 @@ class _AllPlansSheetState extends State<AllPlansSheet> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.accent(context) : Colors.transparent,
+          color: isActive ? _orangeAccent : Colors.transparent, // 👈 was AppColors.accent(context)
           borderRadius: BorderRadius.circular(100),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
-            color: isActive ? AppColors.accentText(context) : AppColors.textSecondary(context),
+            color: isActive ? _orangeAccentText : AppColors.textSecondary(context), // 👈 was AppColors.accentText(context)
             fontSize: 14,
             fontWeight: FontWeight.w700,
           ),
@@ -264,7 +267,7 @@ class _PlanOptionRow extends StatelessWidget {
   final String subLine;
   final String? badge;
   final String? discountBadge;
-  final String? originalPrice; // 👈 new
+  final String? originalPrice;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -274,7 +277,7 @@ class _PlanOptionRow extends StatelessWidget {
     required this.subLine,
     this.badge,
     this.discountBadge,
-    this.originalPrice, // 👈 new
+    this.originalPrice,
     required this.isSelected,
     required this.onTap,
   });
@@ -290,7 +293,7 @@ class _PlanOptionRow extends StatelessWidget {
           color: AppColors.background(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.accent(context) : AppColors.border(context),
+            color: isSelected ? _orangeAccent : AppColors.border(context), // 👈 was AppColors.accent(context)
             width: isSelected ? 1.5 : 0.5,
           ),
         ),
@@ -301,14 +304,14 @@ class _PlanOptionRow extends StatelessWidget {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppColors.accent(context) : Colors.transparent,
+                color: isSelected ? _orangeAccent : Colors.transparent, // 👈 was AppColors.accent(context)
                 border: Border.all(
-                  color: isSelected ? AppColors.accent(context) : AppColors.textSecondary(context),
+                  color: isSelected ? _orangeAccent : AppColors.textSecondary(context), // 👈 was AppColors.accent(context)
                   width: 1.5,
                 ),
               ),
               child: isSelected
-                  ? Icon(Icons.check_rounded, color: AppColors.accentText(context), size: 14)
+                  ? Icon(Icons.check_rounded, color: _orangeAccentText, size: 14) // 👈 was AppColors.accentText(context)
                   : null,
             ),
             const SizedBox(width: 14),
@@ -331,7 +334,7 @@ class _PlanOptionRow extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppColors.error(context).withValues(alpha: 0.15), // 👈 red-ish, reads as "deal" more than accent green
+                            color: AppColors.error(context).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: AppColors.error(context).withValues(alpha: 0.4), width: 0.5),
                           ),
@@ -349,7 +352,7 @@ class _PlanOptionRow extends StatelessWidget {
                   ),
                   if (priceLine.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Row( // 👈 new — struck-through original + new price side by side
+                    Row(
                       children: [
                         if (originalPrice != null) ...[
                           Text(
@@ -388,13 +391,13 @@ class _PlanOptionRow extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: AppColors.accent(context),
+                  color: _orangeAccent, // 👈 was AppColors.accent(context)
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   badge!,
                   style: GoogleFonts.poppins(
-                    color: AppColors.accentText(context),
+                    color: _orangeAccentText, // 👈 was AppColors.accentText(context)
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),
