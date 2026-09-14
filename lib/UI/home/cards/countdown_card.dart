@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_button.dart';
 import '../../../core/theme/lipped_card.dart';
 
 class CountdownCard extends StatelessWidget {
@@ -15,7 +16,7 @@ class CountdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox( // 👈 new — forces LippedCard to actually span full width
+    return SizedBox(
       width: double.infinity,
       child: LippedCard(
         padding: const EdgeInsets.symmetric(
@@ -23,11 +24,11 @@ class CountdownCard extends StatelessWidget {
           horizontal: 24,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch, // 👈 new — keeps children from shrinking to their own content width
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Blocking apps in',
-              textAlign: TextAlign.center, // 👈 new — since the column now stretches, center the text explicitly
+              textAlign: TextAlign.center,
               style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.textSecondary(context),
                 fontWeight: FontWeight.w700,
@@ -48,7 +49,7 @@ class CountdownCard extends StatelessWidget {
               child: Text(
                 '$count',
                 key: ValueKey(count),
-                textAlign: TextAlign.center, // 👈 new
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 110,
                   fontWeight: FontWeight.w900,
@@ -58,16 +59,15 @@ class CountdownCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 36),
-            GestureDetector(
-              onTap: onCancel,
-              child: Center( // 👈 new — since the column now stretches, center this button explicitly
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundSubtle(context),
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: AppColors.border(context), width: 0.5),
-                  ),
+            Center( // 👈 kept — LippedButton is width: double.infinity internally, so still need to constrain it
+              child: SizedBox(
+                width: 160, // 👈 new — gives the pill a fixed, non-full-width size, matching its original compact look
+                child: LippedButton( // 👈 was GestureDetector/Container
+                  onTap: onCancel,
+                  color: AppColors.backgroundSubtle(context),
+                  lipColor: AppColors.border(context),
+                  height: 46,
+                  borderRadius: BorderRadius.circular(50),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

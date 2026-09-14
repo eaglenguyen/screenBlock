@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 
 import 'package:in_app_review/in_app_review.dart';
@@ -359,7 +360,7 @@ class SettingsScreen extends ConsumerWidget {
                             inactiveTrackColor: AppColors.backgroundSubtle(context),
                           ),
                         ),
-                      if (kDebugMode) // 👈 new
+                      if (kDebugMode)
                         SettingsRow(
                           icon: Icons.replay_rounded,
                           iconColor: AppColors.accent(context),
@@ -367,19 +368,20 @@ class SettingsScreen extends ConsumerWidget {
                           label: 'Restart Onboarding',
                           onTap: () async {
                             final box = Hive.box(HiveBoxNames.settings);
-                            await box.delete('seenHomeTutorial');
-                            await box.delete('seenQuickBlockTutorial');
-                            await box.delete('seenPasteListTutorial');
+                            await box.delete('onboardingComplete');
+                            await box.delete('onboardingStep');
+                            await box.delete('onboardingAge');
+                            await box.delete('onboardingGender');
+                            await box.delete('onboardingHours');
+                            await box.delete('onboardingGoals');
+                            await box.delete('onboardingFuture');
+                            await box.delete('onboardingCommitment');
+                            await box.delete('onboardingHighCommitment');
+                            await box.delete('onboardingScrollStartTime');
+                            await box.delete('onboardingBlockTime');
 
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Onboarding will show again', style: TextStyle(color: AppColors.textPrimary(context))),
-                                  backgroundColor: AppColors.backgroundCard(context),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              );
+                              context.go('/onboarding');
                             }
                           },
                         ),

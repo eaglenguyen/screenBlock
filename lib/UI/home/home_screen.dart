@@ -18,7 +18,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/permission_dialogs.dart';
 import '../../features/quickblock/widgets/quick_block_row.dart';
-import '../../onboarding/manual_blocking_tutorial.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/home_ui_state.dart';
 import '../settings/settings_viewmodel.dart';

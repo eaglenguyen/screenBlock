@@ -8,6 +8,7 @@ import 'package:pausenow/features/quickblock/widgets/quick_block_tutorial.dart';
 import '../../../core/constants/hivebox_names.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_button.dart';
 import '../../../core/theme/pressable_scale.dart';
 import '../../../core/utils/permission_dialogs.dart';
 import '../../../domain/platform/ios_blocking_service.dart';
@@ -114,93 +115,63 @@ class _QuickBlockRowState extends ConsumerState<QuickBlockRow> with SingleTicker
         return Expanded(
           child: _animatedBlock(
             globalIndex,
-            PressableScale(
-              onTap: () => checkAccessibilityAndProceed(
-                context,
-                ref,
-                    () async {
-                  if (isBlocked) { // 👈 new — about to unblock, show the choice dialog first
-                    final shouldUnblock = await QuickBlockUnblockDialog.show(context, appName: app.name);
-                    if (!shouldUnblock) return; // user chose to spin instead, or dialog was dismissed
-                    notifier.toggle(app.packageName);
-                    return;
-                  }
-
-                  // 👇 existing block-flow logic unchanged, only runs when currently unblocked (about to block)
-                  if (Platform.isIOS) {
-                    final service = ref.read(blockingServiceProvider) as IOSBlockingService;
-                    final hasSelection = await service.hasQuickBlockSelection(app.packageName);
-                    if (!hasSelection) {
-                      final box = Hive.box(HiveBoxNames.settings);
-                      final seenTutorial = box.get('seenQuickBlockTutorial', defaultValue: false) as bool;
-                      if (!seenTutorial) {
-                        await QuickBlockPickerTutorialOverlay.show(context, appName: app.name);
-                      }
-                      final count = await service.showQuickBlockPicker(cardId: app.packageName, appLabel: app.name);
-                      if (count == null || count == 0) return;
-                    }
-                  }
-                  notifier.toggle(app.packageName);
-                },
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: SizedBox(
                 height: 120,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                child: LippedButton( // 👈 was PressableScale + manual Positioned lip
+                  onTap: () => checkAccessibilityAndProceed(
+                    context,
+                    ref,
+                        () async {
+                      if (isBlocked) {
+                        final shouldUnblock = await QuickBlockUnblockDialog.show(context, appName: app.name);
+                        if (!shouldUnblock) return;
+                        notifier.toggle(app.packageName);
+                        return;
+                      }
+
+                      if (Platform.isIOS) {
+                        final service = ref.read(blockingServiceProvider) as IOSBlockingService;
+                        final hasSelection = await service.hasQuickBlockSelection(app.packageName);
+                        if (!hasSelection) {
+                          final box = Hive.box(HiveBoxNames.settings);
+                          final seenTutorial = box.get('seenQuickBlockTutorial', defaultValue: false) as bool;
+                          if (!seenTutorial) {
+                            await QuickBlockPickerTutorialOverlay.show(context, appName: app.name);
+                          }
+                          final count = await service.showQuickBlockPicker(cardId: app.packageName, appLabel: app.name);
+                          if (count == null || count == 0) return;
+                        }
+                      }
+                      notifier.toggle(app.packageName);
+                    },
+                  ),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.backgroundSubtle(context)
+                      : app.bgColor,
+                  lipColor: AppColors.cardLip(context),
+                  height: 112,
+                  borderRadius: BorderRadius.circular(16), // 👈 square-ish tile shape instead of the default stadium
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Stack(
-                          clipBehavior: Clip.none,
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Positioned(
-                              top: 4,
-                              left: 6,
-                              right: 6,
-                              bottom: -8,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.cardLip(context),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: double.infinity,
-                              height: 112,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).brightness == Brightness.dark
-                                    ? AppColors.backgroundSubtle(context)
-                                    : app.bgColor,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.06),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset(app.iconAsset, width: 24, height: 24,
-                                      colorFilter: ColorFilter.mode(app.iconColor, BlendMode.srcIn)),
-                                  const SizedBox(height: 6),
-                                  Text(app.name, style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w600)), // 👈 was bodySmall fontSize:11
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    isBlocked ? 'Blocked' : 'Tap to block',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      fontSize: 10, // 👈 was 9
-                                      color: isBlocked ? AppColors.error(context) : AppColors.textSecondary(context),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
+                            SvgPicture.asset(app.iconAsset, width: 24, height: 24,
+                                colorFilter: ColorFilter.mode(app.iconColor, BlendMode.srcIn)),
+                            const SizedBox(height: 6),
+                            Text(app.name, style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 4),
+                            Text(
+                              isBlocked ? 'Blocked' : 'Tap to block',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                fontSize: 10,
+                                color: isBlocked ? AppColors.error(context) : AppColors.textSecondary(context),
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],

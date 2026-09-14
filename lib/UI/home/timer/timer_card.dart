@@ -5,6 +5,7 @@ import 'package:pausenow/core/theme/lipped_card.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_button.dart';
 
 
 class TimerCard extends StatefulWidget {
@@ -212,44 +213,71 @@ class _TimerCardState extends State<TimerCard>
   }
 
   Widget _timerBlock(String value, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSubtle(context),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: AppColors.border(context),
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 58,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: child,
-                );
-              },
-              child: Text(
-                value,
-                key: ValueKey(value),
-                style: AppTextStyles.displayMedium.copyWith(
-                  fontSize: 48,
-                  color: AppColors.textSecondary(context),
+    return Column(
+      children: [
+        SizedBox( // 👈 new — fixed height wrapper to contain the lip + floating card
+          height: 90, // 👈 adjust if the numbers need more/less room
+          child: Stack(
+            children: [
+              Positioned( // 👈 new — the lip, fixed at the bottom
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: 84,
+                  decoration: BoxDecoration(
+                    color: AppColors.border(context), // 👈 darker neutral shade beneath
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-            ),
+              Positioned( // 👈 new — the actual number card, floating above the lip
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 4, // 👈 leaves a 4px gap showing the lip beneath — the "3D" effect
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundSubtle(context),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.border(context),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: SizedBox(
+                    height: 58,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                      child: Text(
+                        value,
+                        key: ValueKey(value),
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.displayMedium.copyWith(
+                          fontSize: 48,
+                          color: AppColors.textSecondary(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(label, style: AppTextStyles.bodySmall),
-        ],
-      ),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: AppTextStyles.bodySmall),
+      ],
     );
   }
+
 
   Widget _timerColon() {
     return Padding(
@@ -319,38 +347,47 @@ class _TimerCardState extends State<TimerCard>
     return Row(
       children: [
         Expanded(
-          flex: 75, // 👈 new — 75% of the row width
+          flex: 75,
           child: KeyedSubtree(
             key: widget.startButtonKey,
-            child: ElevatedButton.icon(
-              onPressed: isDisabled ? null : widget.onBlockNow,
-              icon: Icon(
-                isDisabled ? Icons.lock_clock_rounded : Icons.play_arrow_rounded,
-                color: isDisabled ? AppColors.textSecondary(context) : AppColors.accentText(context),
-                size: 30,
-              ),
-              label: Text(
-                isDisabled ? '' : 'Start',
-                style: const TextStyle(fontSize: 19),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDisabled ? AppColors.backgroundSubtle(context) : AppColors.accent(context),
-                foregroundColor: isDisabled ? AppColors.textSecondary(context) : AppColors.accentText(context),
-                disabledBackgroundColor: AppColors.backgroundSubtle(context),
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: const StadiumBorder(),
-                textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 25),
+            child: LippedButton( // 👈 was ElevatedButton.icon
+              onTap: isDisabled ? null : widget.onBlockNow,
+              color: isDisabled ? AppColors.backgroundSubtle(context) : AppColors.accent(context),
+              lipColor: isDisabled
+                  ? AppColors.border(context)
+                  : Color.lerp(AppColors.accent(context), Colors.black, 0.18),
+              enabled: !isDisabled,
+              height: 58, // 👈 roughly matches the old button's rendered height (15px vertical padding + text/icon)
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    isDisabled ? Icons.lock_clock_rounded : Icons.play_arrow_rounded,
+                    color: isDisabled ? AppColors.textSecondary(context) : AppColors.accentText(context),
+                    size: 30,
+                  ),
+                  if (!isDisabled) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      'Start',
+                      style: AppTextStyles.labelLarge.copyWith(
+                        fontSize: 25,
+                        color: AppColors.accentText(context),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        Expanded( // 👈 new — was a fixed-size GestureDetector, now flexes to fill remaining width
-          flex: 25, // 👈 new — 25% of the row width
+        Expanded(
+          flex: 25,
           child: GestureDetector(
             onTap: widget.onPomodoroTapped,
             child: Container(
-              height: 60, // 👈 new — matches the Start button's approximate height, since width is now flexible instead of fixed
+              height: 60,
               decoration: BoxDecoration(
                 color: widget.isPomodoroMode
                     ? const Color(0xFFE74C3C).withValues(alpha: 0.15)
@@ -372,7 +409,6 @@ class _TimerCardState extends State<TimerCard>
       ],
     );
   }
-
 
   Widget _selectorPill({
     required String icon,

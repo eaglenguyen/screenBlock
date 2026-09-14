@@ -7,9 +7,9 @@ import 'UI/home/home_screen.dart';
 import 'UI/schedule/schedule_screen.dart';
 import 'UI/settings/settings_screen.dart';
 import 'UI/stats/stats_screen.dart';
-import 'UI/wheel/wheel_screen.dart'; // 👈 new
+import 'UI/wheel/wheel_screen.dart';
 import 'core/constants/hivebox_names.dart';
-import 'onboarding/onboarding_welcome_flow.dart';
+import 'onboarding_new/onboarding_flow.dart'; // 👈 was 'onboarding/onboarding_welcome_flow.dart'
 
 class AppRouter {
   AppRouter._();
@@ -32,7 +32,7 @@ class AppRouter {
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
-        builder: (context, state) => const OnboardingWelcomeFlow(),
+        builder: (context, state) => const OnboardingFlow(), // 👈 was OnboardingWelcomeFlow()
       ),
       ShellRoute(
         builder: (context, state, child) => ShellScreen(child: child),
@@ -60,7 +60,7 @@ class AppRouter {
             ),
           ),
           GoRoute(
-            path: '/wheel', // 👈 new
+            path: '/wheel',
             name: 'wheel',
             pageBuilder: (context, state) => CustomTransitionPage(
               key: state.pageKey,
