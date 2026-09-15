@@ -69,13 +69,16 @@ class PomodoroSheet extends ConsumerStatefulWidget {
   ConsumerState<PomodoroSheet> createState() => _PomodoroSheetState();
 }
 
-class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
+class _PomodoroSheetState extends ConsumerState<PomodoroSheet>
+    with SingleTickerProviderStateMixin { // 👈 new
   late int _workMinutes;
   late int _shortBreakMinutes;
   late bool _isPomodoroMode;
   late bool _autoStartBreak;
 
   String? _expandedRow;
+
+  late AnimationController _shineController; // 👈 new
 
   @override
   void initState() {
@@ -84,8 +87,27 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
     _shortBreakMinutes = widget.config.shortBreakMinutes;
     _isPomodoroMode = widget.config.isPomodoroMode;
     _autoStartBreak = widget.config.autoStartBreak;
+
+    _shineController = AnimationController( // 👈 new
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _startShineLoop();
   }
 
+  Future<void> _startShineLoop() async { // 👈 new
+    while (mounted) {
+      await Future.delayed(const Duration(seconds: 3));
+      if (!mounted) return;
+      await _shineController.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() { // 👈 new — add if not already present
+    _shineController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     final isPremium = ref.watch(isPremiumProvider);
@@ -237,39 +259,84 @@ class _PomodoroSheetState extends ConsumerState<PomodoroSheet> {
                   ),
                   const SizedBox(height: 20),
                   // "Upgrade to Pro" button
-                  Container( // 👈 wraps the button so we can apply a gradient (ElevatedButton itself doesn't support gradient fills directly)
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFE8623D), Color(0xFFF2A340)],
-                      ),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          useRootNavigator: true,
-                          builder: (_) => const FeaturePaywallScreen(source: 'pomodoro',),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent, // 👈 was _proOrange — transparent so the gradient behind shows through
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.transparent, // 👈 new — avoids a double-shadow look from the ElevatedButton's own elevation
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: const StadiumBorder(),
-                        minimumSize: const Size(double.infinity, 0),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Upgrade to Pro',
-                        style: AppTextStyles.labelLarge,
-                      ),
+                  ClipRRect( // 👈 new — clips the shine sweep to the pill shape
+                    borderRadius: BorderRadius.circular(50),
+                    child: Stack( // 👈 new
+                      children: [
+                        Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFFE8623D), Color(0xFFF2A340)],
+                            ),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                useRootNavigator: true,
+                                builder: (_) => const FeaturePaywallScreen(source: 'pomodoro'),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: const StadiumBorder(),
+                              minimumSize: const Size(double.infinity, 0),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'Upgrade to Pro',
+                              style: AppTextStyles.labelLarge,
+                            ),
+                          ),
+                        ),
+                        Positioned.fill( // 👈 new — the shine sweep overlay
+                          child: IgnorePointer(
+                            child: AnimatedBuilder(
+                              animation: _shineController,
+                              builder: (context, child) {
+                                return LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final width = constraints.maxWidth;
+                                    final travel = width * 1.8;
+                                    final dx = -travel / 2 + (_shineController.value * travel);
+
+                                    return Transform.translate(
+                                      offset: Offset(dx, 0),
+                                      child: Transform.rotate(
+                                        angle: -0.35,
+                                        child: Container(
+                                          width: 30,
+                                          height: constraints.maxHeight * 3,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.centerLeft,
+                                              end: Alignment.centerRight,
+                                              colors: [
+                                                Colors.white.withValues(alpha: 0.0),
+                                                Colors.white.withValues(alpha: 0.4),
+                                                Colors.white.withValues(alpha: 0.0),
+                                              ],
+                                              stops: const [0.0, 0.5, 1.0],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

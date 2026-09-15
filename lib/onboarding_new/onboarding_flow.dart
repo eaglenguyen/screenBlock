@@ -5,10 +5,22 @@ import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:pausenow/onboarding_new/screens/reassurance_screen.dart';
 import 'package:pausenow/onboarding_new/screens/welcome_screen.dart';
+import 'package:pausenow/onboarding_new/widget/demo_app_picker.dart';
 import 'package:pausenow/onboarding_new/widget/demo_video.dart';
+import 'package:uuid/uuid.dart';
+import '../UI/appPicker/app_picker_viewmodel.dart';
+import '../UI/schedule/schedule_viewmodel.dart';
+import '../core/constants/app_constants.dart';
 import '../core/constants/hivebox_names.dart';
+import '../onboarding/onboarding_demo_screens.dart';
 import '../onboarding/onboarding_viewmodel.dart';
 import 'data/onboarding_data.dart';
+import 'gauntlet/schedule_gauntlet_state.dart';
+import 'gauntlet/screens/day_pick.dart';
+import 'gauntlet/screens/equip_screen.dart';
+import 'gauntlet/screens/intro_screen.dart';
+import 'gauntlet/screens/screen_time.dart';
+import 'gauntlet/screens/time_range.dart';
 import 'onboarding_step_id.dart';
 import 'widget/single_choice_screen.dart';
 import 'screens/name_screen.dart';
@@ -20,30 +32,76 @@ class OnboardingFlow extends ConsumerStatefulWidget { // 👈 was StatefulWidget
   ConsumerState<OnboardingFlow> createState() => _OnboardingFlowState(); // 👈 was State<OnboardingFlow>
 }
 
-class _OnboardingFlowState extends ConsumerState<OnboardingFlow> { // 👈 was State<OnboardingFlow>
+class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   late OnboardingStepId _currentStep;
   final _data = OnboardingData();
+  bool _isNavigating = false; // 👈 new
+  final _gauntlet = ScheduleGauntletState();
+  final String _gauntletScheduleId = const Uuid().v4();
 
-  void _goBack() {
-    final prev = OnboardingFlowController.previous(_currentStep);
-    if (prev == null) return;
-    setState(() => _currentStep = prev);
+  Future<void> _saveGauntletSchedule() async {
+    final start = _gauntlet.startTime;
+    final end = _gauntlet.endTime;
+    if (start == null || end == null) return; // shouldn't happen given the flow order, but guards against bad state
+
+    String fmt(TimeOfDay t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+    try {
+      await ref.read(scheduleViewModelProvider.notifier).saveSchedule(
+        existingId: _gauntletScheduleId, // 👈 the same id used when the app picker wrote its selection
+        name: _gauntlet.name ?? 'Focus Time',
+        startTime: fmt(start),
+        endTime: fmt(end),
+        days: _gauntlet.days,
+        blockingType: AppConstants.blockingTypeSpecificApps,
+        blockedApps: _gauntlet.apps,
+        allowedApps: const [],
+      );
+    } catch (e) {
+      debugPrint('❌ gauntlet schedule save error: $e');
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _currentStep = OnboardingFlowController.order.first;
+    ref.read(appPickerViewModelProvider.notifier).loadApps(); // 👈 new — fire-and-forget, way ahead of when it's needed
   }
 
   void _goNext() {
+    if (_isNavigating) return; // 👈 new
+    _isNavigating = true;
+
     final next = OnboardingFlowController.next(_currentStep);
     if (next == null) {
       _onOnboardingComplete();
+      _isNavigating = false; // 👈 new — no further screen transition happens, so unlock immediately
       return;
     }
     setState(() => _currentStep = next);
+
+    Future.delayed(const Duration(milliseconds: 500), () { // 👈 new — unlocks after the screen transition settles
+      if (mounted) _isNavigating = false;
+    });
   }
+
+  void _goBack() {
+    if (_isNavigating) return; // 👈 new
+    _isNavigating = true;
+
+    final prev = OnboardingFlowController.previous(_currentStep);
+    if (prev == null) {
+      _isNavigating = false; // 👈 new
+      return;
+    }
+    setState(() => _currentStep = prev);
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _isNavigating = false;
+    });
+  }
+
 
   Future<void> _onOnboardingComplete() async {
     final box = Hive.box(HiveBoxNames.settings);
@@ -76,6 +134,113 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> { // 👈 was S
           key: const ValueKey('welcome'),
           onGetStarted: _goNext,
         );
+      case OnboardingStepId.gauntletIntro:
+        return OnboardingGauntletIntroScreen(
+          key: const ValueKey('gauntletIntro'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.gauntletIntro) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.screenTimeGuess:
+        return OnboardingScreenTimeGuessScreen(
+          key: const ValueKey('screenTimeGuess'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.screenTimeGuess) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: (hours) {
+            _data.screenTimeGuess = hours;
+            _goNext();
+          },
+        );
+      case OnboardingStepId.gauntletAppsPicker:
+        return DemoAppPickerScreen(
+          key: const ValueKey('gauntletAppsPicker'),
+          scheduleId: _gauntletScheduleId,
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.gauntletAppsPicker) + 1, // 👈 was: progress: (...) / OnboardingFlowController.order.length,
+          progressTotal: OnboardingFlowController.order.length, // 👈 new
+          onBack: _goBack,
+          onAppsSelected: (apps) {
+            _gauntlet.apps = apps;
+            _goNext();
+          },
+        );
+      case OnboardingStepId.gauntletEquip1:
+        return OnboardingGauntletEquipScreen(
+          key: const ValueKey('gauntletEquip1'),
+          state: _gauntlet,
+          justFilled: ScheduleStone.apps,
+          stepNumber: 1,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.gauntletTimeRange:
+        return OnboardingGauntletTimeRangeScreen(
+          key: const ValueKey('gauntletTimeRange'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.gauntletTimeRange) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: (start, end) {
+            _gauntlet.startTime = start;
+            _gauntlet.endTime = end;
+            _goNext();
+          },
+        );
+      case OnboardingStepId.gauntletEquip2:
+        return OnboardingGauntletEquipScreen(
+          key: const ValueKey('gauntletEquip2'),
+          state: _gauntlet,
+          justFilled: ScheduleStone.time,
+          stepNumber: 2,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.gauntletDays:
+        return OnboardingGauntletDaysScreen(
+          key: const ValueKey('gauntletDays'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.gauntletDays) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: (days) {
+            _gauntlet.days = days;
+            _goNext();
+          },
+        );
+      case OnboardingStepId.gauntletEquip3:
+        return OnboardingGauntletEquipScreen(
+          key: const ValueKey('gauntletEquip3'),
+          state: _gauntlet,
+          justFilled: ScheduleStone.days,
+          stepNumber: 3,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.gauntletName:
+        return OnboardingNameScreen(
+          key: const ValueKey('gauntletName'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.gauntletName) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          title: 'Name your schedule!',
+          subtitle: "Give it a name you'll recognize later.",
+          hint: 'e.g. Focus Time',
+          continueLabel: 'Continue',
+          showRandomizer: true, // 👈 new
+          onBack: _goBack,
+          onContinue: (name) async { // 👈 now async
+            _gauntlet.name = name;
+            await _saveGauntletSchedule(); // 👈 new — actually creates the schedule
+            _goNext();
+          },
+        );
+      case OnboardingStepId.gauntletEquip4:
+        return OnboardingGauntletEquipScreen(
+          key: const ValueKey('gauntletEquip4'),
+          state: _gauntlet,
+          justFilled: ScheduleStone.name,
+          stepNumber: 4,
+          showConfetti: true,
+          onContinue: _goNext,
+        );
+
+
+
       case OnboardingStepId.need: // 👈 new
         return OnboardingSingleChoiceScreen(
           key: const ValueKey('need'),

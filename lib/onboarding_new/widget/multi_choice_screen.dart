@@ -28,11 +28,12 @@ class OnboardingMultiChoiceScreen extends StatefulWidget {
   @override
   State<OnboardingMultiChoiceScreen> createState() => _OnboardingMultiChoiceScreenState();
 }
-
 class _OnboardingMultiChoiceScreenState extends State<OnboardingMultiChoiceScreen> {
   final Set<String> _selected = {};
+  bool _hasChosen = false;
 
   void _toggle(String option) {
+    if (_hasChosen) return; // 👈 new — locks selection once Continue has been tapped
     setState(() {
       if (_selected.contains(option)) {
         _selected.remove(option);
@@ -40,6 +41,12 @@ class _OnboardingMultiChoiceScreenState extends State<OnboardingMultiChoiceScree
         _selected.add(option);
       }
     });
+  }
+
+  void _handleContinue() { // 👈 new
+    if (_hasChosen) return;
+    _hasChosen = true;
+    widget.onContinue(_selected.toList());
   }
 
   @override
@@ -113,7 +120,7 @@ class _OnboardingMultiChoiceScreenState extends State<OnboardingMultiChoiceScree
               OnboardingContinueButton(
                 label: 'Continue',
                 enabled: canContinue,
-                onTap: () => widget.onContinue(_selected.toList()),
+                onTap: _handleContinue, // 👈 was: () => widget.onContinue(_selected.toList())
               ),
             ],
           ),

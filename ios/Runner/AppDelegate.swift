@@ -30,7 +30,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if #available(iOS 16.0, *) {
             setupChannel(engine: engine)
             
-
+            // inside setupChannel(engine:) or wherever your other platform view registrations live
+            if let embeddedPickerRegistrar = engine.registrar(forPlugin: "EmbeddedAppPickerPlugin") {
+                let factory = EmbeddedAppPickerPlatformViewFactory(messenger: embeddedPickerRegistrar.messenger())
+                embeddedPickerRegistrar.register(
+                    factory,
+                    withId: "com.eagle.pausenow/embedded_app_picker_view"
+                )
+            } else {
+                NSLog("❌ Failed to get plugin registrar for EmbeddedAppPickerPlugin")
+            }
             // 👇 register platform view for inline screen time report
             if let registrar = engine.registrar(forPlugin: "ScreenTimeReportPlugin") {
                 registrar.register(

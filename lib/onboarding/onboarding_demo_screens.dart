@@ -10,6 +10,10 @@ import '../UI/home/widgets/app_list_sheet.dart';
 import '../UI/schedule/schedule_viewmodel.dart';
 import '../core/constants/app_constants.dart';
 import '../domain/platform/ios_blocking_service.dart';
+import '../onboarding_new/widget/app_picker_android.dart';
+import '../onboarding_new/widget/app_picker_ios.dart';
+import '../onboarding_new/widget/continue_button.dart';
+import '../onboarding_new/widget/onboarding_shell.dart';
 import '../providers/blocking_service_provider.dart';
 import 'onboarding_question_bank.dart';
 
@@ -167,15 +171,18 @@ class DemoDaysScreen extends StatefulWidget {
   final List<int> initialDays;
   final Function(List<int> days) onContinue;
   final VoidCallback? onBack;
-  final double progress;
+  final int progressStep; // 👈 was double progress
+  final int progressTotal; // 👈 new
 
   const DemoDaysScreen({
     super.key,
     required this.initialDays,
     required this.onContinue,
     this.onBack,
-    required this.progress,
+    required this.progressStep,
+    required this.progressTotal,
   });
+
 
   @override
   State<DemoDaysScreen> createState() => _DemoDaysScreenState();
@@ -204,8 +211,9 @@ class _DemoDaysScreenState extends State<DemoDaysScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return QBShell(
-      progress: widget.progress,
+    return OnboardingShell(
+      progressStep: widget.progressStep,
+      progressTotal: widget.progressTotal,
       onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -299,218 +307,12 @@ class _DemoDaysScreenState extends State<DemoDaysScreen> {
   }
 }
 
-// App Picker
-
-class DemoAppPickerScreen extends ConsumerStatefulWidget {
-  final String scheduleId; // 👈 new
-  final Function(List<String> apps) onAppsSelected;
-  final VoidCallback? onBack;
-  final double progress;
-
-  const DemoAppPickerScreen({
-    super.key,
-    required this.scheduleId, // 👈 new
-    required this.onAppsSelected,
-    this.onBack,
-    required this.progress,
-  });
-
-  @override
-  ConsumerState<DemoAppPickerScreen> createState() => _DemoAppPickerScreenState();
-}
-
-class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
-  bool _isPicking = false;
-
-  Future<void> _openRealPicker() async {
-    setState(() => _isPicking = true);
-    try {
-      if (Platform.isIOS) {
-        final service = ref.read(blockingServiceProvider) as IOSBlockingService;
-        final count = await service.showSchedulePicker( // 👈 was showAppPicker
-          scheduleId: widget.scheduleId, // 👈 new — writes to the correct per-schedule key
-          blockingMode: AppConstants.blockingTypeSpecificApps,
-        );
-        final selectedCount = count ?? 0;
-        if (selectedCount == 0) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please select at least 1 app to block')),
-            );
-          }
-          return;
-        }
-        final cappedCount = selectedCount > 3 ? 3 : selectedCount;
-        final placeholders = List.generate(cappedCount, (i) => 'ios_app_$i');
-        widget.onAppsSelected(placeholders);
-      } else {
-        // Android unchanged — real package names already stored correctly on the Schedule model
-        if (!mounted) return;
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          useRootNavigator: true,
-          builder: (_) => AppListSheet(
-            isBlockList: true,
-            initialApps: const [],
-            onSave: (apps) {
-              if (apps.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please select at least 1 app to block')),
-                );
-                return;
-              }
-              final capped = apps.length > 3 ? apps.sublist(0, 3) : apps;
-              widget.onAppsSelected(capped);
-            },
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('❌ demo app picker error: $e');
-    } finally {
-      if (mounted) setState(() => _isPicking = false);
-    }
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return QBShell(
-      progress: widget.progress,
-      onBack: widget.onBack,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 8),
-          Text(
-            'Which apps do you\nwant to block?',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Pick the apps for this schedule',
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 28),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1E),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.06), width: 0.5),
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Select Apps',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: _isPicking ? null : _openRealPicker,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: _isPicking
-                                ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                            )
-                                : Text(
-                              'Add',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Divider(color: Colors.white.withValues(alpha: 0.06), height: 0.5),
-                  Expanded(
-                    child: ListView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _fakeRow('📚', 'All Apps & Categories'),
-                        _fakeRow('💬', 'Social'),
-                        _fakeRow('🎮', 'Games'),
-                        _fakeRow('🍿', 'Entertainment'),
-                        _fakeRow('🎨', 'Creativity'),
-                        _fakeRow('🌍', 'Education'),
-                        _fakeRow('🚴', 'Health & Fitness'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.arrow_upward_rounded, color: Colors.white.withValues(alpha: 0.4), size: 16),
-              const SizedBox(width: 6),
-              Text(
-                'Tap Add',
-                style: GoogleFonts.poppins(
-                  color: Colors.white.withValues(alpha: 0.4),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12), // 👈 new
-          Center( // 👈 new
-            child: GestureDetector(
-              onTap: () => widget.onAppsSelected([]), // 👈 skip — proceeds with empty list, no validation
-              child: Text(
-                '(debug)',
-                style: GoogleFonts.poppins(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ),
-
-        ],
-      ),
-    );
-  }
 
   Widget _fakeRow(String emoji, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 0.5)),
+        border: Border(bottom: BorderSide(color: const Color(0xFFF0E6D8), width: 0.5)), // 👈 was Colors.white alpha
       ),
       child: Row(
         children: [
@@ -519,18 +321,19 @@ class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
             height: 24,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+              border: Border.all(color: const Color(0xFFB08A5A).withValues(alpha: 0.4), width: 1.5), // 👈 was Colors.white alpha
             ),
           ),
           const SizedBox(width: 14),
           Text(emoji, style: const TextStyle(fontSize: 18)),
           const SizedBox(width: 10),
-          Text(label, style: GoogleFonts.poppins(color: Colors.white, fontSize: 15)),
+          Text(label, style: GoogleFonts.poppins(color: const Color(0xFF4A3728), fontSize: 15)), // 👈 was Colors.white
         ],
       ),
     );
   }
-}
+
+
 
 // Set schedule mockup
 

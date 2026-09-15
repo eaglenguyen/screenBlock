@@ -604,28 +604,7 @@ class _OnboardingWelcomeFlowState
             _nextStep();
           },
         );
-      case OnboardingSteps.demoDays:
-        return DemoDaysScreen(
-          key: const ValueKey('demoDays'),
-          progress: _getProgress(),
-          onBack: _previousStep,
-          initialDays: _demoScheduleDays,
-          onContinue: (days) {
-            setState(() => _demoScheduleDays = days);
-            _nextStep();
-          },
-        );
-      case OnboardingSteps.demoPickApps:
-        return DemoAppPickerScreen(
-          key: const ValueKey('demoPickApps'),
-          scheduleId: _demoScheduleId, // 👈 new
-          progress: _getProgress(),
-          onBack: _previousStep,
-          onAppsSelected: (apps) {
-            setState(() => _demoBlockedApps = apps);
-            _nextStep();
-          },
-        );
+
       case OnboardingSteps.setMultipleSchedules: // 👈 new
         return SetMultipleSchedulesScreen(
           key: const ValueKey('setMultipleSchedules'),

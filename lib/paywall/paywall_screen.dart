@@ -25,6 +25,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   String? _error;
   Offerings? _offerings;
   Package? _selectedPackage;
+  bool _showCloseButton = false; // 👈 new
 
   void _handleClosePressed(BuildContext context) {
     final packages = _offerings?.current?.availablePackages ?? [];
@@ -56,7 +57,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       AnalyticsEvents.paywallViewed,
       {AnalyticsProps.source: widget.source},
     );
+
+    Future.delayed(const Duration(seconds: 3), () { // 👈 new
+      if (mounted) setState(() => _showCloseButton = true);
+    });
   }
+
+
 
   void _showAllPlansSheet(BuildContext context, List<Package> packages) {
     showModalBottomSheet(
@@ -191,16 +198,23 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       children: [
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: GestureDetector(
-                            onTap: () => _handleClosePressed(context),
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: AppColors.backgroundSubtle(context),
-                                shape: BoxShape.circle,
+                          child: AnimatedOpacity( // 👈 new — was a plain GestureDetector
+                            duration: const Duration(milliseconds: 400),
+                            opacity: _showCloseButton ? 1.0 : 0.0,
+                            child: IgnorePointer( // 👈 new — unclickable/untappable while hidden
+                              ignoring: !_showCloseButton,
+                              child: GestureDetector(
+                                onTap: () => _handleClosePressed(context),
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.backgroundSubtle(context),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 18),
+                                ),
                               ),
-                              child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 18),
                             ),
                           ),
                         ),

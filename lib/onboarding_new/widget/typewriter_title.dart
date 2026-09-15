@@ -14,6 +14,7 @@ class TypewriterTitle extends StatefulWidget {
   final bool haptics;
   final TextAlign textAlign; // 👈 new
   final Duration startDelay; // 👈 new
+  final Map<String, Color>? highlightWords; // 👈 new — maps a substring to a highlight color
 
 
 
@@ -28,13 +29,13 @@ class TypewriterTitle extends StatefulWidget {
     this.haptics = true,
     this.textAlign = TextAlign.left,
     this.startDelay = const Duration(milliseconds: 400), // 👈 new — matches/slightly exceeds your screen transition's 600ms duration once you account for the fade curve settling
+    this.highlightWords, // 👈 new
 
   });
 
   @override
   State<TypewriterTitle> createState() => _TypewriterTitleState();
 }
-
 class _TypewriterTitleState extends State<TypewriterTitle> {
   String _displayText = '';
 
@@ -47,7 +48,6 @@ class _TypewriterTitleState extends State<TypewriterTitle> {
   @override
   void didUpdateWidget(covariant TypewriterTitle oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 👇 re-types if the title itself changes (e.g. swapping screens while reusing the same widget instance)
     if (oldWidget.text != widget.text) {
       setState(() => _displayText = '');
       _type();
@@ -56,28 +56,72 @@ class _TypewriterTitleState extends State<TypewriterTitle> {
 
   Future<void> _type() async {
     await Future.delayed(widget.startDelay);
-    final chars = widget.text.characters.toList(); // 👈 new — splits into real grapheme clusters, emoji included as single units
-    for (int i = 0; i < chars.length; i++) { // 👈 was widget.text.length
+    final chars = widget.text.characters.toList();
+    for (int i = 0; i < chars.length; i++) {
       if (!mounted) return;
       if (widget.haptics) HapticFeedback.lightImpact();
-      setState(() => _displayText = chars.sublist(0, i + 1).join()); // 👈 was widget.text.substring(0, i + 1)
+      setState(() => _displayText = chars.sublist(0, i + 1).join());
       await Future.delayed(widget.letterDelay);
     }
   }
 
+  List<TextSpan> _buildSpans() { // 👈 new — splits _displayText into colored/uncolored spans
+    if (widget.highlightWords == null || widget.highlightWords!.isEmpty) {
+      return [TextSpan(text: _displayText)];
+    }
+
+    final spans = <TextSpan>[];
+    int cursor = 0;
+    final text = _displayText;
+
+    while (cursor < text.length) {
+      int? matchStart;
+      int? matchEnd;
+      Color? matchColor;
+
+      for (final entry in widget.highlightWords!.entries) {
+        final index = text.indexOf(entry.key, cursor);
+        if (index == cursor) {
+          matchStart = index;
+          matchEnd = index + entry.key.length;
+          matchColor = entry.value;
+          break;
+        }
+      }
+
+      if (matchStart != null && matchEnd != null) {
+        spans.add(TextSpan(text: text.substring(matchStart, matchEnd), style: TextStyle(color: matchColor)));
+        cursor = matchEnd;
+      } else {
+        // find the next match position to know how far plain text extends
+        int nextMatch = text.length;
+        for (final key in widget.highlightWords!.keys) {
+          final idx = text.indexOf(key, cursor);
+          if (idx != -1 && idx < nextMatch) nextMatch = idx;
+        }
+        spans.add(TextSpan(text: text.substring(cursor, nextMatch)));
+        cursor = nextMatch;
+      }
+    }
+
+    return spans;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox( // 👈 new — forces full width so textAlign has something to center within
+    return SizedBox(
       width: double.infinity,
-      child: Text(
-        _displayText,
-        textAlign: widget.textAlign,
-        style: GoogleFonts.poppins(
-          color: widget.color,
-          fontSize: widget.fontSize,
-          fontWeight: widget.fontWeight,
-          height: widget.height,
+      child: Text.rich(
+        TextSpan(
+          style: GoogleFonts.poppins(
+            color: widget.color,
+            fontSize: widget.fontSize,
+            fontWeight: widget.fontWeight,
+            height: widget.height,
+          ),
+          children: _buildSpans(),
         ),
+        textAlign: widget.textAlign,
       ),
     );
   }

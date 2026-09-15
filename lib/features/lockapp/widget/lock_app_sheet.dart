@@ -7,6 +7,8 @@ import 'package:pausenow/features/lockapp/widget/single_app_picker_sheet.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_button.dart';
+import '../../../core/theme/lipped_card.dart';
 import '../../../data/models/lock_app_config.dart';
 import '../../../domain/platform/ios_blocking_service.dart';
 import '../../../providers/blocking_service_provider.dart';
@@ -27,7 +29,7 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
   String? _packageName;
   String? _appName;
   int _maxUnlocks = 3;
-  String? _pendingConfigId; // 👈 new — stable configId used for iOS token storage, generated once on first picker open
+  String? _pendingConfigId;
   String? _iconUrl;
 
   bool get isEditing => widget.existingConfig != null;
@@ -39,11 +41,9 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
     _packageName = c?.packageName;
     _appName = c?.appName;
     _maxUnlocks = c?.maxUnlocks ?? 3;
-    _pendingConfigId = c?.id; // 👈 new — reuse existing config's id if editing
+    _pendingConfigId = c?.id;
     _iconUrl = c?.iconUrl;
-
   }
-
 
   Future<void> _openAppPicker() async {
     if (Platform.isIOS) {
@@ -56,7 +56,7 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           useRootNavigator: true,
-          builder: (_) => const AppStoreSearchSheet(), // 👈 no onSelected needed
+          builder: (_) => const AppStoreSearchSheet(),
         );
         if (result != null) {
           setState(() {
@@ -83,6 +83,7 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
       );
     }
   }
+
   int get _dailyTotalMinutes => _maxUnlocks * 5;
 
   @override
@@ -108,19 +109,19 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: 36, // 👈 was 32 — bigger
+                    height: 36,
                     decoration: BoxDecoration(
                       color: AppColors.backgroundSubtle(context),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 16),
+                    child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 18), // 👈 was 16
                   ),
                 )
               else
-                const SizedBox(width: 32),
+                const SizedBox(width: 36),
               Container(
-                width: 36,
+                width: 40, // 👈 was 36
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.border(context),
@@ -131,28 +132,22 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
                 GestureDetector(
                   onTap: _packageName == null ? null : _save,
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: 36, // 👈 was 32
+                    height: 36,
                     decoration: BoxDecoration(
                       color: AppColors.accent(context),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.check_rounded, color: AppColors.accentText(context), size: 18),
+                    child: Icon(Icons.check_rounded, color: AppColors.accentText(context), size: 20), // 👈 was 18
                   ),
                 )
               else
-                const SizedBox(width: 32),
+                const SizedBox(width: 36),
             ],
           ),
-
           const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundCard(context),
-              borderRadius: BorderRadius.circular(24),
-            ),
+          LippedCard( // 👈 was a plain Container
+            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20), // 👈 was 24 — roomier
             child: Column(
               children: [
                 GestureDetector(
@@ -160,20 +155,20 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Use ', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary(context))),
+                      Text('Choose ', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary(context))),
                       Text(
                         _appName ?? 'an app',
-                        style: AppTextStyles.bodyLarge.copyWith(
+                        style: AppTextStyles.headlineSmall.copyWith( // 👈 was bodyLarge — bigger
                           color: AppColors.textPrimary(context),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w900, // 👈 was w800
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.unfold_more_rounded, size: 16, color: AppColors.textSecondary(context)),
+                      const SizedBox(width: 6),
+                      Icon(Icons.unfold_more_rounded, size: 18, color: AppColors.textSecondary(context)), // 👈 was 16
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24), // 👈 was 20
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -191,9 +186,9 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
                       child: Text(
                         '$_maxUnlocks times',
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.bodySmall.copyWith(
+                        style: AppTextStyles.headlineSmall.copyWith( // 👈 was bodySmall — much bigger
                           color: AppColors.textPrimary(context),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
@@ -206,64 +201,72 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   'max. per day',
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary(context),
+                    fontWeight: FontWeight.w600, // 👈 new
+                  ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22), // 👈 was 20
                 Text(
                   'For 5min each time',
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary(context),
+                    fontWeight: FontWeight.w600, // 👈 new
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10), // 👈 was 16/8
                   decoration: BoxDecoration(
                     color: AppColors.accent(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: Text(
                     '= ${_dailyTotalMinutes}min/day',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.bodyLarge.copyWith( // 👈 was bodyMedium
                       color: AppColors.accent(context),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800, // 👈 was w700
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28), // 👈 was 24
           if (!isEditing)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _packageName == null ? null : _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.backgroundCard(context),
-                  foregroundColor: AppColors.textPrimary(context),
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: const StadiumBorder(),
-                  disabledBackgroundColor: AppColors.backgroundCard(context).withValues(alpha: 0.5),
-                  textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 17),
+            LippedButton( // 👈 was SizedBox + ElevatedButton
+              onTap: _packageName == null ? null : _save,
+              color: AppColors.accent(context), // 👈 was backgroundCard — now uses the accent color as a real primary CTA
+              lipColor: Color.lerp(AppColors.accent(context), Colors.black, 0.18),
+              height: 58,
+              borderRadius: BorderRadius.circular(50),
+              enabled: _packageName != null,
+              child: Text(
+                '+ Add',
+                style: AppTextStyles.labelLarge.copyWith(
+                  fontSize: 18, // 👈 was 17
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.accentText(context),
                 ),
-                child: const Text('+ Add'),
               ),
             )
           else
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _delete,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error(context).withValues(alpha: 0.15),
-                  foregroundColor: AppColors.error(context),
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: const StadiumBorder(),
-                  textStyle: AppTextStyles.labelLarge.copyWith(fontSize: 17),
+            LippedButton( // 👈 was SizedBox + ElevatedButton
+              onTap: _delete,
+              color: AppColors.error(context).withValues(alpha: 0.15),
+              lipColor: AppColors.error(context).withValues(alpha: 0.35),
+              height: 58,
+              borderRadius: BorderRadius.circular(50),
+              child: Text(
+                'Delete',
+                style: AppTextStyles.labelLarge.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.error(context),
                 ),
-                child: const Text('Delete'),
               ),
             ),
         ],
@@ -275,15 +278,15 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40,
-        height: 40,
+        width: 44, // 👈 was 40 — bigger
+        height: 44,
         decoration: BoxDecoration(
           color: onTap == null
               ? AppColors.backgroundSubtle(context).withValues(alpha: 0.5)
               : AppColors.backgroundSubtle(context),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: AppColors.textPrimary(context), size: 18),
+        child: Icon(icon, color: AppColors.textPrimary(context), size: 20), // 👈 was 18
       ),
     );
   }
@@ -298,7 +301,6 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
         appName: _appName ?? '',
         maxUnlocks: _maxUnlocks,
         iconUrl: _iconUrl ?? '',
-
       );
       if (mounted) Navigator.pop(context);
     } catch (e, st) {
@@ -316,5 +318,4 @@ class _LockAppSheetState extends ConsumerState<LockAppSheet> {
     await ref.read(lockAppViewModelProvider.notifier).deleteConfig(widget.existingConfig!.id);
     if (mounted) Navigator.pop(context);
   }
-
 }

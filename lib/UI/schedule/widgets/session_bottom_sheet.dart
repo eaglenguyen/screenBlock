@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -677,92 +678,12 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
   }
 
   void _showDeleteConfirmation() {
-    final confirmController = TextEditingController();
-    const confirmWord = 'delete';
-
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          final isConfirmed = confirmController.text.trim().toLowerCase() == confirmWord.toLowerCase();
-
-          return AlertDialog(
-            backgroundColor: AppColors.backgroundCard(context),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: Text(
-              'Are you sure you want to delete?',
-              style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
-              textAlign: TextAlign.center,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Type delete to confirm:',
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: confirmController,
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary(context)),
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: '',
-                    hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-                    filled: true,
-                    fillColor: AppColors.backgroundSubtle(context),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border(context))),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border(context))),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.error(context))),
-                  ),
-                  onChanged: (_) => setDialogState(() {}),
-                ),
-              ],
-            ),
-            actions: [
-              Column(
-                children: [
-                  AbsorbPointer(
-                    absorbing: !isConfirmed,
-                    child: Opacity(
-                      opacity: isConfirmed ? 1.0 : 0.4,
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.7,
-                        child: HoldToConfirmButton(
-                          onConfirmed: () {
-                            Navigator.pop(ctx);
-                            _onDelete();
-                          },
-                          color: AppColors.error(context),
-                          fillColor: Color.lerp(AppColors.error(context), Colors.black, 0.3)!,
-                          textColor: Colors.white,
-                          label: 'Hold to Delete',
-                          holdingLabel: 'Keep holding...',
-                          doneLabel: 'Deleting',
-                          holdDuration: const Duration(seconds: 3),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textPrimary(context),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: const StadiumBorder(),
-                        side: BorderSide(color: AppColors.border(context)),
-                      ),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
+      builder: (ctx) => _DeleteConfirmDialog(
+        onConfirm: () {
+          Navigator.pop(ctx);
+          _onDelete();
         },
       ),
     );
@@ -1027,6 +948,96 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
     return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
+}
+
+class _DeleteConfirmDialog extends StatefulWidget {
+  final VoidCallback onConfirm;
+  const _DeleteConfirmDialog({required this.onConfirm});
+
+  @override
+  State<_DeleteConfirmDialog> createState() => _DeleteConfirmDialogState();
+}
+
+class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
+  int _secondsLeft = 5;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_secondsLeft <= 1) {
+        t.cancel();
+        setState(() => _secondsLeft = 0);
+      } else {
+        setState(() => _secondsLeft--);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canConfirm = _secondsLeft == 0;
+
+    return AlertDialog(
+      backgroundColor: AppColors.backgroundCard(context),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Text(
+        'Are you sure you want to delete?',
+        style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context)),
+        textAlign: TextAlign.center,
+      ),
+      content: Text(
+        'This can\'t be undone.',
+        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
+        textAlign: TextAlign.center,
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: canConfirm ? widget.onConfirm : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: canConfirm
+                  ? AppColors.error(context)
+                  : AppColors.error(context).withValues(alpha: 0.35),
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: AppColors.error(context).withValues(alpha: 0.35),
+              disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const StadiumBorder(),
+              elevation: 0,
+            ),
+            child: Text(
+              canConfirm ? 'Delete' : 'Delete in ${_secondsLeft}s',
+              style: TextStyle(color: canConfirm ? Colors.white : Colors.white.withValues(alpha: 0.7)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => Navigator.pop(context),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textPrimary(context),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: const StadiumBorder(),
+              side: BorderSide(color: AppColors.border(context)),
+            ),
+            child: const Text('Cancel'),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _PulsingPencil extends StatefulWidget {

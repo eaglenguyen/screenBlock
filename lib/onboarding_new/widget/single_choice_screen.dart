@@ -40,6 +40,8 @@ class OnboardingSingleChoiceScreen extends StatefulWidget {
 
 class _OnboardingSingleChoiceScreenState extends State<OnboardingSingleChoiceScreen> {
   String? _selected;
+  bool _hasChosen = false; // 👈 new
+
 
   void _showFullImage(BuildContext context, String asset) {
     showDialog(
@@ -82,12 +84,13 @@ class _OnboardingSingleChoiceScreenState extends State<OnboardingSingleChoiceScr
   }
 
   void _choose(String value) {
+    if (_hasChosen) return; // 👈 new
+    _hasChosen = true;
     setState(() => _selected = value);
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) widget.onSelected(value);
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

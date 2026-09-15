@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/lipped_button.dart';
 import '../../../core/theme/lipped_card.dart';
 import '../home_state.dart';
 
@@ -288,27 +289,30 @@ class ActiveBlockingCard extends StatelessWidget {
     if (!isPaused) {
       return Opacity(
         opacity: isHardMode ? 0.35 : 1.0,
-        child: SizedBox(
-          width: double.infinity,
-          child: TextButton.icon(
-            onPressed: isHardMode ? null : onPauseToggle,
-            icon: Icon(
-              Icons.pause_rounded,
-              color: AppColors.textPrimary(context),
-              size: 22, // 👈 was 20
-            ),
-            label: Text(
-              'Pause',
-              style: AppTextStyles.labelLarge.copyWith( // 👈 was labelMedium
+        child: LippedButton( // 👈 was SizedBox + TextButton.icon
+          onTap: isHardMode ? null : onPauseToggle,
+          color: AppColors.backgroundSubtle(context),
+          lipColor: AppColors.border(context),
+          height: 54,
+          borderRadius: BorderRadius.circular(50),
+          enabled: !isHardMode,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.pause_rounded,
                 color: AppColors.textPrimary(context),
-                fontSize: 17, // 👈 was 15
+                size: 22,
               ),
-            ),
-            style: TextButton.styleFrom(
-              backgroundColor: AppColors.backgroundSubtle(context),
-              padding: const EdgeInsets.symmetric(vertical: 16), // 👈 was 14
-              shape: const StadiumBorder(),
-            ),
+              const SizedBox(width: 8),
+              Text(
+                'Pause',
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: AppColors.textPrimary(context),
+                  fontSize: 17,
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -317,74 +321,89 @@ class ActiveBlockingCard extends StatelessWidget {
       opacity: isHardMode ? 0.35 : 1.0,
       child: Column(
         children: [
-          SizedBox(
-            width: double.infinity,
-            child: TextButton.icon(
-              onPressed: isHardMode ? null : onPauseToggle,
-              icon: Icon(
-                Icons.play_arrow_rounded,
-                color: _pastelYellowText,
-                size: 22,
-              ),
-              label: Text(
-                'Resume',
-                style: AppTextStyles.labelLarge.copyWith(
+          LippedButton( // 👈 was SizedBox + TextButton.icon — Resume
+            onTap: isHardMode ? null : onPauseToggle,
+            color: _pastelYellow.withValues(alpha: 0.15),
+            lipColor: _pastelYellow.withValues(alpha: 0.35),
+            height: 54,
+            borderRadius: BorderRadius.circular(50),
+            enabled: !isHardMode,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.play_arrow_rounded,
                   color: _pastelYellowText,
-                  fontSize: 17,
+                  size: 22,
                 ),
-              ),
-              style: TextButton.styleFrom(
-                backgroundColor: _pastelYellow.withValues(alpha: 0.15),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: const StadiumBorder(),
-              ),
+                const SizedBox(width: 8),
+                Text(
+                  'Resume',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: _pastelYellowText,
+                    fontSize: 17,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
-                child: TextButton.icon(
-                  onPressed: isHardMode ? null : onRestart,
-                  icon: Icon(
-                    Icons.refresh_rounded,
-                    color: AppColors.textSecondary(context),
-                    size: 20, // 👈 was 18
-                  ),
-                  label: Text(
-                    'Restart',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.textSecondary(context),
-                      fontSize: 15, // 👈 was 14
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: AppColors.backgroundSubtle(context),
-                    padding: const EdgeInsets.symmetric(vertical: 14), // 👈 was 12
-                    shape: const StadiumBorder(),
+                child: LippedButton( // 👈 was TextButton.icon — Restart
+                  onTap: isHardMode ? null : onRestart,
+                  color: AppColors.backgroundSubtle(context),
+                  lipColor: AppColors.border(context),
+                  height: 48,
+                  borderRadius: BorderRadius.circular(50),
+                  enabled: !isHardMode,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        color: AppColors.textSecondary(context),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Restart',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          color: AppColors.textSecondary(context),
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: TextButton.icon(
-                  onPressed: isHardMode ? null : onSkipRound,
-                  icon: Icon(
-                    Icons.skip_next_rounded,
-                    color: AppColors.textSecondary(context),
-                    size: 20,
-                  ),
-                  label: Text(
-                    'Skip Round',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.textSecondary(context),
-                      fontSize: 15,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: AppColors.backgroundSubtle(context),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: const StadiumBorder(),
+                child: LippedButton( // 👈 was TextButton.icon — Skip Round
+                  onTap: isHardMode ? null : onSkipRound,
+                  color: AppColors.backgroundSubtle(context),
+                  lipColor: AppColors.border(context),
+                  height: 48,
+                  borderRadius: BorderRadius.circular(50),
+                  enabled: !isHardMode,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.skip_next_rounded,
+                        color: AppColors.textSecondary(context),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Skip Round',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          color: AppColors.textSecondary(context),
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -399,30 +418,38 @@ class ActiveBlockingCard extends StatelessWidget {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
     return Opacity(
       opacity: isHardMode ? 0.35 : 1.0,
-      child: SizedBox(
-        width: double.infinity,
-        child: TextButton.icon(
-          onPressed: isHardMode ? null : (isOnBreak ? onEndBreak : onTakeBreak),
-          icon: Icon(
-            isOnBreak ? Icons.stop : Icons.pause_rounded,
-            color: isOnBreak
-                ? _pastelYellowText
-                : AppColors.textPrimary(context),
-            size: 22, // 👈 was 20
-          ),
-          label: Text(
-            isOnBreak ? 'End Break' : 'Take A Break',
-            style: AppTextStyles.labelLarge.copyWith( // 👈 was labelMedium
-              color: AppColors.textPrimary(context),
-              fontSize: 19, // 👈 was 18
-              fontWeight: FontWeight.w700, // 👈 new
+      child: LippedButton( // 👈 was TextButton.icon wrapped in SizedBox
+        onTap: isHardMode ? null : (isOnBreak ? onEndBreak : onTakeBreak),
+        color: isOnBreak
+            ? _pastelYellow.withValues(alpha: 0.15)
+            : AppColors.backgroundSubtle(context),
+        lipColor: isOnBreak
+            ? _pastelYellow.withValues(alpha: 0.35)
+            : AppColors.border(context),
+        height: 54, // 👈 tune to match your original TextButton's rendered height
+        borderRadius: BorderRadius.circular(50), // 👈 fixed        enabled: !isHardMode,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!isOnBreak) ...[
+              Icon(
+                Icons.pause_rounded,
+                color: AppColors.textPrimary(context),
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              isOnBreak ? 'End Break Now' : 'Take A Break',
+              style: AppTextStyles.labelLarge.copyWith(
+                color: isOnBreak
+                    ? _pastelYellowText
+                    : AppColors.textPrimary(context),
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          style: TextButton.styleFrom(
-            backgroundColor:AppColors.backgroundSubtle(context),
-            padding: const EdgeInsets.symmetric(vertical: 16), // 👈 was 14
-            shape: const StadiumBorder(),
-          ),
+          ],
         ),
       ),
     );

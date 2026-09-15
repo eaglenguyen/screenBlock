@@ -1,6 +1,16 @@
 enum OnboardingStepId {
   welcome,
   need,
+  gauntletIntro, // 👈 new
+  screenTimeGuess, // 👈 new
+  gauntletAppsPicker, // 👈 new
+  gauntletEquip1, // 👈 new
+  gauntletTimeRange, // 👈 new
+  gauntletEquip2, // 👈 new
+  gauntletDays, // 👈 new
+  gauntletEquip3, // 👈 new
+  gauntletName, // 👈 new
+  gauntletEquip4, // 👈 new
   reassurance,
   neurodivergence,
   name, // 👈 new
@@ -13,12 +23,22 @@ class OnboardingFlowController {
 
   static const List<OnboardingStepId> order = [
     OnboardingStepId.welcome,
-    OnboardingStepId.need, // 👈 new
-    OnboardingStepId.reassurance, // 👈 new
-    OnboardingStepId.neurodivergence, // 👈 new
-    OnboardingStepId.name, // 👈 new — placed early, adjust position as you like
-    OnboardingStepId.age, // 👈 new
-    OnboardingStepId.demoVideo, // 👈 new
+    OnboardingStepId.gauntletIntro, // 👈 new
+    OnboardingStepId.screenTimeGuess, // 👈 new — gauntlet section right after welcome, per your ask
+    OnboardingStepId.gauntletAppsPicker,
+    OnboardingStepId.gauntletEquip1,
+    OnboardingStepId.gauntletTimeRange,
+    OnboardingStepId.gauntletEquip2,
+    OnboardingStepId.gauntletDays,
+    OnboardingStepId.gauntletEquip3,
+    OnboardingStepId.gauntletName,
+    OnboardingStepId.gauntletEquip4,
+    OnboardingStepId.need,
+    OnboardingStepId.reassurance,
+    OnboardingStepId.neurodivergence,
+    OnboardingStepId.name,
+    OnboardingStepId.age,
+    OnboardingStepId.demoVideo,
 
 
   ];

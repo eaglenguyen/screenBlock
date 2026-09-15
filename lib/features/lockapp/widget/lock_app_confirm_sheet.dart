@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
@@ -47,7 +48,7 @@ class LockAppConfirmSheet extends StatefulWidget {
 
 class _LockAppConfirmSheetState extends State<LockAppConfirmSheet> {
   Timer? _timer;
-  int _secondsLeft = 3;
+  int _secondsLeft = 6;
   bool _countdownDone = false;
 
   @override

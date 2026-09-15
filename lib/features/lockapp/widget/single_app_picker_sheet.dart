@@ -4,9 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:installed_apps/app_info.dart';
 import '../../../UI/appPicker/app_picker_state.dart';
 import '../../../UI/appPicker/app_picker_viewmodel.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-
 
 class SingleAppPickerSheet extends ConsumerStatefulWidget {
   final void Function(String packageName, String appName) onSelected;
@@ -52,7 +49,7 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
-        color: AppColors.backgroundCard(context),
+        color: Colors.white, // 👈 was AppColors.backgroundCard(context)
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -63,7 +60,7 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border(context),
+                color: const Color(0xFFF0E6D8), // 👈 was AppColors.border(context)
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -72,32 +69,39 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('Choose an app', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary(context))),
+              child: Text(
+                'Choose an app',
+                style: TextStyle( // 👈 was AppTextStyles.headlineSmall
+                  color: const Color(0xFF4A3728),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.backgroundSubtle(context),
+                color: const Color(0xFFFFF7ED), // 👈 was AppColors.backgroundSubtle(context)
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border(context), width: 0.5),
+                border: Border.all(color: const Color(0xFFF0E6D8), width: 0.5), // 👈 was AppColors.border(context)
               ),
               child: TextField(
                 controller: _searchController,
-                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary(context)),
+                style: const TextStyle(color: Color(0xFF4A3728), fontSize: 15, fontWeight: FontWeight.w600), // 👈 was AppTextStyles.bodyLarge
                 onChanged: (q) => ref.read(appPickerViewModelProvider.notifier).search(q),
                 decoration: InputDecoration(
                   hintText: 'Search apps...',
-                  hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context)),
-                  prefixIcon: Icon(Icons.search_rounded, color: AppColors.textSecondary(context), size: 20),
+                  hintStyle: const TextStyle(color: Color(0xFFB08A5A)), // 👈 was AppTextStyles.bodyMedium
+                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFB08A5A), size: 20), // 👈 was AppColors.textSecondary(context)
                   suffixIcon: state.isSearching
                       ? GestureDetector(
                     onTap: () {
                       _searchController.clear();
                       ref.read(appPickerViewModelProvider.notifier).clearSearch();
                     },
-                    child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 18),
+                    child: const Icon(Icons.close_rounded, color: Color(0xFFB08A5A), size: 18), // 👈 was AppColors.textSecondary(context)
                   )
                       : null,
                   border: InputBorder.none,
@@ -108,7 +112,7 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
           ),
           Expanded(
             child: state.isLoading
-                ? Center(child: CircularProgressIndicator(color: AppColors.accent(context)))
+                ? const Center(child: CircularProgressIndicator(color: Color(0xFF7DD3B0))) // 👈 was AppColors.accent(context)
                 : state.isSearching
                 ? _list(context, state.searchResults)
                 : _categorized(context, state),
@@ -120,8 +124,8 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
 
   Widget _list(BuildContext context, List<AppInfo> apps) {
     if (apps.isEmpty) {
-      return Center(
-        child: Text('No apps found', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context))),
+      return const Center(
+        child: Text('No apps found', style: TextStyle(color: Color(0xFFB08A5A))), // 👈 was AppTextStyles.bodyMedium
       );
     }
     return ListView.builder(
@@ -146,14 +150,19 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
               padding: const EdgeInsets.fromLTRB(4, 16, 0, 8),
               child: Text(
                 label.toUpperCase(),
-                style: AppTextStyles.labelSmall.copyWith(color: AppColors.textSecondary(context), letterSpacing: 0.12),
+                style: const TextStyle( // 👈 was AppTextStyles.labelSmall
+                  color: Color(0xFFB08A5A),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.backgroundSubtle(context),
+                color: const Color(0xFFFFF7ED), // 👈 was AppColors.backgroundSubtle(context)
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border(context), width: 0.5),
+                border: Border.all(color: const Color(0xFFF0E6D8), width: 0.5), // 👈 was AppColors.border(context)
               ),
               child: Column(
                 children: List.generate(apps.length, (i) {
@@ -161,7 +170,7 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
                   return Column(
                     children: [
                       _tile(context, apps[i]),
-                      if (!isLast) Divider(height: 0.5, thickness: 0.5, color: AppColors.border(context), indent: 56),
+                      if (!isLast) const Divider(height: 0.5, thickness: 0.5, color: Color(0xFFF0E6D8), indent: 56), // 👈 was AppColors.border(context)
                     ],
                   );
                 }),
@@ -178,28 +187,28 @@ class _SingleAppPickerSheetState extends ConsumerState<SingleAppPickerSheet> {
       onTap: () => _pick(app),
       borderRadius: BorderRadius.circular(14),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13), // 👈 was 11
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: app.icon != null
-                  ? Image.memory(app.icon!, width: 36, height: 36, fit: BoxFit.cover)
+                  ? Image.memory(app.icon!, width: 40, height: 40, fit: BoxFit.cover) // 👈 was 36
                   : Container(
-                width: 36,
-                height: 36,
-                color: AppColors.backgroundCard(context),
-                child: Icon(Icons.apps_rounded, color: AppColors.textSecondary(context), size: 18),
+                width: 40,
+                height: 40,
+                color: const Color(0xFFF0E6D8), // 👈 was AppColors.backgroundCard(context)
+                child: const Icon(Icons.apps_rounded, color: Color(0xFFB08A5A), size: 20), // 👈 was AppColors.textSecondary(context)
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 app.name ?? app.packageName ?? '',
-                style: AppTextStyles.bodyLarge.copyWith(fontSize: 14, color: AppColors.textPrimary(context)),
+                style: const TextStyle(color: Color(0xFF4A3728), fontSize: 15, fontWeight: FontWeight.w600), // 👈 was AppTextStyles.bodyLarge fontSize:14
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary(context), size: 20),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFFB08A5A), size: 22), // 👈 was AppColors.textSecondary(context), size:20
           ],
         ),
       ),

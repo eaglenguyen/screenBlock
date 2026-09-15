@@ -49,16 +49,14 @@ class _IconSpec {
     required this.delay,
   });
 }
-// Coach mark style demo
+
 class _DemoPhase {
   final Duration pauseAt;
-  final double dx; // 0.0-1.0, horizontal position within the fullscreen frame
-  final double dy; // 0.0-1.0, vertical position within the fullscreen frame
+  final double dx;
+  final double dy;
   final String label;
-  final bool labelAbove; // 👈 new
-  final String? pointerEmoji; // 👈 new — if set, renders this emoji instead of the plain circle
-
-
+  final bool labelAbove;
+  final String? pointerEmoji;
 
   const _DemoPhase({
     required this.pauseAt,
@@ -70,21 +68,19 @@ class _DemoPhase {
   });
 }
 
-
 class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     with TickerProviderStateMixin {
   late VideoPlayerController _videoController;
   bool _videoInitialized = false;
-  bool _showCloseButton = false; // 👈 new
-  bool _videoEnded = false; // 👈 new
-
+  bool _showCloseButton = false;
+  bool _videoEnded = false;
 
   late AnimationController _iconController;
   late AnimationController _expandController;
   bool _isExpanding = false;
-  Rect? _phoneStartRect; // 👈 new — the phone's real on-screen position/size, captured right before expanding
+  Rect? _phoneStartRect;
 
-  final GlobalKey _phoneKey = GlobalKey(); // 👈 new
+  final GlobalKey _phoneKey = GlobalKey();
 
   final _icons = const [
     _IconSpec(fromLeft: true, asset: 'assets/icons/instagram.png', targetX: -140, targetY: -100, delay: 0.0),
@@ -93,12 +89,11 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     _IconSpec(fromLeft: false, asset: 'assets/icons/tiktok.png', targetX: 148, targetY: 20, delay: 0.2),
   ];
 
-  // 👇 PLACEHOLDER TIMESTAMPS/POSITIONS — replace with real values from your actual recorded video
   final _phases = const [
-    _DemoPhase(pauseAt: Duration(seconds: 1, milliseconds: 200), dx: 0.81, dy: 0.60, label: 'Tap to block'),
-    _DemoPhase(pauseAt: Duration(seconds: 4, milliseconds: 300), dx: 0.5, dy: 0.89, label: 'Tap Spin', labelAbove: true, pointerEmoji: '👇'),
+    _DemoPhase(pauseAt: Duration(seconds: 1, milliseconds: 100), dx: 0.81, dy: 0.60, label: 'Tap to block'),
+    _DemoPhase(pauseAt: Duration(seconds: 4, milliseconds: 300), dx: 0.5, dy: 0.87, label: 'Tap Spin', labelAbove: true, pointerEmoji: '👇'),
     _DemoPhase(pauseAt: Duration(seconds: 7), dx: 0.5, dy: 0.15, label: 'Tap the notification', pointerEmoji: '👆'),
-    _DemoPhase(pauseAt: Duration(seconds: 9 , milliseconds: 200), dx: 0.5, dy: 0.415, label: 'Spin the wheel!'),
+    _DemoPhase(pauseAt: Duration(seconds: 9, milliseconds: 200), dx: 0.5, dy: 0.415, label: 'Spin the wheel!'),
   ];
 
   int _currentPhaseIndex = 0;
@@ -113,16 +108,15 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
       if (mounted) _iconController.forward();
     });
 
-    _expandController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    _expandController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
 
     _videoController = VideoPlayerController.asset('assets/video/demowheel.mp4')
       ..initialize().then((_) {
         if (!mounted) return;
         setState(() => _videoInitialized = true);
-        _videoController.setLooping(false); // 👈 fixed — was true
-        _videoController.addListener(_checkPhaseProgress); // 👈 fixed — was missing entirely
-        _videoController.addListener(_checkVideoEnded); // 👈 new
-
+        _videoController.setLooping(false);
+        _videoController.addListener(_checkPhaseProgress);
+        _videoController.addListener(_checkVideoEnded);
       }).catchError((e) {
         debugPrint('❌ video init error: $e');
       });
@@ -133,8 +127,7 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     _iconController.dispose();
     _expandController.dispose();
     _videoController.removeListener(_checkPhaseProgress);
-    _videoController.removeListener(_checkVideoEnded); // 👈 new
-
+    _videoController.removeListener(_checkVideoEnded);
     _videoController.dispose();
     super.dispose();
   }
@@ -152,7 +145,7 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     }
   }
 
-  void _checkVideoEnded() { // 👈 new
+  void _checkVideoEnded() {
     if (_videoEnded) return;
     final value = _videoController.value;
     if (value.isInitialized &&
@@ -160,9 +153,8 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
         value.position >= value.duration &&
         value.duration > Duration.zero) {
       _videoEnded = true;
-      setState(() => _showCloseButton = true); // 👈 close button now only appears here
-      widget.onContinue(); // 👈 removed the Future.delayed entirely — advances immediately
-
+      setState(() => _showCloseButton = true);
+      widget.onContinue();
     }
   }
 
@@ -174,7 +166,6 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     _videoController.play();
     HapticFeedback.lightImpact();
   }
-
 
   void _showMeHow() async {
     final box = _phoneKey.currentContext?.findRenderObject() as RenderBox?;
@@ -189,14 +180,13 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     });
     HapticFeedback.mediumImpact();
 
-    _iconController.reverse();
+    await _iconController.reverse();
     await _expandController.forward();
 
     if (!mounted) return;
     _videoController.seekTo(Duration.zero);
-    _videoController.play(); // 👈 this is now the ONLY place the video ever starts playing
+    _videoController.play();
   }
-
 
   void _closeFullscreen() async {
     setState(() => _showCloseButton = false);
@@ -213,15 +203,43 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     _iconController.forward();
   }
 
+  // 👇 the ONE shared visual — used both at rest and while growing to fullscreen
+  Widget _buildPhoneVisual({required double borderWidth, required double shadowOpacity, required double radius}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: const Color(0xFF4A3728), width: borderWidth),
+        boxShadow: shadowOpacity > 0
+            ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12 * shadowOpacity), blurRadius: 20, offset: const Offset(0, 10))]
+            : null,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular((radius - borderWidth).clamp(0.0, radius)),
+        child: Container(
+          color: Colors.black,
+          child: _videoInitialized
+              ? FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: 1000, // 👈 was _videoController.value.size.width * 1.08 — arbitrary large base, only the ratio matters
+              height: 1000 / _videoController.value.aspectRatio, // 👈 was .size.height * 1.15 — now driven by the rotation-correct aspect ratio
+              child: VideoPlayer(_videoController),
+            ),
+          )
+              : const Center(child: CircularProgressIndicator(color: Color(0xFF7DD3B0))),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
     const phoneWidth = 250.0;
-    final videoAspect = _videoInitialized ? _videoController.value.aspectRatio : (9 / 19.5); // fallback guess until video loads
+    final videoAspect = _videoInitialized ? _videoController.value.aspectRatio : (9 / 19.5);
     final phoneHeight = phoneWidth / videoAspect;
-
-
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7ED),
@@ -281,36 +299,21 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
                         child: Stack(
                           alignment: Alignment.center,
                           clipBehavior: Clip.none,
-                          children: [                    Opacity(
-                            opacity: _isExpanding ? 0.0 : 1.0,
-                            child: Container( // 👈 was GestureDetector — no more tap-to-play here
+                          children: [
+                            // 👇 resting slot — only visibly renders the phone when NOT expanding.
+                            // Once expanding starts, this becomes an invisible placeholder (SizedBox),
+                            // so there's zero overlap with the growing overlay below.
+                            SizedBox(
                               key: _phoneKey,
                               width: phoneWidth,
                               height: phoneHeight,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(32),
-                                border: Border.all(color: const Color(0xFF4A3728), width: 3),
-                                boxShadow: [
-                                  BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 20, offset: const Offset(0, 10)),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(28),
-                                child: _videoInitialized
-                                    ? AspectRatio(
-                                  aspectRatio: _videoController.value.aspectRatio,
-                                  child: VideoPlayer(_videoController), // 👈 just shows the first frame, paused, no play button overlay
-                                )
-                                    : const Center(child: CircularProgressIndicator(color: Color(0xFF7DD3B0))),
-                              ),
+                              child: _isExpanding ? null : _buildPhoneVisual(borderWidth: 3, shadowOpacity: 1, radius: 32),
                             ),
-                          ),
                             AnimatedBuilder(
                               animation: _iconController,
                               builder: (context, _) {
                                 return Opacity(
-                                  opacity: _isExpanding ? 0.0 : 1.0,
+                                  opacity: _iconController.value,
                                   child: Stack(
                                     alignment: Alignment.center,
                                     children: [for (final spec in _icons) _buildIcon(spec)],
@@ -342,42 +345,29 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
             AnimatedBuilder(
               animation: _expandController,
               builder: (context, child) {
-                final t = Curves.easeOutCubic.transform(_expandController.value); // 👈 was easeInOutCubic — a curve with a gentler middle-phase rate of change
+                final t = Curves.easeOutCubic.transform(_expandController.value);
                 final start = _phoneStartRect!;
                 final end = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
                 final rect = Rect.lerp(start, end, t)!;
                 final radius = lerpDouble(32, 0, t)!;
+                final borderWidth = lerpDouble(3, 0, t)!;
+                final shadowOpacity = (1 - t).clamp(0.0, 1.0);
 
                 return Positioned(
                   left: rect.left,
                   top: rect.top,
                   width: rect.width,
                   height: rect.height,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(radius),
-                    child: Container(
-                      color: Colors.black,
-                      child: Stack(
-                        children: [
-                          _videoInitialized
-                              ? FittedBox(
-                            fit: BoxFit.cover,
-                            child: SizedBox(
-                              width: _videoController.value.size.width,
-                              height: _videoController.value.size.height,
-                              child: VideoPlayer(_videoController),
-                            ),
-                          )
-                              : const Center(child: CircularProgressIndicator(color: Color(0xFF7DD3B0))),
-                          if (_showingPhaseOverlay && t > 0.98 && _currentPhaseIndex < _phases.length)
-                            _PhaseHighlight(
-                              phase: _phases[_currentPhaseIndex],
-                              frameSize: rect.size,
-                              onTap: _onPhaseTapped,
-                            ),
-                        ],
-                      ),
-                    ),
+                  child: Stack(
+                    children: [
+                      _buildPhoneVisual(borderWidth: borderWidth, shadowOpacity: shadowOpacity, radius: radius),
+                      if (_showingPhaseOverlay && t > 0.98 && _currentPhaseIndex < _phases.length)
+                        _PhaseHighlight(
+                          phase: _phases[_currentPhaseIndex],
+                          frameSize: rect.size,
+                          onTap: _onPhaseTapped,
+                        ),
+                    ],
                   ),
                 );
               },
@@ -444,9 +434,6 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
   }
 }
 
-
-
-
 class _PhaseHighlight extends StatefulWidget {
   final _DemoPhase phase;
   final Size frameSize;
@@ -461,9 +448,10 @@ class _PhaseHighlight extends StatefulWidget {
   @override
   State<_PhaseHighlight> createState() => _PhaseHighlightState();
 }
+
 class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderStateMixin {
   late AnimationController _pulseController;
-  late List<AnimationController> _rippleControllers; // 👈 new — one-shot controllers, triggered on demand
+  late List<AnimationController> _rippleControllers;
 
   @override
   void initState() {
@@ -472,7 +460,6 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
       ..addListener(_onPulseTick)
       ..repeat();
 
-    // 👇 new — two ripple controllers, each fires once per trigger, one per heartbeat peak
     _rippleControllers = [
       AnimationController(vsync: this, duration: const Duration(milliseconds: 700)),
       AnimationController(vsync: this, duration: const Duration(milliseconds: 700)),
@@ -483,11 +470,11 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
 
   void _onPulseTick() {
     final v = _pulseController.value;
-    if (_lastPulseValue < 0.001 && v >= 0.001) { // 👈 changed — fires at the very START of the beat (t≈0), not at the peak (t=0.15)
+    if (_lastPulseValue < 0.001 && v >= 0.001) {
       HapticFeedback.lightImpact();
       _rippleControllers[0].forward(from: 0);
     }
-    if (_lastPulseValue < 0.25 && v >= 0.25) { // 👈 changed — start of second beat's scale-up (was 0.4, its peak)
+    if (_lastPulseValue < 0.25 && v >= 0.25) {
       HapticFeedback.lightImpact();
       _rippleControllers[1].forward(from: 0);
     }
@@ -499,7 +486,7 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
     _pulseController.removeListener(_onPulseTick);
     _pulseController.dispose();
     for (final c in _rippleControllers) {
-      c.dispose(); // 👈 new
+      c.dispose();
     }
     super.dispose();
   }
@@ -544,7 +531,7 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (widget.phase.pointerEmoji == null) // 👈 new — only show ripples when there's no pointer emoji
+                  if (widget.phase.pointerEmoji == null)
                     for (final controller in _rippleControllers)
                       AnimatedBuilder(
                         animation: controller,
@@ -556,8 +543,8 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
           ),
         ),
         Positioned(
-          left: x - 40,
-          top: y - 40,
+          left: x - 50,
+          top: y - 50,
           child: GestureDetector(
             onTap: widget.onTap,
             child: AnimatedBuilder(
@@ -567,9 +554,9 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
                 return Transform.scale(
                   scale: scale,
                   child: widget.phase.pointerEmoji != null
-                      ? SizedBox( // 👈 new — emoji version, same 80x80 footprint as the circle for consistent positioning
-                    width: 80,
-                    height: 80,
+                      ? SizedBox(
+                    width: 100,
+                    height: 100,
                     child: Center(
                       child: Text(
                         widget.phase.pointerEmoji!,
@@ -577,9 +564,9 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
                       ),
                     ),
                   )
-                  : Container(
-                    width: 80,
-                    height: 80,
+                      : Container(
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 3),
@@ -623,7 +610,7 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
   }
 
   Widget _buildRipple(double t) {
-    if (t >= 1.0) return const SizedBox.shrink(); // 👈 new — fully hidden once its one-shot animation completes
+    if (t >= 1.0) return const SizedBox.shrink();
     final size = 80.0 + (t * 60);
     final opacity = (1.0 - t).clamp(0.0, 1.0) * 0.6;
     return Container(

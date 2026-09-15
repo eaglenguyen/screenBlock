@@ -6,6 +6,7 @@ class LippedButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final Color color;
+  final Gradient? gradient; // 👈 new — takes priority over `color` if provided
   final Color? lipColor; // defaults to a darker shade of `color` if not provided
   final double height;
   final double lipDepth;
@@ -16,7 +17,8 @@ class LippedButton extends StatefulWidget {
     super.key,
     required this.child,
     required this.onTap,
-    required this.color,
+    this.color = Colors.transparent, // 👈 now has a default, since gradient may be used instead
+    this.gradient, // 👈
     this.lipColor,
     this.height = 58,
     this.lipDepth = 6,
@@ -46,7 +48,6 @@ class _LippedButtonState extends State<LippedButton> {
   void _handleTapCancel() {
     setState(() => _isPressed = false);
   }
-
   @override
   Widget build(BuildContext context) {
     final radius = widget.borderRadius ?? BorderRadius.circular(50);
@@ -80,7 +81,11 @@ class _LippedButtonState extends State<LippedButton> {
                 top: _isPressed ? widget.lipDepth : 0,
                 bottom: _isPressed ? 0 : widget.lipDepth,
                 child: Container(
-                  decoration: BoxDecoration(color: widget.color, borderRadius: radius),
+                  decoration: BoxDecoration(
+                    color: widget.gradient == null ? widget.color : null, // 👈 new
+                    gradient: widget.gradient, // 👈 new
+                    borderRadius: radius,
+                  ),
                   child: Center(child: widget.child),
                 ),
               ),

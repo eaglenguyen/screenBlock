@@ -10,6 +10,7 @@ import 'package:pausenow/UI/wheel/widgets/paste_list_tutorial_overlay.dart';
 import 'package:pausenow/UI/wheel/widgets/wheel_painter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/lipped_button.dart';
 import '../../paywall/feature_paywall_screen.dart';
 import '../../providers/premium_provider.dart';
 import '../settings/widgets/hard_mode_gate.dart';
@@ -195,29 +196,18 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
     final isEnabled = state.commitModeEnabled;
     return Padding(
       padding: const EdgeInsets.only(top: 2),
-      child: GestureDetector(
-        onTap: () => _handleCommitModeTap(context, state),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-              gradient: const LinearGradient( // 👈 always applied now
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFE8623D),
-                  Color(0xFFF2A340),
-                ],
-              ),
-            borderRadius: BorderRadius.circular(50),
-            border: Border.all(
-              color: isEnabled ? const Color(0xFFE8623D) : AppColors.border(context),
-              width: isEnabled ? 1.5 : 0.5,
-            ),
-            boxShadow: isEnabled // 👈 new — subtle glow matching the gradient color
-                ? [BoxShadow(color: const Color(0xFFF2A340).withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 3))]
-                : null,
+      child: SizedBox(
+        width: 130, // 👈 adjust to fit your layout — LippedButton defaults to full width otherwise
+        child: LippedButton( // 👈 was GestureDetector/AnimatedContainer
+          onTap: () => _handleCommitModeTap(context, state),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFE8623D), Color(0xFFF2A340)],
           ),
+          lipColor: const Color(0xFFA84A28), // 👈 darker burnt-orange shade beneath the gradient
+          height: 58, // 👈 tune to match your original AnimatedContainer's rendered height
+          borderRadius: BorderRadius.circular(50),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -226,18 +216,15 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                 height: 14,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isEnabled ? Colors.black : Colors.transparent, // 👈 white dot reads better on the orange gradient than another orange
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2,
-                  ),
+                  color: isEnabled ? Colors.black : Colors.transparent,
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
               ),
               const SizedBox(width: 8),
               Text(
-                'STRICT\nMODE', // 👈 updated label to match your rename
+                'STRICT\nMODE',
                 style: AppTextStyles.bodyLarge.copyWith(
-                  color: Colors.white, // 👈 white text on the gradient for contrast
+                  color: Colors.white,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.5,
                   fontSize: 15,
@@ -461,28 +448,45 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                             const SizedBox(height: 16),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 20),
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: _confettiColor.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: _confettiColor.withValues(alpha: 0.3), width: 0.5),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text('Your pick:', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary(context))),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      state.lastResult!,
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyles.bodyLarge.copyWith(
-                                        color: _confettiColor,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 24,
+                              child: TweenAnimationBuilder<double>(
+                                key: ValueKey(state.lastResult),
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                duration: const Duration(milliseconds: 450), // 👈 slightly shorter
+                                curve: Curves.easeOutBack,
+                                builder: (context, value, child) {
+                                  return Transform.scale(
+                                    scale: value,
+                                    child: child,
+                                  );
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(18), // 👈 was 20
+                                  decoration: BoxDecoration(
+                                    color: _confettiColor.withValues(alpha: 0.12), // 👈 back to 0.12
+                                    borderRadius: BorderRadius.circular(16), // 👈 was 20
+                                    border: Border.all(color: _confettiColor.withValues(alpha: 0.6), width: 2), // 👈 was 0.3/1 — more visible
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: _confettiColor.withValues(alpha: 0.15), // 👈 was 0.3 — much softer
+                                        blurRadius: 12, // 👈 was 20
+                                        offset: const Offset(0, 4), // 👈 was 6, spreadRadius removed
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        state.lastResult!,
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.bodyLarge.copyWith( // 👈 back to bodyLarge
+                                          color: _confettiColor,
+                                          fontWeight: FontWeight.w800, // 👈 back to w800
+                                          fontSize: 26, // 👈 small bump from original 24, not the 30 before
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

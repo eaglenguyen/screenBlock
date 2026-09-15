@@ -23,17 +23,22 @@ class OnboardingContinueButton extends StatefulWidget {
 
 class _OnboardingContinueButtonState extends State<OnboardingContinueButton> {
   bool _isPressed = false;
+  bool _isLocked = false; // 👈 new
 
   void _handleTapDown(TapDownDetails _) {
-    if (!widget.enabled) return;
+    if (!widget.enabled || widget.onTap == null || _isLocked) return; // 👈 guard added
     setState(() => _isPressed = true);
     HapticFeedback.mediumImpact();
   }
 
   void _handleTapUp(TapUpDetails _) {
-    if (!widget.enabled) return;
+    if (!widget.enabled || widget.onTap == null || _isLocked) return; // 👈 guard added
     setState(() => _isPressed = false);
-    widget.onTap();
+    _isLocked = true; // 👈 new — locks immediately on tap
+    widget.onTap!();
+    Future.delayed(const Duration(milliseconds: 600), () { // 👈 new — unlocks after a beat, in case the button is reused without rebuilding
+      if (mounted) _isLocked = false;
+    });
   }
 
   void _handleTapCancel() {

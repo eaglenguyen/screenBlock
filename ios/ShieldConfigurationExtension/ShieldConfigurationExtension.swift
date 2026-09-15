@@ -90,7 +90,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         if let remaining = lockAppRemaining, let max = lockAppMax {
             secondaryLabel = remaining <= 0 ? "No unlocks left today" : "Unlock (\(remaining)/\(max))"
         } else {
-            secondaryLabel = wasUnblockTapped ? "didnt get a notification? Open pause now" : "Spin Wheel?"
+            secondaryLabel = wasUnblockTapped ? "didnt get a notification? Open spinbrek" : "Spin Wheel?"
         }
 
         let secondaryColor: UIColor

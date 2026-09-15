@@ -1,5 +1,8 @@
 // lib/onboarding_new/screens/name_screen.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widget/continue_button.dart';
 import '../widget/progress_bar.dart';
@@ -10,6 +13,11 @@ class OnboardingNameScreen extends StatefulWidget {
   final int progressTotal;
   final VoidCallback onBack;
   final ValueChanged<String> onContinue;
+  final String title; // 👈 new
+  final String subtitle; // 👈 new
+  final String hint; // 👈 new
+  final String continueLabel; // 👈 new
+  final bool showRandomizer; // 👈 new
 
   const OnboardingNameScreen({
     super.key,
@@ -17,6 +25,12 @@ class OnboardingNameScreen extends StatefulWidget {
     required this.progressTotal,
     required this.onBack,
     required this.onContinue,
+    this.title = "What should we\ncall you?", // 👈 keeps old default
+    this.subtitle = "This is how we'll address you throughout the app.",
+    this.hint = 'Your name...',
+    this.continueLabel = 'Continue',
+    this.showRandomizer = false, // 👈 new
+
   });
 
   @override
@@ -26,6 +40,21 @@ class OnboardingNameScreen extends StatefulWidget {
 class _OnboardingNameScreenState extends State<OnboardingNameScreen> {
   final _ctrl = TextEditingController();
   bool _hasText = false;
+
+  static const _randomNames = [ // 👈 new
+    'Focus Fortress',
+    'Deep Work Den',
+    'No Distraction Zone',
+    'The Grind Hour',
+    'Locked In Mode',
+    'Clarity Block',
+    'Zen Hours',
+    'Productivity Vault',
+    'Flow State',
+    'Quiet Hours',
+    'Brain Sanctuary',
+    'The Focus Zone',
+  ];
 
   @override
   void initState() {
@@ -41,6 +70,12 @@ class _OnboardingNameScreenState extends State<OnboardingNameScreen> {
     super.dispose();
   }
 
+  void _randomize() { // 👈 new
+    HapticFeedback.selectionClick();
+    final random = _randomNames[Random().nextInt(_randomNames.length)];
+    _ctrl.text = random;
+    _ctrl.selection = TextSelection.fromPosition(TextPosition(offset: _ctrl.text.length));
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,12 +108,7 @@ class _OnboardingNameScreenState extends State<OnboardingNameScreen> {
                 ],
               ),
               const SizedBox(height: 40),
-              TypewriterTitle(
-                text: "What is your name?",
-                textAlign: TextAlign.center,
-                fontSize: 30,
-              ),
-
+              TypewriterTitle(text: widget.title),
               const SizedBox(height: 32),
               Container(
                 decoration: BoxDecoration(
@@ -102,7 +132,7 @@ class _OnboardingNameScreenState extends State<OnboardingNameScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Your name...',
+                    hintText: '',
                     hintStyle: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 18),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -112,9 +142,40 @@ class _OnboardingNameScreenState extends State<OnboardingNameScreen> {
                   },
                 ),
               ),
+              if (widget.showRandomizer) ...[ // 👈 new
+                const SizedBox(height: 14),
+                Center(
+                  child: GestureDetector(
+                    onTap: _randomize,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50),
+                        border: Border.all(color: const Color(0xFFF0E6D8), width: 1),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('🎲', style: TextStyle(fontSize: 16)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Random',
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFF4A3728),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
               OnboardingContinueButton(
-                label: 'Continue',
+                label: widget.continueLabel, // 👈 fixed — was hardcoded 'Continue', now actually uses the override
                 enabled: _hasText,
                 onTap: () => widget.onContinue(_ctrl.text.trim()),
               ),

@@ -129,23 +129,18 @@ class _OnboardingWelcomeScreenState extends State<OnboardingWelcomeScreen>
               ),
             ),
             const SizedBox(height: 32),
-            Text(
-              'SpinBrek',
-              style: GoogleFonts.poppins(
-                color: Colors.black87, // 👈 accentDark
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-              ),
+            Image.asset(
+              'assets/images/spinwheeltrans_fixed.png', // 👈 adjust to your actual saved filename/path
+              height: 80, // 👈 tune to match the visual weight of the old text
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             SizedBox(
-              height: 30,
+              height: 28,
               child: Text(
                 _displayText,
                 style: GoogleFonts.poppins(
                   color: const Color(0xFF4A3728).withValues(alpha: 0.7), // 👈 textPrimary at reduced opacity
-                  fontSize: 17,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),
