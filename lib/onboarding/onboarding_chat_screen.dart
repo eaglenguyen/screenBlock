@@ -1204,7 +1204,7 @@ class _OnboardingGoalsConfirmScreenState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'a lot of people have started with the same goals — Pause Now helped them get there.',
+                    'a lot of people have started with the same goals — SpinBrek helped them get there.',
                     style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.45),
                       fontSize: 14,

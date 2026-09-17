@@ -36,7 +36,7 @@ class _GetHelpSheetState extends State<GetHelpSheet> {
     {
       'q': 'How do I cancel my subscription?',
       'a':
-      'On iOS, go to Settings → Apple ID → Subscriptions → Pause Now → Cancel. Cancellation takes effect at the end of your current billing period.',
+      'On iOS, go to Settings → Apple ID → Subscriptions → SpinBrek → Cancel. Cancellation takes effect at the end of your current billing period.',
     },
     {
       'q': 'What are ⭐️ and how do I earn it?',
@@ -200,7 +200,7 @@ class _GetHelpSheetState extends State<GetHelpSheet> {
             child: OutlinedButton.icon(
               onPressed: () => launchUrl(
                 Uri.parse(
-                  'mailto:pause.now.2026@gmail.com?subject=Pause Now Support',
+                  'mailto:pause.now.2026@gmail.com?subject=SpinBrek Support',
                 ),
               ),
               icon: Icon(
@@ -280,7 +280,7 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
     );
 
     final uri = Uri.parse(
-      'mailto:pause.now.2026@gmail.com?subject=Pause Now Feedback&body=$body',
+      'mailto:pause.now.2026@gmail.com?subject=SpinBrek Feedback&body=$body',
     );
 
     if (await canLaunchUrl(uri)) {
@@ -349,7 +349,7 @@ class _GiveFeedbackSheetState extends State<GiveFeedbackSheet> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Help us make Pause Now better',
+                'Help us make SpinBrek better',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary(context),
                 ),

@@ -767,7 +767,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             const SizedBox(height: 12),
             Text(
-              'pause now does not store accounts',
+              'Spinbrek does not store accounts',
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary(context),

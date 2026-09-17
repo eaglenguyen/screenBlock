@@ -156,7 +156,7 @@ class _OnboardingOutlookScreenState extends State<OnboardingOutlookScreen>
                               style: TextStyle(color: Colors.white),
                             ),
                             const TextSpan(
-                              text: 'pause now',
+                              text: 'SpinBrek',
                               style: TextStyle(color: Color(0xFFEDB82A)),
                             ),
                           ],

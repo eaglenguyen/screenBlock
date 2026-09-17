@@ -35,7 +35,7 @@ class QuotesScreen extends StatelessWidget {
       },
       {
         'name': 'Marcus',
-        'title': 'Pause Now User',
+        'title': 'SpinBrek User',
         'headline': 'My focus at work is night and day',
         'body': 'I used to check my phone every few minutes without even realizing it. Since blocking my apps during work hours, I actually finish tasks in one sitting.',
       },
@@ -47,7 +47,7 @@ class QuotesScreen extends StatelessWidget {
       },
       {
         'name': 'Priya Anand',
-        'title': 'Pause Now User',
+        'title': 'SpinBrek User',
         'headline': 'I finally read again',
         'body': 'I hadn\'t finished a book in two years. Three weeks into using this app, I\'ve read two. Small change, huge difference in how my evenings feel.',
       },

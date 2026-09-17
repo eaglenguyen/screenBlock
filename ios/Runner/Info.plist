@@ -42,17 +42,17 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>pause now does not use the camera.</string>
+	<string>SpinBrek does not use the camera.</string>
 	<key>NSFamilyControlsUsageDescription</key>
-	<string>pause now uses Screen Time to block distracting apps and help you focus.</string>
+	<string>SpinBrek uses Screen Time to block distracting apps and help you focus.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>pause now does not use the microphone. This permission is required by a third-party library.</string>
+	<string>SpinBrek does not use the microphone. This permission is required by a third-party library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>pause now does not access your photo library.</string>
+	<string>SpinBrek does not access your photo library.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSUserNotificationUsageDescription</key>
-	<string>pause now sends notifications to remind you before your trial ends and when a blocking session completes.</string>
+	<string>SpinBrek sends notifications to remind you before your trial ends and when a blocking session completes.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

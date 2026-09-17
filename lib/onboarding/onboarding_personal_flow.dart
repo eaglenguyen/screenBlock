@@ -1865,7 +1865,7 @@ class OnboardingProductivityScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 60),
           Text(
-            'Pause Now stops you from scrolling',
+            'SpinBrek stops you from scrolling',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               color: Colors.white,

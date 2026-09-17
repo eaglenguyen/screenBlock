@@ -63,7 +63,7 @@ class DemoExplainerScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'here\'s how pause now works:',
+                    'here\'s how SpinBrek works:',
                     style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.45),
                       fontSize: 15,
@@ -551,7 +551,7 @@ class _SetMultipleSchedulesScreenState extends State<SetMultipleSchedulesScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Set as many blocking schedules & apps as you need. pause now runs them all automatically, exactly when you need it.',
+                    'Set as many blocking schedules & apps as you need. SpinBrek runs them all automatically, exactly when you need it.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.45),
@@ -678,7 +678,7 @@ class _DemoComparisonScreenState extends ConsumerState<DemoComparisonScreen>
               FadeTransition(
                 opacity: _titleFade,
                 child: Text(
-                  'Become 5x more productive with pause now',
+                  'Become 5x more productive with SpinBrek',
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontSize: 28,
@@ -700,7 +700,7 @@ class _DemoComparisonScreenState extends ConsumerState<DemoComparisonScreen>
                           child: FadeTransition(
                             opacity: _cardFade,
                             child: _buildCard(
-                              label: 'Without pause now',
+                              label: 'Without SpinBrek',
                               heightFraction: 0.2 * _withoutBarGrow.value,
                               valueLabel: '20%',
                               filled: false,
@@ -712,7 +712,7 @@ class _DemoComparisonScreenState extends ConsumerState<DemoComparisonScreen>
                           child: FadeTransition(
                             opacity: _cardFade,
                             child: _buildCard(
-                              label: 'With pause now',
+                              label: 'With SpinBrek',
                               heightFraction: 1.0 * _withBarGrow.value,
                               valueLabel: '5x',
                               filled: true,
@@ -728,7 +728,7 @@ class _DemoComparisonScreenState extends ConsumerState<DemoComparisonScreen>
               FadeTransition(
                 opacity: _subtitleFade,
                 child: Text(
-                  'pause now makes it easy and holds you accountable.',
+                  'SpinBrek makes it easy and holds you accountable.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     color: Colors.white.withValues(alpha: 0.45),

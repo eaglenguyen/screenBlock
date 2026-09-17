@@ -250,7 +250,7 @@ class _GraphPainter extends CustomPainter {
 
     if (progress > 0.95) {
       _drawArrow(canvas, _gold, fullPath, 1.0 - 0.01, 1.0);
-      _drawEndLabel(canvas, 'with pause now', _gold, Offset(r + 20, endY + 97));
+      _drawEndLabel(canvas, 'with SpinBrek', _gold, Offset(r + 20, endY + 97));
     }
   }
 

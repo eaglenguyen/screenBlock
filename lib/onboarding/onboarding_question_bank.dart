@@ -323,7 +323,7 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
                   text: 'goals',
                   style: const TextStyle(color: Color(0xFFEDB82A)),
                 ),
-                const TextSpan(text: ' using pause now'),
+                const TextSpan(text: ' using SpinBrek'),
               ],
             ),
           ),
@@ -1274,7 +1274,7 @@ class QBCommitmentLowScreen extends StatelessWidget {
                 fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.2,
               )),
           const SizedBox(height: 16),
-          Text('You don\'t need to be ready —\n you just need to start.\npause now is designed to make change\nfeel easy, not overwhelming.',
+          Text('You don\'t need to be ready —\n you just need to start.\nSpinBrek is designed to make change\nfeel easy, not overwhelming.',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 color: Colors.white.withValues(alpha: 0.45), fontSize: 15, height: 1.5,
@@ -1444,7 +1444,7 @@ class QBRealisticTargetScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '90% of users say that they scroll much less after using pause now.',
+            '90% of users say that they scroll much less after using SpinBrek.',
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.45),
               fontSize: 14,
@@ -1551,7 +1551,7 @@ class _ReviewCarouselState extends State<ReviewCarousel> {
     {
       'title': 'Best way to reclaim your\nlost time',
       'author': 'Colton Smetana',
-      'body': 'Pause Now helped me break free from endless doomscrolling. I\'m more present and productive now. And the best part? The devs actually listen to feedback.',
+      'body': 'SpinBrek helped me break free from endless doomscrolling. I\'m more present and productive now. And the best part? The devs actually listen to feedback.',
     },
     {
       'title': 'Changed my daily habits',

@@ -116,7 +116,7 @@ class MyApp extends ConsumerWidget {
     });
 
     return MaterialApp.router(
-      title: 'pause now',
+      title: 'SpinBrek',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

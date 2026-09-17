@@ -69,7 +69,7 @@ class _AcknowledgmentsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'pause now is built with the help of these creators.',
+            'Spinbrek is built with the help of these creators.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary(context),
             ),
@@ -108,7 +108,7 @@ class _AcknowledgmentsSheet extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _wasModified
-                      ? 'Modified for use in Pause Now. Licensed under CC BY 4.0.'
+                      ? 'Modified for use in SpinBrek. Licensed under CC BY 4.0.'
                       : 'Licensed under CC BY 4.0.',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary(context),

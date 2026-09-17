@@ -365,7 +365,7 @@ class _OnboardingPermissionsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '"pause now" Would Like to\nAccess Screen Time',
+                    '"SpinBrek" Would Like to\nAccess Screen Time',
                     style: GoogleFonts.poppins(
                       color: const Color(0xFF1A1A1A).withValues(alpha: 0.55),
                       fontSize: 19,
@@ -375,7 +375,7 @@ class _OnboardingPermissionsScreenState
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Providing "Pause Now" access to Screen Time may allow it to see your activity data, restrict content, and limit the usage of apps and websites.',
+                    'Providing "SpinBrek" access to Screen Time may allow it to see your activity data, restrict content, and limit the usage of apps and websites.',
                     style: GoogleFonts.poppins(
                       color: const Color(0xFF1A1A1A).withValues(alpha: 0.55),
                       fontSize: 14.5,
@@ -842,7 +842,7 @@ class AccessibilityDisclosureDialog {
               ),
               const SizedBox(height: 18),
               Text(
-                'Pause Now needs Accessibility access to block distracting apps',
+                'SpinBrek needs Accessibility access to block distracting apps',
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 15,
@@ -852,7 +852,7 @@ class AccessibilityDisclosureDialog {
               ),
               const SizedBox(height: 12),
               Text(
-                'To block the apps you choose, Pause Now uses Android\'s Accessibility Service to detect which app is currently open on your screen. When you\'ve started a focus session and open a blocked app, Pause Now shows the block screen to help you stay on track.',
+                'To block the apps you choose, SpinBrek uses Android\'s Accessibility Service to detect which app is currently open on your screen. When you\'ve started a focus session and open a blocked app, SpinBrek shows the block screen to help you stay on track.',
                 style: GoogleFonts.poppins(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 13,
@@ -861,7 +861,7 @@ class AccessibilityDisclosureDialog {
               ),
               const SizedBox(height: 12),
               Text(
-                'This is used only to power app blocking — Pause Now does not read the content of your screen, and no data about which apps you use is ever collected, stored, or shared.',
+                'This is used only to power app blocking — SpinBrek does not read the content of your screen, and no data about which apps you use is ever collected, stored, or shared.',
                 style: GoogleFonts.poppins(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 13,
@@ -870,7 +870,7 @@ class AccessibilityDisclosureDialog {
               ),
               const SizedBox(height: 12),
               Text(
-                'You\'ll be taken to your device\'s Accessibility settings to turn this on for Pause Now.',
+                'You\'ll be taken to your device\'s Accessibility settings to turn this on for SpinBrek.',
                 style: GoogleFonts.poppins(
                   color: Colors.white.withValues(alpha: 0.45),
                   fontSize: 12,

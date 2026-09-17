@@ -90,7 +90,7 @@ List<ChatStep> getOnboardingSteps(String name) => [
   // Screen 5 — The Solution
   ChatStep(
     botMessages: [
-      ChatMessage(type: MessageType.bot, text: 'great, that\'s exactly what Pause Now is for'),
+      ChatMessage(type: MessageType.bot, text: 'great, that\'s exactly what SpinBrek is for'),
       ChatMessage(type: MessageType.bot, text: 'not to make your phone the enemy.'),
       ChatMessage(type: MessageType.bot, text: 'not to shame you for scrolling.'),
       ChatMessage(type: MessageType.bot, text: 'but to create'),

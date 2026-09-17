@@ -169,70 +169,74 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
                   const SizedBox(height: 40),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: 'pause now ',
-                            style: TextStyle(color: AppColors.textPrimary(context)),
-                          ),
-                          TextSpan(
-                            text: 'Free',
-                            style: TextStyle(color: AppColors.textSecondary(context)),
-                          ),
-                          WidgetSpan(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 40),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.5,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'vs ',
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary(context),
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: 'pause now ',
-                                      style: TextStyle(color: _orangeAccent), // 👈 was AppColors.accent(context)
-                                    ),
-                                    WidgetSpan(
-                                      child: Container(
-                                        margin: const EdgeInsets.only(left: 4),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                                        decoration: BoxDecoration(
-                                          color: _orangeAccent, // 👈 was AppColors.accent(context)
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          'Pro',
-                                          style: GoogleFonts.poppins(
-                                            color: _orangeAccentText, // 👈 was AppColors.accentText(context)
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                    child: Column( // 👈 was RichText with a nested WidgetSpan — now a Column stacks the two rows vertically
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.poppins(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Spinbrek ',
+                                style: TextStyle(color: AppColors.textPrimary(context)),
                               ),
+                              TextSpan(
+                                text: 'Free',
+                                style: TextStyle(color: AppColors.textSecondary(context)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Padding( // 👈 new — indents just this row
+                          padding: const EdgeInsets.only(left: 64), // 👈 adjust this value to taste
+                          child: RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.poppins(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'vs  ',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary(context),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Spinbrek ',
+                                  style: TextStyle(color: _orangeAccent),
+                                ),
+                                WidgetSpan(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(left: 4),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: _orangeAccent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      'Pro',
+                                      style: GoogleFonts.poppins(
+                                        color: _orangeAccentText,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),

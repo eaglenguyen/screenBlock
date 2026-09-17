@@ -565,7 +565,7 @@ class _OnboardingWelcomeFlowState
           onBack: _previousStep,
           imageAsset: 'assets/images/mascot_flex.png', // 👈 swap to your real asset
           title: 'Let\'s create your first\nblocking schedule',
-          subtitle: 'We will now calibrate pause now to your physical ability and screen time patterns.',
+          subtitle: 'We will now calibrate SpinBrek to your physical ability and screen time patterns.',
           onNext: _nextStep,
         );
       case OnboardingSteps.permissions:
@@ -835,7 +835,7 @@ class _WelcomeScreenState extends State<_WelcomeScreen>
                   children: [
                     const Spacer(flex: 2),
                     Text(
-                      'pause now',
+                      'SpinBrek',
                       style: GoogleFonts.poppins(
                         color: const Color(0xFFEDB82A),
                         fontSize: 16,

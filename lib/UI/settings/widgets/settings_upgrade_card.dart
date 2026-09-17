@@ -119,7 +119,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Try Pause Now Pro',
+                    'Try SpinBrek Pro',
                     style: AppTextStyles.bodyLarge.copyWith( // 👈 was GoogleFonts.poppins
                       color: Colors.white, // kept white — intentional, fixed gradient bg needs guaranteed contrast, not a theme-dependent token
                       fontWeight: FontWeight.w700,
@@ -129,7 +129,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Includes 1 week of pause now Pro - unlocking every feature for you to try, for free!',
+                'Includes 1 week of SpinBrek Pro - unlocking every feature for you to try, for free!',
                 style: AppTextStyles.bodyMedium.copyWith( // 👈 was GoogleFonts.poppins
                   color: Colors.white,
                   height: 1.4,
