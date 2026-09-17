@@ -22,14 +22,14 @@ class _OnboardingWelcomeScreenState extends State<OnboardingWelcomeScreen>
   String _displayText = '';
 
   final _orbitIcons = [
-    _OrbitIcon(asset: 'assets/icons/tiktok.svg', color: Colors.black, bg: const Color(0xFFFFF0DA), angleOffset: 0),
-    _OrbitIcon(asset: 'assets/icons/instagram.svg', color: null, bg: const Color(0xFFFFE1EC), angleOffset: pi / 4),
+    _OrbitIcon(asset: 'assets/icons/instagram.png', angleOffset: pi / 4, showBackground: false), // 👈 new
     _OrbitIcon(icon: Icons.explore_rounded, color: const Color(0xFF3478F6), bg: const Color(0xFFDCEBFF), angleOffset: pi / 2),
-    _OrbitIcon(icon: Icons.restaurant_rounded, color: const Color(0xFFE8899E), bg: const Color(0xFFFFE1EC), angleOffset: 3 * pi / 4),
-    _OrbitIcon(icon: Icons.directions_run_rounded, color: const Color(0xFF2D7A54), bg: const Color(0xFFDFF3EA), angleOffset: pi),
+    _OrbitIcon(asset: 'assets/icons/youtube.png', angleOffset: 3 * pi / 4),
+    _OrbitIcon(icon: Icons.fastfood, color: const Color(0xFF2D7A54), bg: const Color(0xFFDFF3EA), angleOffset: pi),
+    _OrbitIcon(asset: 'assets/icons/tiktok.png', angleOffset: 0, showBackground: false), // 👈 new
     _OrbitIcon(icon: Icons.menu_book_rounded, color: const Color(0xFFB07A1E), bg: const Color(0xFFFFF0DA), angleOffset: 5 * pi / 4),
     _OrbitIcon(icon: Icons.compass_calibration_rounded, color: const Color(0xFF3478F6), bg: const Color(0xFFDCEBFF), angleOffset: 3 * pi / 2),
-    _OrbitIcon(icon: Icons.movie_filter_rounded, color: const Color(0xFF7B4FE0), bg: const Color(0xFFECE4FA), angleOffset: 7 * pi / 4),
+    _OrbitIcon(asset: 'assets/icons/twitter.png', angleOffset: 7 * pi / 4),
   ];
 
   @override
@@ -107,19 +107,9 @@ class _OnboardingWelcomeScreenState extends State<OnboardingWelcomeScreen>
                           border: Border.all(color: const Color(0xFF4A3728).withValues(alpha: 0.08), width: 1),
                         ),
                       ),
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 4)),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Text('🎡', style: TextStyle(fontSize: 32)),
-                        ),
+                      Image.asset(
+                        'assets/images/logowithwheeltrans.png', // 👈 adjust to your actual saved filename/path
+                        height: 80, // 👈 tune to match the visual weight of the old text
                       ),
                       for (final orbit in _orbitIcons)
                         _buildOrbitingIcon(orbit, t, radius: 130),
@@ -128,18 +118,13 @@ class _OnboardingWelcomeScreenState extends State<OnboardingWelcomeScreen>
                 },
               ),
             ),
-            const SizedBox(height: 32),
-            Image.asset(
-              'assets/images/spinwheeltrans_fixed.png', // 👈 adjust to your actual saved filename/path
-              height: 80, // 👈 tune to match the visual weight of the old text
-            ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 40),
             SizedBox(
               height: 28,
               child: Text(
                 _displayText,
                 style: GoogleFonts.poppins(
-                  color: const Color(0xFF4A3728).withValues(alpha: 0.7), // 👈 textPrimary at reduced opacity
+                  color: Colors.black87, // 👈 textPrimary at reduced opacity
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -163,11 +148,28 @@ class _OnboardingWelcomeScreenState extends State<OnboardingWelcomeScreen>
     final angle = orbit.angleOffset + t;
     final x = radius * cos(angle);
     final y = radius * sin(angle);
+
+    final iconContent = orbit.asset != null
+        ? (orbit.asset!.endsWith('.svg') // 👈 new — branch by file type
+        ? SvgPicture.asset(
+      orbit.asset!,
+      width: 22,
+      height: 22,
+      colorFilter: orbit.color != null ? ColorFilter.mode(orbit.color!, BlendMode.srcIn) : null,
+    )
+        : Image.asset( // 👈 new — PNG path
+      orbit.asset!,
+      width: orbit.showBackground ? 22 : 36, // 👈 bigger when there's no circle padding it out
+      height: orbit.showBackground ? 22 : 36,
+    ))
+        : Icon(orbit.icon, color: orbit.color, size: 22);
+
     return Transform.translate(
       offset: Offset(x, y),
       child: Transform.rotate(
         angle: -t,
-        child: Container(
+        child: orbit.showBackground // 👈 new — skip the circle Container entirely when false
+            ? Container(
           width: 44,
           height: 44,
           decoration: BoxDecoration(
@@ -177,17 +179,9 @@ class _OnboardingWelcomeScreenState extends State<OnboardingWelcomeScreen>
               BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 6, offset: const Offset(0, 3)),
             ],
           ),
-          child: Center(
-            child: orbit.asset != null
-                ? SvgPicture.asset(
-              orbit.asset!,
-              width: 22,
-              height: 22,
-              colorFilter: orbit.color != null ? ColorFilter.mode(orbit.color!, BlendMode.srcIn) : null,
-            )
-                : Icon(orbit.icon, color: orbit.color, size: 22),
-          ),
-        ),
+          child: Center(child: iconContent),
+        )
+            : iconContent, // 👈 just the raw PNG/icon, no circle, no shadow, no background at all
       ),
     );
   }
@@ -197,8 +191,16 @@ class _OrbitIcon {
   final String? asset;
   final IconData? icon;
   final Color? color;
-  final Color bg;
+  final Color? bg; // 👈 was required Color bg — now optional
   final double angleOffset;
+  final bool showBackground; // 👈 new — set false for transparent PNGs you don't want circled
 
-  const _OrbitIcon({this.asset, this.icon, this.color, required this.bg, required this.angleOffset});
+  const _OrbitIcon({
+    this.asset,
+    this.icon,
+    this.color,
+    this.bg,
+    required this.angleOffset,
+    this.showBackground = true, // 👈 new — defaults to true, so existing icons keep their circle
+  });
 }

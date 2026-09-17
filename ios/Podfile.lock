@@ -15,25 +15,25 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.4.8):
     - Flutter
-  - PostHog (3.64.1)
+  - PostHog (3.75.2)
   - posthog_flutter (0.0.1):
     - Flutter
     - FlutterMacOS
     - PostHog (< 4.0.0, >= 3.61.0)
-  - purchases_flutter (9.16.1):
+  - purchases_flutter (10.12.0):
     - Flutter
-    - PurchasesHybridCommon (= 17.55.1)
-  - purchases_ui_flutter (9.16.1):
+    - PurchasesHybridCommon (= 18.37.0)
+  - purchases_ui_flutter (10.12.0):
     - Flutter
-    - PurchasesHybridCommonUI (= 17.55.1)
-  - PurchasesHybridCommon (17.55.1):
-    - RevenueCat (= 5.67.1)
-  - PurchasesHybridCommonUI (17.55.1):
-    - PurchasesHybridCommon (= 17.55.1)
-    - RevenueCatUI (= 5.67.1)
-  - RevenueCat (5.67.1)
-  - RevenueCatUI (5.67.1):
-    - RevenueCat (= 5.67.1)
+    - PurchasesHybridCommonUI (= 18.37.0)
+  - PurchasesHybridCommon (18.37.0):
+    - RevenueCat (= 5.88.0)
+  - PurchasesHybridCommonUI (18.37.0):
+    - PurchasesHybridCommon (= 18.37.0)
+    - RevenueCatUI (= 5.88.0)
+  - RevenueCat (5.88.0)
+  - RevenueCatUI (5.88.0):
+    - RevenueCat (= 5.88.0)
   - rive_native (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -111,19 +111,19 @@ SPEC CHECKSUMS:
   in_app_review: 7dd1ea365263f834b8464673f9df72c80c17c937
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
-  PostHog: 3a3e8319a0684f78e1ae8568a1dbd42c2596061f
+  PostHog: 84ef3ce0b4231492b36b702f77b104e4c08e0a2d
   posthog_flutter: 35d27c0ca7b0afe0e24789b1c6594e88dfffe066
-  purchases_flutter: b44fcb4ff5e68a4dfe53fd0c339683803b04dd2c
-  purchases_ui_flutter: 64afab2a2adc79a73ed5ca77f416c8d360a12734
-  PurchasesHybridCommon: ecd9d7c586287625f1225b8de5e24c1021502270
-  PurchasesHybridCommonUI: 3056a3d261529f6adb8f74ecc3ab7f1cc0d3fab4
-  RevenueCat: 9357239a9f0978285e68983637b8a602e65c94f0
-  RevenueCatUI: 6f9291da540f98baf405b5bdfc46b2d5547b704a
+  purchases_flutter: 2b5d794e1a67c6e200a2c9c623598055dcc3751c
+  purchases_ui_flutter: cd8190c10ebcbde997eb91dafa4f2792ff79d484
+  PurchasesHybridCommon: 2e72564d3393d480ca126d4d057737435dd7ccba
+  PurchasesHybridCommonUI: b9e63653fa3abb753b702e0a9b074fbf452b0cbb
+  RevenueCat: 96e12da1f3de201c65f337ff661506ac28ee1514
+  RevenueCatUI: 86e2209d13c41893a4e24da4e26370d4bd9f8b93
   rive_native: c8fbe631855835dc84f7d59befcdb43de3ac48d4
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   video_player_avfoundation: 3453f792138786248960ca029747fcd9f318ef52
 
-PODFILE CHECKSUM: 9f4b27d26b67711236dddd9cc312b59fcb8f69e8
+PODFILE CHECKSUM: 3b5c6b86330ac561b2eab58b3a0867bdc887bb68
 
 COCOAPODS: 1.17.0

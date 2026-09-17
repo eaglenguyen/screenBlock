@@ -70,11 +70,9 @@ class _OnboardingPermissionsScreenState
     } else {
       final hasAccessibility = await service.hasAccessibilityPermission();
       final hasOverlay = await service.hasOverlayPermission();
-      final hasUsageStats = await service.hasUsageStatsPermission();
       setState(() {
         _hasAccessibility = hasAccessibility;
         _hasOverlay = hasOverlay;
-        _hasUsageStats = hasUsageStats;
       });
     }
     setState(() => _isCheckingPermissions = false);

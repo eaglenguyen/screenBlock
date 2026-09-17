@@ -3,7 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
+import 'package:pausenow/onboarding_new/screens/bad_news_screen.dart';
+import 'package:pausenow/onboarding_new/screens/first_paywall.dart';
+import 'package:pausenow/onboarding_new/screens/good_news_screen.dart';
+import 'package:pausenow/onboarding_new/screens/graph_screen.dart';
+import 'package:pausenow/onboarding_new/screens/loading_screen.dart';
+import 'package:pausenow/onboarding_new/screens/mutiple_schedule_mock.dart';
 import 'package:pausenow/onboarding_new/screens/reassurance_screen.dart';
+import 'package:pausenow/onboarding_new/screens/setup_intro.dart';
+import 'package:pausenow/onboarding_new/screens/trial_remind.dart';
 import 'package:pausenow/onboarding_new/screens/welcome_screen.dart';
 import 'package:pausenow/onboarding_new/widget/demo_app_picker.dart';
 import 'package:pausenow/onboarding_new/widget/demo_video.dart';
@@ -12,7 +20,6 @@ import '../UI/appPicker/app_picker_viewmodel.dart';
 import '../UI/schedule/schedule_viewmodel.dart';
 import '../core/constants/app_constants.dart';
 import '../core/constants/hivebox_names.dart';
-import '../onboarding/onboarding_demo_screens.dart';
 import '../onboarding/onboarding_viewmodel.dart';
 import 'data/onboarding_data.dart';
 import 'gauntlet/schedule_gauntlet_state.dart';
@@ -20,8 +27,11 @@ import 'gauntlet/screens/day_pick.dart';
 import 'gauntlet/screens/equip_screen.dart';
 import 'gauntlet/screens/intro_screen.dart';
 import 'gauntlet/screens/screen_time.dart';
+import 'gauntlet/screens/setting_up.dart';
 import 'gauntlet/screens/time_range.dart';
 import 'onboarding_step_id.dart';
+import 'screens/permission_screen.dart';
+import 'screens/signature_screen.dart';
 import 'widget/single_choice_screen.dart';
 import 'screens/name_screen.dart';
 
@@ -38,6 +48,12 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   bool _isNavigating = false; // 👈 new
   final _gauntlet = ScheduleGauntletState();
   final String _gauntletScheduleId = const Uuid().v4();
+  String _formatTimeOfDay(TimeOfDay t) {
+    final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final minute = t.minute.toString().padLeft(2, '0');
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
 
   Future<void> _saveGauntletSchedule() async {
     final start = _gauntlet.startTime;
@@ -134,13 +150,90 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           key: const ValueKey('welcome'),
           onGetStarted: _goNext,
         );
-      case OnboardingStepId.gauntletIntro:
-        return OnboardingGauntletIntroScreen(
-          key: const ValueKey('gauntletIntro'),
-          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.gauntletIntro) + 1,
+
+      case OnboardingStepId.need: // 👈 new
+        return OnboardingSingleChoiceScreen(
+          key: const ValueKey('need'),
+          title: 'Whats your biggest need right now?',
+          subtitle: "To give you the best start, we'd love to know what you most need help with in your daily life",
+          options: const [
+            'Stop Overthinking and Actually Starting',
+            'Organize my Brain and Thoughts',
+            'A Wheel of Tasks to Spin',
+            'Block Apps and Stop Doomscrolling',
+            'Help Deciding What I Need To Do',
+          ],
+          progressStep: 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack, // 👈 you'll need to add this method if it doesn't exist yet — see below
+          onSelected: (choice) {
+            _data.need = choice; // 👈 needs a matching field on OnboardingData
+            _goNext();
+          },
+        );
+      case OnboardingStepId.reassurance: // 👈 new
+        return OnboardingReassuranceScreen(
+          key: const ValueKey('reassurance'),
+          onContinue: _goNext,
+          onBack: _goBack, // 👈 new
+          userNeed: _data.need,
+        );
+      case OnboardingStepId.neurodivergence:
+        return OnboardingSingleChoiceScreen(
+          key: const ValueKey('neurodivergence'),
+          title: 'Are you\nneurodivergent?',
+          subtitle: 'We want to help you stay focused and get things done with less friction. Which of these feels most like you?',
+          options: const [
+            'I am neurodivergent',
+            'I think I am neurodivergent',
+            'I am not neurodivergent',
+          ],
+          otherLabel: "I don't know",
+          infoImageAsset: 'assets/images/neurodivergent.jpg', // 👈 new
+          progressStep: 3,
           progressTotal: OnboardingFlowController.order.length,
           onBack: _goBack,
-          onContinue: _goNext,
+          onSelected: (choice) {
+            _data.neurodivergenceStatus = choice;
+            _goNext();
+          },
+        );
+      case OnboardingStepId.name:
+        return OnboardingNameScreen(
+          key: const ValueKey('name'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.name) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: (name) {
+            _data.name = name;
+            // 👇 new — writes to the same two places SettingsProfileCard reads from
+            ref.read(onboardingViewModelProvider.notifier).setUserName(name);
+            Hive.box(HiveBoxNames.settings).put('userName', name);
+            _goNext();
+          },
+        );
+      case OnboardingStepId.age:
+        return OnboardingSingleChoiceScreen(
+          key: const ValueKey('age'),
+          title: 'Hi ${_data.name ?? "Hey"}!\nHow old are you?',
+          titleAlign: TextAlign.center,
+          options: const ['Under 18', '18–24', '25–34', '35–44', '45–54', '55+'],
+          optionIcons: const [
+            Icons.child_care_rounded,
+            Icons.school_rounded,
+            Icons.work_outline_rounded,
+            Icons.house,
+            Icons.family_restroom_rounded,
+            Icons.elderly_rounded,
+          ],
+          otherLabel: null,
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.age) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onSelected: (choice) {
+            _data.ageRange = choice;
+            _goNext();
+          },
         );
       case OnboardingStepId.screenTimeGuess:
         return OnboardingScreenTimeGuessScreen(
@@ -153,6 +246,69 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             _goNext();
           },
         );
+      case OnboardingStepId.loadingProfile: // 👈 new
+        return OnboardingLoadingProfileScreen(
+          key: const ValueKey('loadingProfile'),
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.badNews:
+        return OnboardingBadNewsScreen(
+          key: const ValueKey('badNews'),
+          screenTimeHoursPerDay: _data.screenTimeGuess ?? 4,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.goodNews:
+        return OnboardingGoodNewsScreen(
+          key: const ValueKey('goodNews'),
+          screenTimeHoursPerDay: _data.screenTimeGuess ?? 4,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.comparisonGraph:
+        return OnboardingComparisonGraphScreen(
+          key: const ValueKey('comparisonGraph'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.comparisonGraph) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.demoVideo:
+        return OnboardingDemoVideoScreen(
+          key: const ValueKey('demoVideo'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.demoVideo) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.setupIntro:
+        return OnboardingSetupIntroScreen(
+          key: const ValueKey('setupIntro'),
+          userName: _data.name,
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.setupIntro) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: _goNext,
+        );
+      case OnboardingStepId.screenTimePermission:
+        return OnboardingScreenTimePermissionScreen(
+          key: const ValueKey('screenTimePermission'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.screenTimePermission) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: _goNext, // 👈 called internally once permission is actually granted
+        );
+
+        // Schedule section
+
+
+      case OnboardingStepId.gauntletIntro:
+        return OnboardingGauntletIntroScreen(
+          key: const ValueKey('gauntletIntro'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.gauntletIntro) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: _goNext,
+        );
+
       case OnboardingStepId.gauntletAppsPicker:
         return DemoAppPickerScreen(
           key: const ValueKey('gauntletAppsPicker'),
@@ -229,6 +385,11 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             _goNext();
           },
         );
+      case OnboardingStepId.settingUp:
+        return OnboardingSettingUpScreen(
+          key: const ValueKey('settingUp'),
+          onContinue: _goNext,
+        );
       case OnboardingStepId.gauntletEquip4:
         return OnboardingGauntletEquipScreen(
           key: const ValueKey('gauntletEquip4'),
@@ -238,101 +399,34 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           showConfetti: true,
           onContinue: _goNext,
         );
-
-
-
-      case OnboardingStepId.need: // 👈 new
-        return OnboardingSingleChoiceScreen(
-          key: const ValueKey('need'),
-          title: 'Whats your biggest need right now?',
-          subtitle: "To give you the best start, we'd love to know what you most need help with in your daily life",
-          options: const [
-            'Stop Overthinking and Actually Starting',
-            'Organize my Brain and Thoughts',
-            'A Wheel of Tasks to Spin',
-            'Block Apps and Stop Doomscrolling',
-            'Help Deciding What I Need To Do',
-          ],
-          progressStep: 1,
+      case OnboardingStepId.setMultipleSchedules:
+        return OnboardingSetMultipleSchedulesScreen(
+          key: const ValueKey('setMultipleSchedules'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.setMultipleSchedules) + 1,
           progressTotal: OnboardingFlowController.order.length,
-          onBack: _goBack, // 👈 you'll need to add this method if it doesn't exist yet — see below
-          onSelected: (choice) {
-            _data.need = choice; // 👈 needs a matching field on OnboardingData
-            _goNext();
-          },
+          onBack: _goBack,
+          onNext: _goNext,
         );
-      case OnboardingStepId.reassurance: // 👈 new
-        return OnboardingReassuranceScreen(
-          key: const ValueKey('reassurance'),
+      case OnboardingStepId.paywallIntro:
+        return OnboardingPaywallScreen(
+          key: const ValueKey('paywallIntro'),
           onContinue: _goNext,
-          onBack: _goBack, // 👈 new
-          userNeed: _data.need,
         );
-      case OnboardingStepId.neurodivergence:
-        return OnboardingSingleChoiceScreen(
-          key: const ValueKey('neurodivergence'),
-          title: 'Are you\nneurodivergent?',
-          subtitle: 'SpinBrek helps you stay focused and get things done with less friction. Which of these feels most like you?',
-          options: const [
-            'I am neurodivergent',
-            'I think I am neurodivergent',
-            'I am not neurodivergent',
-          ],
-          otherLabel: "I don't know",
-          infoImageAsset: 'assets/images/neurodivergent.jpg', // 👈 new
-          progressStep: 3,
-          progressTotal: OnboardingFlowController.order.length,
-          onBack: _goBack,
-          onSelected: (choice) {
-            _data.neurodivergenceStatus = choice;
-            _goNext();
-          },
-        );
-      case OnboardingStepId.name:
-        return OnboardingNameScreen(
-          key: const ValueKey('name'),
-          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.name) + 1,
-          progressTotal: OnboardingFlowController.order.length,
-          onBack: _goBack,
-          onContinue: (name) {
-            _data.name = name;
-            // 👇 new — writes to the same two places SettingsProfileCard reads from
-            ref.read(onboardingViewModelProvider.notifier).setUserName(name);
-            Hive.box(HiveBoxNames.settings).put('userName', name);
-            _goNext();
-          },
-        );
-      case OnboardingStepId.age:
-        return OnboardingSingleChoiceScreen(
-          key: const ValueKey('age'),
-          title: 'How old are you?',
-          titleAlign: TextAlign.center,
-          options: const ['Under 18', '18–24', '25–34', '35–44', '45–54', '55+'],
-          optionIcons: const [
-            Icons.child_care_rounded,
-            Icons.school_rounded,
-            Icons.work_outline_rounded,
-            Icons.house,
-            Icons.family_restroom_rounded,
-            Icons.elderly_rounded,
-          ],
-          otherLabel: null, // 👈 no "something else" needed here
-          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.age) + 1,
-          progressTotal: OnboardingFlowController.order.length,
-          onBack: _goBack,
-          onSelected: (choice) {
-            _data.ageRange = choice;
-            _goNext();
-          },
-        );
-      case OnboardingStepId.demoVideo:
-        return OnboardingDemoVideoScreen(
-          key: const ValueKey('demoVideo'),
-          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.demoVideo) + 1,
-          progressTotal: OnboardingFlowController.order.length,
+      case OnboardingStepId.commitmentSignature:
+        return OnboardingCommitmentSignatureScreen(
+          key: const ValueKey('commitmentSignature'),
+          scheduleStartTime: _gauntlet.startTime != null
+              ? _formatTimeOfDay(_gauntlet.startTime!)
+              : '9:00 AM',
           onBack: _goBack,
           onContinue: _goNext,
         );
+      case OnboardingStepId.trialReminder:
+        return OnboardingTrialReminderScreen(
+          key: const ValueKey('trialReminder'),
+          onNext: _goNext,
+        );
+
     }
   }
 }

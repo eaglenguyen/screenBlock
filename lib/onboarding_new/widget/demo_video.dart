@@ -281,11 +281,15 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
                             ],
                           ),
                           const SizedBox(height: 28),
-                          const TypewriterTitle(text: 'Awesome 🎉', fontSize: 26),
+                          const TypewriterTitle(text: 'Awesome 🎉', fontSize: 26, textAlign: TextAlign.center),
                           const SizedBox(height: 8),
-                          Text(
-                            'Tap the phone to preview, then see the full flow.',
-                            style: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 15),
+                          SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'Spinbrek allows you to spin a wheel before you try to unblock, check it out!',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 15),
+                            ),
                           ),
                         ],
                       ),

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pausenow/onboarding_new/widget/typewriter_title.dart';
 import 'app_picker_android.dart';
 import 'app_picker_ios.dart';
 import 'continue_button.dart';
@@ -55,22 +56,12 @@ class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 8),
-          Text(
-            'We can help you\nreduce that time!',
-            style: GoogleFonts.poppins(
-              color: const Color(0xFF4A3728),
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.2,
-            ),
+          const TypewriterTitle(
+            text: 'Pick up to 3 apps',
+            fontSize: 26,
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 6),
-          Text(
-            'Pick up to 3 apps — the most distracting ones.',
-            style: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 14),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Expanded(
             child: Platform.isIOS
                 ? ClipRRect(

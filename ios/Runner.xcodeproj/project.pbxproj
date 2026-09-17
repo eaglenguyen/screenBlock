@@ -1150,7 +1150,7 @@
 				DEVELOPMENT_TEAM = 4GUFR796N8;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "pause now";
+				INFOPLIST_KEY_CFBundleDisplayName = Spinbrek;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1978,7 +1978,7 @@
 				DEVELOPMENT_TEAM = 4GUFR796N8;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "pause now";
+				INFOPLIST_KEY_CFBundleDisplayName = Spinbrek;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2010,7 +2010,7 @@
 				DEVELOPMENT_TEAM = 4GUFR796N8;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "pause now";
+				INFOPLIST_KEY_CFBundleDisplayName = Spinbrek;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (

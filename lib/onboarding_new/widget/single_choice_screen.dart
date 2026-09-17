@@ -91,6 +91,8 @@ class _OnboardingSingleChoiceScreenState extends State<OnboardingSingleChoiceScr
       if (mounted) widget.onSelected(value);
     });
   }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,7 +125,7 @@ class _OnboardingSingleChoiceScreenState extends State<OnboardingSingleChoiceScr
                 ],
               ),
               const SizedBox(height: 32),
-              TypewriterTitle(text: widget.title,  textAlign: widget.titleAlign),
+              TypewriterTitle(text: widget.title, textAlign: widget.titleAlign),
               if (widget.subtitle != null) ...[
                 const SizedBox(height: 10),
                 Text(
@@ -136,55 +138,58 @@ class _OnboardingSingleChoiceScreenState extends State<OnboardingSingleChoiceScr
                 ),
               ],
               const SizedBox(height: 28),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: widget.options.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, i) {
-                    final option = widget.options[i];
-                    return OnboardingOptionPill(
-                      label: option,
-                      icon: widget.optionIcons != null && i < widget.optionIcons!.length ? widget.optionIcons![i] : null,
-                      isSelected: _selected == option,
-                      onTap: () => _choose(option),
-                    );
-                  },
+              Expanded( // 👈 kept — but now wraps a scrollable column, not a fixed-fill ListView
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (int i = 0; i < widget.options.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 12), // 👈 replicates ListView.separated's spacing
+                        OnboardingOptionPill(
+                          label: widget.options[i],
+                          icon: widget.optionIcons != null && i < widget.optionIcons!.length ? widget.optionIcons![i] : null,
+                          isSelected: _selected == widget.options[i],
+                          onTap: () => _choose(widget.options[i]),
+                        ),
+                      ],
+                      if (widget.otherLabel != null) // 👈 moved inside — now sits directly under the last pill
+                        Center(
+                          child: GestureDetector(
+                            onTap: () => _choose(widget.otherLabel!),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Text(
+                                widget.otherLabel!,
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF4A3728),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (widget.infoImageAsset != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () => _showFullImage(context, widget.infoImageAsset!),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.asset(
+                                  widget.infoImageAsset!,
+                                  width: 180,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-              if (widget.otherLabel != null)
-                Center(
-                  child: GestureDetector(
-                    onTap: () => _choose(widget.otherLabel!),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 30),
-                      child: Text(
-                        widget.otherLabel!,
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF4A3728),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              if (widget.infoImageAsset != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () => _showFullImage(context, widget.infoImageAsset!),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          widget.infoImageAsset!,
-                          width: 180,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           ),
         ),

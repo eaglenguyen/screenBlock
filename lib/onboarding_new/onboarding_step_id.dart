@@ -1,8 +1,19 @@
 enum OnboardingStepId {
   welcome,
   need,
-  gauntletIntro, // 👈 new
+  reassurance,
+  neurodivergence,
+  name, // 👈 new
+  age, // 👈 new
   screenTimeGuess, // 👈 new
+  loadingProfile, // 👈 new
+  badNews,
+  goodNews,
+  comparisonGraph,
+  demoVideo,
+  setupIntro,
+  screenTimePermission,
+  gauntletIntro, // 👈 new
   gauntletAppsPicker, // 👈 new
   gauntletEquip1, // 👈 new
   gauntletTimeRange, // 👈 new
@@ -10,12 +21,12 @@ enum OnboardingStepId {
   gauntletDays, // 👈 new
   gauntletEquip3, // 👈 new
   gauntletName, // 👈 new
+  settingUp, // 👈 new
   gauntletEquip4, // 👈 new
-  reassurance,
-  neurodivergence,
-  name, // 👈 new
-  age, // 👈 new
-  demoVideo,
+  setMultipleSchedules,
+  paywallIntro,
+  commitmentSignature,
+  trialReminder,
 }
 
 class OnboardingFlowController {
@@ -23,8 +34,21 @@ class OnboardingFlowController {
 
   static const List<OnboardingStepId> order = [
     OnboardingStepId.welcome,
+
+    OnboardingStepId.need,
+    OnboardingStepId.reassurance,
+    OnboardingStepId.neurodivergence,
+    OnboardingStepId.name,
+    OnboardingStepId.age,
+    OnboardingStepId.screenTimeGuess,
+    OnboardingStepId.loadingProfile, // 👈 new — right after screen time guess
+    OnboardingStepId.badNews,
+    OnboardingStepId.goodNews,
+    OnboardingStepId.comparisonGraph,
+    OnboardingStepId.demoVideo,
+    OnboardingStepId.setupIntro,
+    OnboardingStepId.screenTimePermission,
     OnboardingStepId.gauntletIntro, // 👈 new
-    OnboardingStepId.screenTimeGuess, // 👈 new — gauntlet section right after welcome, per your ask
     OnboardingStepId.gauntletAppsPicker,
     OnboardingStepId.gauntletEquip1,
     OnboardingStepId.gauntletTimeRange,
@@ -32,13 +56,12 @@ class OnboardingFlowController {
     OnboardingStepId.gauntletDays,
     OnboardingStepId.gauntletEquip3,
     OnboardingStepId.gauntletName,
+    OnboardingStepId.settingUp, // 👈 new
     OnboardingStepId.gauntletEquip4,
-    OnboardingStepId.need,
-    OnboardingStepId.reassurance,
-    OnboardingStepId.neurodivergence,
-    OnboardingStepId.name,
-    OnboardingStepId.age,
-    OnboardingStepId.demoVideo,
+    OnboardingStepId.setMultipleSchedules,
+    OnboardingStepId.paywallIntro,
+    OnboardingStepId.commitmentSignature,
+    OnboardingStepId.trialReminder,
 
 
   ];

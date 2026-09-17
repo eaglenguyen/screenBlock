@@ -12,6 +12,7 @@ import '../../../providers/blocking_service_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../home_viewmodel.dart';
 import 'app_list_sheet.dart';
+import 'app_picker_sheet.dart';
 
 class BlockModeSheet extends ConsumerStatefulWidget {
   const BlockModeSheet({super.key});
@@ -354,36 +355,38 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
   }
 
   Future<void> _showIOSAppPicker(bool isAllApps) async {
-    try {
-      final service = ref.read(blockingServiceProvider)
-      as IOSBlockingService;
-
-      final count = await service.showAppPicker(
-        blockingMode: isAllApps
-            ? AppConstants.blockingTypeAllApps
-            : AppConstants.blockingTypeSpecificApps,
+    if (!isAllApps) {
+      // 👈 new — specific_apps mode now uses the embedded live picker with real-time gating
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        useRootNavigator: true,
+        builder: (_) => BlockedAppsPickerScreen(
+          initialCount: _blockedApps.length,
+          onSaved: (count) {
+            setState(() {
+              _blockedApps = List.generate(count, (i) => 'ios_app_$i');
+            });
+          },
+        ),
       );
+      return;
+    }
 
+    // 👇 all_apps mode — unchanged, still native modal (already premium-only to reach here)
+    try {
+      final service = ref.read(blockingServiceProvider) as IOSBlockingService;
+      final count = await service.showAppPicker(blockingMode: AppConstants.blockingTypeAllApps);
       if (!mounted) return;
-
-      // 👇 always update state regardless of count
       setState(() {
-        final placeholders = List.generate(
-          count ?? 0,
-              (i) => 'ios_app_$i',
-        );
-        if (isAllApps) {
-          _allowedApps = placeholders;
-        } else {
-          _blockedApps = placeholders;
-        }
+        _allowedApps = List.generate(count ?? 0, (i) => 'ios_app_$i');
       });
-
-
     } catch (e) {
       debugPrint('❌ iOS app picker error: $e');
     }
   }
+
 
   // ── Set mode button ──────────────────────────────
   Widget _buildSetModeButton() {

@@ -91,7 +91,7 @@ class _OnboardingContinueButtonState extends State<OnboardingContinueButton> {
                       widget.label,
                       style: TextStyle(
                         color: widget.textColor,
-                        fontSize: 17,
+                        fontSize: 18,
                         fontWeight: FontWeight.w800,
                       ),
                     ),

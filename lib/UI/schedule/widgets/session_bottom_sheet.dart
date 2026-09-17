@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:pausenow/UI/schedule/widgets/schedule_app_picker_sheet.dart';
 import 'package:pausenow/UI/schedule/widgets/schedule_presets.dart';
 import 'package:uuid/uuid.dart';
 
@@ -498,34 +499,36 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
   }
 
   Future<void> _showIOSAppPicker(bool isAllApps) async {
+    if (!isAllApps) {
+      // 👈 new — specific apps now uses the embedded live picker with real-time gating
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        useRootNavigator: true,
+        builder: (_) => ScheduleAppsPickerScreen(
+          scheduleId: _configId,
+          initialCount: _blockedApps.length,
+          onSaved: (count) {
+            setState(() {
+              _blockedApps = List.generate(count, (i) => 'ios_app_$i');
+            });
+          },
+        ),
+      );
+      return;
+    }
+
+    // 👇 all_apps mode — unchanged, native modal
     try {
       final service = ref.read(blockingServiceProvider) as IOSBlockingService;
       final count = await service.showSchedulePicker(
         scheduleId: _configId,
-        blockingMode: isAllApps ? AppConstants.blockingTypeAllApps : AppConstants.blockingTypeSpecificApps,
+        blockingMode: AppConstants.blockingTypeAllApps,
       );
-
       if (!mounted) return;
-
-      if (!isAllApps && count == AppConstants.freeTrackedAppsLimit + 1) {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          useRootNavigator: true,
-
-          builder: (_) => const FeaturePaywallScreen(source: "multiple_schedules"),
-        );
-        return;
-      }
-
       setState(() {
-        final placeholders = List.generate(count ?? 0, (i) => 'ios_app_$i');
-        if (isAllApps) {
-          _allowedApps = placeholders;
-        } else {
-          _blockedApps = placeholders;
-        }
+        _allowedApps = List.generate(count ?? 0, (i) => 'ios_app_$i');
       });
     } catch (e) {
       debugPrint('❌ iOS app picker error: $e');

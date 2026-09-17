@@ -72,10 +72,10 @@ class _OnboardingScreenTimeGuessScreenState extends State<OnboardingScreenTimeGu
                 ],
               ),
               const SizedBox(height: 32),
-              const TypewriterTitle(text: 'How long do you use\nyour phone in a day?'),
+              const TypewriterTitle(text: 'How much time do you\nspend on your phone?'),
               const SizedBox(height: 10),
               Text(
-                "Take a guess if you don't know for sure.",
+                "Take an educated guess if you don't know",
                 style: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 15, height: 1.4),
               ),
               const Spacer(),
@@ -93,10 +93,10 @@ class _OnboardingScreenTimeGuessScreenState extends State<OnboardingScreenTimeGu
               const SizedBox(height: 24),
               SliderTheme(
                 data: SliderThemeData(
-                  activeTrackColor: _hours >= 12 ? const Color(0xFFE74C3C) : const Color(0xFF7FB4E8), // 👈 new — track turns red at max too
+                  activeTrackColor: _hours >= 12 ? const Color(0xFFE74C3C) : const Color(0xFF7DD3B0), // 👈 was #7FB4E8 blue — now mint accent
                   inactiveTrackColor: const Color(0xFFF0E6D8),
-                  thumbColor: _hours >= 12 ? const Color(0xFFE74C3C) : const Color(0xFF7FB4E8), // 👈 new
-                  overlayColor: (_hours >= 12 ? const Color(0xFFE74C3C) : const Color(0xFF7FB4E8)).withValues(alpha: 0.2),
+                  thumbColor: _hours >= 12 ? const Color(0xFFE74C3C) : const Color(0xFF7DD3B0), // 👈 was #7FB4E8
+                  overlayColor: (_hours >= 12 ? const Color(0xFFE74C3C) : const Color(0xFF7DD3B0)).withValues(alpha: 0.2), // 👈 was #7FB4E8
                   trackHeight: 8,
                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
                 ),
