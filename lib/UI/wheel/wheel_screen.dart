@@ -848,7 +848,7 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
           const SizedBox(height: 16),
           Center(
             child: _BubbleButton(
-              label: 'Add suggested list',
+              label: 'Add tailored To-Do list',
               color: AppColors.accentDark(context),
               onTap: () => ref.read(wheelViewModelProvider.notifier).addPresetList(WheelPresets.defaultList),
             ),

@@ -29,6 +29,7 @@ class _BreakSheetState extends ConsumerState<BreakSheet> {
   static const _freeLimitMinutes = 10;
 
   bool get _isOverFreeLimit => _selectedMinutes > _freeLimitMinutes;
+  bool get _showsProGate => _isOverFreeLimit && !ref.watch(isPremiumProvider); // 👈 new — the actual gate visibility check
 
   @override
   Widget build(BuildContext context) {
@@ -36,51 +37,32 @@ class _BreakSheetState extends ConsumerState<BreakSheet> {
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
       decoration: BoxDecoration(
         color: AppColors.backgroundCard(context),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildHandle(context),
           const SizedBox(height: 20),
-          const Text('☕️', style: TextStyle(fontSize: 36)), // 👈 new — matches the emoji convention
+          const Text('☕️', style: TextStyle(fontSize: 36)),
           const SizedBox(height: 8),
           _buildTitle(),
           const SizedBox(height: 8),
           _buildValue(context),
           const SizedBox(height: 16),
           _buildSlider(context),
-          if (_isOverFreeLimit) ...[
+          if (_showsProGate) ...[ // 👈 was: if (_isOverFreeLimit)
             const SizedBox(height: 8),
             _buildProNotice(context),
           ],
-          const SizedBox(height: 24), // 👈 was 20
+          const SizedBox(height: 24),
           _buildStartButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildHandle(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: AppColors.border(context),
-        borderRadius: BorderRadius.circular(2),
-      ),
-    );
-  }
-
-  Widget _buildTitle() {
-    return Text(
-      'How long?',
-      style: AppTextStyles.headlineMedium.copyWith(fontWeight: FontWeight.w900), // 👈 was headlineSmall, no weight override
-      textAlign: TextAlign.center,
-    );
-  }
+  // ... _buildHandle, _buildTitle unchanged
 
   Widget _buildValue(BuildContext context) {
     return Row(
@@ -89,12 +71,12 @@ class _BreakSheetState extends ConsumerState<BreakSheet> {
         Text(
           '$_selectedMinutes minutes',
           style: AppTextStyles.headlineMedium.copyWith(
-            color: _isOverFreeLimit ? _proOrange : _pastelYellowText, // 👈 was AppColors.warning(context)
-            fontWeight: FontWeight.w800, // 👈 new
+            color: _showsProGate ? _proOrange : _pastelYellowText, // 👈 was: _isOverFreeLimit ? _proOrange : ...
+            fontWeight: FontWeight.w800,
           ),
           textAlign: TextAlign.center,
         ),
-        if (_isOverFreeLimit) ...[
+        if (_showsProGate) ...[ // 👈 was: if (_isOverFreeLimit)
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -117,17 +99,15 @@ class _BreakSheetState extends ConsumerState<BreakSheet> {
   }
 
   Widget _buildSlider(BuildContext context) {
-    final trackColor = _isOverFreeLimit ? _proOrange : _pastelYellow; // 👈 was AppColors.warning(context)
+    final trackColor = _showsProGate ? _proOrange : _pastelYellow; // 👈 was: _isOverFreeLimit ? _proOrange : ...
     return SliderTheme(
       data: SliderThemeData(
         activeTrackColor: trackColor,
         inactiveTrackColor: AppColors.backgroundSubtle(context),
         thumbColor: trackColor,
         overlayColor: trackColor.withValues(alpha: 0.2),
-        thumbShape: const RoundSliderThumbShape(
-          enabledThumbRadius: 12,
-        ),
-        trackHeight: 6, // 👈 was 4 — chunkier, matches the pill-bar convention
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+        trackHeight: 6,
       ),
       child: Slider(
         value: _selectedMinutes.toDouble(),
@@ -145,7 +125,7 @@ class _BreakSheetState extends ConsumerState<BreakSheet> {
   Widget _buildProNotice(BuildContext context) {
     return Text(
       'Breaks over $_freeLimitMinutes min require Pro',
-      style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall — bumped up
+      style: AppTextStyles.bodyMedium.copyWith(
         color: AppColors.textSecondary(context),
         fontWeight: FontWeight.w600,
       ),
@@ -157,11 +137,11 @@ class _BreakSheetState extends ConsumerState<BreakSheet> {
     return SizedBox(
       width: double.infinity,
       child: HoldToConfirmButton(
-        color: _pastelYellow, // 👈 was AppColors.warning(context)
-        fillColor: const Color(0xFFF7C948), // 👈 was AppColors.warningDark(context) — a slightly richer yellow for the fill/progress state
-        textColor: _pastelYellowText, // 👈 was AppColors.warningLight(context)
+        color: _pastelYellow,
+        fillColor: const Color(0xFFF7C948),
+        textColor: _pastelYellowText,
         onConfirmed: () {
-          if (_isOverFreeLimit) {
+          if (_isOverFreeLimit) { // 👈 kept as _isOverFreeLimit here — the real gate check, unaffected by watch/rebuild timing
             final isPremium = ref.read(isPremiumProvider);
             if (!isPremium) {
               Navigator.pop(context);
@@ -181,4 +161,23 @@ class _BreakSheetState extends ConsumerState<BreakSheet> {
       ),
     );
   }
+}
+
+Widget _buildHandle(BuildContext context) {
+  return Container(
+    width: 40,
+    height: 4,
+    decoration: BoxDecoration(
+      color: AppColors.border(context),
+      borderRadius: BorderRadius.circular(2),
+    ),
+  );
+}
+
+Widget _buildTitle() {
+  return Text(
+    'How long?',
+    style: AppTextStyles.headlineMedium.copyWith(fontWeight: FontWeight.w900), // 👈 was headlineSmall, no weight override
+    textAlign: TextAlign.center,
+  );
 }

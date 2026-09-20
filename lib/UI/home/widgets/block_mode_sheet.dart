@@ -326,20 +326,16 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
   // ── App list bottom sheet ────────────────────────
   void _openAppListSheet(bool isAllApps) {
     if (Platform.isIOS) {
-      // iOS uses FamilyActivityPicker
       _showIOSAppPicker(isAllApps);
     } else {
-      // Android uses our custom AppListSheet
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        useRootNavigator: true,
         backgroundColor: Colors.transparent,
+        useRootNavigator: true,
         builder: (_) => AppListSheet(
           isBlockList: !isAllApps,
-          initialApps: isAllApps
-              ? _allowedApps
-              : _blockedApps,
+          initialApps: isAllApps ? _allowedApps : _blockedApps,
           onSave: (apps) {
             setState(() {
               if (isAllApps) {
@@ -348,6 +344,7 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
                 _blockedApps = apps;
               }
             });
+            // 👈 removed _onSetMode() call — back to just updating local state
           },
         ),
       );
@@ -356,7 +353,6 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
 
   Future<void> _showIOSAppPicker(bool isAllApps) async {
     if (!isAllApps) {
-      // 👈 new — specific_apps mode now uses the embedded live picker with real-time gating
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -368,13 +364,13 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
             setState(() {
               _blockedApps = List.generate(count, (i) => 'ios_app_$i');
             });
+            _onSetMode(); // 👈 new — commits everything immediately, same as tapping Save on BlockModeSheet itself
           },
         ),
       );
       return;
     }
 
-    // 👇 all_apps mode — unchanged, still native modal (already premium-only to reach here)
     try {
       final service = ref.read(blockingServiceProvider) as IOSBlockingService;
       final count = await service.showAppPicker(blockingMode: AppConstants.blockingTypeAllApps);
@@ -382,11 +378,11 @@ class _BlockModeSheetState extends ConsumerState<BlockModeSheet> {
       setState(() {
         _allowedApps = List.generate(count ?? 0, (i) => 'ios_app_$i');
       });
+      _onSetMode(); // 👈 new — same for the All Apps native picker path
     } catch (e) {
       debugPrint('❌ iOS app picker error: $e');
     }
   }
-
 
   // ── Set mode button ──────────────────────────────
   Widget _buildSetModeButton() {

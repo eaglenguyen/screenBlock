@@ -346,6 +346,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
   }
 
   Widget _timeRow(BuildContext context, String label, String value, VoidCallback onTap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark; // 👈 new
     return GestureDetector(
       onTap: onTap,
       child: Row(
@@ -355,18 +356,27 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: _currentComboColor.withValues(alpha: 0.25), // 👈 was AppColors.accent(context).withValues(alpha: 0.15)
+              color: _currentComboColor.withValues(alpha: isDark ? 0.35 : 0.25), // 👈 was: withValues(alpha: 0.25)
               borderRadius: BorderRadius.circular(50),
             ),
-            child: Text(value, style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF2C2C2A), fontWeight: FontWeight.w700)), // 👈 dark text for contrast against light pastels
+            child: Text(
+              value,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isDark ? Colors.white : const Color(0xFF2C2C2A), // 👈 was: const Color(0xFF2C2C2A)
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+
+
   Widget _buildBlockingTypeRow(BuildContext context) {
     final isPremium = ref.watch(isPremiumProvider);
     final isAllApps = _blockingType == AppConstants.blockingTypeAllApps;
+    final isDark = Theme.of(context).brightness == Brightness.dark; // 👈 new
 
     return _bubbleCard(
       context: context,
@@ -450,7 +460,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _currentComboColor.withValues(alpha: 0.25), // 👈 was AppColors.accent(context).withValues(alpha: 0.15)
+                color: _currentComboColor.withValues(alpha: isDark ? 0.35 : 0.25), // 👈 was: withValues(alpha: 0.25)
                 borderRadius: BorderRadius.circular(50),
               ),
               child: Row(
@@ -458,10 +468,15 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                 children: [
                   Text(
                     isAllApps ? 'All apps' : 'Specific apps',
-                    style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF2C2C2A), fontWeight: FontWeight.w700), // 👈 dark text instead of accent
+                    style: AppTextStyles.bodyMedium.copyWith(
+                        color: isDark ? Colors.white : const Color(0xFF2C2C2A), // 👈 was: const Color(0xFF2C2C2A)
+                        fontWeight: FontWeight.w700
+                    ), // 👈 dark text instead of accent
                   ),
                   const SizedBox(width: 2),
-                  const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF2C2C2A), size: 18), // 👈 dark instead of accent
+                  Icon(Icons.keyboard_arrow_down_rounded,
+                      color: isDark ? Colors.white : const Color(0xFF2C2C2A), // 👈 was: const Color(0xFF2C2C2A)
+                      size: 18), // 👈 dark instead of accent
                 ],
               ),
             ),
@@ -587,6 +602,7 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
   Widget _buildDayPicker(BuildContext context) {
     const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S']; // 👈 back to single letters
     final comboLabel = _getDaysLabel();
+    final isDark = Theme.of(context).brightness == Brightness.dark; // 👈 new
 
     return _bubbleCard(
       context: context,
@@ -625,7 +641,9 @@ class _SessionBottomSheetState extends ConsumerState<SessionBottomSheet> {
                     child: Text(
                       days[index],
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: isSelected ? const Color(0xFF2C2C2A) : AppColors.textSecondary(context),
+                        color: isSelected
+                            ? (isDark ? Colors.white : const Color(0xFF2C2C2A)) // 👈 was: const Color(0xFF2C2C2A)
+                            : AppColors.textSecondary(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 10,
                       ),

@@ -5,7 +5,7 @@ import '../widget/continue_button.dart';
 import '../widget/slot_machine_animation.dart';
 
 const Map<int, int> _screenTimeYearsPreset = {
-  1: 2,
+  1: 3,
   2: 5,
   3: 7,
   4: 9,

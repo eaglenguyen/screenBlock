@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../onboarding_new/widget/app_picker_ios.dart';
 import '../../../paywall/feature_paywall_screen.dart';
@@ -24,8 +25,9 @@ class _BlockedAppsPickerScreenState extends ConsumerState<BlockedAppsPickerScree
   late int _selectedCount = widget.initialCount;
 
   bool get _isPremium => ref.read(isPremiumProvider);
-  bool get _isOverLimit => !_isPremium && _selectedCount > 3;
-  bool get _canSave => _selectedCount == 0 || _isPremium || _selectedCount <= 3;
+
+  bool get _isOverLimit => !_isPremium && _selectedCount > AppConstants.focusSessionFreeAppsLimit; // 👈 was > 3
+  bool get _canSave => _selectedCount == 0 || _isPremium || _selectedCount <= AppConstants.focusSessionFreeAppsLimit; // 👈 was <= 3
 
   void _handleSave() {
     if (!_canSave) return;
@@ -96,8 +98,8 @@ class _BlockedAppsPickerScreenState extends ConsumerState<BlockedAppsPickerScree
                     const Icon(Icons.error_outline_rounded, color: Color(0xFFE8703A), size: 18),
                     const SizedBox(width: 6),
                     Text(
-                      'Max 3 apps. Upgrade to Pro for more!',
-                      style: GoogleFonts.poppins(color: const Color(0xFFE8703A), fontSize: 14, fontWeight: FontWeight.w600),
+                      'Max 1 app. Upgrade to Pro for more!', // 👈 was 'Max 3 apps. Upgrade to Pro for more!'
+                      style: GoogleFonts.poppins(color: const Color(0xFFE8703A), fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),

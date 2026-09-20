@@ -20,7 +20,7 @@ class TimerPickerSheet extends ConsumerStatefulWidget {
 class _TimerPickerSheetState extends ConsumerState<TimerPickerSheet> {
   late int _selected;
 
-  bool get _isOverFreeLimit => _selected > 240;
+  bool get _isOverFreeLimit => _selected > 180;
 
   @override
   void initState() {

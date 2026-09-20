@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:pausenow/onboarding_new/screens/bad_news_screen.dart';
+import 'package:pausenow/onboarding_new/screens/bar_graph.dart';
 import 'package:pausenow/onboarding_new/screens/first_paywall.dart';
 import 'package:pausenow/onboarding_new/screens/good_news_screen.dart';
 import 'package:pausenow/onboarding_new/screens/graph_screen.dart';
@@ -14,7 +15,7 @@ import 'package:pausenow/onboarding_new/screens/setup_intro.dart';
 import 'package:pausenow/onboarding_new/screens/trial_remind.dart';
 import 'package:pausenow/onboarding_new/screens/welcome_screen.dart';
 import 'package:pausenow/onboarding_new/widget/demo_app_picker.dart';
-import 'package:pausenow/onboarding_new/widget/demo_video.dart';
+import 'package:pausenow/onboarding_new/widget/demo_video_screen.dart';
 import 'package:uuid/uuid.dart';
 import '../UI/appPicker/app_picker_viewmodel.dart';
 import '../UI/schedule/schedule_viewmodel.dart';
@@ -25,6 +26,7 @@ import 'data/onboarding_data.dart';
 import 'gauntlet/schedule_gauntlet_state.dart';
 import 'gauntlet/screens/day_pick.dart';
 import 'gauntlet/screens/equip_screen.dart';
+import 'gauntlet/screens/hobby_question.dart';
 import 'gauntlet/screens/intro_screen.dart';
 import 'gauntlet/screens/screen_time.dart';
 import 'gauntlet/screens/setting_up.dart';
@@ -274,9 +276,6 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       case OnboardingStepId.demoVideo:
         return OnboardingDemoVideoScreen(
           key: const ValueKey('demoVideo'),
-          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.demoVideo) + 1,
-          progressTotal: OnboardingFlowController.order.length,
-          onBack: _goBack,
           onContinue: _goNext,
         );
       case OnboardingStepId.setupIntro:
@@ -368,6 +367,17 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           stepNumber: 3,
           onContinue: _goNext,
         );
+      case OnboardingStepId.hobbies:
+        return OnboardingHobbiesScreen(
+          key: const ValueKey('hobbies'),
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.hobbies) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onContinue: (hobbies) {
+            _data.hobbies = hobbies; // 👈 add a matching field to your data model
+            _goNext();
+          },
+        );
       case OnboardingStepId.gauntletName:
         return OnboardingNameScreen(
           key: const ValueKey('gauntletName'),
@@ -420,6 +430,19 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               : '9:00 AM',
           onBack: _goBack,
           onContinue: _goNext,
+        );
+      case OnboardingStepId.demoComparison:
+        return OnboardingDemoComparisonScreen(
+          key: const ValueKey('demoComparison'),
+          scheduleId: _gauntletScheduleId, // 👈 reuse the same id from your gauntlet save, or generate a new one if this is separate
+          progressStep: OnboardingFlowController.order.indexOf(OnboardingStepId.demoComparison) + 1,
+          progressTotal: OnboardingFlowController.order.length,
+          onBack: _goBack,
+          onNext: _goNext,
+          scheduleStart: _gauntlet.startTime ?? const TimeOfDay(hour: 9, minute: 0),
+          scheduleEnd: _gauntlet.endTime ?? const TimeOfDay(hour: 17, minute: 0),
+          scheduleDays: _gauntlet.days,
+          blockedApps: _gauntlet.apps,
         );
       case OnboardingStepId.trialReminder:
         return OnboardingTrialReminderScreen(

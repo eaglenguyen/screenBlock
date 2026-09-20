@@ -323,7 +323,7 @@ class _QBGoalsScreenState extends State<QBGoalsScreen> {
                   text: 'goals',
                   style: const TextStyle(color: Color(0xFFEDB82A)),
                 ),
-                const TextSpan(text: ' using SpinBrek'),
+                const TextSpan(text: ' using Spinbrek'),
               ],
             ),
           ),

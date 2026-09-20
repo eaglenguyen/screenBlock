@@ -20,12 +20,14 @@ enum OnboardingStepId {
   gauntletEquip2, // 👈 new
   gauntletDays, // 👈 new
   gauntletEquip3, // 👈 new
+  hobbies,
   gauntletName, // 👈 new
   settingUp, // 👈 new
   gauntletEquip4, // 👈 new
   setMultipleSchedules,
   paywallIntro,
   commitmentSignature,
+  demoComparison,
   trialReminder,
 }
 
@@ -55,12 +57,14 @@ class OnboardingFlowController {
     OnboardingStepId.gauntletEquip2,
     OnboardingStepId.gauntletDays,
     OnboardingStepId.gauntletEquip3,
+    OnboardingStepId.hobbies,
     OnboardingStepId.gauntletName,
     OnboardingStepId.settingUp, // 👈 new
     OnboardingStepId.gauntletEquip4,
     OnboardingStepId.setMultipleSchedules,
     OnboardingStepId.paywallIntro,
     OnboardingStepId.commitmentSignature,
+    OnboardingStepId.demoComparison,
     OnboardingStepId.trialReminder,
 
 

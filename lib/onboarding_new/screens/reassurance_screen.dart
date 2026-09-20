@@ -61,7 +61,7 @@ class OnboardingReassuranceScreen extends StatelessWidget {
               const SizedBox(height: 12),
 
               Text(
-                'SpinBrek helps our users to scroll less and live more productive lives.',
+                'Spinbrek helps our users to scroll less and live more productive lives.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   color: const Color(0xFFB08A5A),

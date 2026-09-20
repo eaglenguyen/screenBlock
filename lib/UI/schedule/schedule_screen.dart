@@ -235,13 +235,26 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                           : AddSessionCard(
                         label: 'Lock an App',
                         hint: 'E.g., "Unlock TikTok\nonly 3 times a day"',
-                        onTap: () => showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          useRootNavigator: true,
-                          builder: (_) => const LockAppSheet(),
-                        ),
+                        onTap: () { // 👈 new — gated, always requires premium on any platform
+                          final isPremium = ref.read(isPremiumProvider);
+                          if (!isPremium) {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              useRootNavigator: true,
+                              builder: (_) => const FeaturePaywallScreen(source: 'lock_app'),
+                            );
+                            return;
+                          }
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            useRootNavigator: true,
+                            builder: (_) => const LockAppSheet(),
+                          );
+                        },
                       ),
                     ),
                     Padding(
@@ -281,14 +294,27 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                           : AddSessionCard(
                         label: 'Time Limit',
                         hint: 'E.g., "Cap TikTok\nat 30 min a day"',
-                        onTap: () => showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          useRootNavigator: true,
-                          useSafeArea: true, // 👈 restore
-                          builder: (_) => const TimeLimitBottomSheet(),
-                        ),
+                        onTap: () { // 👈 new — gated on Android only; free on iOS
+                          final isPremium = ref.read(isPremiumProvider);
+                          if (!isPremium && !Platform.isIOS) {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              useRootNavigator: true,
+                              builder: (_) => const FeaturePaywallScreen(source: 'time_limit'),
+                            );
+                            return;
+                          }
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            useRootNavigator: true,
+                            useSafeArea: true,
+                            builder: (_) => const TimeLimitBottomSheet(),
+                          );
+                        },
                       ),
                     ),
                   ],

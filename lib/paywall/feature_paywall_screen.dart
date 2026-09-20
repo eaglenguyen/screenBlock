@@ -32,7 +32,7 @@ class _FeaturePaywallScreenState extends ConsumerState<FeaturePaywallScreen> {
   final List<_FeatureItem> _features = [
     _FeatureItem(label: 'Manual blocking', free: true, pro: true),
     _FeatureItem(label: '1 schedule', free: true, pro: true),
-    _FeatureItem(label: '3 apps per block session', free: true, pro: true),
+    _FeatureItem(label: '3 apps per schedule', free: true, pro: true),
     _FeatureItem(label: 'Unlimited schedules', free: false, pro: true),
     _FeatureItem(label: 'Unlimited apps per session', free: false, pro: true),
     _FeatureItem(label: '\'Block All Apps\' Mode', free: false, pro: true),

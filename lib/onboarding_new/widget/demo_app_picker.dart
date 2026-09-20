@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -108,18 +109,19 @@ class _DemoAppPickerScreenState extends ConsumerState<DemoAppPickerScreen> {
             onTap: _handleContinue,
           ),
           const SizedBox(height: 12), // 👈 new
-          Center( // 👈 new
-            child: GestureDetector(
-              onTap: () => widget.onAppsSelected([]), // 👈 skip — proceeds with empty list, no validation
-              child: Text(
-                '(debug)',
-                style: GoogleFonts.poppins(
-                  color: const Color(0xFFB08A5A).withValues(alpha: 0.6),
-                  fontSize: 13,
+          if (kDebugMode) // 👈 new — hides this entirely in release builds
+            Center(
+              child: GestureDetector(
+                onTap: () => widget.onAppsSelected([]),
+                child: Text(
+                  '(debug)',
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFFB08A5A).withValues(alpha: 0.6),
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

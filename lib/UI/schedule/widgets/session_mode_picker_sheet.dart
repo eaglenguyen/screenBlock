@@ -230,13 +230,12 @@ class _SessionModePickerSheetState extends ConsumerState<SessionModePickerSheet>
                     context,
                     title: 'Time Limit',
                     subtitle: widget.hasTimeLimitConfig ? 'Already created' : 'Daily usage cap',
-                    isLocked: !isPremium || widget.hasTimeLimitConfig,
-                    isAlreadyCreated: widget.hasTimeLimitConfig,
+                    isLocked: (!isPremium && !Platform.isIOS) || widget.hasTimeLimitConfig,                    isAlreadyCreated: widget.hasTimeLimitConfig,
                     lockMessage: widget.hasTimeLimitConfig ? 'Session already created' : 'Upgrade to unlock',
                     showBetaFlair: Platform.isIOS && !widget.hasTimeLimitConfig,
                     onTap: widget.hasTimeLimitConfig
                         ? null
-                        : isPremium
+                        : (isPremium || Platform.isIOS) // 👈 was: isPremium
                         ? () {
                       Navigator.pop(context);
                       widget.onTimeLimitTap();

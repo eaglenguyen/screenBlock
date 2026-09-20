@@ -7,20 +7,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import '../widget/continue_button.dart';
-import '../widget/progress_bar.dart';
 import '../widget/typewriter_title.dart';
 
 class OnboardingDemoVideoScreen extends StatefulWidget {
-  final int progressStep;
-  final int progressTotal;
-  final VoidCallback onBack;
   final VoidCallback onContinue;
 
   const OnboardingDemoVideoScreen({
     super.key,
-    required this.progressStep,
-    required this.progressTotal,
-    required this.onBack,
     required this.onContinue,
   });
 
@@ -222,8 +215,8 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
               ? FittedBox(
             fit: BoxFit.cover,
             child: SizedBox(
-              width: 1000, // 👈 was _videoController.value.size.width * 1.08 — arbitrary large base, only the ratio matters
-              height: 1000 / _videoController.value.aspectRatio, // 👈 was .size.height * 1.15 — now driven by the rotation-correct aspect ratio
+              width: 1000,
+              height: 1000 / _videoController.value.aspectRatio,
               child: VideoPlayer(_videoController),
             ),
           )
@@ -251,83 +244,62 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: _isExpanding ? 0.0 : 1.0,
-                    child: IgnorePointer(
-                      ignoring: _isExpanding,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            children: [
-                              GestureDetector(
-                                onTap: widget.onBack,
-                                child: Container(
-                                  width: 38,
-                                  height: 38,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFF0E6D8), width: 1),
-                                  ),
-                                  child: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF4A3728), size: 16),
+                  Expanded(
+                    child: AnimatedBuilder(
+                      animation: _iconController,
+                      builder: (context, _) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            AnimatedOpacity(
+                              duration: const Duration(milliseconds: 300),
+                              opacity: _isExpanding ? 0.0 : 1.0,
+                              child: IgnorePointer(
+                                ignoring: _isExpanding,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    const TypewriterTitle(text: 'Awesome 🎉', fontSize: 26, textAlign: TextAlign.center),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Spinbrek allows you to spin a wheel before you try to unblock, check it out!',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 15),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: OnboardingProgressBar(step: widget.progressStep, total: widget.progressTotal),
+                            ),
+                            const Spacer(),
+                            Center(
+                              child: SizedBox(
+                                width: 380,
+                                height: 520,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    SizedBox(
+                                      key: _phoneKey,
+                                      width: phoneWidth,
+                                      height: phoneHeight,
+                                      child: _isExpanding ? null : _buildPhoneVisual(borderWidth: 3, shadowOpacity: 1, radius: 32),
+                                    ),
+                                    Opacity(
+                                      opacity: _iconController.value,
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [for (final spec in _icons) _buildIcon(spec)],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 28),
-                          const TypewriterTitle(text: 'Awesome 🎉', fontSize: 26, textAlign: TextAlign.center),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              'Spinbrek allows you to spin a wheel before you try to unblock, check it out!',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 15),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: SizedBox(
-                        width: 380,
-                        height: 520,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          clipBehavior: Clip.none,
-                          children: [
-                            // 👇 resting slot — only visibly renders the phone when NOT expanding.
-                            // Once expanding starts, this becomes an invisible placeholder (SizedBox),
-                            // so there's zero overlap with the growing overlay below.
-                            SizedBox(
-                              key: _phoneKey,
-                              width: phoneWidth,
-                              height: phoneHeight,
-                              child: _isExpanding ? null : _buildPhoneVisual(borderWidth: 3, shadowOpacity: 1, radius: 32),
-                            ),
-                            AnimatedBuilder(
-                              animation: _iconController,
-                              builder: (context, _) {
-                                return Opacity(
-                                  opacity: _iconController.value,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [for (final spec in _icons) _buildIcon(spec)],
-                                  ),
-                                );
-                              },
-                            ),
+                            const Spacer(),
                           ],
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                   AnimatedOpacity(

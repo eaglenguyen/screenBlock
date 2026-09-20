@@ -76,7 +76,7 @@ class _OnboardingComparisonGraphScreenState extends State<OnboardingComparisonGr
                 height: 100, // 👈 tune this to roughly 2 lines' worth of height at your title's font size — adjust once you see it rendered
                 child: Align(
                   alignment: Alignment.topLeft,
-                  child: TypewriterTitle(text: 'SpinBrek replaces mindless scrolling with real action'),
+                  child: TypewriterTitle(text: 'Spinbrek replaces mindless scrolling with real action'),
                 ),
               ),
               const SizedBox(height: 64),
@@ -120,11 +120,11 @@ class _OnboardingComparisonGraphScreenState extends State<OnboardingComparisonGr
                       children: [
                         _legendDot(const Color(0xFFE74C3C)),
                         const SizedBox(width: 6),
-                        Text('Without SpinBrek', style: GoogleFonts.poppins(color: const Color(0xFF4A3728), fontSize: 13, fontWeight: FontWeight.w600)),
+                        Text('Without Spinbrek', style: GoogleFonts.poppins(color: const Color(0xFF4A3728), fontSize: 13, fontWeight: FontWeight.w600)),
                         const SizedBox(width: 20),
                         _legendDot(const Color(0xFF22C58B)),
                         const SizedBox(width: 6),
-                        Text('With SpinBrek', style: GoogleFonts.poppins(color: const Color(0xFF4A3728), fontSize: 13, fontWeight: FontWeight.w600)),
+                        Text('With Spinbrek', style: GoogleFonts.poppins(color: const Color(0xFF4A3728), fontSize: 13, fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 16),

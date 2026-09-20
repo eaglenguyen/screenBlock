@@ -54,7 +54,7 @@ class PurchaseSuccessScreen extends StatelessWidget {
           const SizedBox(height: 8),
 
           Text(
-            'Enjoy SpinBrek Pro.',
+            'Enjoy Spinbrek Pro.',
             style: GoogleFonts.poppins(
               color: AppColors.textSecondary(context),
               fontSize: 15,

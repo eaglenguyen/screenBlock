@@ -109,7 +109,7 @@ class _OnboardingSetMultipleSchedulesScreenState extends State<OnboardingSetMult
                   fontWeight: FontWeight.w800,
                   letterSpacing: -1,
                   height: 1.2,
-                ),
+                ),textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               Center(
@@ -204,7 +204,7 @@ class _OnboardingSetMultipleSchedulesScreenState extends State<OnboardingSetMult
               ),
               const SizedBox(height: 24),
               Text(
-                'Set as many blocking schedules & apps as you need. SpinBrek runs them all automatically, exactly when you need it.', // 👈 was "SpinBrek"
+                'Set as many blocking schedules & apps as you need. Spinbrek runs them all automatically, exactly when you need it.', // 👈 was "SpinBrek"
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   color: const Color(0xFFB08A5A), // 👈 was Colors.white.withValues(alpha: 0.45)
