@@ -60,7 +60,24 @@ class WheelViewModel extends _$WheelViewModel {
     await _repo.saveItems(updated);
   }
 
-  Future<void> removeItem(String text) async {
+  Future<void> updateItemAt(int index, String newText) async { // 👈 new — replaces addItem-style search with index
+    final trimmed = newText.trim();
+    if (trimmed.isEmpty) return;
+    if (index < 0 || index >= state.items.length) return;
+    final updated = [...state.items];
+    updated[index] = trimmed;
+    state = state.copyWith(items: updated);
+    await _repo.saveItems(updated);
+  }
+
+  Future<void> removeItemAt(int index) async { // 👈 new — replaces value-based removeItem for list rows
+    if (index < 0 || index >= state.items.length) return;
+    final updated = [...state.items]..removeAt(index);
+    state = state.copyWith(items: updated);
+    await _repo.saveItems(updated);
+  }
+
+  Future<void> removeItem(String text) async { // 👈 restored — still needed by the result card, which only has the text value, not an index
     final updated = state.items.where((i) => i != text).toList();
     state = state.copyWith(items: updated);
     await _repo.saveItems(updated);
@@ -127,4 +144,6 @@ class WheelViewModel extends _$WheelViewModel {
       await _settingsBox.put(_cooldownEndsAtKey, cooldownEndsAt.millisecondsSinceEpoch);
     }
   }
+
+
 }

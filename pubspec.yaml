@@ -124,21 +124,24 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path_ios: "assets/icons/pauseIcon.png"
-  image_path_android: "assets/icons/pauseEdit.png"
+  image_path_ios: "assets/icons/newicon.png"
+  image_path_android: "assets/icons/newicon.png"
   min_sdk_android: 21
   remove_alpha_ios: true  # 👈 add this
-  adaptive_icon_background: "#22224A"  # 👈 your navy color
-  adaptive_icon_foreground: "assets/icons/pauseEdit.png"
+  adaptive_icon_background: "#FBF4E1"  # 👈 cream
+  adaptive_icon_foreground: "assets/icons/newicon.png"
 
 
 flutter_native_splash:
-  color: "#16162A"
-  image: assets/icons/pauseEdit.png
-  color_dark: "#16162A"
-  image_dark: assets/icons/pauseEdit.png
+  color: "#FBF4E1"
+  image: assets/icons/1024padded.png
+  color_dark: "#FBF4E1"
+  image_dark: assets/icons/1024padded.png
   ios: true
-  android: false  # 👈 you already have Android handled
+  android_12:
+    image: assets/icons/1024padded.png
+    color: "#FBF4E1"
+  icon_background_color: "#FBF4E1"
   fullscreen: true
 
   # The following line ensures that the Material Icons font is

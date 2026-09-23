@@ -301,14 +301,18 @@ class AppBlockAccessibilityService : AccessibilityService() {
         android.util.Log.d("AccessibilityService", "onServiceConnected")
     }
 
+
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         android.util.Log.d("pausenow", "🎯 onAccessibilityEvent pkg=$packageName eventCallback=${eventCallback != null} isOverlayShowing=$isOverlayShowing")
         if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val packageName = event.packageName?.toString() ?: return
 
-        if (packageName.contains("systemui") ||
-            packageName == "android" ||
-            packageName == "com.eagle.pausenow") return
+        if (packageName.contains("systemui") || packageName == "android") return // 👈 removed "com.eagle.pausenow" from this line
+
+        if (packageName == "com.eagle.pausenow") { // 👈 new — handle it separately so currentForegroundApp still updates
+            currentForegroundApp = packageName
+            return
+        }
 
         if (packageName.contains("launcher") ||
             packageName.contains("nexuslauncher") ||
@@ -321,7 +325,7 @@ class AppBlockAccessibilityService : AccessibilityService() {
         currentForegroundApp = packageName
         checkTimeLimitForApp(packageName)
         checkQuickBlockForApp(packageName)
-        checkLockAppForApp(packageName) // 👈 new
+        checkLockAppForApp(packageName)
 
         if (isPauseExpired()) {
             android.util.Log.d("pausenow", "⏰ Pause expired — notifying Flutter")

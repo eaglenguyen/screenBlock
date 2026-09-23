@@ -25,9 +25,6 @@ class _WheelTitleState extends State<_WheelTitle> with SingleTickerProviderState
   late AnimationController _wiggleController;
   late Animation<double> _wiggle;
 
-
-
-
   @override
   void initState() {
     super.initState();
@@ -45,6 +42,7 @@ class _WheelTitleState extends State<_WheelTitle> with SingleTickerProviderState
     _wiggleController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +123,14 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
   Color _confettiColor = const Color(0xFFF7C948);
 
   Timer? _cooldownTicker; // 👈 new — drives the live countdown display
+
+  int? _editingIndex;
+  late TextEditingController _editController; // 👈 new
+  late FocusNode _editFocusNode; // 👈 new
+
+
+
+
 
   void _showRenameDialog(BuildContext context, String currentName) {
     final controller = TextEditingController(text: currentName);
@@ -264,6 +270,8 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
   @override
   void initState() {
     super.initState();
+    _editController = TextEditingController(); // 👈 new
+    _editFocusNode = FocusNode(); // 👈 new
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
@@ -309,7 +317,29 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
     _spinPlayer?.dispose();
     _landPlayer?.dispose();
     _cooldownTicker?.cancel();
+    _editController.dispose(); // 👈 new
+    _editFocusNode.dispose(); // 👈 new
     super.dispose();
+
+  }
+
+  void _startEditingItem(int index, String item) { // 👈 now takes index
+    setState(() {
+      _editingIndex = index;
+      _editController.text = item;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _editFocusNode.requestFocus();
+      _editController.selection = TextSelection(baseOffset: 0, extentOffset: _editController.text.length);
+    });
+  }
+
+  void _commitEdit(int index, String originalItem) { // 👈 now takes index
+    final newText = _editController.text.trim();
+    if (newText.isNotEmpty && newText != originalItem) {
+      ref.read(wheelViewModelProvider.notifier).updateItemAt(index, newText); // 👈 new method, index-based
+    }
+    setState(() => _editingIndex = null);
   }
 
   late VoidCallback _tickListener;
@@ -461,28 +491,48 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                                 },
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.all(18), // 👈 was 20
+                                  padding: const EdgeInsets.all(18),
                                   decoration: BoxDecoration(
-                                    color: _confettiColor.withValues(alpha: 0.12), // 👈 back to 0.12
-                                    borderRadius: BorderRadius.circular(16), // 👈 was 20
-                                    border: Border.all(color: _confettiColor.withValues(alpha: 0.6), width: 2), // 👈 was 0.3/1 — more visible
+                                    color: _confettiColor.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: _confettiColor.withValues(alpha: 0.6), width: 2),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: _confettiColor.withValues(alpha: 0.15), // 👈 was 0.3 — much softer
-                                        blurRadius: 12, // 👈 was 20
-                                        offset: const Offset(0, 4), // 👈 was 6, spreadRadius removed
+                                        color: _confettiColor.withValues(alpha: 0.15),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
                                       ),
                                     ],
                                   ),
-                                  child: Column(
+                                  child: Row( // 👈 was Column — now a Row so the remove icon sits beside the text
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        state.lastResult!,
-                                        textAlign: TextAlign.center,
-                                        style: AppTextStyles.bodyLarge.copyWith( // 👈 back to bodyLarge
-                                          color: _confettiColor,
-                                          fontWeight: FontWeight.w800, // 👈 back to w800
-                                          fontSize: 26, // 👈 small bump from original 24, not the 30 before
+                                      Flexible( // 👈 new — lets long result text wrap instead of overflowing past the icon
+                                        child: Text(
+                                          state.lastResult!,
+                                          textAlign: TextAlign.center,
+                                          style: AppTextStyles.bodyLarge.copyWith(
+                                            color: _confettiColor,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 26,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10), // 👈 new
+                                      GestureDetector( // 👈 new — the remove button itself
+                                        onTap: () {
+                                          final removedItem = state.lastResult!;
+                                          ref.read(wheelViewModelProvider.notifier).removeItem(removedItem);
+                                          ref.read(wheelViewModelProvider.notifier).clearResult(); // 👈 clears the result card too, since the item no longer exists
+                                          HapticFeedback.lightImpact();
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: _confettiColor.withValues(alpha: 0.15),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(Icons.close_rounded, color: _confettiColor, size: 18),
                                         ),
                                       ),
                                     ],
@@ -697,12 +747,14 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                                 final item = state.items[index];
                                 final isLast = index == state.items.length - 1;
                                 final color = palette[index % palette.length];
+                                final isEditing = _editingIndex == index; // 👈 new — index-based check
                                 return Column(
                                   children: [
                                     Material(
                                       color: Colors.transparent,
                                       child: InkWell(
                                         borderRadius: BorderRadius.circular(20),
+                                        onTap: isEditing ? null : () => _startEditingItem(index, item), // 👈 passes index now
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                           child: Row(
@@ -718,16 +770,30 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                                                   child: Container(
                                                     width: 12,
                                                     height: 12,
-                                                    decoration: BoxDecoration(
-                                                      color: color,
-                                                      shape: BoxShape.circle,
-                                                    ),
+                                                    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                                                   ),
                                                 ),
                                               ),
                                               const SizedBox(width: 14),
                                               Expanded(
-                                                child: Text(
+                                                child: isEditing
+                                                    ? TextField(
+                                                  controller: _editController,
+                                                  focusNode: _editFocusNode,
+                                                  autofocus: true,
+                                                  style: AppTextStyles.bodyLarge.copyWith(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: AppColors.textPrimary(context),
+                                                  ),
+                                                  decoration: const InputDecoration(
+                                                    isDense: true,
+                                                    border: InputBorder.none,
+                                                    contentPadding: EdgeInsets.zero,
+                                                  ),
+                                                  onSubmitted: (_) => _commitEdit(index, item), // 👈 passes index now
+                                                )
+                                                    : Text(
                                                   item,
                                                   style: AppTextStyles.bodyLarge.copyWith(
                                                     fontSize: 15,
@@ -736,10 +802,16 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                                                   ),
                                                 ),
                                               ),
-                                              GestureDetector(
-                                                onTap: () => ref.read(wheelViewModelProvider.notifier).removeItem(item),
-                                                child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 20),
-                                              ),
+                                              if (isEditing)
+                                                GestureDetector(
+                                                  onTap: () => _commitEdit(index, item), // 👈 passes index now
+                                                  child: Icon(Icons.check_rounded, color: AppColors.accent(context), size: 20),
+                                                )
+                                              else
+                                                GestureDetector(
+                                                  onTap: () => ref.read(wheelViewModelProvider.notifier).removeItemAt(index), // 👈 index-based
+                                                  child: Icon(Icons.close_rounded, color: AppColors.textSecondary(context), size: 20),
+                                                ),
                                             ],
                                           ),
                                         ),
