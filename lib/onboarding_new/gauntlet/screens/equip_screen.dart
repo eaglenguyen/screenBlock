@@ -35,7 +35,7 @@ class _OnboardingGauntletEquipScreenState extends State<OnboardingGauntletEquipS
   bool get _isFirstEquip => widget.stepNumber == 1;
 
   static const _funFacts = [ // 👈 new
-    'Fun fact #1 — In USA, people spend about 12 hours a day on screens.',
+    'Fun fact #1 — The average screentime for adults from ages 21-30 is 8 hours!',
     'Fun fact #2 — A 2025 meta-analysis of 15 studies involving 35,223 people found a positive correlation between ADHD symptoms and problematic social-media use',
     'Fun fact #3 — Neurodivergent people are 5x more likely to get distracted and get lost on their phone',
   ];
@@ -96,17 +96,17 @@ class _OnboardingGauntletEquipScreenState extends State<OnboardingGauntletEquipS
                 children: [
                   if (!widget.showConfetti) ...[ // 👈 unchanged flow for steps 1-3
                     const Spacer(),
-                    Text(
-                      '${widget.stepNumber}/4 steps done',
-                      style: GoogleFonts.poppins(color: const Color(0xFF4A3728), fontSize: 26, fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 6),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
                         _funFacts[(widget.stepNumber - 1).clamp(0, _funFacts.length - 1)],
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(color: const Color(0xFFB08A5A), fontSize: 15, height: 1.4),
+                        style: GoogleFonts.poppins(
+                          color: const Color(0xFF8A6535),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          height: 1.35,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -138,7 +138,7 @@ class _OnboardingGauntletEquipScreenState extends State<OnboardingGauntletEquipS
                           children: [
                             const SizedBox(height: 12),
                             Text(
-                              'Schedule complete! 🎉',
+                              'Schedule created! 🎉',
                               style: GoogleFonts.poppins(color: const Color(0xFF4A3728), fontSize: 26, fontWeight: FontWeight.w800),
                             ),
                             const SizedBox(height: 24),

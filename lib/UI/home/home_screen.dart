@@ -20,6 +20,7 @@ import '../../core/utils/permission_dialogs.dart';
 import '../../features/quickblock/widgets/quick_block_row.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/home_ui_state.dart';
+import '../../services/notification_service.dart';
 import '../settings/settings_viewmodel.dart';
 import 'cards/active_blocking_card.dart';
 import 'cards/break_confirmation_card.dart';
@@ -382,8 +383,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             await service.requestOverlayPermission();
             return;
           }
+          if (!await NotificationService.instance.canScheduleExactAlarms()) {
+            await NotificationService.instance.requestExactAlarmPermission();
+            return;
+          }
         }
-        notifier.startBlocking();
+        await notifier.startBlocking();
       });
     }
   }

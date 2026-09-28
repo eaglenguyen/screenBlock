@@ -1,4 +1,5 @@
 // lib/onboarding_new/screens/demo_video_screen.dart
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -82,12 +83,21 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
     _IconSpec(fromLeft: false, asset: 'assets/icons/tiktok.png', targetX: 148, targetY: 20, delay: 0.2),
   ];
 
-  final _phases = const [
+  static const _iosPhases = [
     _DemoPhase(pauseAt: Duration(seconds: 1, milliseconds: 100), dx: 0.81, dy: 0.60, label: 'Tap to block'),
     _DemoPhase(pauseAt: Duration(seconds: 4, milliseconds: 300), dx: 0.5, dy: 0.87, label: 'Tap Spin', labelAbove: true, pointerEmoji: '👇'),
     _DemoPhase(pauseAt: Duration(seconds: 7), dx: 0.5, dy: 0.15, label: 'Tap the notification', pointerEmoji: '👆'),
     _DemoPhase(pauseAt: Duration(seconds: 9, milliseconds: 200), dx: 0.5, dy: 0.415, label: 'Spin the wheel!'),
   ];
+
+  static const _androidPhases = [
+    _DemoPhase(pauseAt: Duration(seconds: 2, milliseconds: 200), dx: 0.81, dy: 0.55, label: 'Tap to block'),
+    _DemoPhase(pauseAt: Duration(seconds: 5), dx: 0.87, dy: 0.57, label: 'Open YouTube',pointerEmoji: '👆' ), // 👈 set timing/position
+    _DemoPhase(pauseAt: Duration(seconds: 11, milliseconds: 700), dx: 0.5, dy: 0.84, label: 'Tap Spin', labelAbove: true, pointerEmoji: '👇'),              // 👈 set timing/position
+    _DemoPhase(pauseAt: Duration(seconds: 13, milliseconds: 800), dx: 0.5, dy: 0.33, label: 'Spin the wheel!'),                                          // 👈 set timing/position
+  ];
+
+  final List<_DemoPhase> _phases = Platform.isAndroid ? _androidPhases : _iosPhases;
 
   int _currentPhaseIndex = 0;
   bool _showingPhaseOverlay = false;
@@ -103,14 +113,16 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
 
     _expandController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
 
-    _videoController = VideoPlayerController.asset('assets/video/demowheel.mp4')
-      ..initialize().then((_) {
-        if (!mounted) return;
-        setState(() => _videoInitialized = true);
-        _videoController.setLooping(false);
-        _videoController.addListener(_checkPhaseProgress);
-        _videoController.addListener(_checkVideoEnded);
-      }).catchError((e) {
+    _videoController = VideoPlayerController.asset(
+      Platform.isAndroid ? 'assets/video/android_demo.mp4' : 'assets/video/demowheel.mp4',
+    )   ..initialize().then((_) {
+      if (!mounted) return;
+      setState(() => _videoInitialized = true);
+      _videoController.setLooping(false);
+      if (Platform.isAndroid) _videoController.setPlaybackSpeed(1.1); // 👈 tweak
+      _videoController.addListener(_checkPhaseProgress);
+      _videoController.addListener(_checkVideoEnded);
+    }).catchError((e) {
         debugPrint('❌ video init error: $e');
       });
   }
@@ -270,7 +282,7 @@ class _OnboardingDemoVideoScreenState extends State<OnboardingDemoVideoScreen>
                                 ),
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(height: 40),
                             Center(
                               child: SizedBox(
                                 width: 380,
@@ -522,6 +534,7 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
           left: x - 50,
           top: y - 50,
           child: GestureDetector(
+            behavior: HitTestBehavior.opaque, // 👈 keeps the tap target without a visible circle
             onTap: widget.onTap,
             child: AnimatedBuilder(
               animation: _pulseController,
@@ -540,17 +553,8 @@ class _PhaseHighlightState extends State<_PhaseHighlight> with TickerProviderSta
                       ),
                     ),
                   )
-                      : Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                      boxShadow: [
-                        BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 16, spreadRadius: 2),
-                      ],
-                    ),
-                  ),
+                      : const SizedBox(width: 100, height: 100), // 👈 was the white ring
+
                 );
               },
             ),

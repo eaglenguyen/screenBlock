@@ -96,7 +96,7 @@ class _OnboardingPaywallScreenState extends ConsumerState<OnboardingPaywallScree
                   child: Column(
                     children: [
                       Text(
-                        'We want you to\ntry SpinBrek for free.',
+                        'We want you to\ntry Spinbrek for free.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
                           color: const Color(0xFF4A3728),

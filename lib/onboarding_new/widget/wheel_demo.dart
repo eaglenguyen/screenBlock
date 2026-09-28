@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class MiniWheelPreview extends StatefulWidget {
-  const MiniWheelPreview({super.key});
+  final bool showLabel; // 👈 new
+
+  const MiniWheelPreview({super.key, this.showLabel = true});
 
   @override
   State<MiniWheelPreview> createState() => _MiniWheelPreviewState();
@@ -112,7 +114,8 @@ class _MiniWheelPreviewState extends State<MiniWheelPreview> with SingleTickerPr
             ],
           ),
         ),
-        const SizedBox(height: 10),
+    if (widget.showLabel) ...[ // 👈 new — skips the gap and pill entirely when false
+    const SizedBox(height: 10),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
           child: _landedTask.isEmpty
@@ -131,6 +134,7 @@ class _MiniWheelPreviewState extends State<MiniWheelPreview> with SingleTickerPr
           ),
         ),
       ],
+    ],
     );
   }
 }

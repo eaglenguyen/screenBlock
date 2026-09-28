@@ -25,6 +25,8 @@ class _WheelTitleState extends State<_WheelTitle> with SingleTickerProviderState
   late AnimationController _wiggleController;
   late Animation<double> _wiggle;
 
+
+
   @override
   void initState() {
     super.initState();
@@ -128,7 +130,19 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
   late TextEditingController _editController; // 👈 new
   late FocusNode _editFocusNode; // 👈 new
 
-
+  Future<void> _copyList(List<String> items) async {
+    await Clipboard.setData(ClipboardData(text: items.join('\n')));
+    HapticFeedback.lightImpact();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('List copied', style: TextStyle(color: AppColors.textPrimary(context))),
+        backgroundColor: AppColors.backgroundCard(context),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
 
 
 
@@ -579,6 +593,34 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                         ),
                         Row(
                           children: [
+                            if (!_isPasteMode && state.items.isNotEmpty) ...[
+                              GestureDetector(
+                                onTap: () => _copyList(state.items),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.backgroundSubtle(context),
+                                    borderRadius: BorderRadius.circular(50),
+                                    border: Border.all(color: AppColors.border(context), width: 0.5),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.copy_rounded, size: 14, color: AppColors.textSecondary(context)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Copy',
+                                        style: AppTextStyles.bodyMedium.copyWith(
+                                          color: AppColors.textSecondary(context),
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                             if (_isPasteMode) ...[
                               GestureDetector(
                                 onTap: _submitNewItem,

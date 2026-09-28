@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pausenow/UI/schedule/schedule_viewmodel.dart';
 import 'package:pausenow/UI/schedule/widgets/pause_sheet.dart';
 import 'package:pausenow/UI/schedule/widgets/session_bottom_sheet.dart';
@@ -154,6 +155,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                     onPause: (mins) => ref
                                         .read(homeViewModelProvider.notifier)
                                         .pauseSchedule(mins),
+                                    onSpinWheel: () => context.go('/wheel'), // 👈 new
+
                                   );
                                 },
                               ),

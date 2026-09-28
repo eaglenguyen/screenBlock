@@ -66,6 +66,7 @@ class NotificationService {
 
 
 
+
   Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -124,5 +125,11 @@ class NotificationService {
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
     }
+  }
+
+  Future<bool> canScheduleExactAlarms() async {
+    if (!Platform.isAndroid) return true;
+    final android = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    return await android?.canScheduleExactNotifications() ?? true;
   }
 }

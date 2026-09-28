@@ -14,6 +14,7 @@ import '../../core/constants/hivebox_names.dart';
 import '../../data/models/block_session.dart';
 import '../../providers/premium_provider.dart';
 import '../../providers/repository_providers.dart';
+import '../../services/notification_service.dart';
 import '../../services/revenuecat_service.dart';
 import '../home/home_viewmodel.dart';
 import 'settings_state.dart';
@@ -51,6 +52,7 @@ class SettingsViewModel extends _$SettingsViewModel {
     final hasUsage = await _service.hasUsageStatsPermission();
     final hasOverlay = await _service.hasOverlayPermission();
     final hasScreenTime = await _service.hasAccessibilityPermission();
+    final hasExactAlarm = await NotificationService.instance.canScheduleExactAlarms();
 
     bool hasAccessibility = false;
     if (Platform.isAndroid) {
@@ -95,7 +97,8 @@ class SettingsViewModel extends _$SettingsViewModel {
       hasUsagePermission: hasUsage,
       hasOverlayPermission: hasOverlay,
       hasBatteryOptimization: hasBattery,
-      hasNotificationPermission: hasNotification, // 👈 add
+      hasNotificationPermission: hasNotification,
+        hasExactAlarmPermission: hasExactAlarm,
     );
   }
 
@@ -204,4 +207,6 @@ class SettingsViewModel extends _$SettingsViewModel {
           .invokeMethod('setUninstallProtectionEnabled', {'enabled': enabled});
     } catch (_) {}
   }
+
+
 }

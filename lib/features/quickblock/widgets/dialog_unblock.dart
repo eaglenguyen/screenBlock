@@ -26,7 +26,7 @@ class _UnblockChoiceDialog extends StatefulWidget {
 }
 
 class _UnblockChoiceDialogState extends State<_UnblockChoiceDialog> {
-  int _secondsLeft = 10;
+  int _secondsLeft = 5;
   Timer? _timer;
 
   @override

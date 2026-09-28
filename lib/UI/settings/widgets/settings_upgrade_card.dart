@@ -77,22 +77,36 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final gradientColors = isDark
+        ? const [Color(0xFFE8623D), Color(0xFFF2A340), Color(0xFFF7C948)] // old orange
+        : const [Color(0xFFE56F97), Color(0xFF9A7BE3), Color(0xFF5E9CE6)]; // berry → sky
+
+    final buttonBg = isDark ? Colors.black54 : const Color(0xFFFBF4E1);
+    final buttonText = isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF4A3728);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE8623D),
-                Color(0xFFF2A340),
-                Color(0xFFF7C948),
-              ],
-              stops: [0.0, 0.55, 1.0],
+              colors: gradientColors,
+              stops: const [0.0, 0.55, 1.0],
             ),
+            boxShadow: isDark
+                ? null
+                : [
+              BoxShadow(
+                color: const Color(0xFF9A7BE3).withValues(alpha: 0.35),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
           child: Column(
@@ -101,27 +115,27 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
               Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.accent(context),
+                      color: const Color(0xFFFBF4E1),
                       borderRadius: BorderRadius.circular(9),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(9),
                       child: Image.asset(
-                        'assets/icons/pauseIcon.png',
-                        width: 32,
-                        height: 32,
+                        'assets/icons/newicon.png',
+                        width: 64,
+                        height: 64,
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Try SpinBrek Pro',
-                    style: AppTextStyles.bodyLarge.copyWith( // 👈 was GoogleFonts.poppins
-                      color: Colors.white, // kept white — intentional, fixed gradient bg needs guaranteed contrast, not a theme-dependent token
+                    'Try Spinbrek Pro',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -129,8 +143,8 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Includes 1 week of SpinBrek Pro - unlocking every feature for you to try, for free!',
-                style: AppTextStyles.bodyMedium.copyWith( // 👈 was GoogleFonts.poppins
+                'Includes 1 week of Spinbrek Pro - unlocking every feature for you to try, for free!',
+                style: AppTextStyles.bodyMedium.copyWith(
                   color: Colors.white,
                   height: 1.4,
                 ),
@@ -141,27 +155,25 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _startAnnualTrial,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black54,
-                    foregroundColor: AppColors.accentText(context),
+                    backgroundColor: buttonBg,
+                    foregroundColor: buttonText,
+                    disabledBackgroundColor: buttonBg.withValues(alpha: 0.7),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(20), // usually needs a slightly larger value to look right
-                    ),                    elevation: 0,
-                    textStyle: AppTextStyles.labelLarge, // 👈 was GoogleFonts.poppins
+                    shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    elevation: 0,
+                    textStyle: AppTextStyles.labelLarge,
                   ),
                   child: _isLoading
                       ? SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(
-                      color: AppColors.accentText(context),
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator(color: buttonText, strokeWidth: 2),
                   )
                       : Text(
                     'Redeem Your Free Week',
-                    style: AppTextStyles.labelLarge.copyWith( // 👈 was GoogleFonts.poppins
-                      color: Colors.white.withValues(alpha: 0.9),
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: buttonText,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -172,9 +184,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
                   _annualPackage != null
                       ? 'Then ${_annualPackage!.storeProduct.priceString} every year'
                       : 'Then billed annually',
-                  style: AppTextStyles.bodySmall.copyWith( // 👈 was GoogleFonts.poppins
-                    color: Colors.white,
-                  ),
+                  style: AppTextStyles.bodySmall.copyWith(color: Colors.white),
                 ),
               ),
             ],
@@ -186,7 +196,7 @@ class _SettingsUpgradeCardState extends ConsumerState<SettingsUpgradeCard> {
             onTap: () => context.push('/paywall', extra: 'settings_upgrade'),
             child: Text(
               'Learn More',
-              style: AppTextStyles.bodyMedium.copyWith( // 👈 was GoogleFonts.poppins
+              style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textPrimary(context),
                 fontWeight: FontWeight.w600,
               ),

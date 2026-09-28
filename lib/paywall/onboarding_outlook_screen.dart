@@ -6,7 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
-import '../../onboarding/widgets/mascot_character.dart';
+import '../onboarding_new/data/mascot_character.dart';
 
 class OnboardingOutlookScreen extends StatefulWidget {
   final VoidCallback onNext;

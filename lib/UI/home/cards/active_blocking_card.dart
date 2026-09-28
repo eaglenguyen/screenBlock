@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
@@ -8,6 +10,7 @@ import '../home_state.dart';
 
 const _pastelYellow = Color(0xFFFFE4A3);
 const _pastelYellowText = Color(0xFF6B5417);
+const _ringTrackBreak = Color(0xFFFFF4D6);
 
 class ActiveBlockingCard extends StatelessWidget {
   final HomeState state;
@@ -199,47 +202,69 @@ class ActiveBlockingCard extends StatelessWidget {
 
   Widget _buildTimer(BuildContext context) {
     final isOnBreak = state.phase == BlockingPhase.onBreak;
-    final seconds = isOnBreak
-        ? state.breakRemainingSeconds
-        : state.remainingSeconds;
-    final h = (seconds ~/ 3600).toString().padLeft(2, '0');
-    final m = ((seconds % 3600) ~/ 60)
-        .toString().padLeft(2, '0');
+    final seconds = isOnBreak ? state.breakRemainingSeconds : state.remainingSeconds;
+    final total = isOnBreak
+        ? state.originalBreakSeconds // 👈 swap for whatever field holds the break length
+        : state.selectedMinutes * 60;
+    final progress = total > 0 ? ((total - seconds) / total).clamp(0.0, 1.0) : 0.0;
+
+    final h = seconds ~/ 3600;
+    final m = ((seconds % 3600) ~/ 60).toString().padLeft(2, '0');
     final s = (seconds % 60).toString().padLeft(2, '0');
-    return Column(
-      children: [
-        if (isOnBreak)
-          Text(
-            'Break',
-            style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall — bumped up
-              color: _pastelYellowText,
-              fontWeight: FontWeight.w700,
-            ),
+    final timeText = h > 0 ? '$h:$m:$s' : '$m:$s';
+
+    final accent = AppColors.accent(context);
+
+    final ringColor = isPaused
+        ? AppColors.textSecondary(context).withValues(alpha: 0.4)
+        : (isOnBreak ? _pastelYellow : accent);
+    final trackColor = isOnBreak
+        ? _ringTrackBreak
+        : accent.withValues(alpha: 0.18);
+    final label = isPaused ? 'Paused' : (isOnBreak ? 'Break' : 'remaining');
+
+    return SizedBox(
+      width: 230,
+      height: 230,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: progress),
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.linear,
+        builder: (context, value, child) => CustomPaint(
+          painter: _RingPainter(
+            progress: value,
+            color: ringColor,
+            trackColor: trackColor,
           ),
-        if (isPaused)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text(
-              'Paused',
-              style: AppTextStyles.bodyMedium.copyWith( // 👈 was bodySmall
-                color: AppColors.textSecondary(context),
-                fontWeight: FontWeight.w700,
+          child: child,
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                timeText,
+                style: TextStyle(
+                  fontSize: h > 0 ? 40 : 52,
+                  fontWeight: FontWeight.w900,
+                  color: isPaused
+                      ? AppColors.textSecondary(context)
+                      : AppColors.textPrimary(context),
+                  letterSpacing: -1.5,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
               ),
-            ),
-          ),
-        Text(
-          '$h:$m:$s',
-          style: TextStyle(
-            fontSize: 56, // 👈 was 48 — bigger, more commanding
-            fontWeight: FontWeight.w900,
-            color: isPaused
-                ? AppColors.textSecondary(context)
-                : AppColors.textPrimary(context),
-            letterSpacing: -1.5,
-            fontFeatures: const [FontFeature.tabularFigures()],
+              Text(
+                label,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: isOnBreak ? _pastelYellowText : AppColors.textSecondary(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -454,4 +479,40 @@ class ActiveBlockingCard extends StatelessWidget {
       ),
     );
   }
+}
+
+
+
+class _RingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  final Color trackColor;
+  static const _stroke = 16.0;
+
+  _RingPainter({required this.progress, required this.color, required this.trackColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = (size.shortestSide - _stroke) / 2;
+    final base = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, base..color = trackColor);
+    if (progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2,
+        2 * math.pi * progress,
+        false,
+        base..color = color,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) =>
+      old.progress != progress || old.color != color || old.trackColor != trackColor;
 }

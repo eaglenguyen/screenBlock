@@ -27,6 +27,7 @@ import '../../features/quickblock/quick_block_viewmodel.dart';
 import '../../paywall/feature_paywall_screen.dart';
 import '../../providers/blocking_service_provider.dart';
 import '../../providers/premium_provider.dart';
+import '../../services/notification_service.dart';
 import '../stats/widgets/goal_settings_sheet.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -254,6 +255,18 @@ class SettingsScreen extends ConsumerWidget {
                           label: 'Display Over Apps',
                           onTap: notifier.requestOverlayPermission,
                           trailing: _permissionBadge(state.hasOverlayPermission, context),
+                        ),
+                      if (Platform.isAndroid)
+                        SettingsRow(
+                          icon: Icons.alarm_rounded,
+                          iconColor: AppColors.success(context),
+                          iconBgColor: AppColors.primarySubtle(context),
+                          label: 'Alarms & Reminders',
+                          onTap: () async {
+                            await NotificationService.instance.requestExactAlarmPermission();
+                            await notifier.checkPermissions();
+                          },
+                          trailing: _permissionBadge(state.hasExactAlarmPermission, context),
                         ),
                       if (Platform.isAndroid)
                         SettingsRow(

@@ -28,6 +28,7 @@ class OnboardingSetupIntroScreen extends StatefulWidget {
 class _OnboardingSetupIntroScreenState extends State<OnboardingSetupIntroScreen> with SingleTickerProviderStateMixin {
   late AnimationController _revealController;
   bool _showTitle = false; // 👈 new
+  bool _showImage = false;
 
   @override
   void initState() {
@@ -114,21 +115,30 @@ class _OnboardingSetupIntroScreenState extends State<OnboardingSetupIntroScreen>
                       text: '${widget.userName ?? "Hey"}, time to block some apps and take back your time!',
                       textAlign: TextAlign.center,
                       fontSize: 24,
-                      startDelay: Duration.zero, // 👈 new — no need for its own internal delay anymore, the outer timer already handled that
+                      startDelay: Duration.zero,
+                      onComplete: () {
+                        if (mounted) setState(() => _showImage = true);
+                      },
                     )
                         : const SizedBox.shrink(),
                   ),
                 ),
               ),
               const SizedBox(height: 32),
-              _staggeredFade( // 👈 image animates in last
-                start: 0.5,
-                end: 0.9,
-                child: Center(
-                  child: Image.asset(
-                    'assets/images/breakphone_smoothed.png',
-                    height: 300,
-                    fit: BoxFit.contain,
+              AnimatedSlide(
+                offset: _showImage ? Offset.zero : const Offset(0, 0.3),
+                duration: const Duration(milliseconds: 2000),
+                curve: const Cubic(0.16, 1, 0.3, 1),
+                child: AnimatedOpacity(
+                  opacity: _showImage ? 1 : 0,
+                  duration: const Duration(milliseconds: 2000),
+                  curve: const Cubic(0.16, 1, 0.3, 1),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/new_wheel.png',
+                      height: 300,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),

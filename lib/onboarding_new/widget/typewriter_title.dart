@@ -15,7 +15,7 @@ class TypewriterTitle extends StatefulWidget {
   final TextAlign textAlign; // 👈 new
   final Duration startDelay; // 👈 new
   final Map<String, Color>? highlightWords; // 👈 new — maps a substring to a highlight color
-
+  final VoidCallback? onComplete; // 👈 new
 
 
   const TypewriterTitle({
@@ -30,7 +30,7 @@ class TypewriterTitle extends StatefulWidget {
     this.textAlign = TextAlign.left,
     this.startDelay = const Duration(milliseconds: 400), // 👈 new — matches/slightly exceeds your screen transition's 600ms duration once you account for the fade curve settling
     this.highlightWords, // 👈 new
-
+    this.onComplete,
   });
 
   @override
@@ -63,6 +63,7 @@ class _TypewriterTitleState extends State<TypewriterTitle> {
       setState(() => _displayText = chars.sublist(0, i + 1).join());
       await Future.delayed(widget.letterDelay);
     }
+    if (mounted) widget.onComplete?.call(); // 👈 new
   }
 
   List<TextSpan> _buildSpans() { // 👈 new — splits _displayText into colored/uncolored spans
